@@ -26,7 +26,7 @@ Kyokai is a fork, not a denial. Austral remains the source of many good bones: l
 
 ## Austral Source Replacement Map
 
-The old inherited Austral chapter files are out of the active Kyokai build after replacement by Kyokai chapters. They remain important source history in git and in Borretti's Austral project, but the reader should use the Kyokai chapters below for current behavior. `src/appendix-a.md` is different: it carries the full GFDL text included with the built specification.
+The old inherited Austral chapter files are out of the active Kyokai build after replacement by Kyokai chapters. They remain important source history in git and in Borretti's Austral project. The Kyokai chapters below define current behavior. `src/appendix-a.md` is different: it carries the full GFDL text included with the built specification.
 
 | Austral Source Area | Kyokai Replacement / Status |
 | --- | --- |
@@ -42,7 +42,7 @@ The old inherited Austral chapter files are out of the active Kyokai build after
 | Built-ins and pervasive APIs | `language/18-built-ins.md` and stdlib chapters. |
 | Memory support | Memory/layout/backend and allocator stdlib chapters. |
 | FFI | `language/16-unsafe-ffi-and-abi.md`, `stdlib/11-transitional-ffi-tracking.md`. |
-| Examples and style | `language/19-examples.md`, syntax/naming rules, and future style guidance. |
+| Examples and style | `language/19-examples.md` plus the accepted syntax and naming rules. |
 | Rationale | `rationale/00-rationale-index.md` through `rationale/08-toolchain-philosophy.md`; Borretti wording is marked as source text when reused. |
 | Full GFDL text | `src/appendix-a.md`, navigated by `appendices/a-license.md`. |
 

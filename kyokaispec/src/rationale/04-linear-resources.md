@@ -60,3 +60,15 @@ Linear resources are Kyokai's answer to lifecycle bugs: not a linter pass, not a
 
 > Trace: D6, D77, D89, D194
 > Covers: Linear ownership and borrowing make resource lifecycle boundaries explicit and statically checked.
+
+## Strict Linearity Without Affine Escape Hatches
+
+[Rikona Kurasaki / Mjoyufull]
+Strict linearity creates pressure where ordinary languages hide work: a new field changes cleanup paths, a graph needs ownership that does not form a pointer fog, a branch join exposes mismatched states, a collection cannot hand out a moved element and leave a hole behind, and a test still needs teardown after an assertion panics. Kyokai keeps the rule and attacks the pressure directly.
+
+The language and stdlib answer with immutable borrows for observation, nominal authority bundles, generational handles, slot maps, transactional builders, named recovery records, hole-free removal APIs, linear drains, explicit early release, fixture cleanup scopes, and callback classes that distinguish repeated reads, repeated mutation, one-shot capture consumption, and state-machine stepping. The toolchain answers with join tables, resource-flow explanations, constructor migrations, cleanup insertion when one explicit repair exists, and ordered checklists when user intent is not unique.
+
+None of this grants affine discard. No tool inserts hidden cleanup, allocation, authority, default values, or branch behavior. The improvement is that the compiler explains the proof it is asking the programmer to finish.
+
+> Trace: D488-D500
+> Covers: Strict-linearity ergonomics come from explicit APIs, checked elaboration, and tooling assistance rather than weakening exactly-once ownership.

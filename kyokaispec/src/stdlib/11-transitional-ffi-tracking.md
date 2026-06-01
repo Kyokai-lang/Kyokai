@@ -32,7 +32,7 @@ Each transitional FFI item has a tracking record containing module path, public 
 | Reason | OS/hardware boundary, reviewed external dependency, bootstrap bridge, or separate justified exception. | D64, D230-D231 |
 | Replacement Target | Native Kyokai implementation, safer wrapper, permanent external boundary, or explicit compatibility retirement. | D229-D230 |
 | Contracts | Ownership, allocation, failure, callback, thread, lifetime, panic/TPOE, and capability behavior. | D20, D85, D245 |
-| Tests | Conformance vectors, oracle comparison, ABI tests, fuzz/property tests where applicable. | D220, D229-D232 |
+| Tests | Conformance vectors, oracle comparison, ABI tests, and fuzz/property tests; any category outside the wrapper domain is recorded as `N/A`. | D220, D229-D232 |
 | License/Provenance | Source project, license compatibility, generated/bundled status, and attribution needs. | D263 |
 | Compatibility | Stable, experimental, transitional, compatibility-only, deprecation/removal rule. | D223, D243 |
 
@@ -53,7 +53,7 @@ FFI must not pass raw by-value linear values or Kyokai sum types across the C bo
 
 ## Replacement And Admission
 
-A transitional FFI API may be public only as `experimental`, `transitional`, or through a stable safe wrapper whose internal FFI boundary is accepted as either permanent or tracked for replacement. The public contract remains stable only if replacing the implementation with native Kyokai preserves the same behavior.
+A transitional FFI API is public only as `experimental`, `transitional`, or through a stable safe wrapper whose internal FFI boundary is accepted as either permanent or tracked for replacement. The public contract remains stable only if replacing the implementation with native Kyokai preserves the same behavior.
 
 > Trace: D157, D223, D229-D230, D243
 > Covers: Implementation replacement cannot change public stdlib behavior without compatibility process.
@@ -70,3 +70,19 @@ The point is to be practical without letting practical become permanent by accid
 
 > Trace: D20, D64, D229-D230, D245
 > Covers: Transitional FFI stays useful, visible, and replaceable.
+
+## Bindgen Wrapper-Kit Record
+
+`kyokai bindgen` generates raw foreign declarations, extern records, constants, layout checks, target facts, probes, and unsafe wrapper skeletons. Generated output remains unsafe-only until a safe-wrapper admission record exists.
+
+A safe-wrapper record names foreign library version range, headers, target triples, symbols, flags, ownership, aliasing, lifetimes, initialization, thread safety, callbacks, allocator behavior, foreign error-state translation, required Kyokai capabilities, cleanup, provenance digest, replacement owner, audit owner, target coverage, test evidence, and graduation criteria. Capability-bearing foreign operations expose explicit Kyokai capability parameters in the safe wrapper.
+
+| Wrapper Stage | Public Status | Required Exit Condition |
+| --- | --- | --- |
+| Raw generated binding | Unsafe-only. | Add audited unsafe contracts and wrapper skeleton review. |
+| Transitional safe wrapper | Stable only when the public safe contract is complete; internal bridge remains tracked. | Meet replacement or permanent-boundary criteria. |
+| Permanent external boundary | Stable safe wrapper over a reviewed foreign dependency. | Keep target, version, advisory, audit, and provenance records current. |
+| Native replacement | Safe native Kyokai implementation preserving the same public behavior. | Pass the ordinary admission record and compatibility review. |
+
+> Trace: D430, D499, D501
+> Covers: Bindgen provenance, wrapper-kit admission, owners, target coverage, evidence, and graduation criteria are explicit.

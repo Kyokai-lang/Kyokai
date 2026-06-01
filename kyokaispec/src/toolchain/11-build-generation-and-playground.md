@@ -23,7 +23,7 @@ Generated source under a package module root must have source origin metadata ty
 > Trace: D52, D78, D83, D150, D264
 > Covers: Generated source is not silently mixed with handwritten source, and generated build-directory outputs are separated into visible `gen/` artifacts or private cache scratch.
 
-Generators run before module discovery only for their declared outputs. A generator failure is a build failure. A generator must not modify files outside its declared outputs, and a conforming sandbox runner should enforce this when the host supports it. If sandbox enforcement is unavailable, audit must report the generator as unsandboxed.
+Generators run before module discovery only for their declared outputs. A generator failure is a build failure. A generator must not modify files outside its declared outputs. The selected host sandbox enforces declared read, write, network, process-spawn, environment, and working-root grants when the host can enforce them. On a weaker host, audit marks the build as weaker and CI policy can reject it. Undeclared generator authority is a build error, not a warning.
 
 > Trace: D78, D83, D150
 > Covers: Generation has explicit output boundaries and audit-visible sandbox status.
@@ -88,7 +88,7 @@ The official sandbox runner contract defines how untrusted Kyokai programs are b
 > Trace: D67, D137, D211, D226
 > Covers: Playground execution is capability-denied by default and resource-bounded.
 
-A hosted playground such as `play.kyokai.dev` is optional. The required artifact is the sandbox-runner contract and a conforming runner implementation path. Compiler Explorer support plus a sandbox runner is enough for public first interaction even if the hosted web frontend changes later.
+The normative toolchain surface is the sandbox-runner contract and a conforming runner implementation path. A hosted playground deployment, hostname, and frontend are infrastructure choices outside stable language semantics. Every official hosted playground uses the same runner contract; no web-only execution model exists.
 
 > Trace: D226
 > Covers: The normative requirement is the runner contract, not one permanent website.
@@ -98,10 +98,47 @@ Sandbox results must distinguish compile error, test failure, runtime normal exi
 > Trace: D29, D84, D226
 > Covers: Playground failures preserve Kyokai failure categories and runner policy categories.
 
+## Generation Sandbox Record
+
+Each `[generate.<name>]` declaration records command identity, arguments, working root, input roots, output roots, admitted environment keys, filesystem grants, network grants, process-spawn grants, target, profile, edition and toolchain inputs, required capabilities, sandbox profile, checked-in or build-only classification, and provenance destination. A generator receives no `RootCapability`, no application capabilities, and no ambient secrets.
+
+The build rejects undeclared reads and writes when the host sandbox can enforce them. On a weaker host, the audit record names the missing enforcement and CI policy can reject the build. Generated provenance records generator configuration hash, tool hash, input hashes, output hashes, and granted authority.
+
+> Trace: D150, D465
+> Covers: Build generation runs under a default-deny authority record with auditable weaker-host handling.
+
+## Generation Drift Check
+
+`kyokai generate --check` regenerates under the declared sandbox and fails when checked output differs. It prints changed outputs, generator identity, source digests, output digests, sandbox-profile identity, and provenance path. It does not rewrite files.
+
+> Trace: D406, D465
+> Covers: CI can detect stale checked-in generation without mutating the workspace.
+
+## Bindgen Wrapper Kit
+
+`kyokai bindgen` is a generation frontend for foreign interfaces. It records preprocessor identity, headers, include paths, macro-modeling policy, target headers, sysroot, defines, probes, generated raw declarations, generated wrapper skeletons, provenance digest, and audit destination. Generated declarations remain unsafe-only until wrapper admission establishes a safe API and records foreign error translation, callback rules, TLS error snapshots, target ABI facts, and replacement or permanent-boundary status.
+
+> Trace: D405-D406, D430, D499
+> Covers: Bindgen accelerates wrapper authoring without treating generated foreign declarations as safe Kyokai.
+
+## Standalone Compiler Mode
+
+Direct compiler mode accepts explicit source roots, dependency KBI artifacts, target record, profile, backend, output root, and entrypoint or library artifact class. It uses the same parser, resolver, checker, lowering, backend, diagnostics, artifact layout, generated-C lanes, and provenance rules as package builds. Bypassing manifest discovery does not define alternate language semantics.
+
+> Trace: D426, D509
+> Covers: Standalone compilation is an explicit-input lane through the ordinary compiler engine.
+
+## Development Service Boundary
+
+Scratch, eval, REPL, playground, and hosted development services use explicit sandbox profiles and non-release markers. Hot reload, debugger setup, and editor setup are toolchain development services. Hot reload requires a development profile, target support, `HotReloadCapability`, stable KBI identity, stable ABI fingerprint, stable layout dependencies, stable authority requirements, and no active linear-state migration. A reload that violates those requirements fails with a structured tool error.
+
+> Trace: D475, D489, D505
+> Covers: Development services improve iteration without changing stable language semantics or smuggling state migration into reload.
+
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
 There is nothing wrong with a generator, a REPL, or a playground. The danger is pretending they are small because they are convenient. A build generator can rewrite the room before the compiler walks in. A REPL can hide a dropped linear value behind a prompt. A playground can become a tiny unguarded server. Kyokai lets these tools exist with the lights on.
 
-> Trace: D83, D150, D151-D151a, D226
-> Covers: Convenience tools remain explicit about source generation, ownership, authority, and sandbox boundaries.
+> Trace: D83, D150, D151-D151a, D226, D465, D475, D505, D509
+> Covers: Convenience tools remain explicit about source generation, ownership, authority, sandbox boundaries, and artifact identity.

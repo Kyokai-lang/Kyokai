@@ -19,14 +19,14 @@ Build identity includes:
 | --- | --- | --- |
 | Source | File bytes, logical module names, source origins, generated-source declarations, and doc-test extraction inputs. | D52, D78, D218 |
 | Project | Package/workspace manifests, lockfile, package identities, versions, editions, module roots, build tables, profiles, and diagnostic policy. | D51, D78, D83, D105 |
-| Dependencies | Pinned Git revisions, resolved package identities, `.koi` compatibility fields, yanked/advisory policy when fatal. | D51, D79, D244 |
-| Target | Triple, support tier, target-spec bytes, backend selection, external tool versions, sysroot, linker, and admitted flags. | D31, D80, D149 |
-| Compiler | Compiler version, `.koi` format version, language edition, backend compatibility class, diagnostic schema version. | D79, D83, D105 |
-| Command | Flags that affect accepted source, generated artifacts, diagnostics as artifacts, profile, target, backend, output mode, output root, and cache root. | D26, D29, D31, D264 |
+| Dependencies | Pinned Git revisions, canonical source-artifact hashes, package-instance feature sets, dependency `.koi` identities, compatibility fields, yanked/advisory policy when fatal, and package provenance. | D51, D79, D244, D397, D423-D424, D461 |
+| Target | Triple, support tier, target-spec bytes, backend selection, external tool versions, sysroot, linker, admitted flags, CPU/features, stack defaults, task-stack defaults, guard policy, and overflow detection. | D31, D80, D149, D262, D308, D343 |
+| Compiler | Toolchain identity, version ABI string, compiler version, stdlib/runtime/resolver versions, `.koi`/KBI version, language edition, backend compatibility class, cache-format version, package-index schema version, target-metadata version, and diagnostic schema version. | D79, D83, D105, D425, D429 |
+| Command | Flags that affect accepted source, generated artifacts, diagnostics as artifacts, profile, target, backend, output mode, output root, cache root, debug/source-map policy, sanitizer policy, frame-pointer policy, LTO, and instrumentation. | D26, D27, D29, D31, D264, D308 |
 | Output paths | Output/cache roots only where artifact contents record paths; path remapping controls reproducible profiles. | D27, D83, D264 |
 
-> Trace: D26, D29, D31, D51, D52, D78-D80, D83, D105, D149, D218, D244, D264
-> Covers: Build identity is explicit and complete enough for reproducible artifacts.
+> Trace: D26, D29, D31, D51, D52, D78-D80, D83, D105, D149, D218, D244, D264, D397, D423-D425, D429, D461
+> Covers: Build identity records package instances, canonical source content, toolchain compatibility, cache schema, and provenance inputs explicitly.
 
 Hidden host facts are excluded unless a chapter admits them. Excluded facts include current time, timezone, locale, process ID, random seed, current username, unrelated environment variables, shell aliases, host directory iteration order, and absolute build path after path-remapping policy.
 
@@ -40,7 +40,7 @@ Source paths embedded in debug info, diagnostics-as-artifacts, docs JSON, genera
 > Trace: D27, D83
 > Covers: Path handling is deterministic and profile-controlled.
 
-If absolute paths are requested, the artifact is still deterministic only for builds performed under the same remapped path identity. Release profiles should use remapped paths by default.
+If absolute paths are requested, the artifact is still deterministic only for builds performed under the same remapped path identity. Release profiles use remapped paths by default.
 
 > Trace: D27, D83, D225
 > Covers: Absolute debug paths are explicit and not the release default.
@@ -52,22 +52,22 @@ The output tree path is not a source semantic input. It becomes a build-identity
 > Trace: D27, D83, D264
 > Covers: Output/cache paths affect reproducibility only through path-recording artifacts, and reproducible profiles remap paths by default.
 
-The default output root `kyokai-out/` holds user-visible artifacts. The default cache root `.kyokai-cache/` holds disposable toolchain state. A cache entry must not be the only copy of a requested build product, and an output artifact must not be required as hidden compiler state unless it is also validated by ordinary artifact identity.
+The default output root `kyokai-out/` holds user-visible artifacts. The default project build cache root `.kyokai-cache/` holds disposable project-owned compiler state. Package-source caches, local docs caches, installed-toolchain caches, and global caches are separate roots. A cache entry must not be the only copy of a requested build product, and an output artifact must not be required as hidden compiler state unless it is also validated by ordinary artifact identity.
 
-> Trace: D83, D144, D264
-> Covers: User-visible artifacts and disposable compiler state remain separate even when a build reuses prior outputs.
+> Trace: D83, D144, D264, D397, D425, D429, D516
+> Covers: User-visible artifacts, project build cache, package-source cache, docs cache, installed-toolchain cache, and global cache state remain separate roots.
 
 ## Package Cache
 
-The package cache stores fetched Git dependencies by URL identity and immutable revision. A cache hit must verify the revision identity and package manifest hash before use. The cache must not satisfy a dependency from a branch name, tag name alone, mutable checkout, or unverified local directory unless that source kind is explicitly admitted by the manifest schema.
+The package-source cache stores canonical package source artifacts. For Git dependencies it records repository identity, immutable revision, canonical uncompressed source-content hash, transport provenance, artifact-format version, and hash-algorithm version. For index and mirror retrieval it records the same canonical source-content identity instead of trusting provider-specific archive bytes. A cache hit verifies canonical path ordering, file-mode policy, symlink policy, metadata stripping, manifest hash, content hash, and source provenance before use. A branch name, tag name alone, mutable checkout, provider archive checksum alone, or unverified local directory cannot satisfy a dependency.
 
-> Trace: D51, D83, D244
-> Covers: Dependency cache reuse is pinned and verified.
+> Trace: D51, D83, D244, D423
+> Covers: Dependency cache reuse is pinned to canonical source content and verified provenance rather than transport bytes or mutable labels.
 
-A corrupted cache entry must be rejected and may be repaired by refetching from the declared immutable source. Repairing the cache must not edit manifests or lockfiles unless the command is an explicit dependency update.
+A corrupted package-source cache entry is rejected. A command with an admitted remote source action can repair it by refetching the declared immutable source and revalidating canonical identity. An offline command fails with a package-source diagnostic instead. Repairing a cache entry does not edit manifests or lockfiles unless the command explicitly selects a lockfile update mode.
 
-> Trace: D51, D83
-> Covers: Cache repair preserves dependency meaning.
+> Trace: D51, D83, D396, D423-D424, D429
+> Covers: Package-source repair preserves dependency meaning, obeys offline policy, and cannot mutate lockfile graphs by accident.
 
 ## Incremental Compilation
 
@@ -81,22 +81,26 @@ Incremental cache keys include every build identity input that could affect the 
 > Trace: D83, D144
 > Covers: Incremental cache correctness is required.
 
-A cache may store parsed syntax trees, name-resolution results, typechecking facts, borrow/linearity facts, target-guard evaluation, `.koi` readers, generated backend IR, generated C, private object files, documentation facts, diagnostics, and dependency build scratch. Each cached entry must record the compatibility class and input fingerprint needed to validate it. Cache state is stored under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<backend>/<package-name>/` when those components apply.
+A build-result cache entry records cache-format version, toolchain identity, version ABI string, source and generated-input hashes, manifest and lockfile hashes, canonical package-source hashes, package-instance feature set, target contract, backend, profile, policy values, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, output-integrity hash, and the compatibility class needed to validate reuse. Cache state is partitioned under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<backend>/<package-instance>/` when those components apply. Cache sharing between package instances exists only after the tool proves identical public `.koi`, identical backend-independent semantic facts, and compatible generated-code inputs. Sharing never changes diagnostics, audit output, build identity, or package-graph reporting.
 
-> Trace: D29, D79, D83, D144, D218, D264
-> Covers: Incremental caches may cover compiler and tool outputs only with explicit fingerprints and deterministic cache-root partitioning.
+> Trace: D29, D79, D83, D144, D218, D264, D397, D425, D429, D480, D497
+> Covers: Build-result cache reuse is keyed by complete package-instance and toolchain facts and is a semantics-preserving optimization only.
 
-Deleting the incremental cache must not change command results except for timing, progress output, and cache-miss reporting. `kyokai clean` deletes cache state by default; `kyokai clean --outputs` and `kyokai clean --all` are the explicit output-removal modes defined by the CLI chapter.
+Cache writes publish atomically after content verification. Concurrent builds use explicit cache locks or content-addressed temporary paths. Lock acquisition, stale-lock detection, unsupported locking, and timeout produce stable diagnostics. Eviction never deletes an entry held by an active build under that protocol. A partial write, unknown cache format, missing metadata record, integrity mismatch, or stale generated-source record is discarded and rebuilt from declared inputs when those inputs are available.
 
-> Trace: D83, D144, D264
-> Covers: Incremental caches are performance artifacts, not semantic sources, and output deletion is explicit.
+Remote build-result cache use is disabled by default. Enabling it requires explicit configuration for endpoint identity, trust policy, integrity verification, provenance validation, selected target/toolchain/profile compatibility, and build-metadata recording. A remote entry cannot introduce a package, source, authority, graph edge, or toolchain fact absent from the declared build. `kyokai build --no-cache` and `KYOKAI_CACHE=off` disable build-result cache reads and writes without changing requested artifacts except for timing and cache reports.
+
+Deleting cache state does not change command results except for timing, progress output, and cache reports. `kyokai clean` removes project build cache state. `kyokai clean --outputs` removes project outputs. `kyokai clean --all` removes both project-owned roots. `kyokai clean docs` removes project-generated docs and docs-cache entries. `kyokai clean --global` selects global caches separately and prints each global root before removal.
+
+> Trace: D83, D144, D264, D397, D425, D429, D480, D516
+> Covers: Cache publication, locking, corruption handling, remote trust, cache-off operation, and scoped removal are explicit and cannot change semantics.
 
 ## Generated Sources
 
-Generated sources participate in reproducibility through declared generator inputs, declared outputs, generator command identity, target/profile/edition inputs, and declared capabilities. Undeclared generated files under a module root are rejected unless the generation chapter admits their source origin.
+Generated sources participate in reproducibility through generator declaration, command identity, declared inputs, declared outputs, admitted environment-key names, sandbox grants, target/profile/edition inputs, toolchain identity, source digests, output digests, and checked-in or build-only classification. Undeclared generated files under a module root are rejected unless the generation chapter admits their source origin. `kyokai generate --check` regenerates under the declared sandbox and fails on drift without silently rewriting source.
 
-> Trace: D78, D83, D150
-> Covers: Generated source is a declared build input/output, not a hidden source side effect.
+> Trace: D78, D83, D150, D406, D465
+> Covers: Generated source provenance records the generator and its bounded authority; drift checking is explicit and non-mutating.
 
 ## Release Provenance
 

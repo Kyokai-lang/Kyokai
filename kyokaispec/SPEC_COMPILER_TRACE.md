@@ -97,6 +97,27 @@ Columns: **Spec** | **Claim (summary)** | **Compiler evidence** | **Tests** | **
 | Appendices | `src/appendices/a-license.md` through `src/appendices/d-formalization-roadmap.md` | Traceability and roadmap documents, not compiler implementation. | N/A except future proof artifact checks. | Reviewed |
 | Austral source material and GFDL text | Old inherited chapter files were replaced by Kyokai chapters; `src/appendix-a.md` carries the full GFDL text. | Source provenance is recorded in `src/appendices/a-license.md` and `src/appendices/c-austral-differences.md`. | Informative |
 
+## Post-D525 normative integration map
+
+The accepted D396-D525 surface is integrated into normative chapters by behavior family. This table records the rewritten homes so later implementation and conformance work can cite the actual contract instead of an appended decision cluster.
+
+| Behavior family | Integrated spec homes | Extracted mechanics |
+| --- | --- | --- |
+| CLI, reporting, cache, and cleanup | `src/toolchain/03-cli.md`, `src/toolchain/09-reproducibility-incremental-builds.md` | Versioned human/JSON lanes, prompt and network rules, cache identities, repair, corruption handling, `kyokai clean`, `--outputs`, `--all`, `clean docs`, and separately scoped `--global` cleanup. |
+| Packages, lockfiles, and KBI | `src/toolchain/01-manifest-package-workspace.md`, `src/toolchain/02-module-resolution-and-koi.md` | Feature-set package instances, source hashes, lockfile modes, offline resolution, runnable targets, KBI schema, edition boundaries, compressed transport, and shared KBI reader rules. |
+| Analysis Server, docs, and audit | `src/toolchain/05-diagnostics.md`, `src/toolchain/08-docs-lsp-audit.md`, `src/toolchain/10-package-index-semver-releases-ci.md` | Stable diagnostic lifecycle, fix safety classes, no separate lint command, Analysis Server lanes, editor bundles, package-root committed `kdocs/`, compact docs-index projections, verified raw-file retrieval, docs cache, audit categories, SemVer domains, advisories, and release verification. |
+| Build generation and artifact emission | `src/toolchain/04-build-profiles-targets-linking.md`, `src/toolchain/11-build-generation-and-playground.md`, `src/language/17-memory-layout-and-backend-contract.md` | Native tool discovery, target records, strict float policy, CPU dispatch, requested `c_output/`, generator sandbox records, generation drift checks, bindgen wrapper kits, standalone compiler inputs, and development-service boundaries. |
+| Linear ownership ergonomics | `src/language/05-declarations.md`, `src/language/11-linearity-borrowing-and-regions.md`, `src/stdlib/03-allocators-and-memory-containers.md`, `src/stdlib/05-collections.md`, `src/stdlib/06-iterators-and-generators.md` | Validated wrappers, parameter roles, `build` expressions, the closed D348 ownership-state set, cleanup reservations layered over ownership state, read-only access, reborrow joins, graph owners, generational handles, hole-free extraction, drain finalization, early release diagnostics, and named recovery payloads. |
+| Implicit completions and elaboration | `src/language/12-implicit-completions-and-elaboration.md` | Closed per-entry registry IDs, local static contexts, inserted nodes, evidence obligations, stable diagnostic labels, `.koi` recording rules, spec homes, forbidden effects, and checker-visible lowering. |
+| Conditional instances and materialization | `src/language/07-generics-and-typeclasses.md` | Explicit conditional instances, selected-graph coherence, overlap witnesses, unsafe-origin instance audit, and semantics-preserving code-size controls. |
+| Concurrency and protocol composition | `src/language/15-concurrency.md`, `src/stdlib/09-concurrency-primitives.md`, `src/stdlib/08-io-files-env-process-time-random.md` | SPSC-only Tier-1 channels, explicit brokers, backpressure, fair `RwLock`, closed spawn-shareable registry, callback classes, poller adapter state, deadlines, cancellation, TLS snapshots, and partial I/O progress. |
+| Failure and fatal reporting | `src/language/13-contracts-and-runtime-failure.md`, `src/toolchain/07-testing-coverage-bench.md` | Recoverable mutation classes, named recovery records, panic-during-defer escalation, redacted local fatal reports, freestanding fatal consequences, linear fixtures, and allocation-failure testing. |
+| Text, bytes, paths, and static literals | `src/language/02-lexical-syntax.md`, `src/language/18-built-ins.md`, `src/stdlib/04-text-bytes-paths-and-strings.md`, `src/stdlib/05-collections.md` | Plain escaped, raw multiline, and explicit `static "..."` literals produce non-allocating `StaticString`; `literal.toStringIn(allocator)` creates owned strings; `TextView[R]` is the region-bound immutable borrowed UTF-8 view; bytes, C strings, OS strings, paths, Unicode-versioned algorithms, and borrowed text-key lifetimes remain explicit. |
+| Structured codecs | `src/stdlib/04-text-bytes-paths-and-strings.md`, `src/stdlib/01-admission-contracts.md`, `src/toolchain/11-build-generation-and-playground.md` | Named strict/permissive/streaming/canonical profiles, explicit allocators and `CodecBudget`, duplicate-key and numeric policy, streaming recovery state, unknown-field behavior, canonical output, schema metadata, generator provenance, and corpus/fuzz/limit tests. |
+| Numeric admission | `src/stdlib/07-math-and-numerics.md`, `src/language/18-built-ins.md` | Checked arithmetic families, CPU feature facts, stable numeric admission records, independent oracles, vectors, target caveats, and transitional-wrapper evidence. |
+
+The workflow and infrastructure-only D-points remain tracked in `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, and `docs/infrastructure/services.md`. They do not invent language semantics.
+
 ## Current inherited compiler pipeline evidence
 
 The inherited pipeline below is useful evidence for Kyokai compiler planning. Paths should be checked against the current Kyokai `../lib/` tree during extraction:
@@ -229,11 +250,11 @@ Each file is assigned to a **phase** for coverage closure (helpers are **N/A** u
 
 ## Phase 8 - Legacy convergence / CI
 
-- Run `dune build` / `dune runtest` in `austral/` when OCaml deps (`yojson`, `ounit2`, etc.) are available and `lib/dune` lists `builtInModules` under `modules_without_implementation` if required by the toolchain.
-- **Last run (workspace agent):** `dune runtest` failed: missing `ounit2`, missing `yojson` for `austral_core`, and Menhir stanza reports `builtInModules` without implementation - fix local opam/switch before treating CI as green.
-- **Installed compiler E2E run (workspace agent):** `AUSTRAL=/home/chris/.nix-profile/bin/austral python3 test-programs/runner.py` in `../austral/` passed every upstream end-to-end test.
-- **Spec fence run (workspace agent):** `make check-austral-fences AUSTRAL=/home/chris/.nix-profile/bin/austral` passed: 14 complete Austral fences compiled; 101 fragment fences skipped by design.
-- **Spec build run (workspace agent):** `nix-shell -p pandoc texliveSmall --run 'make'` passed and generated `spec.pdf` plus `spec.html`.
+- Run `dune build` / `dune runtest` in an upstream `austral/` checkout when OCaml deps (`yojson`, `ounit2`, etc.) are available and `austral/lib/dune` lists `builtInModules` under `modules_without_implementation` if required by the toolchain.
+- **Last verification attempt:** `dune runtest` failed: missing `ounit2`, missing `yojson` for `austral_core`, and Menhir stanza reports `builtInModules` without implementation - fix local opam/switch before treating CI as green.
+- **Installed compiler E2E verification:** `AUSTRAL=austral python3 austral/test-programs/runner.py` against an upstream `austral/` checkout passed every upstream end-to-end test.
+- **Spec fence verification:** `make check-austral-fences AUSTRAL=austral` passed: 14 complete Austral fences compiled; 101 fragment fences skipped by design.
+- **Spec build verification:** `nix-shell -p pandoc texliveSmall --run 'make'` passed and generated `spec.pdf` plus `spec.html`.
 - After any Kyokai implementation or conformance edit, update Kyokai rows from **Kyokai Pending** or **Gap** to **Verified** only with a cited current Kyokai source/test path. Do not upgrade `Legacy Verified` rows merely because inherited Austral tests pass.
 
 ## Mirror: `austral.github.io/_spec/`

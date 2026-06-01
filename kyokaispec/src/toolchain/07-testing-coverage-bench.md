@@ -18,10 +18,12 @@ A pure test has no root capability and receives no ambient authority. If a test 
 > Trace: D48, D67, D137, D211
 > Covers: Tests do not gain ambient authority; capability-using tests spell it.
 
-Each capability-using test receives a fresh root or declared capability instance for that test execution. Capabilities are not shared between tests unless a future harness chapter defines an explicit fixture with linear ownership and cleanup rules.
+Each capability-using test receives a fresh root or declared capability instance for that test execution. A fixture declaration chooses exactly one ownership class: `case`, `module`, or `workspace`. A `case` fixture constructs a fresh value for each test case. A `module` fixture is shared only by tests from its declaring module. A `workspace` fixture is shared only by tests in the selected workspace test run.
 
-> Trace: D137, D211
-> Covers: Test authority is isolated per test.
+A shared fixture is legal only when its shared value is `Free` immutable data, a compiler-admitted synchronized primitive, or a fixture broker whose recorded lease/release protocol returns fresh linear resources to each test and reclaims them through explicit teardown. A fixture that constructs a linear resource returns either one owned per-test value with statically checked cleanup or one broker handle that leases fresh linear resources to cases. Linear resources are never shared directly between parallel tests. Fixture setup failure is a structured test failure. Contract violation inside fixture code remains TPOE and is reported by the harness as a failing test process.
+
+> Trace: D137, D211, D435
+> Covers: Test authority is isolated per test; fixture ownership class, linear lease behavior, teardown, setup failure, and TPOE behavior are explicit.
 
 Test success means the test returns normally with all linear obligations discharged. A failed `require`, failed `ensure`, `panic`, TPOE, failed assertion helper, uncaught runtime-fatal process termination, timeout, leaked live linear value at test exit, or harness setup failure makes the test fail according to its category.
 
@@ -45,7 +47,7 @@ Required flags include:
 | `--no-run` | Build test artifacts without executing them. | D28, D80 |
 | `--jobs <n>` | Limit parallel test execution. | D28, D83 |
 | `--timeout <duration>` | Apply an explicit per-test timeout where the target runner supports it. | D28, D137 |
-| `--format human|json` | Select report format. | D29 |
+| `--message-format=human|json|json-lines` | Select human output, one versioned JSON report, or streamed versioned JSON records. | D29, D503 |
 | `--list` | List discovered tests without building runner executables unless discovery requires checking. | D28, D270 |
 | `--failed` | Re-run tests recorded as failed by the previous compatible test report. | D28, D270 |
 | `--seed <value>` | Set the deterministic property/fuzz seed for reproducible runs. | D220, D270 |
@@ -118,7 +120,45 @@ A benchmark that needs authority must declare capabilities just like a test. The
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-Tests should be close enough to the code to catch the truth, but not so privileged that they become a different court. Kyokai lets them see private rooms when they live in the same module, but it does not hand them the master key to the house unless the test asks for it in the open.
+Tests stay close enough to the code to catch the truth, but not so privileged that they become a different court. Kyokai lets them see private rooms when they live in the same module, but it does not hand them the master key to the house unless the test asks for it in the open.
 
 > Trace: D28, D137, D211
 > Covers: The test model balances practical module testing with explicit capability security.
+
+## Test Sandboxes And Host Grants
+
+Default tests run without ambient environment access, network access, process spawning, real clock access, entropy access, broad filesystem access, or host terminal mutation. A test declares grants through test metadata, admitted source annotations, manifest test profiles, or visible command flags. Integration profiles that permit host authority print every active grant in human output and machine reports.
+
+Parallel tests receive isolated temporary directories, deterministic output capture, deterministic random or replay inputs when selected, and isolated capability bundles. A host-dependent label changes scheduling and reporting only. It does not hide authority. Timeout, cancellation, sandbox refusal, and host-grant mismatch have separate report categories.
+
+> Trace: D403, D412, D421, D503
+> Covers: Tests are sandboxed by default; host authority is visible, reportable, and isolated across parallel runs.
+
+## Linear Fixtures And Teardown
+
+Linear fixtures register setup and cleanup as source-visible obligations. Cleanup runs in LIFO order on normal return and panic-class assertion failure. TPOE does not run user cleanup. A fixture broker that lends linear resources records lease, return, cancellation, timeout, and teardown behavior. Parallel tests never share a raw linear resource directly.
+
+The Analysis Server offers cleanup-registration skeletons and reports a fixture setup that acquires a linear resource before cleanup registration or ownership transfer. It does not insert hidden cleanup or make an invalid test valid.
+
+> Trace: D137, D412, D435, D494
+> Covers: Test fixtures preserve ordinary linearity, explicit cleanup, panic cleanup, and TPOE termination rules.
+
+## Allocation-Failure Testing
+
+The stdlib admits counting, fail-nth, fail-by-size-or-class, leak-checking, limit, and high-water test allocators. A failure schedule is deterministic and serializable into replay metadata: allocator algorithm, seed or counter, allocation class, site ID, target, and harness version.
+
+Allocator-aware APIs are tested for success, fail-first, fail-each-allocation, partial-initialization cleanup, and leak-check paths where those paths exist. Runtime-fatal allocation sites are tested separately and cannot be hidden inside fallible APIs. Failure injection is harness behavior through explicit allocator values or harness configuration. It is never an ordinary-program semantic mode.
+
+> Trace: D415
+> Covers: Deterministic out-of-memory testing exercises allocation cleanup without injecting hidden behavior into normal execution.
+
+## Property, Fuzz, Benchmark, And Numeric Evidence
+
+Property reports record generator ID and version, seed, generated case count, shrink path, minimized input, target, backend, profile, toolchain, and replay command. Fuzz reports record target ID, corpus identity, mutation engine identity, budget, seed, crash artifact, minimized reproducer, failure category, and replay command. Minimization preserves the original failure category.
+
+Benchmark reports record benchmark ID, source revision, toolchain, target, backend, profile, host facts, runner facts, warmup, repetitions, statistical method, confidence presentation, outlier policy, comparability class, and raw sample artifact. Wall-clock thresholds do not block ordinary PRs unless a separately reviewed policy names the environment and threshold.
+
+Numeric stdlib tests record oracle source, license, version or revision, generator command, normalization rule, target/profile, rounding mode, tolerance or exactness rule, and reviewed vector digest.
+
+> Trace: D220, D270, D304, D325, D449, D517
+> Covers: Property replay, fuzz replay, benchmark comparability, and numeric-oracle provenance are explicit report contracts.

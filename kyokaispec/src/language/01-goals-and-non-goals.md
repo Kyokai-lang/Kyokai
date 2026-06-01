@@ -7,13 +7,13 @@ Kyokai inherits more than a compiler skeleton from Austral. It inherits pressure
 > Covers: Kyokai is both a hard fork and a continuation of compatible Austral design goals, and the Kyokai spec must restate inherited rules directly so it stands alone as a full language specification.
 
 [Rikona Kurasaki / Mjoyufull]
-The first goal is fits-in-head simplicity. Borretti's Austral phrase still matters because it names the real test: a programmer should be able to read the specification and understand the whole language model without needing to partake in compiler archaeology, or reading a second language's manual. Kyokai is larger than Austral because it specifies the toolchain and batteries-included standard library too, so simplicity cannot mean smallness alone. It means the language has few overlapping mechanisms, one explicit surface for each semantic job, and no silent second way hiding under the first.
+The first goal is fits-in-head simplicity. Borretti's Austral phrase still matters because it names the real test: a programmer can read the specification and understand the whole language model without needing to partake in compiler archaeology, or reading a second language's manual. Kyokai is larger than Austral because it specifies the toolchain and batteries-included standard library too, so simplicity cannot mean smallness alone. It means the language has few overlapping mechanisms, one explicit surface for each semantic job, and no silent second way hiding under the first.
 
 > Trace: D5, D86, D87, D147
 > Covers: Kyokai keeps the inherited simplicity goal while applying it to a larger self-contained language, toolchain, and stdlib spec; simplicity means low overlapping mechanism count and directly specified behavior, not dependence on Austral as an external manual.
 
 [Rikona Kurasaki / Mjoyufull]
-The second goal is readability. Borretti's Austral line is still clean: "We are not typists, we are programmers." Kyokai optimizes for code that can be read under pressure, even when that costs a few extra characters. Terminators, explicit borrows, explicit capabilities, explicit failure arms, and named construction all follow the same rule: the source should show the boundary that matters.
+The second goal is readability. Borretti's Austral line is still clean: "We are not typists, we are programmers." Kyokai optimizes for code that can be read under pressure, even when that costs a few extra characters. Terminators, explicit borrows, explicit capabilities, explicit failure arms, and named construction all follow the same rule: the source shows the boundary that matters.
 
 > Trace: D9, D11a, D14, D15, D15a, D35, D53, D145
 > Covers: Kyokai keeps readability as a design goal and favors visible boundaries in syntax, ownership, construction, contracts, and failure handling.
@@ -34,7 +34,7 @@ The fifth goal is explicit authority. Code does not receive ambient access to th
 > Covers: Kyokai uses capability values and sealed authority tokens, startup mints root authority explicitly, stdlib authority APIs require explicit capabilities, unsafe operations require audited unsafe contracts, and capabilities are not forgeable from raw bits.
 
 [Rikona Kurasaki / Mjoyufull]
-The sixth goal is correctness through mechanical aid. Human review matters, but tired people under schedule pressure cannot be the only line between a program and memory corruption, authority leaks, or broken resource lifetimes. Kyokai follows Austral's restraint here: type checking, linearity checking, capability checking, contracts, static assertions, runtime checks, and formalization all exist because the machine should shoulder every rule it can check without making the language too tangled to implement or understand.
+The sixth goal is correctness through mechanical aid. Human review matters, but tired people under schedule pressure cannot be the only line between a program and memory corruption, authority leaks, or broken resource lifetimes. Kyokai follows Austral's restraint here: type checking, linearity checking, capability checking, contracts, static assertions, runtime checks, and formalization all exist because the machine shoulders every rule it can check without making the language too tangled to implement or understand.
 
 > Trace: D53, D84, D87, D143/D241, D145, D211, D229
 > Covers: Kyokai uses mechanical checks for correctness and security while balancing those checks against implementability, specification clarity, and the no-language-UB contract.
@@ -57,7 +57,7 @@ The ninth goal is modularity. Kyokai keeps the inherited interface/body split be
 > Covers: Kyokai preserves Austral's module-interface/module-body separation while specifying file extensions, import forms, visibility, module resolution, and interface artifacts as Kyokai rules.
 
 [Rikona Kurasaki / Mjoyufull]
-The tenth goal is strictness with purpose. Kyokai should break the build when a boundary is unclear, when a resource has not been consumed, when an import collision would make a name unstable, when a contract is violated, or when a platform-specific declaration does not resolve cleanly. This brittleness is not aesthetic punishment. It is the language refusing to let uncertainty pass as meaning.
+The tenth goal is strictness with purpose. Kyokai breaks the build when a boundary is unclear, when a resource has not been consumed, when an import collision would make a name unstable, when a contract is violated, or when a platform-specific declaration does not resolve cleanly. This brittleness is not aesthetic punishment. It is the language refusing to let uncertainty pass as meaning.
 
 > Trace: D15a, D17, D19a, D53, D60, D78, D87, D214, D246
 > Covers: Kyokai intentionally rejects ambiguous names, unresolved platform declarations, hidden resource disposal, and vague contracts at compile time or through specified failure paths.
@@ -95,7 +95,16 @@ Kyokai has the following normative non-goals:
 > Trace: D147
 > Covers: Kyokai's non-goals are normative project boundaries, not soft preferences; reversing any listed boundary requires a new explicit public decision.
 
-A later chapter may add a new non-goal through the same public decision process, but no chapter may quietly cross one of the boundaries above. If a feature appears to need a forbidden mechanism, the spec must either reject the feature, redesign it around an existing explicit Kyokai mechanism, or open a new decision that names the boundary being crossed and the consequences of crossing it.
+Adding or removing a non-goal requires an accepted D-point and matching spec update. No chapter can quietly cross one of the boundaries above. If a feature appears to need a forbidden mechanism, the spec must either reject the feature, redesign it around an existing explicit Kyokai mechanism, or open a new decision that names the boundary being crossed and the consequences of crossing it.
 
 > Trace: D147, D155
 > Covers: Non-goals may change only through the explicit public decision process, and accepted behavior must remain traceable instead of drifting through adjacent spec edits.
+
+## Evidence-Tier Honesty
+
+Kyokai rejects slogans that hide the actual boundary. The language does not promise that every omitted operation is forbidden. It promises that each admitted implicit completion is closed, compiler-recorded, inspectable, effect-neutral under its rule, and checked after elaboration. Authority, allocation, cleanup, scheduling, dynamic loading, exception-like exits, and safe-code undefined behavior never appear through an unrecorded completion.
+
+The no-language-UB contract is a `SafeCore` scope claim with evidence state `specified` in this document. Broader `SafeConcurrent`, `SafeFFIWrapped`, and `BackendConforming` claims name their own evidence states and artifacts. Compiler status, test status, proof status, and release status remain separate facts.
+
+> Trace: D366-D367, D477-D487, D508
+> Covers: Honest implicitness replaces obsolete zero-implicitness wording, and claim labels prevent spec intent from being presented as implementation, conformance, or proof evidence.

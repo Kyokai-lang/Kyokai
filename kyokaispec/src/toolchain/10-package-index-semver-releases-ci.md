@@ -8,10 +8,10 @@ An ecosystem needs discoverability, but Kyokai does not need a central altar whe
 
 ## Package Discovery Index
 
-The official package index is a read-only discovery index. It records package names, versions, source repository URLs, immutable source revisions, checksums where available, yanked status, advisory metadata, documentation links, license metadata, and `.koi` interface summaries where produced. It is not the canonical source store and does not replace Git `rev` pinning.
+The official package index is a read-only discovery index. It records package names, versions, source repository URLs, immutable source revisions, checksums where available, yanked status, advisory metadata, documentation metadata, license metadata, and `.koi` interface summaries where produced. Documentation metadata includes the package-root path, `kdocs/manifest.toml` digest, docs-schema version, raw-file adapter class, docs status, and compact deterministic search projection. The index is not the canonical source or documentation store and does not replace Git `rev` pinning.
 
-> Trace: D51, D221, D223, D244
-> Covers: The package index helps users find packages without becoming the source authority.
+> Trace: D51, D221, D223, D244, D525
+> Covers: The package index helps users find packages and repository-owned documentation without becoming the source or documentation storage authority.
 
 A dependency resolved through the index still writes an immutable source revision into the lockfile. A manifest may record version intent, but the lockfile records the exact revision used for the build.
 
@@ -30,7 +30,7 @@ A yank marks a package version or source revision as unavailable for new resolut
 > Trace: D83, D244
 > Covers: Yanks affect new selection without breaking existing lockfile meaning.
 
-A yank record includes package name, version, source revision, reason category, timestamp authority of the index, and optional advisory link. The reason category is one of `security`, `soundness`, `licensing`, `accidental-publish`, `replaced`, or `other`.
+A yank record includes package name, version, source revision, reason category, timestamp authority of the index, and either an advisory link or an explicit no-advisory-link marker. The reason category is one of `security`, `soundness`, `licensing`, `accidental-publish`, `replaced`, or `other`.
 
 > Trace: D221, D244
 > Covers: Yank metadata is inspectable and categorized.
@@ -59,10 +59,12 @@ The `version` field follows SemVer as an ecosystem convention for package API in
 > Trace: D105, D223, D243
 > Covers: SemVer guides package evolution without becoming edition or resolution identity.
 
-`kyokai semver-check` compares public `.kyo` interface surfaces and `.koi` API metadata. It reports removed declarations, changed signatures, changed type visibility, changed contracts, changed capability requirements, changed failure behavior where represented in contracts/docs, changed exported ABI surfaces, deprecated declarations, and added declarations.
+`kyokai semver-check` compares public `.kyo` interfaces, `.koi` API metadata, docs JSON, and declared tool-schema surfaces. Public compatibility includes signatures, visibility, typeclass instances, associated types, capability requirements, allocation behavior, blocking behavior, error/result variants, panic/TPOE/runtime-fatal cases, iteration and ordering guarantees, target availability, exported ABI surfaces, docs JSON, diagnostic JSON, and declared security or performance contracts when those facts are part of the public contract.
 
-> Trace: D17, D20, D53, D79, D218, D223
-> Covers: SemVer checking observes public interface and contract changes.
+The report classifies each difference as `source-breaking`, `abi-breaking`, `behavior-contract-breaking`, `diagnostic-or-tool-output-breaking`, `additive-compatible`, or `documentation-only`. Publishing rejects a version that understates the reported difference unless an explicit maintainer override records the reason. A bug or security repair is non-breaking only when the previous behavior was outside the stated contract or the release record identifies the correction policy.
+
+> Trace: D17, D20, D53, D79, D218, D223, D416
+> Covers: SemVer checking covers public source, ABI, behavior, failure, capability, documentation, and machine-schema contracts and emits explicit diff classes.
 
 The checker is advisory by default. CI or manifest policy may promote SemVer findings to errors. A SemVer pass does not prove behavioral compatibility beyond the surfaces the checker actually compares, and the report must say which comparison domains were included.
 
@@ -95,7 +97,7 @@ Checksums cover every distributed archive and binary. Provenance records name so
 
 ## CI Installation Contract
 
-The official CI contract provides one portable installation path for supported CI systems. `setup-kyokai` or the equivalent official action installs a requested toolchain version, verifies checksums, exposes `kyokai` on `PATH`, reports the installed version, and optionally primes package caches without changing project lockfiles.
+The official CI contract provides one portable installation path for supported CI systems. `setup-kyokai` or the equivalent official action installs a requested toolchain version, verifies checksums, exposes `kyokai` on `PATH`, and reports the installed version. Cache priming runs only when the action input `prime-cache = true` is selected, and it must not change project lockfiles.
 
 > Trace: D225
 > Covers: CI installs are standard, verified, and lockfile-preserving.
@@ -124,3 +126,41 @@ Discoverability is good. Blind trust is not. Kyokai's index is a map, not the la
 
 > Trace: D51, D83, D221, D223-D225, D244
 > Covers: Kyokai's ecosystem model combines discoverability with pinned, auditable, reproducible source identity.
+
+## Index Record Separation
+
+Index records separate package identity, immutable source revision, canonical source-artifact digest, package owner metadata, repository-owned docs state, docs-manifest digest, raw-file adapter class, compact docs-search projection, yank state, advisory records, security holds, takedowns, name disputes, maintainer transfers, provenance records, support tier, badges, search facts, and editorial showcase links. Each record type has its own schema. No record silently changes source identity.
+
+Public index names use the canonical lowercase ASCII grammar in the manifest chapter. Reserved standard-library, official-tool, example, advisory, infrastructure, and official-namespace names cannot be claimed by ordinary packages. A name confusingly close to an official or reserved name is rejected. Similarity to an ordinary third-party name is advisory metadata only; it is not package-identity normalization and does not prove malice.
+
+> Trace: D419, D423, D506, D522
+> Covers: Package identity, canonical content, reserved names, search, showcase, badges, and trust metadata remain separate records.
+
+## Advisories And Minimum-Safe Versions
+
+Advisories record identifier, affected package identities and revisions or version ranges, severity vocabulary, summary, patched revisions, yanks, minimum safe version when one exists, publication timestamp authority, and source links. `kyokai audit` reports advisory state without rewriting lockfiles. A security policy blocks an affected lockfile only when the selected policy declares that behavior.
+
+> Trace: D428, D431
+> Covers: Advisory reporting and policy-controlled blocking do not mutate package identity or lockfile meaning silently.
+
+## Repository-Owned Package Documentation
+
+Every package published to the official index contains generated `kdocs/` directly under that package's root in the exact indexed Git revision. A standalone package therefore uses `project-root/kdocs/`; a workspace repository stores one `kdocs/` directory under each published member package root. `kdocs/` is a tracked publication artifact. The official infrastructure does not require a second upload of the full documentation tree.
+
+The package-index docs record stores package identity, package version, repository URL, exact source revision, package-root path, source digest, `kdocs/manifest.toml` digest, docs-schema version, raw-file adapter class, docs status, and deterministic compact search projection. Early publication uses the same reviewed PR/MR metadata or signed automation path as package release metadata. It does not require a custom login service. A replacement ownership flow requires an accepted public rule before deployment.
+
+The official website retrieves structured documentation files from the exact indexed Git revision through a reviewed forge raw-file adapter, verifies recorded digests, and renders the structured schema through the official renderer. Publisher-controlled HTML, scripts, stylesheets, executable content, and active embeds are not injected into the official Kyokai origin. A Git host with no reviewed browser raw-file adapter reports `browser-render-unavailable`; this does not invalidate toolchain retrieval through the pinned Git revision.
+
+An official docs page reports `verified`, `missing`, `stale`, `malformed`, `schema-incompatible`, `digest-mismatch`, `target-context-mismatch`, `untrusted-revision`, or `browser-render-unavailable`. Documentation indexing and rendering never grant package trust, ownership, support, vulnerability clearance, or source authority.
+
+`kyokai-package-docs` is not a required bootstrap repository. A later docs mirror is cache-aside infrastructure only. It requires a separate service decision defining storage budgets, retention, regeneration, active-content policy, failure states, and deployment ownership. It never becomes canonical documentation storage or a package-publication requirement.
+
+> Trace: D515-D516, D520, D525
+> Covers: Published documentation is committed beside exact Git-hosted package source, centrally indexed as compact reviewed metadata, retrieved through verified raw-file adapters or pinned Git fetches, and rendered without turning Kyokai into a package-doc storage service or granting trust implicitly.
+
+## Release Verification
+
+Official releases publish source archive, toolchain binaries, checksums, provenance, setup metadata, target notes, SBOM status, and attestation status. Release verification checks checksum and provenance independently of caches. CI installation verifies exact requested toolchain identity before exposing `kyokai` on `PATH`.
+
+> Trace: D225, D461
+> Covers: Release artifacts and CI setup verify exact identity independently of cache state.

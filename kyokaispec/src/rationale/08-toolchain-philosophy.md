@@ -61,3 +61,13 @@ The toolchain philosophy is the same as the language philosophy: no quiet second
 
 > Trace: D86, D155, D264-D270
 > Covers: Toolchain behavior is specified rather than inherited from implementation habit.
+
+## Tooling That Shows Its Work
+
+[Rikona Kurasaki / Mjoyufull]
+Strict languages fail when the tools only say no. Kyokai's compiler, Analysis Server, `explain`, and checked fix lanes expose ownership states, branch joins, cleanup obligations, capability flow, `.koi` facts, generated provenance, target selection, cache identity, and lowered forms. A repair is automatic only when one explicit checked edit is correct. Ambiguous repairs remain visible choices.
+
+The command line follows the same rule. Human output has recognizable lanes. JSON and JSON-lines output carry schema versions. Network actions are explicit. Prompts disappear in machine mode. Generated C, source maps, docs caches, audit reports, and provenance have named artifact homes. The toolchain is not a second language; it is the place where the first language becomes inspectable under pressure.
+
+> Trace: D396, D474, D488, D503-D505, D509, D515-D516, D525
+> Covers: CLI, Analysis Server, fixes, generated artifacts, and docs caches expose compiler facts without changing source semantics.

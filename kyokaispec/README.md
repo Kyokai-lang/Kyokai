@@ -19,7 +19,6 @@ The current extracted Kyokai chapters live under:
 3. `../Kyokaishape.md` for live public D-points and pending shape.
 4. Linked public discussions, issues, and PRs.
 5. `../phase.md` for implementation/proof order only.
-6. Root `../../kyokaiplan.md` as the older full design archive when it does not conflict with accepted shape or extracted spec text.
 
 The old inherited Austral chapter files have been removed from the active build after their Kyokai replacements were extracted. Austral remains source material and lineage, but current Kyokai rules live in the Kyokai chapters listed above. See `src/appendices/c-austral-differences.md` for the replacement map.
 
@@ -27,7 +26,7 @@ The old inherited Austral chapter files have been removed from the active build 
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Kyokai spec structure | Extracted through Phase 15 | `kyokaispecdirection.md` records Phases 0-15 as complete. |
+| Kyokai spec structure | Extracted through Phase 15 | The chapter families listed above are present and included by the build. |
 | Kyokai language spec text | Extracted | `src/language/00-introduction.md` through `src/language/19-examples.md`. |
 | Kyokai toolchain spec text | Extracted | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/11-build-generation-and-playground.md`. |
 | Kyokai stdlib contract spec | Extracted | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/11-transitional-ffi-tracking.md`. |

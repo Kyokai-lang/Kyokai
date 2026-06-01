@@ -6,7 +6,7 @@ Kyokai's standard library is not a decorative appendix to the language. It is th
 > Trace: D85, D152, D229, D243
 > Covers: The Kyokai standard library is a committed systems-library surface with explicit contracts and compatibility policy.
 
-The public namespace for the standard library is `Kyokai.*`. Public Kyokai APIs must not expose inherited `Standard.*` or `Austral.*` names as their canonical surface. Compatibility shims, migration guides, or historical examples may mention inherited names, but stable Kyokai programs import `Kyokai.*` modules.
+The public namespace for the standard library is `Kyokai.*`. Public Kyokai APIs must not expose inherited `Standard.*` or `Austral.*` names as their canonical surface. Compatibility shims, migration guides, and historical examples are permitted to mention inherited names, but stable Kyokai programs import `Kyokai.*` modules.
 
 > Trace: D1, D5, D152
 > Covers: The stdlib namespace follows Kyokai project identity and retires inherited public naming.
@@ -18,7 +18,7 @@ The standard library is batteries-included for systems programming. The admitted
 
 ## Authority And Import Model
 
-The standard library does not receive ambient authority. File, environment, process, terminal, network, time, random, signal, and OS-specific operations require explicit capabilities. Pure modules may be imported without authority, but importing a module never grants runtime permission to use authority-bearing operations.
+The standard library does not receive ambient authority. File, environment, process, terminal, network, time, random, signal, and OS-specific operations require explicit capabilities. Pure modules are importable without authority, but importing a module never grants runtime permission to use authority-bearing operations.
 
 > Trace: D67, D85, D211
 > Covers: Stdlib authority follows capability flow, not imports or module names.
@@ -42,7 +42,8 @@ Every public stdlib type, function, typeclass, method, and instance documents th
 | Concurrency | Task-transfer status, synchronization behavior, blocking behavior, memory-order needs, and thread-affinity. | D3, D90-D95, D100-D101, D212 |
 | Platform | Target support, OS-specific behavior, path/encoding caveats, and unsupported-target failures. | D80, D85, D149 |
 | Determinism | Iteration order, randomization, hash seeding, clock dependence, locale dependence, and reproducibility effect. | D83, D85 |
-| Complexity | Time and space complexity, amortized behavior, and worst-case notes where relevant. | D85, D229 |
+| Invalidation | Which operations invalidate borrows, iterators, views, raw addresses, registrations, or cached observations. | D77, D85, D357 |
+| Complexity | Time and space complexity, amortized behavior, and worst-case notes when the behavior applies. | D85, D229 |
 | Edge Cases | Empty input, zero length, invalid encodings, invalid paths, closed handles, allocation edge cases, and boundary values. | D74, D85, D229-D232 |
 | Tests | Required unit tests, property tests, fuzz tests, oracle/reference vectors, or cross-platform tests. | D220, D229-D232 |
 | Implementation | Safe native Kyokai, unsafe internal, permanent FFI boundary, transitional FFI, or externally reviewed implementation. | D229-D231 |
@@ -53,7 +54,7 @@ Every public stdlib type, function, typeclass, method, and instance documents th
 
 ## Module Status
 
-Each stdlib module has a release status: `stable`, `experimental`, `compatibility`, `transitional`, or `internal`. Stable modules must satisfy the admission criteria. Experimental modules are public but may change under documented SemVer/edition policy. Compatibility modules exist for legacy algorithms or migration and must not be presented as preferred defaults. Transitional modules expose temporary bootstrap or FFI-backed behavior with replacement criteria. Internal modules are not public API.
+Each stdlib module has a release status: `stable`, `experimental`, `compatibility`, `transitional`, or `internal`. Stable modules must satisfy the admission criteria. Experimental modules are public previews; their documented SemVer/edition policy permits breaking changes. Compatibility modules exist for legacy algorithms or migration and must not be presented as preferred defaults. Transitional modules expose temporary bootstrap or FFI-backed behavior with replacement criteria. Internal modules are not public API.
 
 > Trace: D152, D157, D223, D229-D230, D243
 > Covers: Stdlib module status controls admission, compatibility, and deprecation promises.
@@ -61,7 +62,7 @@ Each stdlib module has a release status: `stable`, `experimental`, `compatibilit
 A stable module cannot depend on an internal module's undocumented behavior. If a stable module uses unsafe or FFI internally, its public contract still carries the complete safe behavior and the audit surface identifies the trust boundary.
 
 > Trace: D20, D85, D150, D229-D230, D245
-> Covers: Stable safe APIs may use unsafe internals only through documented safe contracts and audit metadata.
+> Covers: Stable safe APIs use unsafe internals only through documented safe contracts and audit metadata.
 
 ## Implementation Policy
 
@@ -78,7 +79,35 @@ FFI is legitimate for OS/hardware boundaries, transitional bootstrap bridges, ex
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-A standard library can become a second language hiding under function names. Kyokai refuses that. The function name should tell you the ownership story. The signature should show the allocator and capability story. The contract should tell you how it fails. The docs should say what changes across platforms. No one should have to read a source file in the rain to find out whether `push` can allocate, whether an iterator dies after mutation, or whether a file call secretly uses the current directory.
+A standard library can become a second language hiding under function names. Kyokai refuses that. The function name tells you the ownership story. The signature shows the allocator and capability story. The contract tells you how it fails. The docs state what changes across platforms. No one has to read a source file in the rain to find out whether `push` can allocate, whether an iterator dies after mutation, or whether a file call secretly uses the current directory.
 
 > Trace: D85, D152, D229
 > Covers: Kyokai's stdlib contract exists so library behavior stays as explicit as language behavior.
+
+## Admission Ladder And Full-Conformance Surface
+
+The standard library uses five stability and release-obligation tiers: `Core`, `Systems`, `Extended`, `Experimental`, and `Internal`. `Core` contains language-adjacent essentials. `Systems` contains stable files, paths, environment, process, time, entropy, networking, concurrency, atomics, platform contracts, and FFI-wrapper surfaces. `Extended` contains stable batteries that are not required by every minimal toolchain profile. `Experimental` contains explicitly unstable incubating APIs. `Internal` contains compiler, runtime, package-manager, generated-helper, test, and stdlib implementation support with no public compatibility promise. Promotion from `Experimental` to a stable tier requires an admission record and compatibility review; age and popularity never promote an API silently.
+
+The usability ladder below orders stable implementation work inside those tiers. It does not replace the five public stability categories.
+
+> Trace: D305, D501
+> Covers: Stdlib stability categories and implementation-order ladders are separate explicit taxonomies.
+
+The standard-library admission ladder is ordered: `Core Pure`, `Core Containers`, `Core Text/Bytes/Paths`, `Core IO/OS`, `Core Testing/Diagnostics`, `Core Networking`, `Core Codecs`, `Core Crypto Policy`, and `Extended Protocols`. An implementation claiming a tier implements every stable module in that tier and every earlier tier. A partial, bootstrap-only, or experimental implementation labels itself accordingly and does not claim the missing stable tiers.
+
+Tier-1 usability includes buffers, strings and text views, paths, files, arguments and environment, formatting, tests, JSON/CBOR foundations, socket and DNS foundations, time, random, process, and common collections. Stable admission requires the chapter-local contract table, target gates, conformance evidence plan, documentation examples, unsafe-audit status, and transitional-FFI record when a foreign bridge exists.
+
+| Ladder Tier | Stable Surface | Additional Admission Burden |
+| --- | --- | --- |
+| `Core Pure` | result, optional, rendering, parsing, numeric helpers | Boundary tests and property tests for parsers. |
+| `Core Containers` | allocators, buffers, arrays, spans, maps, sets, slot maps | Allocation-failure, invalidation, drain, and linear-payload tests. |
+| `Core Text/Bytes/Paths` | UTF-8 text, bytes, OS strings, paths, codecs foundation | Encoding, target-path, and round-trip tests. |
+| `Core IO/OS` | files, directories, streams, args/env, process, clocks, entropy | Capability, partial-progress, cancellation, and target tests. |
+| `Core Testing/Diagnostics` | fixtures, replay records, assertions, diagnostic helpers | Fixture-cleanup and replay tests. |
+| `Core Networking` | sockets, DNS, poller integration, broker examples | Timeout, cancellation, readiness, and backpressure tests. |
+| `Core Codecs` | JSON/CBOR foundation and admitted codecs | Parser, fuzz, corpus, and resource-limit tests. |
+| `Core Crypto Policy` | admitted secure-random and crypto wrapper policy | External vectors, advisory policy, and review evidence. |
+| `Extended Protocols` | separately admitted higher-level systems modules | Protocol-specific evidence and target support. |
+
+> Trace: D305, D392, D481, D501
+> Covers: Full implementations claim explicit stdlib tiers, and the batteries-included cold-start ladder has stable admission evidence for each tier.

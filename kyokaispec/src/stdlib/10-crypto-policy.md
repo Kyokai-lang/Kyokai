@@ -8,24 +8,24 @@ Cryptography is not where Kyokai gets to show off. It is where the language has 
 
 ## Admission Rule
 
-`Kyokai.Crypto` may include only named modern algorithms, modes, protocols, key derivation functions, hashes, MACs, signatures, password hashing schemes, and random constructions with external specifications, published vectors, and documented security properties. Kyokai does not invent cryptographic primitives for the standard library.
+`Kyokai.Crypto` includes only named modern algorithms, modes, protocols, key derivation functions, hashes, MACs, signatures, password hashing schemes, and random constructions with external specifications, published vectors, and documented security properties. Kyokai does not invent cryptographic primitives for the standard library.
 
 > Trace: D229, D231
 > Covers: Crypto admission requires external specification and rejects invented primitives.
 
-Deprecated, broken, legacy, or compatibility-only cryptography may exist only in explicitly named compatibility modules with warning metadata. Compatibility crypto is not imported by ordinary prelude-like surfaces and is never presented as the modern default.
+Deprecated, broken, legacy, or compatibility-only cryptography is permitted only in explicitly named compatibility modules with warning metadata. Compatibility crypto is not imported by ordinary prelude-like surfaces and is never presented as the modern default.
 
 > Trace: D229, D231, D243
 > Covers: Legacy crypto is isolated and warned.
 
 ## Implementation Policy
 
-FFI-backed crypto is allowed and often preferred when wrapping a mature reviewed library. A native Kyokai implementation is admissible only with review evidence appropriate to the primitive's risk, official or de facto standard test vectors, documented side-channel claims, and conformance tests that protect those claims where tooling can observe them.
+FFI-backed crypto is admitted when its admission record identifies a mature reviewed library and shows that wrapping that library provides stronger evidence than a fresh native implementation. Native Kyokai crypto is admitted only with review evidence appropriate to the primitive's risk, official or de facto standard test vectors, documented side-channel claims, and conformance tests for every tooling-observable claim. Neither implementation strategy receives default preference without that evidence record.
 
 > Trace: D230-D231
 > Covers: Crypto can be FFI-backed or native only when the trust evidence fits the risk.
 
-Pure Kyokai memory safety is not a crypto audit. A native implementation must still address timing behavior, cache behavior where relevant, key erasure, randomness quality, algorithm agility, invalid-input handling, and misuse resistance.
+Pure Kyokai memory safety is not a crypto audit. A native implementation must still address timing behavior, cache behavior when the algorithm uses those facts, key erasure, randomness quality, algorithm agility, invalid-input handling, and misuse resistance.
 
 > Trace: D85, D231
 > Covers: Crypto contracts include side-channel and misuse concerns beyond ordinary memory safety.
@@ -39,7 +39,7 @@ Every crypto API family publishes the common stdlib contract fields plus crypto-
 
 | API Family | Ownership | Allocation | Failure | Capabilities | Linearity | Tests | Trace |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Random/entropy | Mutably borrows `RandomCapability`. | Output buffers borrowed; owned bytes require allocator. | Entropy failure returns typed error. | `RandomCapability`. | No secret duplication unless API says. | OS failure injection, statistical sanity, vector where applicable. | D231 |
+| Random/entropy | Mutably borrows `EntropyCapability`. | Output buffers borrowed; owned bytes require allocator. | Entropy failure returns typed error. | `EntropyCapability`. | No secret duplication unless the API contract explicitly admits a named copy operation. | OS failure injection, statistical sanity, and vectors for every admitted deterministic construction. | D231 |
 | Symmetric encryption | Borrows or consumes key/nonce/message by contract. | Output buffer explicit; owned output uses allocator. | Authentication failure is data; invalid sizes are typed errors or TPOE as stated. | RNG only for APIs that create nonces/keys. | Keys and secret buffers are linear where ownership matters. | official vectors, tamper tests, nonce misuse diagnostics. | D229, D231 |
 | Hash/MAC/KDF | State values own internal context. | Streaming state allocation explicit. | Invalid parameters typed; impossible states rejected by type or TPOE. | RNG only for salt/key generation helpers. | Secret keys/password material has cleanup contract. | official vectors, streaming/chunking equivalence. | D229, D231 |
 | Public-key signatures/KEM | Keys are owned values or borrowed views by contract. | Encoded forms take allocator if owned. | Verification failure is data, not fatal. | RNG for generation/signing where algorithm requires it. | Private keys are linear or explicitly copy-restricted. | official vectors, malformed input, serialization round trips. | D229, D231 |
@@ -74,3 +74,12 @@ RIIK does not mean pretending a fresh implementation is wise because it is ours.
 
 > Trace: D230-D231
 > Covers: Crypto policy keeps native ambition subordinate to external standards, vectors, side-channel contracts, and review.
+
+## Entropy, Advisories, And Minimum-Safe Versions
+
+Secure random APIs receive `EntropyCapability` or an admitted narrowed secure-random value. Deterministic PRNGs and test fixtures never satisfy secure-random parameters. Crypto admission records state entropy source, reseed policy, blocking or unavailable behavior, algorithm identity, target support, review status, and failure mapping.
+
+Security advisories record identifier, affected modules and versions, severity vocabulary, patched versions, minimum safe version when one exists, source links, and publication authority. Compatibility modules for legacy crypto carry warnings and are excluded from preferred imports. Patch policy does not silently rewrite dependency resolution; audit reports advisory state and explicit project policy decides whether affected versions are rejected.
+
+> Trace: D421, D431
+> Covers: Crypto entropy, deterministic-test separation, advisory metadata, patch policy, and minimum-safe versions are explicit.

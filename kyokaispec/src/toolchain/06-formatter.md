@@ -10,7 +10,7 @@ The formatter is where style stops being a debate in every doorway. Kyokai has o
 
 `kyokai fmt` formats `.kyo` and `.kai` source files. It is deterministic, idempotent, zero-configuration, and parse-preserving. Running it twice on the same source must produce byte-identical output the second time. Formatting must not change program semantics, module identity, comments' attachment to declarations, documentation comments' meaning, or diagnostic suppression scope.
 
-> Trace: D25, D29, D52, D83
+> Trace: D25, D29, D52, D83, D442-D443
 > Covers: Formatting is stable, semantic-preserving, and safe to automate.
 
 The formatter must parse the source according to the package edition when a manifest context is available. If no manifest context is available, it may use the current default edition only for standalone file formatting, and it must report which edition was used in verbose or JSON mode.
@@ -18,7 +18,7 @@ The formatter must parse the source according to the package edition when a mani
 > Trace: D25, D105
 > Covers: Formatting is edition-aware and reports standalone assumptions.
 
-A file with parse errors is not formatted by default. The formatter may emit diagnostics and leave the file unchanged. A future recovery mode may format valid subtrees only if it is explicitly selected and clearly reports that the output is not a full canonical format.
+A file with parse errors is not formatted by default. The formatter emits diagnostics and leaves the file unchanged. A workspace or package enables partial recovery with `fmt.recover_partial = true`. Recovery formats parser-confirmed subtrees, leaves invalid ranges byte-for-byte unchanged, reports every untouched range, and marks the result noncanonical. CLI recovery writes files only with explicit `--write-partial`; otherwise it prints a preview or returns LSP workspace edits. `kyokai fmt --check` remains strict unless its manifest policy explicitly admits partial formatting for that command.
 
 > Trace: D25, D29
 > Covers: The formatter does not guess through invalid syntax by default.
@@ -35,12 +35,12 @@ The formatter owns whitespace around operators, delimiters, declarations, blocks
 > Trace: D25
 > Covers: Whitespace layout is formatter-owned.
 
-The formatter must preserve ordinary comments and documentation comments. It may move a comment only when the comment remains attached to the same syntax node or trivia position by the formatter's documented attachment rules. It must not reflow code examples inside documentation comments unless a future doc-format mode explicitly opts in.
+The formatter must preserve ordinary comments and documentation comments. It may move a comment only when the comment remains attached to the same syntax node or trivia position by the formatter's documented attachment rules. It must not reflow code examples inside documentation comments. A documentation-format mode is absent from stable Kyokai until a separate accepted D-point defines one.
 
 > Trace: D25, D218
 > Covers: Formatting preserves comment and documentation meaning.
 
-The formatter must not sort imports unless an import-sorting mode is specified by this chapter. Phase 12 does not define import sorting. Preserving import order avoids surprising comments, grouping, and review diffs while the language already treats import-order conflict resolution as illegal.
+The formatter preserves import order unless workspace or package policy sets `fmt.sort_imports = true`. The enabled policy applies the deterministic grouping and byte-stable ordering rule defined below. Import sorting never changes visibility, lookup, shadowing, comment attachment, or import meaning.
 
 > Trace: D25, D78, D214
 > Covers: Import order is preserved because conflict semantics do not depend on order.
@@ -53,6 +53,7 @@ The formatter must not sort imports unless an import-sorting mode is specified b
 | `kyokai fmt --check` | Report files that would change and exit nonzero when any change is needed. | D25, D225 |
 | `kyokai fmt --stdin --filename <path>` | Read one file from stdin, infer context from filename when possible, write formatted source to stdout. | D25, D105 |
 | `kyokai fmt --diff` | Print a deterministic textual diff instead of editing files. | D25, D83 |
+| `kyokai fmt --write-partial` | Write parser-confirmed subtree formatting only when `fmt.recover_partial = true`; leave invalid ranges byte-for-byte unchanged and report noncanonical output. | D443 |
 | `kyokai fmt --format json` | Emit machine-readable file status and diagnostics. | D25, D29 |
 
 > Trace: D25, D29, D78, D83, D105, D225
@@ -70,7 +71,7 @@ In package scope, `kyokai fmt` selects all `.kyo` and `.kai` files under the pac
 > Trace: D25, D78, D83
 > Covers: Formatter file selection follows package/workspace/module roots deterministically.
 
-Files outside module roots are not formatted unless passed explicitly by path. Explicit paths must still use a recognized Kyokai source extension unless a future chapter admits additional source-like files.
+Files outside module roots are not formatted unless passed explicitly by path. Explicit paths must still use a recognized Kyokai source extension. Additional source-like extensions are absent from stable Kyokai until a separate accepted D-point defines them.
 
 > Trace: D25, D52, D78
 > Covers: Formatter discovery does not wander through unrelated repository files.
@@ -90,7 +91,16 @@ If a formatting choice would obscure a language boundary, the boundary wins. Ter
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-A formatter should not be clever in the places where the language is already doing heavy work. Make the code clean. Leave the meaning alone. Let review talk about ownership, contracts, and names instead of arguing over how far a `where` clause leaned to the right.
+A formatter does not get clever in the places where the language is already doing heavy work. Make the code clean. Leave the meaning alone. Let review talk about ownership, contracts, and names instead of arguing over how far a `where` clause leaned to the right.
 
 > Trace: D25
 > Covers: Kyokai formatting removes style noise without touching semantics.
+
+## Import Sorting And Broken-Code Recovery
+
+The default formatter preserves import order. A workspace or package enables sorting with `fmt.sort_imports = true`. Sorting groups imports by standard library, same workspace, external package, and target-gated imports. Within each group, it sorts by canonical package path and imported item name using byte-stable ordering. It preserves comment attachment and never changes visibility, lookup, shadowing, or import meaning.
+
+Formatting parse-invalid source is off by default. A workspace or package enables `fmt.recover_partial = true`; CLI file writes additionally require `--write-partial`. Recovery formats only parser-confirmed subtrees, leaves unknown spans byte-for-byte unchanged, prints every untouched span, and reports that output is not canonical until the file parses successfully. `fmt --check` fails for recovery output.
+
+> Trace: D442-D443, D482
+> Covers: Canonical import sorting and opt-in noncanonical parse-error subtree recovery are explicit formatter policies.

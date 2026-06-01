@@ -37,10 +37,10 @@ Cancellation is cooperative. Kyokai does not use hidden thread cancellation, sig
 > Trace: D91/D237, D93/D234
 > Covers: Blocking, cancellation, and deadlines are visible API choices.
 
-This is a place where honesty beats cleverness. An operation that can block says so. An operation that can be cancelled says how. An operation waiting on multiple channels uses `select ... pick;` with one selected ready arm and no source-order priority guarantee.
+This is a place where honesty beats cleverness. An operation that can block says so. An operation that can be cancelled says how. An operation waiting on multiple channels uses `select ... pick;` with one selected ready arm and no source-order priority guarantee. External readiness waits use the separate `wait ... wake;` surface over Poller, timer, cancellation, signal, or process readiness tokens. Readiness observation does not transfer a channel payload.
 
-> Trace: D92/D258
-> Covers: Multi-channel waiting has a specified selection model.
+> Trace: D92/D258, D342
+> Covers: Multi-channel selection and external readiness waiting have separate visible constructs and specified selection models.
 
 ## Locks And Atomics
 
@@ -68,3 +68,13 @@ Kyokai's concurrency model is intentionally less glamorous than a hidden executo
 
 > Trace: D90-D101, D146, D183-D184, D212
 > Covers: Concurrency keeps ownership, synchronization, blocking, and authority sharing explicit.
+
+## Brokers, Fairness, And Backpressure
+
+[Rikona Kurasaki / Mjoyufull]
+A networking library does not need to invent a scheduler to be fast. Kyokai keeps pollers, timers, sockets, cancellation, deadlines, and SPSC delivery visible, then builds broker tasks over those primitives when many clients need one owner. Backpressure remains a contract: capacity, wakeup, close, drain, timeout, and partial progress are written down.
+
+Fairness is written down too. Tier-1 `RwLock` uses a FIFO fairness queue so a stream of new readers does not starve an earlier writer. Shared spawn capture stays closed to admitted synchronized primitives. New primitives earn entry through a public rule, stdlib admission record, `.koi` transfer facts, and conformance tests.
+
+> Trace: D411, D447-D448, D457a, D471, D473, D498
+> Covers: Poller-backed brokers, fair locks, closed synchronized sharing, and explicit backpressure provide scalable concurrency without hidden runtimes.

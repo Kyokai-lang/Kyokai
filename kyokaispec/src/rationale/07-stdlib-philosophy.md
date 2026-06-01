@@ -61,3 +61,13 @@ The stdlib philosophy is this: make ordinary systems work possible without makin
 
 > Trace: D85, D152, D229
 > Covers: Kyokai's stdlib exposes semantic behavior instead of hiding it behind convenience.
+
+## Cold Start As A Ladder
+
+[Rikona Kurasaki / Mjoyufull]
+A language cannot ask people to write serious systems code while making them rebuild strings, buffers, paths, testing, sockets, DNS, clocks, random sources, and structured data before the first useful program. Kyokai treats that cold start as project work, not as a reason to weaken library admission.
+
+The stdlib grows through named tiers. Each tier carries contracts, target facts, examples, tests, fuzzing where parsers or protocols need it, numerical oracles where approximation matters, and tracked foreign bridges where native work is not ready. Batteries included does not mean mystery included.
+
+> Trace: D392, D501, D517
+> Covers: The stdlib cold-start ladder combines broad systems usefulness with explicit tier admission and evidence.

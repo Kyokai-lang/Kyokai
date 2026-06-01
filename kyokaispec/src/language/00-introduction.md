@@ -5,7 +5,7 @@ Kyokai is a systems programming language built around explicit boundaries: owner
 > Trace: D1, D5, D145
 > Covers: Kyokai uses the `Kyokai.*` namespace, is a hard fork rather than a light rename of Austral, and is designed first for C programmers who want modern safety and codebase readability.
 
-The Kyokai specification is a family of normative documents, but the language specification itself is not an addendum to the Austral specification. A reader should not have to open Austral's spec to understand the Austral-shaped parts of Kyokai, though Fernando Borretti's writing remains important source material for the fork. When Kyokai keeps an Austral rule, this specification restates that rule here, checks it against Kyokai's accepted shape, and marks any exact or near-exact wording as source text from Borretti's Austral specification.
+The Kyokai specification is a family of normative documents, but the language specification itself is not an addendum to the Austral specification. A reader does not need to open Austral's spec to understand the Austral-shaped parts of Kyokai, though Fernando Borretti's writing remains important source material for the fork. When Kyokai keeps an Austral rule, this specification restates that rule here, checks it against Kyokai's accepted shape, and marks any exact or near-exact wording as source text from Borretti's Austral specification.
 
 > Trace: D5, D86, D155
 > Covers: Kyokai is a hard fork that preserves compatible Austral rules in-place when they still apply, and the Kyokai language spec must be self-contained rather than requiring the reader to consult the Austral spec for inherited behavior.
@@ -15,7 +15,7 @@ The Kyokai specification family includes the core language specification, the co
 > Trace: D85, D86, D152, D229
 > Covers: Kyokai has separate normative language, toolchain, standard-library, rationale, and appendix materials; standard-library APIs require explicit semantic contract fields, the stdlib is a core project commitment, and stdlib admission requires contracts, edge-case rules, tests or oracles, and compatibility boundaries.
 
-When a Kyokai rule is written in the normative spec, that spec text is the authority for the rule. Until a rule is extracted, `kyokaidecided.md` is the accepted public shape, `Kyokaishape.md` tracks live public decisions, and root `kyokaiplan.md` remains the older full decision archive and rationale source. `phase.md` gives implementation order; it does not define language semantics. If implementation behavior disagrees with the normative spec, the disagreement is a bug in the implementation, the spec, or both, and must be resolved explicitly.
+When a Kyokai rule is written in the normative spec, that spec text is the authority for the rule. Until a rule is extracted, `kyokaidecided.md` is the accepted public shape, public PRs/MRs carry live decision proposals, and `Kyokaishape.md` acts as an index, archive, migration ledger, or temporary holding area. `phase.md` gives implementation order; it does not define language semantics. If implementation behavior disagrees with the normative spec, the disagreement is a bug in the implementation, the spec, or both, and must be resolved explicitly.
 
 > Trace: D86, D155
 > Covers: Accepted behavior belongs in the normative language or toolchain spec, the spec/compiler relationship is governed by a public decision process, and divergence between accepted spec behavior and compiler behavior is not allowed to drift silently.
@@ -33,9 +33,20 @@ Kyokai does not hide semantically important work. The compiler may insert or com
 Text from Fernando Borretti's Austral specification may be used when it is technically correct for Kyokai, still reads well, and is marked as source text from Borretti's Austral work. New Rikona Kurasaki / Mjoyufull prose is the default for Kyokai-owned explanation and rationale. Paragraphs that combine Kyokai wording with Austral source wording must say which part comes from Borretti's Austral work instead of presenting Borretti as a Kyokai author. Attribution credits prose origin only; it does not make source wording normative unless the paragraph also states a Kyokai rule that has been checked against accepted Kyokai behavior.
 
 > Trace: Attribution policy
-> Covers: Borretti wording is marked as source text from the Austral specification, Kyokai wording is authored under Kyokai, and attribution is separate from semantic authority; internal writing-style notes are not public trace sources.
+> Covers: Borretti wording is marked as source text from the Austral specification, Kyokai wording is authored under Kyokai, and attribution is separate from semantic authority.
 
 The Kyokai specification keeps the existing FSF documentation license carried by the inherited spec tree: GNU Free Documentation License 1.3, included in the license appendix. This documentation license is separate from the code license boundary for Kyokai-owned compiler, toolchain, runtime, standard-library, startup, support, and target helper code.
 
 > Trace: Appendix A, D263
 > Covers: Kyokai spec prose remains under the existing GNU Free Documentation License 1.3 documentation license; the separate Kyokai code license boundary still distinguishes compiler/toolchain code from target-linked runtime, stdlib, and helper code.
+
+## Conformance Claims And Evidence Labels
+
+Kyokai safety claims name a scope tier and an evidence state. Scope tier is one of `SafeCore`, `SafeConcurrent`, `SafeFFIWrapped`, `UnsafeModule`, or `BackendConforming`. `SafeCore` covers single-task checked language semantics. `SafeConcurrent` adds the accepted task, channel, lock, atomic, Poller, cancellation, and happens-before rules. `SafeFFIWrapped` covers safe wrappers only while their unsafe contracts and capability requirements hold. `UnsafeModule` labels raw unsafe, FFI, assembly, volatile/MMIO, callback, dynamic-loading, pointer, and target-intrinsic surfaces. `BackendConforming` labels lowering checked against the selected target/profile backend contract.
+
+Evidence state is one of `designed`, `specified`, `mechanized`, `tested`, or `conformance_checked`. A stronger evidence claim is illegal until its named artifact exists. Scope and evidence are separate facts. A full implementation satisfies every stable rule in its declared support tier. A target-gated surface is present only when the selected structured target contract admits it. An experimental surface is non-default, explicitly named, excluded from stable compatibility, and rejected unless the project opts into that exact experiment.
+
+Normative text does not hand stable semantics to unnamed work. A rule is stated here, routed to a named target contract or policy key, labeled experimental, or absent.
+
+> Trace: D367, D477, D479, D480, D481, D482, D483, D484, D485, D486, D487, D508
+> Covers: Public claims use named evidence tiers, full implementations satisfy their declared stable tier, target gates and policy choices are explicit, experiments are non-default, and stable behavior is not deferred through vague wording.

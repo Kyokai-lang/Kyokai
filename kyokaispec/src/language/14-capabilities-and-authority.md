@@ -3,7 +3,7 @@
 [Rikona Kurasaki / Mjoyufull]
 Authority in Kyokai is not a smell in the air. It is not something a function wakes up owning because it happens to run inside the same process. It is a value with a boundary around it. If code wants the filesystem, the clock, the network, a process handle, an unsafe operation, or a raw device edge, the authority has to cross the line in source.
 
-That is the point. The reader should be able to look at a signature and see which doors the code can open. A dependency that never receives the key cannot quietly walk through the building at night.
+That is the point. The reader can look at a signature and see which doors the code can open. A dependency that never receives the key cannot quietly walk through the building at night.
 
 > Trace: D20, D48, D67, D162, D211, D212, D255
 > Covers: External authority is tracked through explicit capability values, not ambient process permission.
@@ -42,19 +42,19 @@ Capability values are `Linear` unless a specific built-in capability contract sa
 > Trace: D195, D255
 > Covers: Authority is single-owner by default and follows linear checking.
 
-A capability declaration may state task-boundary metadata such as `task_transfer` or `task_local`. If no safe transfer contract exists for a linear capability, safe code may not move it to another task.
+A capability is `task_local` unless its declaration or target contract records an explicit task-transfer contract. A task-transfer capability contract states the underlying authority representation, target support, thread-affinity rule, move behavior, and audit identity. Without that contract, safe code must not move the capability to another task.
 
 > Trace: D248, D255
 > Covers: Capability thread affinity and transfer are explicit declaration or contract facts.
 
-Unsafe modules do not gain the right to construct capabilities directly. `pragma Unsafe_Module` may expose operations that use raw host APIs, but it may not manufacture sealed capability values from raw bits, empty records, pointer casts, or representation tricks.
+Unsafe modules do not gain the right to construct capabilities directly. `pragma Unsafe_Module` may expose operations that use raw host APIs, but it must not manufacture sealed capability values from raw bits, empty records, pointer casts, or representation tricks.
 
 > Trace: D20, D245, D255
 > Covers: Unsafe authority does not include capability forgery.
 
 ## Root Capability
 
-At process startup, the runtime may mint a single `RootCapability` value for an entrypoint that declares it. An entrypoint may also choose to take no root authority.
+At process startup, the runtime mints exactly one `RootCapability` value when the selected entrypoint declares a root-authority parameter. An entrypoint with no root-authority parameter receives no `RootCapability`, and safe source cannot acquire one later.
 
 > Trace: D48/D162, D255
 > Covers: Root authority originates only at runtime bootstrap and only when the entrypoint asks for it.
@@ -69,10 +69,10 @@ The root capability may be borrowed to derive narrower capabilities, moved to an
 > Trace: D89, D195, D255
 > Covers: Root authority obeys ordinary linear movement and consumption.
 
-A program should split root authority early into narrow authority values and pass only those values to the code that needs them. This is a design rule for safe APIs: narrow capabilities are preferred over broad authority.
+Safe APIs split root authority into narrow authority values and pass only the values required by the operation. Broad authority in a public API requires a contract reason that a narrower capability cannot satisfy.
 
 > Trace: D85, D211, D255
-> Covers: Capability APIs should minimize authority by construction.
+> Covers: Capability APIs minimize authority by construction.
 
 ## Acquire, Derive, Split, And Surrender
 
@@ -130,7 +130,7 @@ A capability may be captured by value into `spawn` only if its declaration or st
 > Trace: D88, D235, D248
 > Covers: Owned task transfer of authority is explicit and failure-safe.
 
-A capability marked `task_local` may not be captured by value into a child task, sent through a channel, or transferred to another task by safe code. A thread-affine host resource must stay with its owning task or be accessed through an explicit broker or synchronized wrapper whose contract says how that is safe.
+A capability marked `task_local` must not be captured by value into a child task, sent through a channel, or transferred to another task by safe code. A thread-affine host resource must stay with its owning task or be accessed through an explicit broker or synchronized wrapper whose contract says how that is safe.
 
 > Trace: D248, D255
 > Covers: Thread-affine authority cannot cross task boundaries silently.
@@ -140,7 +140,7 @@ Shared capture by immutable borrow is not generally available for capabilities. 
 > Trace: D88, D100, D212, D248
 > Covers: Capabilities do not become shared-safe merely because they are effectful.
 
-If multiple tasks need one raw destination, the default safe pattern is a broker task that owns the authority-bearing handle and receives messages over channels. A synchronized writer type may exist only as a separate explicit abstraction with documented interleaving guarantees.
+If multiple tasks need one raw destination, the default safe pattern is a broker task that owns the authority-bearing handle and receives messages over channels. The baseline raw-destination contract includes no synchronized writer. Adding a synchronized writer requires a separately admitted named abstraction with documented ownership, interleaving, blocking, cancellation, and failure guarantees.
 
 > Trace: D212, D236
 > Covers: Multi-task authority use is brokered or separately synchronized, not hidden inside raw handles.
@@ -157,7 +157,7 @@ Unsafe operations must live behind source-level unsafe contracts that state what
 > Trace: D20, D245
 > Covers: Unsafe contracts are auditable source obligations.
 
-A safe wrapper around unsafe or foreign code must expose a normal Kyokai signature that accounts for authority, ownership, borrowing, failure, allocation, blocking, and platform behavior. The safe wrapper may not hide authority use behind a pure-looking function.
+A safe wrapper around unsafe or foreign code must expose a normal Kyokai signature that accounts for authority, ownership, borrowing, failure, allocation, blocking, and platform behavior. The safe wrapper must not hide authority use behind a pure-looking function.
 
 > Trace: D20/D20a/D20b, D85, D211, D242
 > Covers: Unsafe wrappers translate raw behavior into explicit Kyokai contracts.
@@ -174,7 +174,7 @@ Foreign code is permissionless from Kyokai's point of view. Safe capability guar
 > Trace: D20/D20a/D20b, D73, D242
 > Covers: FFI is an external trust boundary.
 
-A foreign declaration that can touch host resources must be inside an unsafe module and must be wrapped by safe Kyokai APIs that require the relevant capability or authority-bearing handle. Calling raw foreign code is never proof that the caller had authority.
+A foreign declaration that can touch host resources must be inside an unsafe module and must be wrapped by safe Kyokai APIs that require the operation-specific filesystem, environment, process, clock, entropy, terminal, network, signal, dynamic-loader, device, or narrower authority-bearing handle. Calling raw foreign code is never proof that the caller had authority.
 
 > Trace: D20, D67, D211, D245
 > Covers: FFI cannot bypass capability requirements in safe surfaces.
@@ -235,3 +235,27 @@ Signal watching is capability-gated and notification-based. Safe Kyokai exposes 
 | Import an unsafe module and gain its authority | Compile error or ordinary visibility failure; imports do not grant capability values. | D20/D245 |
 | Send a `task_local` capability to a child task | Compile error. | D248 |
 | Share a raw I/O capability across tasks through hidden synchronization | Rejected; use broker or explicit synchronized wrapper. | D212/D236 |
+
+## Visible Bundles, Ceilings, And Sandboxes
+
+Startup authority bundles are ordinary nominal source-visible records constructed explicitly at process entry from `RootCapability` or narrower startup inputs. An admitted bundle field is a concrete authority value or borrowed startup view: arguments, terminal streams, filesystem roots, environment authority, clock authority, entropy authority, process authority, network authority, cancellation or shutdown source, and an allocator only when that bundle declaration names it. Bundle declarations can choose a narrower subset. A bundle is passed, borrowed, stored, split, and surrendered through ordinary Kyokai rules; it appears in `.koi` when a public API mentions it. Libraries take the narrow capability value they need instead of the whole startup bundle. Kyokai rejects `CliApp`, `AppEnv`, ambient context lookup, hidden capability parameters, compiler-passed application state, automatic dependency injection, automatic minting, and implicit allocators.
+
+Public leaf APIs take the narrowest admitted authority. Passing `RootCapability` or a broad application bundle into a leaf operation produces an overbroad-authority diagnostic unless the operation is an explicit authority-construction boundary.
+
+A package manifest declares an authority ceiling for build generators, scratch execution, tests, playground execution, and linked package surfaces. Link-time and audit checks reject a dependency graph whose required authority exceeds the selected ceiling. A ceiling restricts authority; it never grants authority.
+
+Generated code, bindgen, header probing, build-time generators, evaluation, REPL sessions, and playground execution run under explicit sandbox profiles. Each profile names filesystem roots, network policy, process policy, terminal policy, environment keys, clocks, randomness, CPU, memory, output, and duration budgets.
+
+> Trace: D310, D381, D398, D409-D412, D421-D422, D426, D462, D465, D489, D492, D499
+> Covers: Nominal authority bundles, narrow leaf authority, manifest ceilings, link-time confused-deputy rejection, and explicit sandbox profiles are part of the authority model.
+
+## Attenuation, Resource Limits, And TLS
+
+Capability attenuation is one-way. An attenuation API names the stronger sealed input, weaker sealed output, allowed operations, lifetime relationship, task-transfer classification, closure or revocation behavior, and failure behavior. It cannot grant authority, widen lifetime, widen thread safety, widen target availability, bypass package ceilings, or bypass unsafe audit. `.koi`, generated docs, and audit output record the attenuation edge.
+
+Semaphores, permits, bounded task slots, bounded connection slots, and rate-limit tokens are ordinary linear standard-library capability or synchronization values. Their APIs state acquire, release, try-acquire, deadline, cancellation, fairness, and failure behavior. A limit value does not appear through ambient runtime policy and cannot silently widen itself.
+
+Safe thread-local storage uses `TlsCapability` or a narrower derived capability. `ThreadLocalKey[T]` owns access to per-thread slots through explicit `createKey`, `set`, `getBorrow`, `getBorrowMut`, `take`, `clear`, and `destroyKey` operations or their exact module-local names. A target without declared TLS support rejects import or use before lowering. Storing a `Linear` value moves ownership into the current thread's slot; taking it moves ownership back out. Borrowing it creates an ordinary access-bounded borrow. Recursive initialization, nested access, destructor reentry, thread exit, key destruction, and cleanup through `Cleanable[T]` are API-contract facts. Safe `thread_local var` syntax and macro-defined TLS globals do not exist.
+
+> Trace: D289, D310, D326
+> Covers: Attenuation edges, bounded-resource values, and keyed capability-gated TLS are explicit sealed APIs rather than ambient authority.

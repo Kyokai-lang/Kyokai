@@ -46,7 +46,7 @@ Documentation comments attach to the next declaration or file/module item accord
 ## Identifiers And Module Names
 
 [Rikona Kurasaki / Mjoyufull]
-Identifiers stay narrow on purpose. A language about boundaries should not begin by making the spelling of a name depend on invisible normalization. Kyokai identifiers are ASCII and case-sensitive.
+Identifiers stay narrow on purpose. A language about boundaries does not begin by making the spelling of a name depend on invisible normalization. Kyokai identifiers are ASCII and case-sensitive.
 
 ```ebnf
 identifier = letter, {letter | digit | "_"};
@@ -70,7 +70,7 @@ Functions, variables, parameters, fields, and local bindings use `camelCase`. Ty
 > Trace: D11a, D11b
 > Covers: Kyokai keeps the Austral naming convention while adding ownership-signaling naming patterns as compiler-warned convention for APIs.
 
-No still-live binding may be shadowed by another local binding, parameter, pattern binding, import, or declaration in the same lookup scope. Imports may not introduce names that collide after explicit `as` renaming. Built-in language names cannot be shadowed by imports.
+No still-live binding may be shadowed by another local binding, parameter, pattern binding, import, or declaration in the same lookup scope. Imports must not introduce names that collide after explicit `as` renaming. Built-in language names cannot be shadowed by imports.
 
 > Trace: D60, D214
 > Covers: Kyokai rejects variable shadowing and import-order-dependent name meaning, and built-in names remain protected from imported collisions.
@@ -85,7 +85,7 @@ Ok Err Some None and as audit band bnot body borrow bor break build bxor capabil
 case comptime constant continue debug defer do else ensure errdefer esac extern
 false fi for foreign function generator if import in instance internal is join
 let mon module nil not od of or packed panic pick pragma record require return
-rotl rotr seal select shl shr spawn spec static static_assert taskgroup then
+receiver rotl rotr seal select shl shr spawn spec static static_assert taskgroup then
 todo true type alias typeclass union unreachable unsafe var when where while
 with yield
 ```
@@ -128,12 +128,12 @@ oct digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7";
 > Trace: D135, D261
 > Covers: Kyokai numeric literals use `_` separators and `0x`/`0b`/`0o` base prefixes, replacing Austral's apostrophe separators and `#x`/`#b`/`#o` prefixes.
 
-`_` is a digit separator only when it appears between two digits in the same digit run. It may not appear at the start or end of a literal, immediately after a base prefix, adjacent to a decimal point, adjacent to an exponent marker, or inside a suffix. Apostrophe separators are not Kyokai syntax.
+`_` is a digit separator only when it appears between two digits in the same digit run. It must not appear at the start or end of a literal, immediately after a base prefix, adjacent to a decimal point, adjacent to an exponent marker, or inside a suffix. Apostrophe separators are not Kyokai syntax.
 
 > Trace: D135, D261
 > Covers: Kyokai allows `_` separators only in tightly defined digit positions and rejects apostrophe numeric separators.
 
-Integer suffixes are exactly `i8`, `i16`, `i32`, `i64`, `n8`, `n16`, `n32`, `n64`, and `index`, mapping to `Int8`, `Int16`, `Int32`, `Int64`, `Nat8`, `Nat16`, `Nat32`, `Nat64`, and `Index`. Floating suffixes are exactly `f32` and `f64`, mapping to `Float32` and `Float64`. A suffixed literal has the suffixed type before contextual literal inference. Context may confirm that type, but it may not silently retarget the literal.
+Integer suffixes are exactly `i8`, `i16`, `i32`, `i64`, `n8`, `n16`, `n32`, `n64`, and `index`, mapping to `Int8`, `Int16`, `Int32`, `Int64`, `Nat8`, `Nat16`, `Nat32`, `Nat64`, and `Index`. Floating suffixes are exactly `f32` and `f64`, mapping to `Float32` and `Float64`. A suffixed literal has the suffixed type before contextual literal inference. Context may confirm that type, but it must not silently retarget the literal.
 
 > Trace: D12, D261
 > Covers: Kyokai has a closed numeric literal suffix set and no C-style suffix composition, promotions, or signedness folklore.
@@ -158,17 +158,17 @@ float suffix = "f32" | "f64";
 Kyokai does not make one C-style character token carry three different histories in its mouth. Text, raw text, code points, and bytes are separate literal families.
 
 ```text
-"..."        ordinary escaped String
-"""..."""  raw multi-line String
+"..."        ordinary escaped StaticString
+"""..."""  raw multi-line StaticString
 'A'          Nat32 Unicode scalar value
 b'A'         Nat8 byte
-static "..." StaticString bridge expression
+static "..." explicit StaticString spelling
 ```
 
 > Trace: D54, D120, D165
-> Covers: Kyokai has distinct ordinary string, raw string, code-point, byte, and explicit `static "..."` compile-time text forms.
+> Covers: Plain escaped, raw multiline, and explicit `static "..."` text literals produce `StaticString`; code-point and byte literals remain separate scalar families.
 
-An ordinary string literal produces a `String` and processes escapes. A raw multi-line string literal produces a `String`, processes no escapes, and preserves the content between its delimiters exactly. A code-point literal produces `Nat32` and must denote exactly one Unicode scalar value after escape processing; surrogate code points are illegal. A byte literal produces `Nat8` and must denote exactly one byte after escape processing; non-ASCII byte values require escapes such as `b'\xFF'`.
+An ordinary string literal produces a `StaticString` and processes escapes. A raw multi-line string literal produces a `StaticString`, processes no escapes, and preserves the content between its delimiters exactly. A code-point literal produces `Nat32` and must denote exactly one Unicode scalar value after escape processing; surrogate code points are illegal. A byte literal produces `Nat8` and must denote exactly one byte after escape processing; non-ASCII byte values require escapes such as `b'\xFF'`.
 
 > Trace: D54, D30a, D165
 > Covers: `String` is UTF-8 text, byte values remain separate, code-point literals are Unicode scalar values, and Kyokai has no platform-dependent `char` literal family.
@@ -176,17 +176,17 @@ An ordinary string literal produces a `String` and processes escapes. A raw mult
 The standard escape family is `\\`, `\"`, `\'`, `\n`, `\r`, `\t`, `\0`, `\xNN`, and `\u{HEX...}`. `\xNN` names exactly two hexadecimal digits. `\u{HEX...}` names one Unicode scalar value. An escape that would produce an invalid code point, invalid byte, or invalid UTF-8 contribution for the target literal family is rejected.
 
 > Trace: D54, D87
-> Covers: Escape processing is closed and checked, with invalid literal contents rejected rather than left implementation-defined.
+> Covers: Escape processing is closed and checked, with invalid literal contents rejected rather than delegated to private implementation choice.
 
-`static "..."` is not a separate token. It is a grammar form that applies the `static` keyword to an ordinary escaped string literal and produces a `StaticString`. Ordinary string literals remain runtime `String` in all contexts; Kyokai does not contextually reinterpret them as `StaticString`.
+`static "..."` is an explicit equivalent spelling for a static text literal. A plain escaped string literal and a raw multi-line string literal both produce `StaticString`; neither allocates or contextually becomes an owning `String`. `literal.toStringIn(allocator)` creates owning `String` storage and returns `Result[String, AllocError]`.
 
 > Trace: D120
-> Covers: Compile-time text uses explicit `static "..."` and does not retarget ordinary string literals through context.
+> Covers: Text literals produce static artifact-backed views and do not become owning strings through context.
 
 ## Operators, Delimiters, And Terminators
 
 [Rikona Kurasaki / Mjoyufull]
-Kyokai punctuation is small enough that the reader should be able to hold it in their head without guessing which symbol secretly means authority, movement, or control flow.
+Kyokai punctuation is small enough that the reader can hold it in their head without guessing which symbol secretly means authority, movement, or control flow.
 
 ```text
 ( ) [ ] { }
@@ -222,3 +222,25 @@ The lexer rejects inherited or neighboring-language spellings that would create 
 
 > Trace: D10, D54, D63, D65, D108, D135, D179, D205, D261
 > Covers: Kyokai rejects obsolete Austral spellings and extra neighboring-language surfaces when accepted Kyokai syntax already gives one explicit form.
+
+## Source Byte Contract
+
+A Kyokai source file is UTF-8. A UTF-8 byte-order mark is rejected, including as the first three bytes of a source file. A Unix shebang is legal only as the first two bytes `#!` on line 1 of an executable-entry `.kai` file in an executable-source command mode. The shebang ends at the first line terminator and is excluded from Kyokai tokens. A shebang in a `.kyo` file, a non-entry `.kai` file, or any later line is a compile-time error.
+
+The lexer accepts LF and CRLF line endings and normalizes both to one logical newline. A bare CR is a source-encoding diagnostic. Source spans record byte offsets into the original file plus one-based logical line and Unicode-scalar display columns. Terminal rendering can add display-width columns as presentation data, but byte offsets and logical scalar columns remain the machine contract. Any display-width column is derived with the toolchain's pinned Unicode-data version. The toolchain identity and diagnostic machine metadata record that version whenever display-width columns are emitted.
+
+A documentation comment attaches to the next attachable declaration without crossing a declaration boundary that prevents attachment. An unattached documentation comment is a compile-time error. Its diagnostic identifies the comment span, the attachment failure, and the repair choices: move it to an attachable declaration or convert it into an ordinary comment.
+
+A plain text literal is immutable compile-time UTF-8 storage. It is `StaticString`, is `Free`, performs no runtime allocation, stores no allocator identity, and remains valid for the program artifact lifetime. `literal.toStringIn(allocator)` creates owned mutable `String` storage and returns `Result[String, AllocError]`.
+
+| Surface | Static rule | Runtime behavior | Failure and diagnostic |
+| --- | --- | --- | --- |
+| UTF-8 source | Decode the entire file as UTF-8 before tokenization. | None. | Invalid byte sequence: source-encoding diagnostic with byte offset. |
+| UTF-8 BOM | Reject in every position. | No tokenization occurs. | Source-encoding diagnostic with removal fix. |
+| Entry shebang | Accept only on the first logical line of executable-entry `.kai`. | Ignored by tokenization. | Other placement: file-role diagnostic. |
+| CRLF | Normalize to one logical newline while preserving original byte spans. | None. | Bare CR: source-encoding diagnostic. |
+| Doc comment | Attach to the next legal declaration. | None. | Orphan: hard compile-time diagnostic. |
+| Static text literal | Produce `StaticString`. | Read immutable artifact storage. | Invalid escape or invalid UTF-8: literal diagnostic. |
+
+> Trace: D368, D372, D408, D420, D476
+> Covers: Source bytes, BOM, shebangs, newline normalization, machine spans, orphan documentation comments, Unicode-version boundaries, and allocator-independent static text storage are explicit.

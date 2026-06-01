@@ -17,19 +17,25 @@ A profile may contain these fields:
 
 | Field | Type | Required Meaning | Trace |
 | --- | --- | --- | --- |
-| `inherits` | string | Copy unspecified fields from another profile. Cycles are illegal. | D31 |
+| `inherits` | string | Copy fields not written in the current profile from another profile. Cycles are illegal. | D31 |
 | `optimization` | integer `0`, `1`, `2`, or `3` | Backend optimization level. It must not disable safety checks. | D31, D73 |
 | `debug_info` | boolean | Emit source/debug metadata for supported targets. | D27 |
 | `strip` | boolean | Remove symbols/debug sections only after required diagnostics/provenance artifacts are produced. | D27, D225 |
 | `lto` | boolean | Enable link-time optimization when supported by the selected backend/target. | D31 |
 | `identical_code_folding` | boolean | Permit profile-controlled folding of proven identical generated code. | D200 |
-| `panic_backtrace` | boolean | Include runtime backtrace metadata for `panic`/fatal reporting when the target supports it. | D84 |
+| `panic_backtrace` | string: `off`, `short`, or `full` | Select fatal backtrace detail after CLI precedence and before admitted environment override. | D84, D343 |
+| `environment_backtrace_override` | boolean | Permit hosted `KYOKAI_BACKTRACE` override. Reproducible profiles default to `false`. | D343 |
+| `main_stack_size` | byte size | Override the selected target default main stack size within its declared range. | D262, D308, D343 |
+| `task_stack_size` | byte size | Override configurable task stack default within the target range. | D308, D343 |
+| `guard_size` | byte size | Select guard size where the target stack contract permits override. | D262, D308, D343 |
+| `frame_pointer` | string policy | Select the recorded frame-pointer policy used by code generation and debug identity. | D27, D308 |
+| `sanitizers` | array of strings | Select sanitizer instrumentation admitted by the target/backend contract. | D225, D308 |
 | `path_remap` | array of strings | Map absolute source prefixes for deterministic debug info. | D27, D83 |
 
 > Trace: D27, D31, D73, D83, D84, D200, D225
 > Covers: Profile fields are typed, bounded, and visible.
 
-`optimization` must never remove runtime checks required by the language spec. Bounds checks, integer traps where checked arithmetic applies, contract checks, borrow/linearity consequences already enforced at compile time, panic paths, TPOE paths, stack probes required by the target contract, and safe concurrency checks remain semantically present in all profiles unless a future unsafe-only feature explicitly defines a separate source-visible opt-out.
+`optimization` must never remove runtime checks required by the language spec. Bounds checks, integer traps where checked arithmetic applies, contract checks, borrow/linearity consequences already enforced at compile time, panic paths, TPOE paths, stack probes required by the target contract, and safe concurrency checks remain semantically present in all profiles. Stable Kyokai has no unsafe-only profile or flag that disables these semantics; admitting one requires a separate accepted D-point and source-visible contract.
 
 > Trace: D53, D73, D75-D76, D84, D139, D262
 > Covers: Release optimization cannot erase Kyokai safety semantics.
@@ -55,7 +61,7 @@ A target support entry records the triple, tier, supported backends, runner avai
 | --- | --- | --- | --- |
 | Tier 1 | Release-blocking supported target. | CI builds compiler, stdlib, conformance tests, package tools, and release artifacts for the target. | D80, D225 |
 | Tier 2 | Supported but not fully release-blocking. | Compiler and stdlib build regularly; gaps are documented by target support entry. | D80 |
-| Experimental | Admitted for development. | May be incomplete, but the tool must report unsupported features explicitly and must not silently lower safe Kyokai through UB. | D73, D80, D139 |
+| Experimental | Admitted for development. | Explicitly labeled incomplete surfaces report unsupported features and never silently lower safe Kyokai through UB. | D73, D80, D139 |
 
 > Trace: D73, D80, D139, D225
 > Covers: Target tiers are user-visible promises with defined missing-feature behavior.
@@ -106,9 +112,9 @@ Package output settings live in `[build]` in the package manifest. `output_type`
 > Trace: D26, D31, D80
 > Covers: Package output kind and default backend are manifest-declared.
 
-If `output_type = "executable"`, the package must define exactly one entrypoint selected by the language spec and target contract. If more than one runnable target is admitted by a future chapter, the manifest must name which one `run` uses by default.
+A package can declare multiple runnable executable targets. Each target is a named build-graph node with root module, entry declaration, output name, profile restrictions, target filters, generated-input dependencies, and startup capability bundle. `kyokai build --bin <name>` builds one named executable and `kyokai run --bin <name>` runs one named executable. `kyokai run` without `--bin` is legal only when exactly one runnable target exists or exactly one executable is marked as the default run target.
 
-> Trace: D26, D48, D80
+> Trace: D26, D48, D80, D437
 > Covers: Executable packages have unambiguous entrypoint behavior.
 
 If `output_type = "static-lib"` or `dynamic-lib`, exported symbols must come only from declarations explicitly admitted for export by the language/FFI spec. Ordinary Kyokai public declarations are source-interface public; they are not automatically C or platform ABI exports.
@@ -123,10 +129,10 @@ User-visible build artifacts are written under `<out-root>/<target-triple>/<prof
 > Trace: D26, D31, D78, D80, D83, D149, D264
 > Covers: Build outputs are partitioned by target, profile, backend, and package so cross-build artifacts cannot collide.
 
-The standard output subdirectories are `bin/` for executables, `lib/` for static and dynamic libraries, `koi/` for checked package interface artifacts, `gen/` for declared generated source/backend files meant for inspection, `doc/` for generated HTML and documentation JSON, `reports/` for coverage/bench/audit/SemVer/timing/provenance reports, and `obj/` only for object files that the selected profile or flag marks as user-inspectable artifacts.
+The standard output subdirectories are `bin/` for executables, `lib/` for static and dynamic libraries, `koi/` for checked package interface artifacts, `gen/` for declared generated source/backend files meant for inspection, `c_output/` for explicitly requested generated C, `doc/` for generated HTML and documentation JSON, `reports/` for coverage/bench/audit/SemVer/timing/provenance reports, and `obj/` only for object files that the selected profile or flag marks as user-inspectable artifacts.
 
-> Trace: D27, D31, D79, D83, D218, D223, D225, D264
-> Covers: User-visible output subdirectories have fixed meanings, including `.koi`, generated files, docs, reports, and optional object output.
+> Trace: D27, D31, D79, D83, D218, D223, D225, D264, D509
+> Covers: User-visible output subdirectories have fixed meanings, including `.koi`, requested generated C, generated files, docs, reports, and inspectable object output.
 
 Private object files, backend scratch, temporary IR, dependency build scratch, fingerprints, and incremental query state belong in the cache root, not in the output tree, unless a profile or command explicitly asks to expose them as inspectable products.
 
@@ -164,3 +170,46 @@ C taught systems programmers to ask what the target really is because the machin
 
 > Trace: D31, D80, D83, D139, D149
 > Covers: Explicit target and build policy keeps systems programming practical without returning to backend folklore.
+
+## Target Record
+
+A target record states OS, architecture, ABI, endian, pointer width, integer widths, alignment rules, calling conventions, hosted or freestanding class, runtime shim class, available capabilities, atomics, volatile/MMIO domain, strict-float support, CPU-feature model, sanitizer support, debug-info support, object format, loader policy, and generated-C schema compatibility.
+
+> Trace: D80, D149, D321, D393, D400, D418, D451, D464, D483
+> Covers: Every target-dependent semantic fact lives in a structured target record or produces an unsupported-target diagnostic.
+
+## Native Toolchain Discovery
+
+Native compiler, linker, archiver, sysroot, SDK, include roots, library roots, and discovery providers are explicit target-toolchain configuration. A fallback chain is legal only when configuration lists candidates in order. Each candidate records executable identity, required version range, flags, target triple, sysroot, admitted environment keys, probe command, and rejection diagnostic.
+
+`pkg-config` is a discovery provider only when configuration declares it. Its package names, version constraints, environment variables, sysroot behavior, queried fields, and captured output become build-metadata inputs. Reproducible profiles reject host headers and libraries outside declared roots. The toolchain never silently substitutes host `cc`, linker, shell lookup result, sysroot, SDK, or `pkg-config` response outside the configured chain.
+
+> Trace: D405
+> Covers: Native-tool discovery, fallback order, pkg-config use, sysroots, and host-leak rejection are explicit build identity.
+
+## Strict Float And CPU Dispatch
+
+Safe `Float32` and `Float64` operations use strict IEEE-754 semantics by default. A build profile cannot select reassociation, hidden FMA contraction, flush-to-zero, hidden denormal behavior, signaling-NaN traps, or ambient rounding dependence for ordinary safe operations. Explicit optimized math APIs can name a relaxed policy. Their names and contracts expose the policy instead of inheriting it from release mode.
+
+The target record reports denormal behavior, FMA availability, rounding-mode support, exception-flag exposure, libm or native-oracle tier, and lowering evidence. CPU-feature dispatch is explicit profile or API policy keyed by target record; generated variants and dispatch mechanism are recorded in provenance.
+
+> Trace: D400, D418
+> Covers: Ordinary safe floats remain strict across profiles; relaxed math and CPU dispatch are explicit recorded surfaces.
+
+## Generated C Output
+
+Requested generated C is written to `kyokai-out/<target-triple>/<profile>/<backend>/<package-name>/c_output/` unless `--out-dir` selects another output root. Internal generated C used only to compile can remain in `.kyokai-cache/` as disposable backend state.
+
+`--emit-c=single` writes one deterministic translation unit per declared backend artifact boundary. The backend contract states whether that boundary is package or final link unit. `--emit-c=split` writes deterministic split files plus source-map and provenance records. Generated C records source package, source revision or workspace identity, selected toolchain, target, profile, backend, `.koi`/KBI version, source-map path, generated-file schema, and whether the file is inspection-only or participates in target compilation.
+
+> Trace: D264, D509
+> Covers: Requested generated C is an inspectable output lane with deterministic schema, maps, provenance, and explicit compile participation.
+
+## Dynamic Loading And Development Services
+
+Dynamic-link configuration records rpath or runtime-search-path policy, soname, install name, import-library behavior, loader assumptions, and target unsupportedness. A package cannot depend on ambient loader folklore.
+
+Hot reload is an explicit development service. It records loader mechanism, symbol/version contract, state-transfer boundary, supported target classes, sandbox grants, and restart behavior. It cannot change release-profile semantics or make a program legal under rules that ordinary builds reject.
+
+> Trace: D445, D475
+> Covers: Loader behavior and hot reload are explicit target/toolchain services, not hidden source semantics.

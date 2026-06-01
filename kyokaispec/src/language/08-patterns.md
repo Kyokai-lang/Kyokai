@@ -73,10 +73,10 @@ Plain `let Pattern := expr;` requires an irrefutable pattern. The initializer is
 > Trace: D15, D15a, D46, D87
 > Covers: Plain `let` cannot fail at runtime; fallible binding must use explicit failure syntax.
 
-`let Pattern := expr else Fallback do ... fi;` admits a refutable first pattern. The initializer is evaluated once. If the first pattern matches, its bindings enter scope after the statement. If it does not match, the `else` pattern and block handle the unmatched value according to the let-else chapter's control-flow rules. Any names introduced by the failure path are scoped only to that failure block.
+`let Pattern := expr else Fallback do ... fi;` admits a refutable success pattern only when the scrutinee is a two-variant union. The initializer is evaluated exactly once. If the success pattern matches, its bindings enter scope after the statement. If it does not match, `Fallback` must match the other variant, and the `else` block receives only that failure-pattern binding scope. The `else` block must diverge with type `Never`; it cannot fall through into the success continuation. Every linear payload in both variants is bound or discharged on its selected path.
 
-> Trace: D15, D15a, D60, D205
-> Covers: `let ... else` is the explicit fallible binding form with scoped success and failure bindings.
+> Trace: D15, D15a, D60, D205, D286
+> Covers: `let ... else` is a two-variant refutable binding form with one success continuation, a diverging failure block, and complete linear-payload accounting.
 
 `while let Pattern := expr do ... od;` requires a refutable pattern. Each iteration evaluates `expr` once. A match enters the body with the pattern bindings in scope for that iteration. A mismatch terminates the loop immediately.
 
@@ -88,10 +88,17 @@ Plain `let Pattern := expr;` requires an irrefutable pattern. The initializer is
 > Trace: D13, D38, D205
 > Covers: `case` is exhaustive, source-ordered structural matching with no guards.
 
-`for Pattern in expr do ... od;` applies the pattern to each item produced by the iterator protocol. The pattern must be irrefutable for the iterator item type unless a later loop chapter explicitly defines a refutable-filtering loop form. Kyokai's accepted `for-in` does not silently skip nonmatching items.
+`for Pattern in expr do ... od;` applies the pattern to each item produced by the iterator protocol. The pattern must be irrefutable for the iterator item type. Refutable patterns are compile-time errors. Filtering iteration uses an explicit `case` inside the loop, `while let`, or a named iterator adapter whose ownership and allocation behavior are part of its API contract. Kyokai `for-in` never silently skips nonmatching items.
 
 > Trace: D32, D249, D205
 > Covers: `for-in` pattern binding does not hide filtering; item matching must be total for the item type.
+
+## Refutable Pattern Lowering
+
+Refutable pattern sugar lowers to explicit checked-core `case` control flow before linearity checking. `let ... else` lowers to one success arm and one diverging failure arm. `while let` lowers to a repeated `case` whose nonmatching arm exits the loop. Every lowered arm accounts for each linear payload in the scrutinee and each pre-existing linear binding. `break`, `continue`, `return`, `panic`, `todo`, and `unreachable` exits are checked against the current ownership state and deferred-cleanup reservations. A diagnostic for lost ownership names the unaccounted variant or payload path and the exit that failed to discharge it.
+
+> Trace: D286, D348
+> Covers: Refutable pattern convenience is explicit checked-core case lowering, and every selected path preserves exact linear ownership.
 
 ## Exhaustiveness And Reachability
 
@@ -117,10 +124,10 @@ A non-exhaustive `case` is a compile-time error. Kyokai does not use a runtime m
 
 ## Record Destructuring
 
-Record destructuring is total. Destructuring a record consumes the whole record value and binds its fields as independent values. There is no partial move that leaves the original record alive.
+Record destructuring is total. Destructuring a record accounts for the whole record value and binds its fields as independent values. A completed destructuring does not leave the original record usable as a whole. During checked elaboration, field-by-field movement is represented as `PartiallyMoved(field-set)` until every field has been bound, discarded legally because it is `Free`, or otherwise discharged.
 
-> Trace: D98
-> Covers: Record destructuring consumes the entire record and rejects Rust-style partial-move state.
+> Trace: D98, D348
+> Covers: Record destructuring is total while its explicit field moves use the D348 partial-move state until the whole source is accounted for.
 
 Every linear field in a destructured record must be bound to a real name or nested pattern that ultimately binds and consumes it. Omitting a field is exact sugar for matching that field with `ignore`, so omission is legal only for `Free` fields.
 
@@ -144,7 +151,7 @@ Pattern matching moves ownership of matched linear values into the selected bind
 > Trace: D98, D195, D206, D238-D240
 > Covers: Patterns move linear ownership by default and remain subject to exact-use checking.
 
-A pattern may copy a `Free` value when the context needs the original value to remain usable. It may not copy a `Linear` value. When a record update or destructuring operation over a linear record moves remaining fields, the source value is consumed.
+A pattern may copy a `Free` value when the context needs the original value to remain usable. It must not copy a `Linear` value. When a record update or destructuring operation over a linear record moves remaining fields, the source value is consumed.
 
 > Trace: D98, D138, D195
 > Covers: Free pattern data may be copied where allowed; linear pattern data moves and consumes the source.
@@ -156,7 +163,7 @@ Every arm of a `case` has its own linear obligations. A linear value bound in on
 
 `ignore` never calls a destructor, `Destroyable.destroy`, `defer`, or any other cleanup operation. If a linear value needs cleanup, the program must bind it and call the cleanup API or register visible cleanup before leaving the path.
 
-> Trace: D2, D89, D157, D195, D206, D246
+> Trace: D2, D89, D195, D206, D246, D289-D290
 > Covers: Discard syntax does not perform hidden cleanup; linear cleanup remains explicit.
 
 ## Pattern Type Checking
@@ -180,3 +187,12 @@ A pattern cannot match by runtime type identity, reflection, subclass tests, exc
 
 > Trace: D47, D147, D190, D193, D205
 > Covers: Pattern matching has no runtime typecase, inheritance, trait-object, exception, or reflection matching surface.
+
+## For-In Binding And Linear Joins
+
+`for Pattern in iterator do ... od;` requires an irrefutable pattern for the iterator item type. Kyokai rejects a filtering or refutable `for-in` binder. Filtering is expressed by an explicit test inside the body, an iterator adapter whose contract names filtering, or an explicit `while let` state machine.
+
+A branch that binds, moves, borrows, returns, or consumes a linear value contributes a join-state fact. The join is legal only when each non-diverging arm leaves every pre-branch linear binding in the same state or returns a named state value that accounts for ownership.
+
+> Trace: D286, D340, D439, D495
+> Covers: `for-in` never silently skips nonmatching items, and pattern-driven branch joins preserve explicit linear ownership state.

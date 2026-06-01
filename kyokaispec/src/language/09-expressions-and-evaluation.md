@@ -1,7 +1,7 @@
 # Expressions And Evaluation
 
 [Rikona Kurasaki / Mjoyufull]
-An expression is where a program stops promising and starts producing a value. Kyokai makes that motion strict. The reader should be able to walk the source from left to right and know which call runs, which borrow starts, which bounds check fires, and which value is built before the next one moves.
+An expression is where a program stops promising and starts producing a value. Kyokai makes that motion strict. The reader can walk the source from left to right and know which call runs, which borrow starts, which bounds check fires, and which value is built before the next one moves.
 
 > Trace: D71, D73, D87, D139, D228
 > Covers: Kyokai expression evaluation is strict, source ordered, and specified by the language rather than by backend evaluation folklore.
@@ -60,7 +60,7 @@ Mutable borrowing of an rvalue temporary is illegal. If a mutating call needs a 
 > Trace: D72, D213, D238-D240
 > Covers: Mutable rvalue temporary borrowing is rejected, including through UFCS mutating calls.
 
-UFCS does not bypass the temporary rules. If `expr.method(args)` desugars to a call whose first parameter requires `&![T]`, `expr` may not be an rvalue temporary. Consuming receivers and immutable-borrow receivers remain legal on rvalues only when the ordinary temporary-borrow rules are satisfied.
+UFCS does not bypass the temporary rules. If `expr.method(args)` desugars to a call whose first parameter requires `&![T]`, `expr` must not be an rvalue temporary. Consuming receivers and immutable-borrow receivers remain legal on rvalues only when the ordinary temporary-borrow rules are satisfied.
 
 > Trace: D7a, D72, D213, D254
 > Covers: Dot syntax is not a lifetime escape hatch; mutating UFCS on rvalue temporaries is rejected.
@@ -82,12 +82,12 @@ Integer and floating literals may be typed by a closed suffix or by contextual l
 > Trace: D12, D135/D261, D87
 > Covers: Literal typing is a narrow implicit completion over known expected types and suffixes, not full expression inference or numeric conversion.
 
-A suffixed literal has the suffixed type before contextual inference. Context may confirm that type but may not silently retarget it. If the literal value is not representable in the suffixed type, compilation fails.
+A suffixed literal has the suffixed type before contextual inference. Context may confirm that type but must not silently retarget it. If the literal value is not representable in the suffixed type, compilation fails.
 
 > Trace: D135/D261, D75
 > Covers: Numeric suffixes fix literal type and checked representability at compile time.
 
-Ordinary string literals produce `String`. Raw multiline string literals produce `String` without escape processing. Code-point literals produce a `Nat32` Unicode scalar value. Byte literals produce `Nat8`. `static "..."` produces `StaticString`, and ordinary strings are not contextually retargeted into static strings.
+Plain escaped and raw multiline string literals produce `StaticString` views into immutable artifact storage. Escaped literals process escapes; raw multiline literals do not. Code-point literals produce a `Nat32` Unicode scalar value. Byte literals produce `Nat8`. `literal.toStringIn(allocator)` creates an owning `String` and returns `Result[String, AllocError]`.
 
 > Trace: D30, D54, D120, D194
 > Covers: Text, raw text, code-point, byte, and static text literals are distinct and have fixed built-in types.
@@ -175,7 +175,7 @@ Slice syntax is checked half-open span extraction. `a[i..j]` selects the range f
 > Trace: D106, D210
 > Covers: Slicing uses explicit half-open bounds with checked relation semantics, not raw `j - i` folklore.
 
-On an immutable source, slicing produces an immutable span view. On a mutable source, slicing produces a mutable span view when the mutable-borrow rules allow it. `String` does not gain direct slicing or indexing syntax unless a later explicit rule adds it; text-to-bytes access stays named.
+On an immutable source, slicing produces an immutable span view. On a mutable source, slicing produces a mutable span view when the mutable-borrow rules allow it. `String` does not have direct slicing or indexing syntax. Text-to-bytes access stays named. Adding text indexing requires a separate accepted D-point that states byte, scalar-value, grapheme, allocation, and failure semantics.
 
 > Trace: D30, D30a, D106, D187
 > Covers: Slice result mutability follows source access, while text indexing/slicing is not implicit.
@@ -202,7 +202,7 @@ Integer division truncates toward zero. Integer remainder is the truncating rema
 > Trace: D75
 > Covers: Default integer division and remainder semantics are fixed, and alternate arithmetic policies are not implicit.
 
-Floating-point arithmetic uses IEEE 754 binary32 and binary64 for `Float32` and `Float64`. The default rounding mode is round-to-nearest, ties-to-even. Subnormals, signed zero, infinities, and NaNs follow the strict floating contract. Backend fast-math, reassociation, excess precision, and implicit FMA contraction may not change language-visible results.
+Floating-point arithmetic uses IEEE 754 binary32 and binary64 for `Float32` and `Float64`. The default rounding mode is round-to-nearest, ties-to-even. Subnormals, signed zero, infinities, and NaNs follow the strict floating contract. Backend fast-math, reassociation, excess precision, and implicit FMA contraction must not change language-visible results.
 
 > Trace: D76, D139, D228
 > Covers: Float operations have a strict portable IEEE 754 contract and cannot be weakened by backend flags or profiles.
@@ -251,7 +251,7 @@ Text/byte and OS/foreign string conversions are never implicit. `String`, byte b
 > Trace: D18, D18a
 > Covers: Compile-time evaluation is requested at the expression site and is not inferred from definition annotations.
 
-A `comptime` expression may depend only on explicit compile-time inputs: literals, constants, other `comptime` results, `target`, and language-defined compile-time built-ins. It may not observe filesystem contents, environment variables, wall-clock time, locale, randomness, network state, process state, thread scheduling, runtime capabilities, or FFI.
+A `comptime` expression may depend only on explicit compile-time inputs: literals, constants, other `comptime` results, `target`, and language-defined compile-time built-ins. It must not observe filesystem contents, environment variables, wall-clock time, locale, randomness, network state, process state, thread scheduling, runtime capabilities, or FFI.
 
 > Trace: D18a, D117, D202, D203
 > Covers: Compile-time evaluation is deterministic, host-independent, and cannot smuggle host state into a build.
@@ -299,3 +299,14 @@ Backend lowering must preserve Kyokai evaluation order, checks, fatal paths, ali
 
 > Trace: D73, D139, D228
 > Covers: Expression lowering cannot use C or LLVM undefined behavior as the implementation of safe Kyokai semantics.
+
+## Static Text And Build Evaluation
+
+Evaluating a plain string literal returns a `StaticString` view into immutable artifact storage. Evaluation performs no heap allocation and records no allocator identity. An owning `String` is created only by `literal.toStringIn(allocator)`, which returns `Result[String, AllocError]`.
+
+A `build T do ... build;` expression executes statements in source order. `produce expr;` evaluates `expr`, checks that the result has type `T`, checks that every live linear obligation is accounted for, and exits the nearest build expression. Diverging paths do not produce values. `return` exits the enclosing function under ordinary cleanup and recovery rules. `break`, `continue`, and `yield` do not target a build expression.
+
+The elaborator lowers the build expression into explicit initialization-state control flow before type, borrow, linearity, capability, contract, and backend-readiness checks. Nested build expressions have independent nearest-enclosing `produce` targets.
+
+> Trace: D372, D476, D500
+> Covers: Static literals are non-allocating views and build expressions have ordered evaluation, nearest-target `produce`, definite initialization, and checker-visible lowering.

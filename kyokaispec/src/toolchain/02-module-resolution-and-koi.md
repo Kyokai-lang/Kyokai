@@ -13,22 +13,22 @@ This chapter specifies the toolchain side of the module boundary. The language c
 
 ## Logical Module Mapping
 
-Within a package, a logical module name maps to files under `[layout].module_root`. A dot in a module name is always a directory separator. If `module_root = "src"`, then `Foo` maps to `src/Foo.kyo` and `src/Foo.kai`, while `Foo.Bar` maps to `src/Foo/Bar.kyo` and `src/Foo/Bar.kai`.
+Within a package, a logical module name maps to fixed candidate paths under `[layout].module_root`. A dot in a module name is always a directory separator. If `module_root = "src"`, then `Foo` maps to interface candidate `src/Foo.kyo` and body candidate `src/Foo.kai`, while `Foo.Bar` maps to interface candidate `src/Foo/Bar.kyo` and body candidate `src/Foo/Bar.kai`.
 
 > Trace: D52, D78
-> Covers: Kyokai maps dotted module names to `.kyo` and `.kai` file pairs under the explicit package module root.
+> Covers: Kyokai maps dotted module names to fixed `.kyo` interface and `.kai` body candidate paths under the explicit package module root.
 
 There is no alternate dotted filename form such as `src/Foo.Bar.kyo`. There is no `mod.kyo` convention. There is no include path search. There is no fallback from one package's module root into another directory. One logical module path has one source spelling inside its package.
 
 > Trace: D52, D78
 > Covers: Kyokai rejects alternate module-file spellings, include-path search, and implicit fallback roots.
 
-Prefix modules may coexist. `Foo` and `Foo.Bar` are distinct logical modules because directory segments are path segments, not implicit nested module declarations. Their coexistence is legal when both file pairs exist and both declarations match their logical module names.
+Prefix modules may coexist. `Foo` and `Foo.Bar` are distinct logical modules because directory segments are path segments, not implicit nested module declarations. Their coexistence is legal when each present source file declares its resolved logical module name and every importable module has its required interface.
 
 > Trace: D78
 > Covers: Prefix module names may coexist without creating nested visibility or resolution ambiguity.
 
-A package may not contain two filesystem paths that resolve to the same logical module after canonical path normalization for the host and target rules. Case-insensitive filesystem collisions, symlink-equivalent duplicates, alternate separators, and generated-source overlays must be rejected or normalized before they can create two sources for one module.
+A package must not contain two filesystem paths that resolve to the same logical module after canonical path normalization for the host and target rules. Case-insensitive filesystem collisions, symlink-equivalent duplicates, alternate separators, and generated-source overlays must be rejected or normalized before they can create two sources for one module.
 
 > Trace: D78, D83, D155
 > Covers: Duplicate logical modules are errors, and filesystem normalization cannot create ambiguous module identity.
@@ -45,10 +45,10 @@ A discovered `.kyo` file is an interface source. A discovered `.kai` file is a b
 > Trace: D52, D78
 > Covers: `.kyo` and `.kai` are the only Kyokai source extensions, and source declarations must match resolved module identity.
 
-A complete source module for ordinary build checking has one selected interface and one selected body. If a package depends on a module from another package, the downstream checker consumes that dependency through the dependency package's `.koi` interface artifact rather than reading the dependency's private bodies. Within the same package, body source is available for implementation checking but does not become importable interface surface.
+A public or importable source module has one selected interface and one selected body when its declarations require implementation. A package-private executable-internal, test-only, or manifest-admitted generated implementation-internal module can consist of one selected body without a paired interface. The toolchain rejects any attempt to import a body-only module or publish declarations from it into external `.koi` API surface. If a package depends on a module from another package, the downstream checker consumes that dependency through the dependency package's `.koi` interface artifact rather than reading the dependency's private bodies. Within the same package, body source is available for implementation checking but does not become importable interface surface.
 
-> Trace: D17, D52, D78, D79
-> Covers: Ordinary source modules pair interface and body files, dependency checking consumes `.koi` interfaces, and same-package bodies remain implementation inputs rather than import surfaces.
+> Trace: D17, D52, D78, D79, D313
+> Covers: Importable source modules expose interfaces, restricted body-only internals remain non-importable, dependency checking consumes `.koi` interfaces, and same-package bodies remain implementation inputs rather than import surfaces.
 
 ## Target And Edition Selection
 
@@ -89,7 +89,7 @@ The import graph must be deterministic. The same manifest, lockfile, target, edi
 > Trace: D78, D83, D214
 > Covers: Module graph construction is deterministic and reproducible, independent of host iteration order and import order.
 
-Cyclic imports through interfaces are illegal unless a later chapter defines an explicit cycle protocol. A body may call functions from another body only through declarations visible in interfaces or same-module private declarations; direct private-body cycles across modules are not a module-system feature.
+Module import graphs are acyclic. A module cannot import itself directly or indirectly through `.kyo`, `.kai`, generated interface artifacts, or re-export chains. The compiler rejects a cycle before type checking and prints the complete cycle path. A body can call functions from another body only through declarations visible in interfaces or same-module private declarations; direct private-body cycles across modules are illegal.
 
 > Trace: D78, D79, D155
 > Covers: Interface import cycles are rejected under the current module model, and cross-module private body coupling is not a supported import mechanism.
@@ -128,7 +128,7 @@ The first bytes of a `KBI-1` file are the magic bytes `0x4B 0x4F 0x49 0x0A`, spe
 > Trace: D79, D83, D265
 > Covers: The `.koi` container header, integer encoding, and string encoding are fixed.
 
-The section table is sorted by numeric section id. Duplicate section ids are illegal. Unknown required sections make the artifact unsupported. Unknown optional sections may be skipped by a reader that does not understand them, but skipped optional sections remain covered by artifact hashes.
+The section table is sorted by numeric section id. Duplicate section ids are illegal. Unknown required sections make the artifact unsupported. Unknown extension sections are skipped only when the KBI compatibility table admits that section version. Every skipped extension section remains covered by artifact hashes.
 
 > Trace: D79, D83, D265
 > Covers: Section ordering, duplicate handling, and unknown-section handling are deterministic and versioned.
@@ -138,7 +138,7 @@ The section table is sorted by numeric section id. Duplicate section ids are ill
 | Id | Section | Required Contents | Trace |
 | ---: | --- | --- | --- |
 | 1 | `manifest` | Package identity, package version, edition, module root, workspace/package owner facts. | D78, D105, D265 |
-| 2 | `producer` | Compiler version, compiler compatibility classes, KBI version, diagnostic schema where relevant. | D79, D265 |
+| 2 | `producer` | Compiler version, compiler compatibility classes, KBI version, diagnostic schema version when the artifact records diagnostic metadata. | D79, D265 |
 | 3 | `target` | Target triple, target contract hash, backend contract class, CPU-feature baseline if it affects interface shape. | D80, D149, D265 |
 | 4 | `sources` | Module set, source-origin records, interface hashes, selected body hashes where interface-affecting. | D52, D78, D83, D265 |
 | 5 | `imports` | Dependency package identities, dependency `.koi` hashes, lockfile dependency ids. | D51, D79, D83, D265 |
@@ -182,6 +182,11 @@ Types are encoded as canonical typed graph nodes, not as pretty-printed source s
 > Trace: D6, D24, D33, D42, D55, D79, D159, D188, D265
 > Covers: Type metadata is structured, canonical, and visibility/opacity aware.
 
+Each type record stores one task-boundary classification: `task_local` or `task_transfer`. A generic user type is `task_local` unless its declaration records `task_transfer structural`. For structural opt-in, `.koi` records the opt-in and the stored-field obligations needed to classify each concrete substitution. For an opaque, unsafe-backed, target-backed, or foreign-backed type, `.koi` records the explicit unsafe transfer contract identity instead of guessing from hidden representation. Public records and internal records needed for same-package checking carry these facts; downstream consumers treat package-internal facts as invisible outside the package.
+
+> Trace: D248, D280, D265
+> Covers: `.koi` records task-local defaults, structural-transfer opt-in, post-substitution obligations, and explicit unsafe transfer-contract provenance.
+
 Typeclass records store method signatures, associated types, default method availability, and coherence identity. Instance records store dispatch type, implementing package/module, satisfied obligations, associated type bindings, exported/internal visibility, and overlap/coherence key. Instance bodies are not exposed except through generic materialization metadata explicitly admitted by the generics contract.
 
 > Trace: D79, D82, D82b, D182, D216, D265
@@ -194,15 +199,15 @@ The generics section records enough checked metadata for downstream packages to 
 
 ## Koi Canonicalization And Inspection
 
-All maps inside `.koi` are serialized in bytewise sorted key order. Lists whose source order is semantically meaningful preserve source order. Lists whose order is not semantically meaningful use canonical sorted order. Hashes are computed over normalized section bytes after path remapping and before any future compression wrapper.
+All maps inside `.koi` are serialized in bytewise sorted key order. Lists whose source order is semantically meaningful preserve source order. Lists whose order is not semantically meaningful use canonical sorted order. Hashes are computed over normalized section bytes after path remapping and before transport compression.
 
 > Trace: D83, D265
 > Covers: `.koi` serialization and hashing are deterministic.
 
-Compression is not part of `KBI-1`. A future compressed wrapper must hash the uncompressed canonical bytes and must not change compatibility semantics.
+Compression is not part of canonical `KBI-1` bytes. A compressed `.koi` transport wrapper records wrapper version, compression algorithm ID, uncompressed length, compressed length, canonical uncompressed hash, wrapper checksum, and decompression resource limits. Tools decompress, verify the canonical hash, and then operate on canonical KBI bytes. Unknown algorithms, resource-limit violations, malformed streams, and hash mismatches are hard errors. Compression never changes `.koi` identity or compatibility meaning.
 
 > Trace: D79, D83, D265
-> Covers: Future compression cannot change artifact identity or compatibility meaning.
+> Covers: Compression is a verified transport wrapper and cannot change artifact identity or compatibility meaning.
 
 The toolchain provides `kyokai koi verify <file>`, `kyokai koi print <file> --format json`, `kyokai koi print <file> --format text`, and `kyokai koi diff <old> <new>`. `verify` checks container structure, required sections, section hashes, compatibility fields, and deterministic ordering. `print` emits a derived view. `diff` classifies public API, internal API, contract, generic metadata, target, and hash changes.
 
@@ -231,10 +236,10 @@ A compiler may reject a `.koi` format version it does not implement. It must not
 > Trace: D79, D29
 > Covers: Unsupported `.koi` versions are explicit diagnostics, not silent best-effort reinterpretations.
 
-Mixed-edition workspaces are legal as repository structure, but cross-edition `.koi` consumption is not implied. Under the current design, a package may not consume a `.koi` artifact produced for a different language edition.
+Mixed-edition workspaces are legal as repository structure, but cross-edition `.koi` consumption is not implied. Under the current design, a package must not consume a `.koi` artifact produced for a different language edition.
 
 > Trace: D79, D105, D243
-> Covers: Mixed-edition workspaces may exist, but `.koi` dependencies require exact language-edition match.
+> Covers: Mixed-edition workspaces are structurally legal, but `.koi` dependencies require exact language-edition match.
 
 ## Separate Compilation Boundary
 
@@ -243,7 +248,7 @@ Package-level separate compilation is the required artifact boundary. A dependen
 > Trace: D78, D79, D83
 > Covers: Separate compilation is package-level first, with module-level incremental behavior treated as an internal optimization.
 
-Compiled code artifacts for a package are separate from `.koi` interface artifacts, but their identities must be tied to the same package, edition, target, source, dependency, and compatibility inputs used for reproducible builds. A downstream package may not link code whose interface artifact is incompatible with the checked dependency interface it used.
+Compiled code artifacts for a package are separate from `.koi` interface artifacts, but their identities must be tied to the same package, edition, target, source, dependency, and compatibility inputs used for reproducible builds. A downstream package must not link code whose interface artifact is incompatible with the checked dependency interface it used.
 
 > Trace: D79, D83, D139
 > Covers: Code artifacts and interface artifacts share reproducible identity inputs, and linking must not pair incompatible code with a different checked interface.
@@ -277,3 +282,35 @@ The `.koi` file is the sealed envelope at the package boundary. Not a cache. Not
 
 > Trace: D79, D83
 > Covers: `.koi` makes package interfaces inspectable, reproducible, and consumable without exposing private implementation.
+
+## KBI-1 Semantic Payload Registry
+
+The `KBI-1` header and required top-level section IDs are defined once in **Koi Binary Interface** above. This subsection does not define a second header or a second container schema. It fixes the structured payload records carried inside those required sections and the extension-section registry used by compatible readers.
+
+The required sections carry string-table entries, symbols, exports, type declarations, value declarations, generics, constraints, typeclasses, instances, imports, visibility, contracts, capability requirements, implicit-completion records, stable ABI records, unsafe and audit summaries, const-generic values, receiver-callable metadata, diagnostic metadata, and provenance. A payload kind lives in the top-level section whose table row above names its semantic family. Extension sections state ID, schema version, flags, byte length, canonical hash, required or extension bit, and compatibility policy.
+
+Unknown required sections cause consumer rejection. Unknown extension sections are skipped only when the KBI compatibility table admits that section version. `.koi diff` classifies changes as `compatible`, `additive`, `breaking`, `target-restricted`, `feature-restricted`, `provenance-only`, `docs-only`, or `unknown-incompatible`.
+
+> Trace: D311, D364, D397, D461, D497
+> Covers: `KBI-1` has one container header and one top-level section table; the payload registry enriches those sections without creating a competing schema.
+
+## Edition Boundary
+
+Cross-edition `.koi` consumption is rejected unless a KBI normalization table explicitly admits the producing edition, consuming edition, normalized sections, erased differences, preserved differences, and compatibility result. No cross-edition normalization table is admitted for the initial edition. A mixed-edition workspace can exist as repository structure without implying cross-edition dependency compatibility.
+
+> Trace: D382, D438
+> Covers: `.koi` remains edition-specific until a reviewed normalization table defines an exact cross-edition mapping.
+
+## Compressed KBI Transport
+
+A compressed `.koi` wrapper is transport only. The wrapper records algorithm, version, uncompressed length, compressed length, canonical uncompressed hash, wrapper checksum, and decompression resource limits. Canonical KBI identity is the uncompressed bytes.
+
+> Trace: D423, D446, D480
+> Covers: Compression changes transport representation without changing canonical interface identity.
+
+## Shared KBI Reader And File Roles
+
+The compiler, package manager, docs generator, audit tool, Analysis Server, SemVer checker, and cache use the same `.koi` parser. `.kyo`, `.kai`, and `.koi` role diagnostics reject handwritten `.koi`, body/source extension swaps, attempts to compile `.koi` as source, and stale generated artifacts. A `.koi` file is generated checked interface data, not a source file.
+
+> Trace: D79, D265, D518
+> Covers: Every tool consumes one `.koi` parser and reports file-role mistakes without pretending generated artifacts are editable source.

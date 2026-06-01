@@ -64,10 +64,10 @@ A fallible spawn must have an `else err do ... fi;` arm unless the enclosing tas
 > Trace: D235, D90a
 > Covers: Failed spawn creates no child and no synchronization edge.
 
-By-value captures transfer only after task creation succeeds. On spawn failure, captures remain available to the failure arm, including linear values that would have moved to the child on success. Borrow captures are not extended because no child exists.
+By-value captures transfer only after task creation succeeds. The implementation reserves or allocates child-task resources before capture consumption, or rolls an internal reservation back before exposing failure. On spawn failure, captures remain available to the failure arm, including linear values that would have moved to the child on success. Borrow captures are not extended because no child exists.
 
-> Trace: D88, D235, D248
-> Covers: Spawn failure preserves ownership exactly.
+> Trace: D88, D235, D248, D281
+> Covers: Spawn failure preserves ownership because child creation and capture transfer commit atomically.
 
 ## Capture And Task Transfer
 
@@ -76,7 +76,7 @@ A capture written as `name` captures by value. If `name` has `Free` type, the ch
 > Trace: D88, D89, D195
 > Covers: By-value capture follows ordinary copy or move semantics.
 
-A capture written as `&name` captures an immutable borrow. It is legal only for `Free` values and for the closed shared-access concurrency set: `Atomic[T]`, `Mutex[T]`, and `RwLock[T]`, unless a later explicit contract admits another synchronized primitive. The borrow lives until the child completes at `join;`.
+A capture written as `&name` captures an immutable borrow. It is legal only for types in the closed `SpawnShareable` registry: immutable `Free` values, admitted `Atomic[T]`, `Mutex[T]`, `RwLock[T]`, and explicitly admitted SPSC channel endpoints whose transfer class permits shared observation. User code cannot implement `SpawnShareable`. Adding a registry entry requires an accepted D-point, stdlib admission record, `.koi` transfer fact, and conformance tests. The borrow lives until the child completes at `join;`.
 
 > Trace: D88, D100, D248, D252
 > Covers: Shared task capture is narrow, explicit, and scoped to structured join.
@@ -86,7 +86,7 @@ A capture written as `&name` captures an immutable borrow. It is legal only for 
 > Trace: D88
 > Covers: Spawn cannot smuggle cross-task mutable borrowing.
 
-Task-boundary transfer is controlled by declaration or standard-library contract metadata: `task_transfer` or `task_local`. `Linear` by itself does not imply task-transfer permission. Safe Kyokai has no user-implemented `Send` or `Sync` marker typeclasses and no structural inference for task-transfer safety.
+Task-boundary transfer is controlled by declaration or standard-library contract metadata: `task_transfer` or `task_local`. `Linear` by itself does not imply task-transfer permission. Generic user-defined types are `task_local` by default. A generic user-defined type opts into field-derived transfer classification by declaring `task_transfer structural`; after generic substitution, the checker classifies that concrete type as task-transferable only when every stored field is task-transferable. Safe Kyokai has no user-implemented `Send` or `Sync` marker typeclasses, no automatic structural transfer classification for types that did not opt in, and no user-written conditional transfer syntax such as `task_transfer when T: task_transfer`. Opaque, unsafe-backed, target-backed, and foreign-backed types require an explicit unsafe transfer contract before safe code can transfer their values across tasks. `.koi` records the task classification and the structural-opt-in or unsafe-contract provenance for public types and internal types whose facts can cross package-checking boundaries.
 
 > Trace: D248
 > Covers: Cross-task ownership is explicit metadata, not Rust-style auto-trait inference.
@@ -147,32 +147,31 @@ Fan-in, fan-out, logging, work queues, and broadcast-like designs use explicit b
 > Trace: D236
 > Covers: Complex topology is visible source structure over SPSC endpoints.
 
-Standard-library broker helpers may exist, but they must accept, construct, and own visible SPSC endpoints. They must document ordering, fairness or non-fairness, shutdown, backpressure, cancellation/deadline behavior, and linear-payload drain rules.
+A multi-endpoint broker helper is legal only as a separately admitted standard-library structure over visible SPSC endpoints. Its admission record states ownership, producer and consumer topology, ordering, fairness or non-fairness, shutdown, backpressure, cancellation and deadline behavior, and linear-payload drain rules. The baseline channel contract does not create a hidden broker or cloneable endpoint.
 
 > Trace: D85, D236
 > Covers: Broker helpers do not create hidden shared channel ownership.
 
-## Select And `pick;`
+## Channel `select ... pick;` And Readiness `wait ... wake;`
 
-A `select ... pick;` block waits on multiple admitted channel readiness operations. It contains one or more `when` arms and at most one `timeout(deadline)` arm.
+`select ... pick;` waits on channel operations. Its closed arm families are channel send, channel receive, channel close observation, deadline, cancellation-token observation, and default. It does not wait on raw file descriptors, sockets, OS handles, Poller backend handles, or raw readiness values.
 
-> Trace: D92/D258
-> Covers: Multi-channel waiting is a core block, not a macro or OS-poller bypass.
+`wait ... wake;` waits on external readiness tokens. Its closed arm families are Poller readiness, timer or deadline, cancellation-token observation, target-admitted signal readiness, target-admitted process readiness, and default. It does not send or receive channel messages. A channel adapter can expose a readiness token only through a standard contract that states ownership and close behavior; observing readiness does not transfer the message.
 
-Each non-timeout arm names exactly one admitted blocking channel operation plus its result pattern. `select` waits until at least one arm is ready. Exactly one ready arm is chosen and exactly one arm body executes.
+| Construct | Arm family | Readiness point | Ownership transfer point | Blocking and exit facts |
+| --- | --- | --- | --- | --- |
+| `select` | Send | Channel contract reports send can commit. | Selected send commit only. An unselected arm retains its message. | Capacity, close, cancellation, and deadline follow the channel API. |
+| `select` | Receive | Channel contract reports a message or exhaustion case. | Selected receive commit only. | Close and drain behavior follow the endpoint contract. |
+| `select` | Deadline, cancellation, default | Token is ready or default is eligible. | No channel transfer. | Returns the typed selected result. |
+| `wait` | Poller, timer, signal, process | Token contract reports readiness. | No resource transfer unless the selected token API explicitly returns an owned event record. | Target contract records edge/level mode and spurious-wake policy. |
+| `wait` | Cancellation, default | Token is ready or default is eligible. | No external-resource transfer. | Returns the typed selected result. |
 
-> Trace: D92/D258
-> Covers: Select executes one selected communication path.
+If exactly one arm is ready, that arm is selected. If several arms are ready, the permitted result is any ready arm under specified nondeterminism. Default `select` and default `wait` promise neither source-order priority nor starvation freedom. A named biased or fair mode changes this rule only when its separate contract states eligibility, ordering, fairness, and replay facts. Values, borrows, and ownership transfers associated with non-selected arms do not occur. The same linear endpoint cannot appear in multiple arms of one `select`.
 
-If multiple arms are ready, the language gives no fixed source-order priority. An implementation may choose any ready arm. Programs that require priority must encode priority explicitly outside `select`.
+Target contracts record Poller backend class, edge-triggered or level-triggered readiness, descriptor families, signal/process support, and spurious-wake policy. Tooling reports obvious fixed biased loops with always-ready arms as starvation risks; that report is advisory and does not change semantics.
 
-> Trace: D92/D258
-> Covers: Select has non-priority ready-arm semantics.
-
-Values, borrows, and ownership transfers associated with non-selected arms do not occur. The same linear endpoint may not appear in multiple arms of one `select`.
-
-> Trace: D92/D258, D195
-> Covers: Select does not speculatively move or borrow unchosen paths.
+> Trace: D92/D258, D195, D283-D284, D342, D484
+> Covers: Channel choice and external readiness waiting are separate constructs with closed arm families, exact transfer points, target-recorded Poller facts, and specified nondeterminism.
 
 ## Cancellation, Deadlines, And Plain Blocking
 
@@ -200,6 +199,20 @@ Cancellation is ordinary structured control flow when code chooses to act on it.
 
 > Trace: D2b, D91
 > Covers: Cooperative cancellation is not fatal termination.
+
+Every blocking or cancellable API publishes one cancellation-safety class.
+
+| Class | Required post-cancellation contract |
+| --- | --- |
+| `NoEffectOnCancel` | Cancellation returns control without changing user-visible resource state. |
+| `PartialProgress` | The API lists every value, offset, buffer, handle, message, or resource field that can advance before cancellation wins. |
+| `ConsumesOnCancel` | The API lists every consumed linear value and the owned recovery payload returned to the caller; absence of a recovery payload is written explicitly. |
+| `UncancellableBlocking` | The API does not observe cancellation until normal return or a target-recorded interruption event. |
+
+If cancellation races with successful completion, the API contract states which result wins and where ownership transfers commit. POSIX interruption and Windows cancellation details are target-contract facts, not inherited folklore.
+
+> Trace: D284, D327
+> Covers: Cancellation is cooperative, classed per API, race-explicit, and target-recorded.
 
 ## Poller And Event Loops
 
@@ -308,7 +321,7 @@ Failed channel operations create no happens-before edge. `Relaxed` atomic operat
 
 ## Data-Race Boundary
 
-Safe Kyokai code cannot create two unsynchronized mutable accesses to the same non-atomic storage. Ordinary shared mutation across tasks must use channels, `Mutex[T]`, `RwLock[T]`, `Atomic[T]`, or another future primitive that explicitly names its synchronization and happens-before rules.
+Safe Kyokai code cannot create two unsynchronized mutable accesses to the same non-atomic storage. Ordinary shared mutation across tasks must use channels, `Mutex[T]`, `RwLock[T]`, or `Atomic[T]`. Another synchronized primitive is absent from stable Kyokai until an accepted D-point explicitly names its synchronization and happens-before rules.
 
 > Trace: D3, D3b, D90, D100, D247
 > Covers: Safe cross-task mutation is limited to named synchronization primitives.
@@ -330,7 +343,37 @@ The preferred order is channels first, mutexes and rwlocks second, atomics last.
 > Trace: D184
 > Covers: The standard concurrency style has an explicit gradient.
 
-This guidance does not change legality. A program may use any admitted primitive when its contract fits, but public APIs should choose the primitive whose ownership, blocking, cancellation, and ordering story is easiest to audit.
+This guidance does not change legality. A program can use any admitted primitive when its contract fits. Public APIs use the primitive whose ownership, blocking, cancellation, and ordering contract they state explicitly.
 
 > Trace: D85, D184
 > Covers: Guidance informs API design without adding hidden semantics.
+
+## Channel Families And Backpressure
+
+Kyokai's language core and Tier-1 stdlib recognize unique linear SPSC endpoints only. MPSC, MPMC, and broadcast endpoints are rejected as core primitives and rejected from the Tier-1 channel set. Fan-in, fan-out, work queues, and publish/subscribe use explicit broker tasks over SPSC channels, poller registration, and named queue policy. A broker library can package that visible structure; it cannot expose a hidden cloneable shared endpoint.
+
+Every channel and broker contract states capacity, topology, send behavior, receive behavior, close behavior, buffered-element cleanup, linear-payload drain obligations, wakeup behavior, ordering, fairness or non-fairness, cancellation class, timeout class, partial-progress behavior, and happens-before edges. Backpressure is source-visible through blocking, try, deadline, or cancellation-aware operations.
+
+> Trace: D282-D284, D317, D327, D342, D350, D353-D354, D388, D436, D471, D473
+> Covers: The SPSC-only primitive boundary, explicit broker topology, cleanup, and visible backpressure rules are separate contracts.
+
+## Lock Fairness And Lifetime Diagnostics
+
+`RwLock` contracts state writer-starvation behavior and queueing policy. A lock guard is linear. Tooling reports guards live across blocking, wait, spawn, join, select, and nested-lock boundaries. Lock-order metadata is explicit API or type metadata. These diagnostics expose risky visible lifetimes; they do not claim deadlock freedom.
+
+> Trace: D447, D498
+> Covers: Lock fairness and lock-lifetime warnings are explicit library and tooling behavior rather than scheduler folklore.
+
+## Callback Invocation Classes
+
+Callbacks are classified as `CallableRead`, `CallableMut`, `CallableOnce`, or `CallableState[S]`. A repeated callback with linear state uses `CallableMut` with replacement-before-return or `CallableState[S]` state transfer. A callback that consumes linear captures uses `CallableOnce`. Foreign wrappers also state reentry class, thread affinity, userdata layout, cleanup, and capability requirements.
+
+> Trace: D448, D456-D457a, D493
+> Covers: Repeated stateful callbacks and one-shot linear captures use named invocation classes across safe and foreign boundaries.
+
+## Poller And Select Protocol State
+
+`Poller` and `select` protocols expose registration state, readiness events, partial progress, cancellation, timeout, deregistration, close, and stale-event handling. Non-transactional I/O reports bytes or messages already transferred before failure. Scheduling and readiness ordering are specified nondeterminism: reports record replay-relevant facts without promising global fairness.
+
+> Trace: D411, D473, D484
+> Covers: Poller readiness, cancellation, partial progress, stale events, and replay boundaries are explicit.

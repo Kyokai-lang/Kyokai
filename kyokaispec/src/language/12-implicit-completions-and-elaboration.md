@@ -45,6 +45,11 @@ The compiler type-checks and elaborates expressions, resolving operator families
 > Trace: D23, D82/D82a/D82b, D110/D254, D209/D161, D238
 > Covers: Typed elaboration resolves overload-like surfaces, generic arguments, and receiver lookup before ownership checking.
 
+Every expression is processed in `synthesize` or `check(ExpectedType)` mode. `synthesize` derives one type from the expression. `check(ExpectedType)` validates the expression against one already-known local expected type. Expected type can flow from annotations, function parameters, return annotations, fields, union payloads, array elements, typeclass signatures, explicit generic arguments, and assignment or update targets. Nested calls use the immediate expected type when one exists; they do not solve arbitrary constraints backward through distant return contexts.
+
+> Trace: D349
+> Covers: Typed elaboration uses a local two-mode checking algorithm rather than global solver-driven inference.
+
 Only after those facts are known may the compiler insert approved implicit completions. Every insertion becomes an explicit elaboration node carrying the source span, expected type or syntactic context, inserted core operation, and the rule that admitted it.
 
 > Trace: D87, D238, D239
@@ -60,17 +65,17 @@ Typed sugar such as `or return`, `let...else`, and `while let` lowers into check
 > Trace: D15a, D39, D98, D205, D238-D240
 > Covers: Ownership-sensitive sugar is made explicit before the checkers prove it safe.
 
-Backend lowering starts only after elaboration and all semantic checks succeed. The backend may not add a new language-level implicit behavior or rely on backend undefined behavior to implement one.
+Backend lowering starts only after elaboration and all semantic checks succeed. The backend must not add a new language-level implicit behavior or rely on backend undefined behavior to implement one.
 
 > Trace: D73, D139, D228, D238
 > Covers: Backend lowering consumes checked elaborated core and cannot invent or weaken source semantics.
 
 ## Registry Of Accepted Completions
 
-The current implicit-completion registry contains exactly these source-level insertions: literal typing from known context, immutable `let :=` type inference from a fully determined initializer, auto-borrow for addressable places, auto-reborrow from mutable borrows, mutable-to-immutable read reborrow, one-level field auto-deref, implicit end-of-body `Unit` return, expression-site `Never` coercion, closed `Never` lifting for `Optional`/`Result`, and the exact `or ...` result-propagation sugar.
+The current implicit-completion registry is the closed table at the end of this chapter. Its admitted families are contextual literal typing, immutable `let :=` inference from one fully determined initializer type, auto-borrow for addressable places, mutable auto-reborrow, mutable-to-immutable read reborrow, one-level field auto-deref, end-of-body `Unit`, expression-site `Never`, closed `Never` lifting for `Optional` and `Result`, exact `or ...` lowering, receiver-module fallback, checked formatting/template completion, and checked `build` initialization lowering. No family exists outside that table.
 
-> Trace: D7b, D8, D12, D15a, D34, D46, D58/D191, D87, D186, D187, D238-D240
-> Covers: The accepted registry is closed and names every current implicit completion directly.
+> Trace: D7b, D8, D12, D15a, D34, D46, D58/D191, D87, D186, D187, D238-D240, D356, D459, D500
+> Covers: The accepted registry is closed and names every admitted completion family directly.
 
 Generic type argument inference is not a global implicit conversion system. It is a local call elaboration rule that may omit explicit type arguments only when receiver and argument expressions determine them left to right.
 
@@ -89,12 +94,12 @@ A numeric literal may receive a type from a known expected type at its expressio
 > Trace: D12, D135/D261, D87
 > Covers: Literal inference pushes an already-known type into a literal at the local expression site.
 
-A suffixed literal does not need contextual inference. Its suffix fixes the type before context. Context may confirm the suffix type but may not retarget it to another type.
+A suffixed literal does not need contextual inference. Its suffix fixes the type before context. Context may confirm the suffix type but must not retarget it to another type.
 
 > Trace: D135/D261
 > Covers: Literal suffixes are explicit literal typing and not implicit conversions.
 
-Literal typing may not choose among multiple valid numeric types by preference. `let x := 5;` is illegal unless the initializer itself already fixes a single type. Mixed numeric operators do not use literal typing to perform promotions between non-literal operands.
+Literal typing must not choose among multiple valid numeric types by preference. `let x := 5;` is illegal unless the initializer itself already fixes a single type. Mixed numeric operators do not use literal typing to perform promotions between non-literal operands.
 
 > Trace: D12, D46, D75, D210
 > Covers: Literal inference rejects ambiguity and does not create C-style promotions.
@@ -123,7 +128,7 @@ When a call expects `&[T]` and the argument expression is an addressable place o
 > Trace: D14, D72, D87, D238-D240
 > Covers: Auto-borrow is allowed only for addressable places where the expected borrow type is uniquely known and the borrow checker can prove legality.
 
-The compiler may not mutable-borrow an rvalue temporary. It may not insert a borrow whose lifetime would escape the statement or borrow scope. It may not insert a borrow that conflicts with an existing live borrow.
+The compiler must not mutable-borrow an rvalue temporary. It must not insert a borrow whose lifetime would escape the statement or borrow scope. It must not insert a borrow that conflicts with an existing live borrow.
 
 > Trace: D72, D187, D238-D240
 > Covers: Auto-borrow respects temporary lifetime, escape, and aliasing rules.
@@ -138,7 +143,7 @@ When a call expects `&[T]` and the argument is an existing mutable borrow `&![T]
 > Trace: D187, D238-D240
 > Covers: Mutable-to-immutable borrowing is a read reborrow, not variance or subtype conversion.
 
-Auto-borrow and reborrow insertions must be visible in the elaborated core. The linearity and borrow checkers must see explicit borrow/reborrow nodes; a backend may not synthesize these operations after checking.
+Auto-borrow and reborrow insertions must be visible in the elaborated core. The linearity and borrow checkers must see explicit borrow/reborrow nodes; a backend must not synthesize these operations after checking.
 
 > Trace: D238-D240
 > Covers: Borrow ergonomics are surface sugar over explicit checked core borrow operations.
@@ -227,3 +232,37 @@ If an insertion fails, the diagnostic must explain the explicit source form that
 
 > Trace: D29, D87, D239
 > Covers: Failed implicit completions produce actionable diagnostics rather than silent fallback behavior.
+
+## Closed Completion Registry Record
+
+Every implicit completion registry entry records: registry ID, source pattern, required local static context, inserted elaboration node, evidence obligation, diagnostic label, `.koi` rule, and spec home. A completion is legal only when local static context uniquely determines it and it introduces no hidden allocation, blocking, authority acquisition, cleanup, I/O, thread spawn, dynamic loading, or additional control-flow choice.
+
+Branch pass-through assistance, cleanup suggestions, context-bundle suggestions, and resource-flow refactors are tooling actions. They produce visible source edits and never become implicit elaboration.
+
+`build` lowering introduces explicit initialization-state nodes and joins before semantic checking. A lowered build carries its target type, initialized-field state, linear obligations, produce spans, and abnormal exits. It contains no hidden rollback or defaulting.
+
+| Registry ID | Source pattern and required local static context | Inserted elaboration node | Evidence obligation | Diagnostic label | `.koi` recording rule | Spec home |
+| --- | --- | --- | --- | --- | --- | --- |
+| `literal.context` | Unsuffixed literal at one known expected numeric type. | Typed literal node. | Prove the literal is in range for that exact type. | `implicit.literal.context` | Record the resolved literal type when it appears in exported const values, generic materialization metadata, or other interface-affecting elaborated form. | `language/02-lexical-syntax.md`, `language/09-expressions-and-evaluation.md` |
+| `let.initializer` | Immutable `let :=` whose initializer synthesizes one denotable type. | Typed binding node. | Prove the initializer synthesizes exactly one denotable type without target-type guessing. | `implicit.let.initializer` | Local-body-only; omit from exported interface metadata. Preserve in downstream materialization metadata only when the checked generic body contains the binding. | `language/10-statements-and-control-flow.md` |
+| `borrow.shared-place` | Addressable `T` where a call expects `&[T]`. | Shared-borrow node and region. | Prove addressability, region non-escape, and absence of a conflicting mutable borrow. | `implicit.borrow.shared-place` | Record in exported checked generic materialization metadata when downstream checking must reproduce the inserted borrow. | `language/11-linearity-borrowing-and-regions.md` |
+| `borrow.mut-place` | Mutable addressable `T` where a call expects `&![T]`. | Mutable-borrow node and region. | Prove mutability, addressability, uniqueness, region non-escape, and absence of any conflicting borrow. | `implicit.borrow.mut-place` | Record in exported checked generic materialization metadata when downstream checking must reproduce the inserted borrow. | `language/11-linearity-borrowing-and-regions.md` |
+| `reborrow.mut` | Existing `&![T]` where a call expects `&![T]`. | Nested mutable-reborrow node and suspension chain. | Prove one valid nested reborrow, source suspension, compatible join resumption, and region non-escape. | `implicit.reborrow.mut` | Record in exported checked generic materialization metadata when downstream checking must reproduce the suspension chain. | `language/11-linearity-borrowing-and-regions.md` |
+| `reborrow.read` | Existing `&![T]` where a call expects `&[T]`. | Temporary immutable read-reborrow node. | Prove temporary source suspension, read-only access, compatible join resumption, and region non-escape. | `implicit.reborrow.read` | Record in exported checked generic materialization metadata when downstream checking must reproduce the read reborrow. | `language/11-linearity-borrowing-and-regions.md` |
+| `field.autoderef-one` | Direct field access through exactly one `&[Record]` or `&![Record]`. | One dereference node. | Prove one-level field lookup and reject a second implicit dereference. | `implicit.field.autoderef-one` | Record resolved member identity in interface-affecting elaborated form and in checked generic materialization metadata. | `language/09-expressions-and-evaluation.md` |
+| `unit.fallthrough` | Reachable end of a `Unit` body. | Explicit `Unit` result node. | Prove the return type is exactly `Unit` and all ownership, borrow, and cleanup obligations are satisfied. | `implicit.unit.fallthrough` | Local-body-only except when preserved inside exported checked generic materialization metadata. | `language/05-declarations.md`, `language/10-statements-and-control-flow.md` |
+| `never.expression-site` | `Never` expression at one immediate expected type. | Diverging coercion node. | Prove source type is `Never` and the target is one immediate expected type; create no general subtyping edge. | `implicit.never.expression-site` | Record in interface-affecting elaborated form and checked generic materialization metadata when downstream checking must reproduce the join. | `language/06-type-system.md`, `language/18-built-ins.md` |
+| `never.optional-result` | Closed `Optional` or `Result` lifting admitted by the type-system table. | Closed lift node. | Prove the constructor family is exactly an admitted built-in and reject every unlisted constructor. | `implicit.never.optional-result` | Record the selected built-in lifting rule in interface-affecting elaborated form and checked generic materialization metadata. | `language/06-type-system.md` |
+| `or.result-flow` | Accepted `or return`, mapped return, `or break`, or `or continue` statement suffix. | Explicit lowered `case`. | Prove the scrutinee/result family, selected exit target, payload accounting, and cleanup edges. | `implicit.or.result-flow` | Record lowered control flow in exported checked generic materialization metadata; local nongeneric bodies remain local. | `language/10-statements-and-control-flow.md` |
+| `receiver.fallback` | Ordinary imported lookup failed and exactly one exported receiver fallback matches. | Resolved callable identity. | Prove ordinary lookup failure, one receiver candidate, visibility, and coherent callable identity. | `implicit.receiver.fallback` | Record the resolved public declaration identity in `.koi` whenever an exported declaration or checked generic body relies on it. | `language/09-expressions-and-evaluation.md`, `language/12-implicit-completions-and-elaboration.md` |
+| `format.template` | Checked formatting/template syntax with one admitted writer contract. | Checked template node. | Prove placeholder count, template grammar, `Displayable` obligations, writer contract, and absence of hidden allocation in the writer lane. | `implicit.format.template` | Record checked template metadata and referenced formatting protocol identities in interface-affecting constants or checked generic materialization metadata. | `language/09-expressions-and-evaluation.md`, `language/18-built-ins.md` |
+| `build.initialize` | `build T do ... produce expr; ... build;`. | Initialization-state graph and joins. | Prove exactly one produced `T` on every non-diverging path, exact linear accounting, and no usable partial value, hidden rollback, or defaulting. | `implicit.build.initialize` | Record lowered initialization-state form in exported checked generic materialization metadata when downstream materialization needs it. | `language/03-grammar.md`, `language/09-expressions-and-evaluation.md` |
+
+
+> Trace: D356, D459, D469, D485, D495, D500
+> Covers: The completion registry is closed, inspectable, effect-bounded, checker-visible, and separate from tooling-only source assists.
+
+Kyokai has no strict-borrow mode, no alternate mutable-borrow-elision mode, and no profile that changes this registry. Adding a completion or a borrow mode requires an accepted D-point, registry update, `.koi` rule, diagnostics, and conformance evidence before implementation.
+
+> Trace: D356-D377
+> Covers: Borrow semantics and completion semantics do not vary through hidden profiles or implementation modes.

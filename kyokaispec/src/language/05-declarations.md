@@ -84,19 +84,19 @@ type FileHandle: Linear;
 type Token[T: Type]: Auto;
 ```
 
-The declared universe marker is part of the type's public contract. A body may provide a concrete representation only in a way that satisfies the interface's opacity, universe classification, layout, and visibility rules. Client modules may name the opaque type, pass it, borrow it, store it where its universe allows, and call visible functions over it; they may not construct, deconstruct, inspect, or assume its representation unless another public declaration exposes that operation.
+The declared universe marker is part of the type's public contract. A body may provide a concrete representation only in a way that satisfies the interface's opacity, universe classification, layout, and visibility rules. Client modules may name the opaque type, pass it, borrow it, store it where its universe allows, and call visible functions over it; they must not construct, deconstruct, inspect, or assume its representation unless another public declaration exposes that operation.
 
 > Trace: D17, D52, D78, D190, D194, D195
 > Covers: Opaque types are nominal public or internal names whose representation is hidden from clients while their universe contract remains visible.
 
-An `extern type` names an opaque foreign type with unknown Kyokai size and layout. It may appear only behind FFI-admitted pointer/address forms or other specifically allowed ABI wrappers. It may not be passed by value, stored by value as an ordinary Kyokai object, destructured, measured with ordinary layout introspection, or pattern matched.
+An `extern type` names an opaque foreign type with unknown Kyokai size and layout. It may appear only behind FFI-admitted pointer/address forms or other specifically allowed ABI wrappers. It must not be passed by value, stored by value as an ordinary Kyokai object, destructured, measured with ordinary layout introspection, or pattern matched.
 
 ```kyokai
 extern type FILE;
 ```
 
 > Trace: D20, D20a, D20b, D242, D242a
-> Covers: `extern type` is an opaque C-boundary type and may not cross raw FFI by value or gain guessed Kyokai layout.
+> Covers: `extern type` is an opaque C-boundary type and must not cross raw FFI by value or gain guessed Kyokai layout.
 
 ## Records
 
@@ -158,6 +158,17 @@ An ordinary single-field record is representation-transparent in Kyokai layout a
 > Trace: D109, D190, D196
 > Covers: Ordinary single-field records are zero-cost wrappers while remaining nominally distinct.
 
+## Bitrecords
+
+A `bitrecord` declares a nominal fixed-width value over `Nat8`, `Nat16`, `Nat32`, or `Nat64` storage. Its source body contains `field name: bit N;`, `field name: bits Hi..Lo;`, and `reserved bits Hi..Lo;` items. Bit numbers start at zero at the least-significant bit. Ranges are inclusive, satisfy `Hi >= Lo`, stay within the backing width, and never overlap another field or reserved range.
+
+A single-bit field has type `Bool` unless its declaration uses an admitted one-bit unsigned view. A multi-bit field has the smallest admitted unsigned view that contains its width unless the declaration names a matching unsigned view explicitly. A profile that permits uncovered bits emits a formatter or lint finding for every uncovered position. A strict profile rejects uncovered positions. No profile permits overlap or out-of-range positions.
+
+A `bitrecord` has exactly the storage and alignment of its backing integer. `toBits(value)` returns that integer unchanged. `fromBits(bits)` preserves it unchanged and does not validate reserved bits unless a named constructor states that validation contract. Field reads and updates lower to masks, shifts, and checked range operations. A field has no address and no borrow semantics; `&value.field` and `&!value.field` are compile-time errors. Serialization crosses byte boundaries through explicit endian conversion of the backing integer. The backend never emits C bitfields for Kyokai `bitrecord` semantics.
+
+> Trace: D116, D117/D260, D323
+> Covers: `bitrecord` is a nominal masks-and-shifts value with fixed backing storage, closed position rules, no field borrows, and explicit endian boundaries.
+
 ## Unions
 
 A `union` declares a nominal tagged sum type. Each variant has a constructor name and either no payload, one unnamed payload type, or named fields.
@@ -210,7 +221,7 @@ Capabilities are ordinary values with respect to type checking, borrowing, passi
 
 ## Functions And Contracts
 
-A function declaration gives a signature without a body. A function definition gives the same signature and a body. A body must satisfy its interface declaration exactly where the signature is fixed, and may not weaken the interface contracts visible to callers.
+A function declaration gives a signature without a body. A function definition gives the same signature and a body. A body must satisfy its interface declaration exactly where the signature is fixed, and must not weaken the interface contracts visible to callers.
 
 ```kyokai
 function divide(a: Int32, b: Int32): Int32
@@ -229,12 +240,17 @@ qed;
 > Trace: D17, D52, D53, D78, D140, D142
 > Covers: Function declarations live in interfaces, definitions live in bodies, and interface-visible contracts are part of the signature clients check against.
 
-Parameters are immutable bindings unless the parameter type itself is a mutable reference such as `&![T]`. A parameter name is in scope for later parameter default-free type checking only where the grammar and contract chapters allow it; parameter names may not shadow any still-live binding.
+Parameters are immutable bindings unless the parameter type itself is a mutable reference such as `&![T]`. A parameter name is in scope for later parameter default-free type checking only where the grammar and contract chapters allow it; parameter names must not shadow any still-live binding.
 
 > Trace: D14, D60, D187, D195
 > Covers: Function parameters are ordinary bindings with explicit mutability through reference types and no shadowing.
 
-`require` clauses are Boolean preconditions evaluated at function entry. `ensure` clauses are Boolean postconditions evaluated after the body produces a return value and before that value is delivered to the caller. Contract expressions must be pure, may not mutate state, may not consume linear values, and use ordinary Kyokai runtime semantics including arithmetic trap behavior. A failed contract terminates the program.
+`receiver function` marks an exported ordinary function as eligible for the constrained UFCS receiver-module fallback. The function still declares its receiver as its first ordinary parameter. That parameter is written as owned `T`, immutable borrow `&[T]`, or exclusive mutable borrow `&![T]`. The marker is illegal on a function with no first parameter, a non-exported function, or a function declared outside the nominal receiver type's defining module unless the receiver is a compiler-known built-in family assigned to that module. The marker creates no implicit `self`, receiver declaration sugar, overload preference, or hidden import.
+
+> Trace: D254, D337, D386
+> Covers: Receiver-callable exports use one exact marker while preserving ordinary function signatures, visibility, and ownership spelling.
+
+`require` clauses are Boolean preconditions evaluated at function entry. `ensure` clauses are Boolean postconditions evaluated after the body produces a return value and before that value is delivered to the caller. Contract expressions must be pure, must not mutate state, must not consume linear values, and use ordinary Kyokai runtime semantics including arithmetic trap behavior. A failed contract terminates the program.
 
 > Trace: D53, D75, D84, D140, D142
 > Covers: Function contracts are always checked runtime value contracts; failure is TPOE and contract expressions are observation-only.
@@ -273,7 +289,7 @@ A `foreign "C" is ... mon;` block declares raw foreign functions and constants f
 > Trace: D20, D20a, D20b, D127, D242, D242a
 > Covers: Raw C FFI declarations live in visible foreign blocks inside unsafe module bodies and do not bypass normal visibility.
 
-Every raw foreign call in Kyokai source is treated as if it has an additional leading `&![UnsafeCapability]` parameter. This authority argument is erased from the actual C ABI lowering but remains part of Kyokai's source-level audit and call contract. Raw foreign declarations may not take or return Kyokai linear values or sum types by value.
+Every raw foreign call in Kyokai source is treated as if it has an additional leading `&![UnsafeCapability]` parameter. This authority argument is erased from the actual C ABI lowering but remains part of Kyokai's source-level audit and call contract. Raw foreign declarations must not take or return Kyokai linear values or sum types by value.
 
 > Trace: D20, D20a, D20b, D242, D242a, D245
 > Covers: Raw FFI requires explicit unsafe authority, exact ABI-admitted types, and no implicit linear or sum-type crossing.
@@ -294,3 +310,64 @@ A declaration that depends on a `comptime` result must receive a self-contained 
 
 > Trace: D18, D18a, D202, D203, D215
 > Covers: Compile-time declaration values are deterministic `Free` values and cannot smuggle runtime resources into static program shape.
+
+## Validated Wrapper Types
+
+A validated wrapper is an ordinary nominal record or opaque type whose defining module keeps the raw representation private. Code outside that module constructs the wrapper only through named constructors recorded in `.koi`. A constructor validates its inputs and returns `Result[Wrapper, WrapperValidationError]` or a domain-specific equivalent. Validation failure is recoverable data. It is not TPOE, `panic`, or runtime-fatal.
+
+A validated wrapper does not implicitly convert to or from its representation. Observation uses a named borrowing accessor. Owned extraction uses a named consuming API such as `intoRaw`. Deserialization and foreign wrappers call the same validator or enter through an audited unsafe contract that names the invariant they establish.
+
+| Wrapper contract field | Required rule |
+| --- | --- |
+| Invariant | State the property established by each public constructor. |
+| Construction | Name constructor inputs and recoverable validation error type. |
+| Observation | Name borrowing accessors and whether they allocate. |
+| Extraction | Name consuming accessors for owned representations. |
+| Effects | State validator purity, allocation, capabilities, target facts, and failure classes. |
+| Boundary policy | State serialization, deserialization, FFI, and unsafe-wrapper behavior. |
+| Artifact facts | Record the public wrapper identity, constructors, error type, accessors, and validator effect class in `.koi`. |
+
+Kyokai does not define a magic `Constrained[T, Predicate]` proof type. A library can define helper patterns, but arbitrary predicate types do not become compiler proofs.
+
+> Trace: D466
+> Covers: Validated wrappers use private nominal representation, named recoverable validation, explicit accessors, and recorded boundary rules.
+
+## Configuration Rejection
+
+`compile_error(message);` is a protected compile-time built-in. Its argument has type `StaticString`. It is legal at declaration scope and in compile-time-only declaration-guard positions admitted by `when`. It is not a runtime expression and produces no value.
+
+When selected configuration evaluation reaches `compile_error`, compilation fails with diagnostic code `compile_error`, the built-in source span, the provided message, and the selected target, profile, edition, and feature facts. An inactive `when` branch and an excluded target file are semantically absent, so a `compile_error` inside either one emits no diagnostic.
+
+`static_assert(condition, message);` checks a deterministic compile-time Boolean. `compile_error(message);` rejects a selected configuration directly. Neither form admits token pasting, macros, conditional token streams, body-level target branching, or build-script-generated replacement syntax.
+
+> Trace: D467
+> Covers: Unsupported selected configurations fail through one compile-time built-in with exact activation and diagnostic rules.
+
+## Parameter Access And Derived Roles
+
+Kyokai parameter access has exactly three source forms: owned `T`, immutable borrow `&[T]`, and exclusive mutable borrow `&![T]`. An owned parameter receives or consumes ownership under ordinary move and linearity rules. Return values and named out-parameters follow their written result and borrow forms. Method receiver spelling lowers through those same forms after UFCS resolution.
+
+Parameter access aliases such as `let`, `read`, `inout`, `consume`, `sink`, `set`, and equivalent keywords are syntax errors in signatures. The diagnostic reports the accepted owned or borrow spelling.
+
+Generated docs, `.koi`, diagnostics, and the Analysis Server derive documentation roles: `consume`, `read_borrow`, `mut_borrow`, `return_owned`, `return_borrow`, and `capability`. These are derived facts. They do not change overload resolution, type checking, borrowing, ownership, or lowering.
+
+> Trace: D469
+> Covers: Source syntax stays small while tools render the ownership role already proven by the signature.
+
+## Build Expressions And Definite Initialization
+
+General uninitialized local declarations such as `let x;` are illegal. A binding enters scope through a value expression, function result, initialized pattern, or `build` expression.
+
+```kyokai
+let value: T := build T do
+    statements...
+    produce expr;
+build;
+```
+
+`produce expr;` exits the nearest enclosing `build` expression and yields one fully initialized value of the declared type. Every non-diverging path through the block reaches exactly one `produce`. `return` still exits the enclosing function. `break`, `continue`, `yield`, and generator suspension do not target `build`.
+
+The elaborator lowers `build` before type, linearity, borrow, capability, and contract checking into explicit initialization-state control flow. The lowering introduces no hidden default, rollback, destructor, allocation, or exception. Partial records, omitted required fields, double initialization, and escaping partial values are rejected. A linear value created inside the block is moved into the produced value, consumed visibly, returned through a named recovery payload, or rejected as live at block exit.
+
+> Trace: D500
+> Covers: Multi-line construction preserves definite initialization without adding uninitialized locals or hidden cleanup behavior.

@@ -51,7 +51,7 @@ Region parameters are admitted only by the borrow and region chapters. The commo
 
 ## Rank And Quantification
 
-Kyokai generics are rank-1 only. Type parameters may be introduced only on declarations. A type expression in a parameter, field, local binding, associated type definition, return type, or other value-level type position may not introduce a nested universal quantifier.
+Kyokai generics are rank-1 only. Type parameters may be introduced only on declarations. A type expression in a parameter, field, local binding, associated type definition, return type, or other value-level type position must not introduce a nested universal quantifier.
 
 > Trace: D192
 > Covers: Kyokai rejects higher-rank, rank-N, and impredicative polymorphism.
@@ -66,27 +66,27 @@ Kyokai has no existential types, no `impl Trait`-style opaque returns, no hidden
 > Trace: D82, D193
 > Covers: Functions and stored values do not hide concrete implementation types behind existential or opaque-return surfaces.
 
-## Generic Type Argument Inference
+## Expression Checking Modes And Generic Type Argument Inference
 
-Call-site generic type argument inference is local, argument-driven, forward-only, and left-to-right. If explicit type arguments are omitted, the compiler may infer them only from the receiver and explicit value arguments of that call after ordinary desugaring such as UFCS.
+Every expression is processed in one of two modes. `synthesize` derives one type from the expression itself. `check(ExpectedType)` checks the expression against one already-known expected type. Expected types flow from variable annotations, function parameter types, return annotations, record fields, union payloads, array element context, typeclass method signatures, explicit generic arguments, and assignment or update targets. Expected-type flow never inserts allocation, authority acquisition, blocking, cleanup, or control flow.
 
-> Trace: D7a, D12, D82, D209/D161, D254
-> Covers: Omitted call type arguments are solved from call inputs only, after receiver-call desugaring, and never from distant context.
+> Trace: D12, D46, D87, D209/D161, D349
+> Covers: Kyokai uses local `synthesize` and `check(ExpectedType)` modes instead of global inference or effectful coercion.
 
-Earlier arguments may constrain later arguments. Later arguments do not retroactively reinterpret earlier argument expressions. Literal typing may use type arguments already solved from earlier arguments in the same call. If any omitted type parameter remains unsolved or ambiguous after argument-side information is processed, the call is a compile-time error and the program must supply explicit type arguments.
+Call-site generic type argument inference is local, forward-only, and left-to-right. The compiler resolves callee identity and explicit generic arguments first. It then checks arguments from left to right against parameter types after each known substitution. Earlier arguments can constrain later arguments. A later argument does not retroactively reinterpret an earlier argument.
 
-> Trace: D12, D87, D209/D161
-> Covers: Generic inference is left-to-right, local, deterministic, and rejects unsolved or ambiguous omissions.
+A nested generic call can use an expected type already supplied by its immediate outer parameter or another listed local expected-type source. It cannot solve an outer generic by working backward through arbitrary return types, distant assignments, later expressions, surrounding obligations, import order, or visible-instance order. If an inner expression has no known expected type, it must synthesize one unique type. If an omitted type parameter remains unknown or ambiguous after the local pass, the program must write the missing type argument or annotation.
 
-Expected return type, assignment target type, `let` annotation, enclosing expression context, pattern context, match arm result context, and surrounding generic obligations do not solve omitted type arguments. A call such as `let buf: Buffer[Int32] := Buffer.new(alloc);` is legal without explicit type arguments only when `alloc` or earlier explicit arguments determine `Int32` by the call-inference rules.
+```kyokai
+consumeBuffer(Buffer.new[Int32](alloc));
+consumeBuffer(Buffer.new(alloc)); // legal only when consumeBuffer's parameter supplies Buffer[Int32]
+let buf := Buffer.new(alloc);     // rejected when the initializer cannot synthesize its element type
+```
 
-> Trace: D46, D87, D209/D161
-> Covers: Kyokai rejects return-context and target-type inference for generic call arguments.
+Generic constructors, ordinary function calls, UFCS calls, and typeclass method calls use the same rule after desugaring. Typeclass instance selection happens only after concrete type arguments and constraints identify one coherent instance.
 
-Generic constructors, ordinary function calls, UFCS calls, and typeclass method calls use the same inference rule after desugaring. Import order and visible instance order do not provide a tie-breaker for inference.
-
-> Trace: D82, D179, D209/D161, D214, D254
-> Covers: Generic inference is uniform across call surfaces and cannot depend on import order.
+> Trace: D7a, D12, D46, D82, D87, D179, D209/D161, D214, D254, D349
+> Covers: Nested generic inference accepts immediate expected-type flow but rejects backward solving, distant inference, and order-dependent guesses.
 
 ## Where Clauses
 
@@ -170,7 +170,7 @@ A required method has a signature and no body. A default method has a body in th
 > Trace: D33, D182
 > Covers: Default method bodies are allowed, required methods must be implemented, and instances may override defaults.
 
-Typeclass methods may have contracts. Those contracts are part of the method obligation. An instance method may strengthen implementation detail internally, but it may not expose a weaker public contract than the typeclass method requires.
+Typeclass methods may have contracts. Those contracts are part of the method obligation. An instance method may strengthen implementation detail internally, but it must not expose a weaker public contract than the typeclass method requires.
 
 > Trace: D53, D140, D142, D182
 > Covers: Typeclass method contracts are part of static method obligations and remain always checked.
@@ -185,10 +185,10 @@ Kyokai does not define a general `Default[T]` typeclass. Generic code cannot fab
 > Trace: D177
 > Covers: There is no generic default-value hook or zero-bit-pattern construction rule.
 
-Generic cleanup of linear values uses an explicit standard typeclass such as `Destroyable[T: Linear]`. The language does not invent structural destruction for user types and does not run hidden destructors at scope exit.
+Generic cleanup uses explicit manual contracts. `Destroyable[T]` names a domain cleanup operation. `Cleanable[T]` is the container and drain cleanup contract: `Free` values satisfy it trivially with no runtime action, while `Linear` values require a named consuming implementation. The language does not invent structural destruction and does not run either contract at scope exit.
 
-> Trace: D2, D89, D157, D195
-> Covers: Linear cleanup is explicit through APIs/typeclasses and visible cleanup statements, not hidden RAII or structural destruction.
+> Trace: D2, D89, D124, D195, D289-D290, D376
+> Covers: `Destroyable` and `Cleanable` stay distinct manual cleanup contracts and never become hidden RAII.
 
 ## Instances And Coherence
 
@@ -233,3 +233,46 @@ Allocator handles, stream handles, capability values, and other explicit runtime
 
 > Trace: D79, D82a, D82b, D83
 > Covers: Interface artifacts carry generic/typeclass contract metadata needed for separate compilation and deterministic checking.
+
+## Conditional Instances
+
+A typeclass instance can state explicit compile-time constraints over type parameters, universes, layout facts, task-transfer facts, and typeclass witnesses. After generic substitution, the instance is available only when every written constraint is satisfied.
+
+`.koi` records the instance head, generic parameter pattern, constraint list, exported methods, behavior contract, complexity contract, owning package and module, capability requirements, allocation requirements, and target gates. Changing a public conditional instance head or constraint list is a `.koi` and SemVer-relevant API change.
+
+> Trace: D470
+> Covers: Conditional instances are admitted only as explicit compile-time facts recorded in package interfaces.
+
+## Coherence For Conditional Instances
+
+Coherence is global over the selected package graph. An instance identity includes typeclass identity, receiver or generic head, generic parameter pattern, constraint set, owning package, and owning module. For every concrete resolution context, exactly one visible legal instance can satisfy the requested typeclass and type arguments.
+
+Two instances overlap when one substitution satisfies both heads and both constraint sets for the same target and visibility context. If the compiler cannot prove the constraint sets disjoint, the package graph is rejected even when no current call site selects the overlap. A private instance is exempt only when it is not visible in the same resolution context as the other instance. The diagnostic names both instances, their packages and modules, and one witness substitution when the solver can construct one.
+
+An instance is legal only when its package owns the typeclass or owns at least one concrete head type named by the instance, except for documented stdlib exception records. Kyokai rejects behavior-changing specialization, negative instances, implicit priority, declaration-order selection, dependency-order selection, and runtime fallback dictionaries. A performance specialization is a backend or materialization choice only when it preserves values, failures, ownership, allocation, authority, blocking, target behavior, and public contract.
+
+> Trace: D214, D216, D360, D376, D470
+> Covers: Conditional instances remain deterministic because overlap is rejected across the selected package graph.
+
+## Unsafe-Origin Instances
+
+An instance declared in an unsafe module is marked `unsafe-origin` in `.koi`. It obeys the same orphan and coherence rules as a safe instance. Unsafe status does not authorize forged witnesses, ambiguous dispatch, or weaker laws.
+
+Security-sensitive typeclasses, including equality, ordering, hashing, display, parsing, serialization, and authority-related protocols, require explicit admission records for secret-bearing, capability-bearing, unsafe-backed, and foreign-backed types. `kyokai audit` reports unsafe-origin instances and rejects policy-denied dependency admission.
+
+> Trace: D460
+> Covers: Unsafe modules can define audited instances but cannot bypass coherence or hide security-sensitive behavior.
+
+## Materialization And Code Size
+
+Materialization follows the static-dispatch contract. The compiler can emit a specialized body, share an existing body, deduplicate equivalent bodies, or apply identical-code folding only when observable semantics remain identical. The equivalence check includes values, failures, side effects, ownership, allocation, capabilities, blocking, volatile behavior, atomic behavior, layout, source-map policy, and provenance classification.
+
+Toolchain code-size policy changes emission strategy only. It does not add runtime dictionaries, hidden dispatch, or source-visible specialization. `.koi` records the operation preconditions needed by downstream checking and materialization, including `T: Free`, `T: Linear`, hashing, ordering, task-transfer, pinning, invalidation, target, and capability facts whenever the operation contract contains them.
+
+> Trace: D82a-D82b, D200, D480, D497
+> Covers: Code-size controls preserve static Kyokai semantics and cannot become a hidden dispatch system.
+
+Every compiler-known or standard typeclass admission record states purpose, laws, compiler involvement, `.koi` representation, coherence effects, diagnostics, cleanup behavior, and why named functions do not suffice.
+
+> Trace: D360, D376
+> Covers: Compiler-known protocols remain individually admitted rather than growing by convention.

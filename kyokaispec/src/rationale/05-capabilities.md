@@ -65,3 +65,13 @@ Capability security is Kyokai saying no to ambient permission. The signature bec
 
 > Trace: D67, D85, D211-D212, D255
 > Covers: Authority-bearing operations require visible capability or handle flow.
+
+## Bundles, Ceilings, And Sandboxes
+
+[Rikona Kurasaki / Mjoyufull]
+Passing ten narrow capabilities one by one can become visual noise. Hiding them in a global context would solve the wrong problem. Kyokai permits nominal bundles: ordinary visible records assembled at a boundary and passed where their shape is honest. Leaf APIs still ask for the narrowest capability or handle they need.
+
+The same rule applies outside the running program. Package manifests can declare authority ceilings for dependency graphs. Build generators run under default-deny sandboxes with declared inputs, outputs, environment keys, network access, and process authority. A bundle, ceiling, or sandbox is useful because it names authority; none of them mint authority by convenience.
+
+> Trace: D381, D462, D465, D492
+> Covers: Visible bundles, dependency authority ceilings, and generation sandboxes improve capability ergonomics without creating ambient permission.

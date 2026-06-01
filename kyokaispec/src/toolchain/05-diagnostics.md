@@ -8,10 +8,10 @@ Diagnostics are part of the language experience, but they are also part of the t
 
 ## Diagnostic Records
 
-Every diagnostic has a stable code, severity, primary message, optional source spans, optional labels, optional notes, optional help text, optional machine-applicable suggestions, and optional related diagnostics. Human rendering may change wording across releases, but the code, severity category, span meaning, and JSON shape must remain compatible within the same diagnostic schema version.
+Every diagnostic has a stable code, severity, primary message, zero or more source spans, labels, notes, help records, suggestions, and related diagnostics. Diagnostic IDs have lifecycle states: `active`, `deprecated-alias`, and `removed-at-schema-boundary`. A released code is never reused for a different rule. Human rendering can improve without changing code identity, severity category, span meaning, suggestion semantics, suppression semantics, or JSON compatibility within the same diagnostic schema version.
 
-> Trace: D29, D157
-> Covers: Diagnostics have stable structured identity while allowing human wording improvements.
+> Trace: D29, D157, D414
+> Covers: Diagnostics have stable structured identity, explicit lifecycle, and compatible human-text evolution.
 
 Diagnostic codes are spelled `KYO-E0001` for errors, `KYO-W0001` for warnings, `KYO-L0001` for lints, `KYO-A0001` for audit findings, and `KYO-I0001` for informational notes that may appear as top-level records in machine output. A code is never reused for a different rule after release.
 
@@ -42,7 +42,7 @@ If a diagnostic arises from a `.koi` artifact, the tool must report the artifact
 
 ## JSON Schema
 
-`--format json` emits one UTF-8 JSON object per line unless a command-specific chapter defines a single JSON document mode. Each object has at least these keys:
+`--message-format=json-lines` emits one UTF-8 JSON object per line. `--message-format=json` emits one versioned JSON report document whose diagnostic array carries the same record shape. Each diagnostic record has at least these keys:
 
 ```json
 {
@@ -59,56 +59,56 @@ If a diagnostic arises from a `.koi` artifact, the tool must report the artifact
 }
 ```
 
-> Trace: D29, D225
-> Covers: Machine diagnostics use a stable line-delimited JSON record by default.
+> Trace: D29, D225, D503
+> Covers: Machine diagnostics use the same versioned record schema in JSON-document and JSON-lines lanes.
 
 Unknown keys in a JSON diagnostic must be ignored by consumers. Removing a key, changing a key's meaning, changing a severity string, or reusing a code for a different rule requires a new schema version.
 
 > Trace: D29, D157
 > Covers: Diagnostic JSON evolves compatibly by schema version.
 
-A suggestion has a message, applicability, and edits. Applicability is `machine-applicable`, `maybe-incorrect`, or `manual-only`. A machine-applicable suggestion must preserve parseability and must not change semantics except for the exact error repair described by the diagnostic.
+A suggestion has a stable fix ID, message, safety class, and edit set when edits exist. Safety class is `note-only`, `manual`, `maybe-applicable`, `machine-applicable`, or `machine-applicable-safe`. `kyokai fix` applies only `machine-applicable-safe` edits by default. A safe edit must preserve parseability and must change semantics only through the explicit repair described by the diagnostic.
 
-> Trace: D25, D29
-> Covers: Suggestions distinguish safe automatic edits from human judgment.
+> Trace: D25, D29, D414, D503
+> Covers: Suggestions use stable fix IDs and distinguish notes, manual work, previews, machine edits, and validated safe automatic edits.
 
 ## Diagnostic Explanation Catalog
 
-Every released diagnostic code has an explanation catalog entry shipped with the toolchain. The entry includes the code, severity, rule name, short explanation, longer explanation, common causes, examples where useful, repair patterns, suggestion applicability if any, related diagnostic codes, and links or local anchors to relevant spec chapters. The catalog is versioned with the diagnostic schema.
+Every released diagnostic code has an explanation catalog entry shipped with the toolchain. The entry includes the code, severity, rule name, short explanation, longer explanation, common causes, zero or more worked examples, repair patterns, one suggestion-applicability record or an explicit `none`, related diagnostic codes, and links or local anchors to relevant spec chapters. The catalog is versioned with the diagnostic schema.
 
 > Trace: D29, D267
 > Covers: Diagnostic codes have first-party explanations that can be rendered offline and tied back to the spec.
 
-`kyokai explain <code-or-category>` reads the local explanation catalog by default. It may print a human explanation or JSON when `--format json` is selected. If the installed toolchain does not know the requested code, the command must say so without searching the network by default. Online documentation may mirror the same catalog, but the local toolchain remains the authority for the codes it emits.
+`kyokai explain <code-or-category>` reads the local explanation catalog by default. It prints human text or versioned machine records according to `--message-format`. If the installed toolchain does not know the requested code, the command must say so without searching the network by default. Online documentation can mirror the same catalog, but the local toolchain remains the authority for the codes it emits.
 
 > Trace: D29, D225, D267
 > Covers: Explanation lookup works offline, matches the installed compiler version, and keeps online docs as mirrors rather than hidden authority.
 
 ## Automatic Fixes
 
-A diagnostic may carry edits only when the compiler can state the exact repair being offered. `machine-applicable` means the edit is safe for `kyokai fix` under the current source snapshot. `maybe-incorrect` means the compiler can suggest a plausible edit but cannot prove user intent. `manual-only` means the diagnostic can explain a repair but must not emit an automatic edit.
+A diagnostic carries edits only when the compiler can state the exact repair being offered. `machine-applicable-safe` means the edit passed the repair-specific validation required for default `kyokai fix`. `machine-applicable` means an edit set exists but requires explicit opt-in. `maybe-applicable` means the compiler can suggest a plausible candidate but cannot prove the intended repair. `manual` and `note-only` never apply edits.
 
-> Trace: D25, D29, D267
-> Covers: Automatic fixes are gated by diagnostic applicability rather than by a separate refactoring folklore layer.
+> Trace: D25, D29, D267, D414, D485
+> Covers: Automatic fixes are gated by a closed safety-class table rather than by a separate refactoring folklore layer.
 
-`kyokai fix` applies only selected machine-applicable suggestions by default. It must reject stale suggestions whose source spans no longer match the checked snapshot, reject overlapping edits unless the diagnostic engine has already merged them into one edit set, rerun parsing after edits, and format only the changed files through `kyokai fmt` rules. If validation fails, the command must leave the original files unchanged or restore them before reporting failure.
+`kyokai fix` applies only selected `machine-applicable-safe` suggestions by default. It must reject stale suggestions whose source spans no longer match the checked snapshot, reject overlapping edits unless the diagnostic engine has already merged them into one edit set, rerun parsing after edits, and format only the changed files through `kyokai fmt` rules. If validation fails, the command must leave the original files unchanged or restore them before reporting failure.
 
 > Trace: D25, D29, D83, D267
 > Covers: Safe fixes are snapshot-checked, overlap-checked, parse-checked, and formatter-integrated before file changes become visible.
 
-## Warning And Lint Policy
+## Diagnostic Policy
 
-Warnings are grouped by category. Required categories include `unused`, `style`, `compatibility`, `deprecated`, `unsafe-surface`, `capability-surface`, `ffi-surface`, `reproducibility`, and `toolchain`. The compiler may add categories only by documenting them in this spec or a compatible extension registry.
+Kyokai has no separate `kyokai lint` command. Compiler-integrated advisory diagnostics flow through `check`, `build`, `test`, and the Analysis Server. Warnings are grouped by category. Required categories include `unused`, `style`, `compatibility`, `deprecated`, `unsafe-surface`, `capability-surface`, `ffi-surface`, `reproducibility`, and `toolchain`. The compiler may add categories only by documenting them in this spec or a compatible extension registry.
 
 > Trace: D29, D150, D155
 > Covers: Warnings and lints are categorized and not free-floating messages.
 
-Project-level diagnostic policy lives in `kyokai.toml`. Source-level suppression is allowed only through explicit attributes or pragmas defined by the language spec. A suppression must name a diagnostic code or category and may include a reason string. Blanket suppression of all errors is illegal.
+Project-level diagnostic policy lives in `kyokai.toml`. Source-level suppression is allowed only through explicit attributes or pragmas defined by the language spec. A suppression binds to diagnostic code or category and can include scope, expiry, reason, and policy source. Blanket suppression of all errors is illegal. The compiler-integrated `misclassified_failure` diagnostic reports a Tier-1 API that encodes programmer bugs, violated preconditions, impossible states, or invariant corruption as recoverable `Result`.
 
-> Trace: D29, D155
-> Covers: Diagnostic suppression is explicit, bounded, and auditable.
+> Trace: D29, D155, D414, D455
+> Covers: Diagnostic suppression is explicit, bounded, auditable, and paired with compiler-integrated failure-taxonomy checking rather than a separate lint frontend.
 
-A suppression that matches no emitted diagnostic should itself produce a warning unless the policy marks unused suppressions as allowed. This prevents dead suppressions from becoming old dust nobody remembers to clean.
+A suppression that matches no emitted diagnostic produces a warning unless the policy marks unused suppressions as allowed. This prevents dead suppressions from becoming old dust nobody remembers to clean.
 
 > Trace: D29
 > Covers: Suppression policy catches stale suppressions.
@@ -127,12 +127,19 @@ Human rendering may use color, underlines, source excerpts, and terminal width. 
 
 ## Required Quality
 
-A diagnostic should name the rule violated, the entity involved, the source location, and the nearest actionable correction when the compiler can know it. For ownership, borrow, capability, target, package, and `.koi` errors, the diagnostic must include enough related context that a user can find the other side of the conflict without reading compiler internals.
+## Ownership-State Diagnostics
+
+A linearity or borrow diagnostic reports the binding or projection path, current D348 state, previous state-changing span, attempted operation, and nearest legal action when one exists. Branch-join diagnostics print every normally completing arm and its resulting state. Partial-move diagnostics print the moved field set and the remaining live fields. Loop diagnostics identify `PendingLoopConsumption` and the zero-, one-, or repeated-iteration path that prevents exactly-once proof. Inserted borrow and reborrow diagnostics include the completion registry ID and insertion span.
+
+> Trace: D29, D240, D348, D356
+> Covers: Ownership errors expose checker state transitions instead of reporting only a generic use-after-move or borrow conflict.
+
+A diagnostic must name the rule violated, the entity involved, the source location, and the nearest actionable correction when the compiler can know it. For ownership, borrow, capability, target, package, and `.koi` errors, the diagnostic must include enough related context that a user can find the other side of the conflict without reading compiler internals.
 
 > Trace: D29, D78-D79, D137, D150
 > Covers: Diagnostics for core Kyokai safety boundaries carry actionable context.
 
-A diagnostic must not blame a later phase when an earlier rule is the true cause. A missing symbol caused by a hidden import collision should report the import collision. A link failure caused by undeclared native dependency should report the undeclared dependency before invoking the linker when the tool can prove it.
+A diagnostic must not blame a later phase when an earlier rule is the true cause. A missing symbol caused by a hidden import collision reports the import collision. A link failure caused by an undeclared native dependency reports the undeclared dependency before invoking the linker when the tool can prove it.
 
 > Trace: D29, D31, D78, D150
 > Covers: Diagnostics point at the first meaningful rule violation.
@@ -144,3 +151,20 @@ A good diagnostic does not flatter you. It shows the wound, names the blade, and
 
 > Trace: D29
 > Covers: Kyokai diagnostic quality is required because the language's safety model must be teachable through errors.
+
+## Stable Diagnostic, Redaction, And Explanation Contract
+
+A structured diagnostic records schema version, stable diagnostic ID, severity, category, message key, rendered human message, primary span, related spans with roles, notes, explanation ID, fix IDs, source origin, target/profile/backend, policy facts, redaction facts, and external-tool raw-log artifact when present.
+
+Stable IDs and JSON fields are compatibility surfaces. Human wording can improve while preserving semantic identity. A removed or repurposed ID is a compatibility change. A deprecated source surface emits its stable deprecation ID, replacement, compatibility horizon, and migration action.
+
+Redaction is default-on for secret-marked values, environment values, process arguments, raw addresses, capability internals, tokens, keys, and foreign TLS error payloads that contain secrets. A diagnostic reports that redaction happened. Revealing protected content requires an explicit local policy and never appears in machine output by accident.
+
+External-tool failures retain raw stdout, raw stderr, command identity, arguments after redaction, working directory class, environment-key names, exit category, target, and toolchain provenance. Human diagnostics summarize; artifacts preserve raw evidence.
+
+`kyokai explain` exposes named compiler-backed modes: `linearity`, `borrow`, `defer`, `failure-flow`, `lowering`, `capability`, `target`, `koi`, `generated-c`, and `package-graph`. Explain output never changes program semantics. `kyokai fix` and Analysis Server code actions use the same fix IDs and closed safety classes: `note-only`, `manual`, `maybe-applicable`, `machine-applicable`, and `machine-applicable-safe`.
+
+Branch-join diagnostics print each binding state per arm. Resource-flow assists print constructors, patterns, joins, cleanup obligations, fixtures, interfaces, `.koi` facts, downstream packages, and post-edit validation status.
+
+> Trace: D302-D303, D316, D328, D333, D358, D368, D378-D380, D402, D404, D414, D420, D422, D427-D428, D444, D474, D482, D485, D488, D495, D503, D518
+> Covers: Structured diagnostic identity, redaction, raw external logs, deprecations, explain modes, fix safety, branch joins, and resource-flow reporting are explicit.

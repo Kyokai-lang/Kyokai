@@ -6,23 +6,17 @@ This document explains every change Kyokai makes from Austral, why each change w
 
 ---
 
-## Normative basis (kyokaiplan.md)
+## Public authority and traceability
 
-**Authoritative design source:** [`kyokaidecided.md`](./kyokaidecided.md) is the record of every decided **`D`** point and its rationale for Kyokai. Per **D86**, eventual **normative** text splits into a core language spec (derived from `australspec/`) and a companion toolchain spec; **`kyokaiplan.md` is neither of those** — it is the design plan that informs both. For *this* comparative document, if anything here disagrees with the plan on a decided point, **`kyokaiplan.md` wins** on substance.
+[`kyokaidecided.md`](./kyokaidecided.md) records accepted Kyokai shape that has not yet been fully extracted into the normative spec. The normative chapter family under `kyokaispec/` controls rules already extracted there. This comparative guide is explanatory: if it disagrees with the normative spec or accepted shape, fix this guide.
 
-**Final verification pass (2026-05-01):**
-
-1. **Decision IDs:** All **167** distinct canonical **`D###` / `d###`** tokens in this file resolve to a defined decision in `kyokaiplan.md` when matched against **`### D…:`** headings, appendix **`| D…:`** rows, and inline **`D… →`** markers (including **`D7a`** / **`D7b`**, which are sub-points under **`### D7:`**, not separate `### D7a:` headers).
-2. **Normative Kyokai claims:** Statements that describe *decided* Kyokai semantics are written to follow the cited **`D`**-points and **`kyokaiplan.md` §3.3**; those passages are **kyokaiplan-verified** in the strict sense that each carries traceability to the plan via **`D-index`** / inline **`D###`** citations.
-3. **Illustrative code:** Fenced examples **without** a tying **`D-index`** (or labeled as **baseline** / **sketch** / **example only**) are for intuition and may use placeholder names or CLI flags — they are **not** normative unless the surrounding **`D-index`** pins them to a specific **`D`**.
-
-Together, (1)–(2) are what “**100% `kyokaiplan.md`–verified**” means here: **full traceability and alignment for every cited decision and every D-indexed normative claim**; (3) is explicitly out of that scope.
+A `D-index` entry is a traceability tag, not a substitute for explanation. The nearby prose and code state the Austral-to-Kyokai mechanic directly. The tag lets maintainers find the matching accepted-shape entry when auditing the guide. Examples labeled `baseline`, `sketch`, or `example only` remain illustrative unless the surrounding prose states the accepted mechanic.
 
 ---
 
 ## Table of Contents
 
-0. [Normative basis (kyokaiplan.md)](#normative-basis-kyokaiplanmd)
+0. [Public authority and traceability](#public-authority-and-traceability)
 1. [What Stayed the Same](#1-what-stayed-the-same)
     - 1.1 [New Foundational Commitments](#11-new-foundational-commitments)
 2. [Syntax Changes](#2-syntax-changes)
@@ -821,7 +815,7 @@ d6 — anonymous-by-default `&[T]` / `&![T]` signatures vs explicit `generic [R:
 **Austral**: When passing a mutable borrow to another function, you must manually dereference and re-borrow with `&~`:
 
 ```austral
--- Austral: &~ appears 200+ times in bfetchaust
+-- Austral: repeated mutable-borrow forwarding requires explicit &~ at every call
 generic [R: Region]
 function ansi(out: &![ByteBuf, R], code: Index): Unit is
     appendByte(&~out, 27 : Nat8);
@@ -941,7 +935,7 @@ d9 — `fi` terminator.
 **Austral**: Every function returning `Unit` must explicitly write `return nil;` at the end.
 
 ```austral
--- Austral: return nil appears 18 times in bfetchaust
+-- Austral: every Unit-returning function ends with an explicit return nil
 function nl(out: &![ByteBuf, R]): Unit is
     appendByte(&~out, 10 : Nat8);
     return nil;
@@ -1048,7 +1042,7 @@ d15a — explicit-binder `or return err => expr` inline error mapping (D15a); no
 **Austral**: No defer mechanism. Linear types require explicit consumption, leading to long destroy chains:
 
 ```austral
--- Austral: 11 manual destroys in bfetchaust
+-- Austral: a resource-heavy function can end with a long manual destroy chain
 destroyByteBuf(packages);
 destroyByteBuf(gpu);
 destroyByteBuf(cpu);
@@ -2233,7 +2227,7 @@ seal;
 ```
 **D-index**
 d87 — implicit/inserted forms only under the tautology rule when this block relies on them.
-xref — see `kyokaiplan.md` §3.3 for the authoritative `D` list for this subsection.
+xref — the nearby prose states the mechanic; `d87` is supporting traceability to `kyokaidecided.md`.
 
 ### Design by Contract
 
@@ -2266,7 +2260,7 @@ d6 — anonymous `&[Buffer[Int32]]` in the sketch.
 
 ## Summary of Changes at a Glance
 
-Authoritative `D` numbering lives in `kyokaiplan.md` §3.3 and the appendix index; the table below is a shorthand crosswalk, not a second spec. In the plan appendix, **D7a** (UFCS) and **D7b** (auto-reborrow) are documented as sub-points under **`### D7:`**, not as separate top-level `### D7a:` headers. For the meaning of **kyokaiplan-verified** (including the **167** resolved canonical `D` / `d` tokens), see [Normative basis (kyokaiplan.md)](#normative-basis-kyokaiplanmd) above.
+The table below is an explanatory crosswalk, not a second spec. Each row states the user-visible Austral-to-Kyokai mechanic directly. `D-index` tags elsewhere in this guide provide supporting traceability to `kyokaidecided.md`; they do not require the reader to reconstruct the mechanic from an ID.
 
 | Category | Austral | Kyokai |
 |----------|---------|--------|
@@ -2297,7 +2291,7 @@ Authoritative `D` numbering lives in `kyokaiplan.md` §3.3 and the appendix inde
 
 ## Appendix: D204 through D263 decision titles (synced with `kyokaidecided.md`)
 
-Rows are the **appendix short titles** from the current plan (≈ lines 10950–11010). Full prose for each decision lives under **`### Dnnn:`** in `kyokaiplan.md` and in **§3.3**.
+Rows are short public traceability labels. The surrounding sections state the mechanics; accepted-shape prose for each listed decision lives under the matching `### Dnnn:` heading in `kyokaidecided.md` until normative extraction is complete.
 
 | ID | Appendix title |
 |----|----------------|

@@ -60,3 +60,13 @@ The bet is simple and hard: make the programmer write the boundary once, then ma
 
 > Trace: D85, D155, D211, D229
 > Covers: Kyokai's language design centers explicit semantic boundaries enforced by specification, compiler, and tooling.
+
+## Full-Conformance Honesty
+
+[Rikona Kurasaki / Mjoyufull]
+A language gets weaker when the reader has to guess which promises count today. Kyokai separates the contract from the evidence. A rule can be intended by the spec before a parser accepts it. It can be implemented and tested before a public conformance suite covers it. It can be conformance-backed before a paper theorem or machine proof exists. Those are different facts, and the public record names the strongest one actually earned.
+
+A target gate is not a quiet omission. The selected target record states whether the host has the ABI, filesystem, path, clock, entropy, dynamic-loading, atomic, process, or terminal fact the API needs. If the fact is absent, the compiler rejects the import or use before lowering. That keeps platform variation visible without letting implementation variation become folklore.
+
+> Trace: D367, D477-D487, D508
+> Covers: Kyokai separates spec, implementation, conformance, and proof evidence while requiring explicit target gates and rejecting vague implementation-choice wording.

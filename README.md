@@ -2,22 +2,22 @@
 
 Kyokai is a systems programming language forked from Austral and built around explicit resource ownership, linear types, capability-based authority, and defined failure behavior.
 
-Kyokai is currently in early public development. The accepted language shape has been extracted, but the normative Kyokai spec and compiler implementation are still being brought up from the inherited Austral codebase.
+Kyokai is currently in early public development. The accepted language shape and initial normative Kyokai spec have been extracted, while the compiler implementation is still being brought up from the inherited Austral codebase.
 
 ## Current Status
 
 | Area | Status |
 | --- | --- |
 | Accepted language shape | Present in `kyokaidecided.md`. |
-| Live public D-points | Tracked in `Kyokaishape.md`. |
-| Normative Kyokai spec | Not started yet; future home is `kyokaispec/`. |
+| Live public D-points | Normally carried by PRs/MRs; `Kyokaishape.md` is index/archive. |
+| Normative Kyokai spec | Active under `kyokaispec/`; accepted shape not yet fully extracted remains in `kyokaidecided.md`. |
 | Compiler | Inherited Austral OCaml compiler, being forked toward Kyokai. |
 | Standard library | Inherited Austral stdlib, being redesigned/admitted under Kyokai rules. |
 | Roadmap | `phase.md`. |
 | Code standards | `CODE_STANDARDS.md`. |
 | Project workflow | `PROJECT_STANDARDS.md`. |
 
-Inherited Austral examples, commands, docs, and spec files may still exist while the fork is being converted. Treat accepted Kyokai shape and future Kyokai spec text as the language authority, not stale inherited prose.
+Inherited Austral examples, commands, docs, and spec files may still exist while the fork is being converted. Treat accepted Kyokai shape and written Kyokai spec text as the language authority, not stale inherited prose.
 
 ## Core Direction
 
@@ -35,9 +35,10 @@ Kyokai keeps Austral's most important safety ideas and pushes them toward a prod
 
 1. `kyokaispec/` once a Kyokai rule is written there.
 2. `kyokaidecided.md` for accepted Kyokai shape not yet spec-extracted.
-3. `Kyokaishape.md` for live public D-points and pending shape.
-4. Linked public discussions, issues, and PRs.
-5. `phase.md` for implementation order only.
+3. Public PRs/MRs carrying live D-point proposals and final wording.
+4. `Kyokaishape.md` for index/archive tracking when a D-point does not live directly in a PR/MR.
+5. Issues and discussions as motivation or pre-proposal material.
+6. `phase.md` for implementation order only.
 
 `phase.md` is not a language spec. It records ordering, gates, and status.
 
@@ -49,12 +50,14 @@ Kyokai keeps Austral's most important safety ideas and pushes them toward a prod
 | `standard/` | Current inherited standard-library tree. |
 | `test/` | Unit-level compiler tests. |
 | `test-programs/` | End-to-end compiler tests inherited from Austral. |
-| `kyokaispec/` | Future Kyokai specification workspace; currently inherited Austral staging material. |
+| `kyokaispec/` | Normative Kyokai specification source and generated outputs. |
 | `kyokaidecided.md` | Accepted Kyokai shape and maturity tracker. |
-| `Kyokaishape.md` | Public live D-point tracker. |
+| `Kyokaishape.md` | Public D-point index/archive, not the normal home for new D-point bodies. |
 | `phase.md` | Implementation/proof roadmap. |
 | `CODE_STANDARDS.md` | Mandatory code standards. |
 | `PROJECT_STANDARDS.md` | Public project workflow. |
+| `docs/contributing/spec-writing.md` | Public guide for D-point/spec prose. |
+| `docs/infrastructure/services.md` | Public service/infrastructure ownership board. |
 
 ## Building The Current Inherited Compiler
 
@@ -91,7 +94,7 @@ make
 
 `kyokaispec/` is intentionally kept inside this repository so spec text, compiler changes, tests, and phase tracking can move together.
 
-The spec source can later be published as a GitHub Pages site by building HTML/PDF from `kyokaispec/` and deploying only generated artifacts to a `gh-pages` branch or generated-docs path. The source should stay with the compiler unless there is a clear maintenance reason to split it.
+The spec source is published by building HTML/PDF from `kyokaispec/` and deploying only generated artifacts to a `gh-pages` branch or generated-docs path. The source remains in the main monorepo by default. Under the D514 repository split, Kyokai keeps one main monorepo and separates only independently deployed or independently governed services such as the package index, generated package-doc mirror, and showcase when that separation becomes operationally necessary.
 
 ## License
 

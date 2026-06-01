@@ -25,7 +25,7 @@ The pragma does not grant visibility, does not grant host authority, does not al
 > Trace: D17, D20, D245, D255
 > Covers: Unsafe module status changes which raw operations may appear, not the module system or authority model.
 
-A safe module may import public or same-package `internal` safe wrappers from an unsafe module. It may not call raw foreign declarations or unsafe primitives merely because it can name the module.
+A safe module may import public or same-package `internal` safe wrappers from an unsafe module. It must not call raw foreign declarations or unsafe primitives merely because it can name the module.
 
 > Trace: D17, D20, D245
 > Covers: Safe APIs exported from unsafe modules are ordinary declarations; raw unsafe machinery remains gated.
@@ -47,31 +47,32 @@ Every unsafe module must contain at least one source-level `unsafe contract ... 
 > Trace: D245
 > Covers: Unsafe reasoning is machine-discoverable source metadata.
 
-An unsafe contract must enumerate each unsafe facility used by the module: raw foreign declarations, unsafe intrinsics, inline assembly, volatile operations, raw dynamic loading, raw signal handlers, raw pointer/address conversions, trusted capability acquisition, and any future unsafe primitive.
+An unsafe contract must enumerate each unsafe facility used by the module: raw foreign declarations, unsafe intrinsics, inline assembly, volatile operations, raw dynamic loading, raw signal handlers, raw pointer/address conversions, and trusted capability acquisition. A new unsafe primitive is absent from stable Kyokai until a separate accepted D-point defines its contract fields and adds it to this list.
 
 > Trace: D20, D22, D94/D257, D113a, D245
 > Covers: Unsafe operations are covered individually, not hidden under a single vague module note.
 
-The compiler rejects an unsafe operation that is not covered by an unsafe contract entry. The compiler also rejects a contract entry that names no unsafe operation in the module unless that entry is explicitly marked as a module-wide invariant.
+The compiler produces a stable unsafe operation key for every foreign declaration, foreign call wrapper, callback registration, raw pointer read or write, pointer-to-borrow conversion, volatile access, inline assembly block, dynamic-library open, dynamic-symbol lookup, raw signal handler, trusted capability acquisition, layout reinterpretation, target intrinsic, and separately admitted unsafe primitive. A key records operation class, source span, declaration or expression identity, target guard when present, and public wrapper exposure when present.
 
-> Trace: D245
-> Covers: Contract coverage is checked in both directions.
-
-An unsafe contract states at least:
+The compiler rejects an unsafe operation with no matching `covers` entry. It rejects a coverage entry whose operation key matches nothing unless the entry is explicitly `module_invariant`. Multiple entries can cover one key only when their classes are disjoint or the later entry is explicitly `additional_invariant`.
 
 | Field | Required meaning |
 | --- | --- |
-| `covers` | The unsafe declaration, primitive, raw call, assembly block, or dynamic-loading operation covered. |
-| `requires` | Preconditions the module must establish before the unsafe operation. |
-| `ensures` | Invariants restored before safe callers can observe results. |
-| `authority` | Capability values or trusted authority used by the operation. |
-| `ownership` | Whether Kyokai retains, transfers, borrows, receives, or destroys ownership. |
-| `failure` | How foreign failure conventions become `Result`, `Optional`, TPOE, `panic`, or runtime-fatal behavior. |
-| `backend` | Backend, target, ABI, alignment, calling-convention, or toolchain facts the operation depends on. |
-| `exports` | Safe wrappers whose soundness relies on the contract. |
+| `covers` | One stable unsafe operation key or one explicit `module_invariant`. |
+| `assumes` | Facts accepted before the operation executes. |
+| `requires` | Preconditions the wrapper or module establishes. |
+| `preserves` | Invariants restored before safe callers observe results. |
+| `forbids` | Operations, states, or host behaviors the boundary rejects. |
+| `maps_failure` | Translation from foreign failure conventions into named Kyokai categories. |
+| `owns`, `borrows`, `transfers` | Exact ownership movement across the boundary. |
+| `target`, `threading`, `lifetime`, `layout`, `reentrancy`, `cleanup` | Boundary facts for platform, invocation, storage, and teardown. |
+| `exports` | Safe wrappers whose soundness relies on the entry. |
+| `evidence` | Named proof, ABI document, test suite, sanitizer run, model-check result, standard, or audit artifact. |
 
-> Trace: D20/D20b, D73, D85, D211, D245
-> Covers: Unsafe contracts state authority, ownership, failure, and backend assumptions explicitly.
+A field that does not apply is omitted. Field values can contain free text. Field names are closed grammar and appear in audit output.
+
+> Trace: D20/D20b, D73, D85, D211, D245, D322
+> Covers: Unsafe contract coverage is bidirectional, operation-keyed, `module_invariant`-aware, and expressed through the closed D322 vocabulary.
 
 An unsafe contract is not a formal proof and does not weaken any unsafe primitive's own semantics. The primitive remains governed by its individual rule. The contract records how this module satisfies that rule and what safe wrapper behavior depends on it.
 
@@ -95,7 +96,7 @@ Unsafe primitives other than FFI may also require `&![UnsafeCapability]` when th
 > Trace: D20, D73, D94/D257, D211
 > Covers: Unsafe authority is attached where the operation crosses a trust boundary.
 
-`UnsafeCapability` is not `RootCapability`. It is not broad host authority. It authorizes use of unsafe machinery under contract; the actual filesystem, network, clock, dynamic-loader, device, signal, or process authority still comes from the relevant capability values.
+`UnsafeCapability` is not `RootCapability`. It is not broad host authority. It authorizes use of unsafe machinery under contract; the actual filesystem, environment, network, clock, entropy, terminal, dynamic-loader, device, signal, or process authority still comes from the matching explicit capability value.
 
 > Trace: D20, D67, D211, D255
 > Covers: Unsafe permission and external host permission are separate authority facts.
@@ -114,7 +115,7 @@ mon;
 > Trace: D20, D111/D127
 > Covers: Raw C declarations live in a visible `foreign "C" is ... mon;` boundary.
 
-Only `foreign "C"` is admitted by the current grammar. A future ABI string requires a separate decision covering its calling convention, type mapping, failure conventions, callback behavior, and backend support.
+Only `foreign "C"` is admitted without a target-specific ABI row. A non-`"C"` ABI string is legal only when the selected target contract lists that exact spelling, calling convention, platform set, type mapping, argument and return restrictions, unwind behavior, callback behavior, and backend lowering. Unknown ABI strings are compile-time errors. Adding an ABI string requires an accepted D-point and target-contract update.
 
 > Trace: D20a, D80
 > Covers: The raw foreign ABI set is closed until specified.
@@ -124,7 +125,7 @@ A `foreign "C"` block is legal only in a module body marked `pragma Unsafe_Modul
 > Trace: D17, D20, D245
 > Covers: Foreign declarations do not become public API by existing.
 
-Foreign declarations may declare functions, foreign constants with ABI-fixed scalar representation, and other raw ABI items explicitly admitted by this chapter. Imported functions may not be generic. Exported functions may not be generic.
+Foreign declarations may declare functions, foreign constants with ABI-fixed scalar representation, and other raw ABI items explicitly admitted by this chapter. Imported functions must not be generic. Exported functions must not be generic.
 
 > Trace: D20, D82
 > Covers: Raw ABI declarations are monomorphic and concrete.
@@ -158,7 +159,7 @@ The raw C ABI surface is limited to:
 > Trace: D20a, D42, D75, D80
 > Covers: Raw C declarations use a closed admitted type surface.
 
-`extern type Name;` declares an opaque foreign type with unknown Kyokai size and layout. It may appear only behind FFI-admitted pointer/address forms or other specifically admitted ABI wrappers. It may not be passed by value, stored by value as an ordinary Kyokai object, destructured, measured with ordinary layout introspection, or pattern matched.
+`extern type Name;` declares an opaque foreign type with unknown Kyokai size and layout. It may appear only behind FFI-admitted pointer/address forms or other specifically admitted ABI wrappers. It must not be passed by value, stored by value as an ordinary Kyokai object, destructured, measured with ordinary layout introspection, or pattern matched.
 
 > Trace: D20a, D42
 > Covers: Opaque C types stay opaque and pointer-shaped.
@@ -183,7 +184,7 @@ Passing or returning Kyokai unions, `Optional`, `Result`, or any other sum type 
 > Trace: D20a, D65, D242a
 > Covers: Kyokai sum types have no implicit C ABI.
 
-Raw foreign declarations may not take or return Kyokai `Linear` values by value. Foreign code is never assumed to understand Kyokai linearity, exactly-once consumption, borrow exclusivity, or cleanup obligations.
+Raw foreign declarations must not take or return Kyokai `Linear` values by value. Foreign code is never assumed to understand Kyokai linearity, exactly-once consumption, borrow exclusivity, or cleanup obligations.
 
 > Trace: D20, D195, D242
 > Covers: Raw C cannot pretend to consume or produce Kyokai-owned linear values.
@@ -205,12 +206,12 @@ Safe Kyokai may pass raw address values around only where an API explicitly expo
 > Trace: D73, D77, D245
 > Covers: Validity-sensitive raw memory use is confined to unsafe contracts.
 
-Kyokai has no general `transmute`, no general type-punning primitive, and no arbitrary pointer-to-integer or integer-to-pointer roundtrip in the safe language. Any future representation reinterpretation primitive must state exact provenance, alignment, lifetime, initialization, and backend rules before it ships.
+Kyokai has no general `transmute`, no general type-punning primitive, and no arbitrary pointer-to-integer or integer-to-pointer roundtrip in the safe language. A representation-reinterpretation primitive is absent from stable Kyokai until a separate accepted D-point states exact provenance, alignment, lifetime, initialization, and backend rules.
 
 > Trace: D73, D228
 > Covers: The unsafe memory model stays closed and specified.
 
-A raw pointer retained by foreign code after a call is a contract fact. The wrapper must represent it as a linear handle, borrowed relationship, callback registration, or another explicit state object. It may not leave the retention rule as prose outside the source contract.
+A raw pointer retained by foreign code after a call is a contract fact. The wrapper must represent it as a linear handle, borrowed relationship, callback registration, or another explicit state object. It must not leave the retention rule as prose outside the source contract.
 
 > Trace: D20b, D85, D242, D245
 > Covers: Foreign retention of pointers is represented in Kyokai state.
@@ -232,10 +233,10 @@ A raw foreign call carries no implied guarantee about retry safety, `EINTR`, all
 > Trace: D20b, D85, D91, D245
 > Covers: Foreign conventions are not inherited silently.
 
-Foreign code may not unwind, `longjmp`, throw an exception, or otherwise skip Kyokai frames. If that happens, the foreign boundary contract has been violated. Kyokai does not define ordinary recovery from that violation.
+Foreign code must not unwind, `longjmp`, throw an exception, or otherwise skip Kyokai frames. If that happens, the foreign boundary contract has been violated. Kyokai does not define ordinary recovery from that violation.
 
 > Trace: D20b, D84, D245
-> Covers: Foreign frames may not bypass Kyokai cleanup and ownership state.
+> Covers: Foreign frames must not bypass Kyokai cleanup and ownership state.
 
 Kyokai `panic`, TPOE, runtime-fatal termination, and internal compiler/runtime fatal paths must not unwind through foreign frames. If such a path occurs while foreign code is on the stack, the runtime terminates through the specified fatal path rather than crossing the foreign boundary with stack unwinding.
 
@@ -259,7 +260,14 @@ A callback must not receive a borrowed Kyokai reference unless the wrapper can p
 > Trace: D14, D20b, D195, D242
 > Covers: Borrow lifetime is not trusted to foreign callback folklore.
 
-Exporting Kyokai functions through a C ABI wrapper is legal only for signatures whose parameters and return type are in the exported C ABI surface. Exported functions may not be generic, may not expose Kyokai sum types by value, may not expose `Linear` values by value, and may not expose borrow references directly unless a future rule admits a specific wrapper pattern.
+Foreign callback registration is unsafe and has a D322 coverage entry. Its contract states calling convention, argument and return layout, registration lifetime, unregister operation, invoking thread or executor, reentry policy, panic/TPOE behavior, and ownership transfer for every crossing value. Captured Kyokai values are `Free`, pinned under an explicit owner, or moved into a linear registration handle. Linear capabilities enter callback state only when that handle owns them and the contract states invocation, release, and return of authority.
+
+A callback from an unknown foreign thread cannot touch task-local state, non-transferable values, TLS without selected-target support, or authority not marked callback-safe. Reentry is rejected unless the wrapper contract names the reentry-safe APIs and the nested borrow/capability protocol. Unregister consumes the registration handle. It is legal only when no callback invocation is active, or when the contract names the synchronization protocol that waits for active invocations. `.koi` records exported callback wrappers, audit summaries, target guards, thread requirements, capability requirements, and unregister synchronization facts.
+
+> Trace: D245, D322, D326, D350
+> Covers: Retained callbacks cross FFI only through linear registration handles with explicit affinity, reentry, authority, and unregister synchronization.
+
+Exporting Kyokai functions through a C ABI wrapper is legal only for signatures whose parameters and return type are in the exported C ABI surface. Exported functions must not be generic, must not expose Kyokai sum types by value, must not expose `Linear` values by value, and cannot expose Kyokai borrow references directly. C-facing borrowing uses an admitted opaque-handle or pointer-length wrapper whose unsafe export contract states lifetime window, aliasing, invalidation, thread, reentrancy, and cleanup.
 
 > Trace: D20a, D242, D242a
 > Covers: Exported functions use the same raw ABI honesty as imports.
@@ -308,7 +316,7 @@ writeVolatile(addr: Address[T], value: T): Unit
 > Trace: D94/D257
 > Covers: Volatile is named on the operation, not infected into reference types.
 
-A volatile access is externally observable. The compiler may not elide it, merge it with another volatile access, or move another volatile access across it.
+A volatile access is externally observable. The compiler must not elide it, merge it with another volatile access, or move another volatile access across it.
 
 > Trace: D94/D257
 > Covers: Volatile operations preserve externally visible access order among themselves.
@@ -318,7 +326,7 @@ Volatile is not synchronization. It creates no happens-before edge and does not 
 > Trace: D90/D90a, D94/D257, D247
 > Covers: MMIO visibility is not thread synchronization.
 
-The volatile-legal type domain is closed: fixed-width integer types, `Bool`, raw address/pointer-like machine values explicitly admitted by the memory model, and `extern record` or `packed record` aggregates whose fields are recursively volatile-legal. Ordinary records, unions, borrows, capabilities, and linear resources are not volatile-legal unless a later rule admits them explicitly.
+The volatile-legal type domain is closed: fixed-width integers; fixed-width floats only when the selected target contract admits volatile floating access; `bitrecord` register types with explicit backing layout; and `extern record` MMIO blocks whose fields are recursively volatile-legal. Volatile access records width, alignment, target-visible endianness, read/write permissions, and side-effect class. Capabilities, borrows, linear resource handles, generic `T`, ordinary records, raw address values used as payloads, and synchronization primitives are not volatile-legal. Expanding the volatile-legal domain requires a separate accepted D-point and target-contract update.
 
 > Trace: D42, D73, D94/D257
 > Covers: Volatile does not become a back door for arbitrary value representation.
@@ -340,7 +348,7 @@ The first argument is a compile-time guard, normally over `target.arch`, `target
 > Trace: D18/D18a, D19/D19a, D22, D80
 > Covers: ISA-specific assembly is target-gated at compile time.
 
-Operands use named forms such as `in("reg") expr`, `out("reg") binding`, `inout("reg") binding`, and `clobber("reg", ...)`. The compiler trusts the operand and clobber declarations; the unsafe contract must state the machine-state effects the safe wrapper relies on.
+Operands use named forms such as `in("reg") expr`, `out("reg") binding`, `inout("reg") binding`, `lateout("reg") binding`, immediate operands, symbol operands, and `clobber("reg", ...)`. Every block states target guard, template text, named operands, operand direction, register class or explicit register, immediates, symbols, clobbers, memory effect class, flags effect class, stack effect, and fallthrough behavior. Unused named operands are compile-time errors. The compiler validates operand direction and target availability before lowering; the unsafe contract states the machine-state effects the safe wrapper relies on.
 
 > Trace: D22, D245
 > Covers: Assembly effects are declared by operands, clobbers, and unsafe contract.
@@ -357,7 +365,7 @@ Safe signal handling is defined by the concurrency and capability chapters throu
 > Trace: D95/D256, D245
 > Covers: Arbitrary signal handlers are not safe Kyokai.
 
-Raw signal handlers must obey the selected platform's async-signal-safety rules. They may not touch ordinary Kyokai linear state, allocate, call arbitrary Kyokai code, acquire capabilities, run `defer`, or interact with the borrow checker as if they were ordinary control flow.
+Raw signal handlers must obey the selected platform's async-signal-safety rules. They must not touch ordinary Kyokai linear state, allocate, call arbitrary Kyokai code, acquire capabilities, run `defer`, or interact with the borrow checker as if they were ordinary control flow.
 
 > Trace: D73, D95/D256, D245
 > Covers: Raw signal handlers stay outside the safe execution model.
@@ -398,12 +406,15 @@ module body Kyokai.Posix.RawFile is
     mon;
 
     unsafe contract PosixFileRaw is
-        covers foreign c_open;
-        covers foreign c_close;
-        authority FileSystemCapability;
-        maps errno_to IoError;
-        forbids foreign_unwind;
-        ownership retained_by Kyokai;
+        covers foreign:c_open
+            requires "FileSystemCapability authority and validated path bytes"
+            preserves "safe wrapper returns a linear File handle only on success"
+            maps_failure "errno snapshot maps to IoError"
+            forbids "foreign unwind";
+        covers foreign:c_close
+            owns "consumes the raw file handle exactly once"
+            maps_failure "close status maps to IoError where the wrapper exposes recovery"
+            forbids "foreign unwind";
     audit;
 seal;
 ```
@@ -424,3 +435,34 @@ qed;
 
 > Trace: D20b, D53, D85, D211, D242
 > Covers: Safe APIs expose capability, ownership, contracts, and recoverable failure as Kyokai facts.
+
+## ABI Admission Rows
+
+A non-`"C"` ABI string is legal only when the selected target contract contains an admission row for that exact spelling, calling convention, platform set, argument and return restrictions, unwind behavior, callback rules, and backend lowering. An unknown ABI string is a compile-time error.
+
+> Trace: D432
+> Covers: ABI spellings are target-record admissions, never guessed aliases or backend conveniences.
+
+## Kyokai-To-C Export Wrappers
+
+Kyokai-to-C export wrappers are explicit unsafe-boundary declarations. A wrapper states symbol name, C ABI spelling, layout mapping, ownership mapping, borrow duration, nullability, error mapping, cleanup, thread affinity, reentry class, and capability boundary. Safe Kyokai borrows never cross C as if C could enforce their lifetime.
+
+> Trace: D440, D456
+> Covers: Export wrappers translate ownership, borrows, errors, reentry, and authority explicitly at the C boundary.
+
+## Raw Signal Handlers
+
+A raw signal handler requires a dedicated unsafe contract. The contract lists legal operations, async-signal-safe foreign calls, captured storage, atomic and volatile access, reentry restriction, and target gate. A handler cannot allocate, lock, perform ordinary I/O, unwind, or acquire capabilities.
+
+> Trace: D441
+> Covers: Signal-handler code has a closed unsafe surface and cannot inherit ordinary runtime services accidentally.
+
+
+## Foreign Error Snapshots And Bindgen Admission
+
+A wrapper for a foreign API with thread-local error state snapshots that state immediately after the foreign call and before allocation, logging, yielding, spawning, waiting, callback dispatch, or another foreign call. The wrapper maps the snapshot into its declared Kyokai error type without depending on later ambient foreign state.
+
+`kyokai bindgen` output remains unsafe-only until a safe-wrapper admission record states foreign versions, headers, target triples, symbols, flags, layouts, ownership, aliasing, lifetimes, initialization, thread safety, callbacks, allocator behavior, error-state snapshots, capabilities, cleanup, provenance hash, and audit owner.
+
+> Trace: D405-D406, D430, D457-D457a, D499
+> Covers: Foreign error state is captured before interference, and generated bindings remain unsafe until their complete wrapper contract is admitted.

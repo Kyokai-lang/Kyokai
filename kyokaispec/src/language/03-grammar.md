@@ -21,7 +21,7 @@ interface file = file docs, {import declaration}, module interface;
 body file = file docs, {pragma declaration}, {import declaration}, module body;
 ```
 
-A `.kyo` file must match `interface file`. A `.kai` file must match `body file`. Imports are file-scope declarations. A source file may not contain more than one module declaration.
+A `.kyo` file must match `interface file`. A `.kai` file must match `body file`. Imports are file-scope declarations. A source file must not contain more than one module declaration.
 
 > Trace: D52, D78, D179
 > Covers: `.kyo` and `.kai` have distinct start symbols, imports are file-scope only, and Kyokai keeps one module per source file.
@@ -34,7 +34,7 @@ A `.kyo` file must match `interface file`. A `.kai` file must match `body file`.
 ## Modules And Imports
 
 [Rikona Kurasaki / Mjoyufull]
-A module boundary is sealed. The reader should be able to walk into a file, see its imports at the front, see the module name, and know exactly when the symbol table closes.
+A module boundary is sealed. The reader can walk into a file, see its imports at the front, see the module name, and know exactly when the symbol table closes.
 
 ```ebnf
 module interface = "module", module name, "is", {interface declaration}, "seal", ";";
@@ -72,8 +72,10 @@ interface item = constant declaration
                | opaque type declaration
                | extern type declaration
                | record declaration
+               | bitrecord declaration
                | union declaration
                | capability declaration
+               | configuration rejection declaration
                | function declaration
                | typeclass declaration
                | instance declaration
@@ -84,8 +86,10 @@ body item = constant definition
           | type alias declaration
           | extern type declaration
           | record declaration
+          | bitrecord declaration
           | union declaration
           | capability declaration
+          | configuration rejection declaration
           | function definition
           | typeclass declaration
           | instance definition
@@ -141,6 +145,21 @@ The one-line record form is legal only for a single-field ordinary record. `exte
 > Trace: D35, D42, D109, D116, D196
 > Covers: Kyokai has `record`, `extern record`, and `packed record`; single-field records are the nominal wrapper mechanism; and record declarations close with `build;`.
 
+`bitrecord` declares nominal fixed-width bit-position views over unsigned integer storage.
+
+```ebnf
+bitrecord declaration = "bitrecord", type name, ":", bitrecord backing type, "is", {bitrecord item}, "build", ";";
+bitrecord backing type = "Nat8" | "Nat16" | "Nat32" | "Nat64";
+bitrecord item = "field", identifier, ":", "bit", integer literal, ";"
+               | "field", identifier, ":", "bits", integer literal, "..", integer literal, ";"
+               | "reserved", "bits", integer literal, "..", integer literal, ";";
+```
+
+Bit numbers start at zero at the least-significant bit. Ranges are inclusive. Field and reserved ranges cannot overlap. The declarations chapter defines view types, uncovered-bit policy, raw conversion, borrowing rejection, and lowering.
+
+> Trace: D116, D323
+> Covers: `bitrecord Name: NatN is ... build;` is a declaration form with closed item grammar and least-significant-bit numbering.
+
 Unions declare named variants. A variant may carry no payload, one unnamed payload type, or named fields.
 
 ```ebnf
@@ -159,9 +178,9 @@ union variant = "case", constructor name, ";"
 A function signature is a small contract room: name, parameters, return type, generic obligations, value obligations, then the body if this file owns one.
 
 ```ebnf
-function declaration = "function", identifier, [generic parameters], "(", [parameter list], ")", ":", type,
+function declaration = ["receiver"], "function", identifier, [generic parameters], "(", [parameter list], ")", ":", type,
                        [where clause], {contract clause}, guarded declaration suffix, ";";
-function definition = "function", identifier, [generic parameters], "(", [parameter list], ")", ":", type,
+function definition = ["receiver"], "function", identifier, [generic parameters], "(", [parameter list], ")", ":", type,
                       [where clause], {contract clause}, guarded declaration suffix,
                       "is", block, "qed", ";";
 parameter list = parameter, {",", parameter}, [","];
@@ -170,6 +189,11 @@ contract clause = require clause | ensure clause;
 require clause = "require", expression, ";";
 ensure clause = "ensure", expression, ";";
 ```
+
+`receiver function` is the exact receiver-callable export marker. It does not create a method body form, implicit receiver, different calling convention, or hidden lookup lane. The declarations chapter and module chapter restrict where it is legal.
+
+> Trace: D254, D337, D386
+> Covers: Receiver-callable UFCS exports use one visible declaration marker without adding receiver declaration sugar.
 
 `require` and `ensure` clauses sit between the signature and the body or terminating semicolon. `result` is available only inside `ensure` clauses for non-`Unit` functions as a read-only view of the produced return value. `old expr` is available only inside `ensure` and only for pure entry-state expressions over `Free` data.
 
@@ -223,9 +247,16 @@ foreign block = "foreign", string literal, "is", {foreign declaration}, "mon", "
 foreign declaration = "function", identifier, "(", [parameter list], ")", ":", type, ";"
                     | "constant", identifier, ":", type, ";";
 unsafe contract = "unsafe", "contract", type name, "is", {unsafe contract item}, "audit", ";";
+unsafe contract item = "covers", unsafe operation key, {unsafe contract field}, ";"
+                     | "module_invariant", string literal, {unsafe contract field}, ";"
+                     | "additional_invariant", unsafe operation key, {unsafe contract field}, ";";
+unsafe contract field = ("assumes" | "requires" | "preserves" | "forbids" | "maps_failure"
+                       | "owns" | "borrows" | "transfers" | "target" | "threading" | "lifetime"
+                       | "layout" | "reentrancy" | "cleanup" | "exports" | "evidence"), string literal;
+unsafe operation key = identifier, {":", identifier};
 ```
 
-Only `foreign "C" is ... mon;` is admitted by this grammar. Raw foreign declarations are legal only in a module marked with `pragma Unsafe_Module;`, and that module must contain source-level unsafe contracts covering the unsafe operations it uses.
+`foreign "C" is ... mon;` is the portable baseline form. A non-`"C"` ABI string is type-checked against the selected target contract and is rejected unless that contract admits the exact spelling and lowering contract. Raw foreign declarations are legal only in a module marked with `pragma Unsafe_Module;`, and that module must contain source-level unsafe contracts covering the unsafe operations it uses. Unsafe operation keys use compiler-produced colon-separated identifiers such as `foreign:c_open`; source contracts cannot invent a key that matches no operation.
 
 > Trace: D20, D20a, D20b, D127, D242, D242a, D245
 > Covers: Kyokai raw FFI uses `foreign "C" is ... mon;`, requires `pragma Unsafe_Module;`, forbids implicit linear ownership transfer and implicit sum-type ABI across raw C, and requires audited unsafe contracts.
@@ -285,6 +316,7 @@ statement = let statement
           | taskgroup statement
           | spawn statement
           | select statement
+          | wait statement
           | yield statement;
 ```
 
@@ -379,15 +411,20 @@ A `spawn` statement is legal only inside a `taskgroup`. Spawn capture lists are 
 select statement = "select", {select arm}, [select timeout arm], "pick", ";";
 select arm = "when", expression, "do", block;
 select timeout arm = "timeout", "(", expression, ")", "do", block;
+wait statement = "wait", {wait arm}, [wait default arm], "wake", ";";
+wait arm = "when", expression, "do", block;
+wait default arm = "default", "do", block;
 ```
 
-> Trace: D3a, D3b, D90, D91, D92, D93
-> Covers: Kyokai has a visible `select ... pick;` concurrency boundary whose channel and timeout semantics are specified in the concurrency chapter.
+`select ... pick;` waits on channel operations. `wait ... wake;` waits on Poller readiness tokens, deadline tokens, cancellation-token observation, and target-admitted signal or process readiness tokens. The concurrency chapter defines the closed arm tables and ownership transfer points.
+
+> Trace: D3a, D3b, D90-D93, D283, D342
+> Covers: Channel selection and external readiness waiting use separate visible grammar forms with separate semantic arm registries.
 
 ## Expressions
 
 [Rikona Kurasaki / Mjoyufull]
-Expressions are where Kyokai stays plain on purpose. Calls look like calls. Construction looks like construction. Field access is not secretly pointer syntax. The reader should not need a folklore ladder from C taped to the wall.
+Expressions are where Kyokai stays plain on purpose. Calls look like calls. Construction looks like construction. Field access is not secretly pointer syntax. The reader does not need a folklore ladder from C taped to the wall.
 
 ```ebnf
 expression = literal
@@ -411,6 +448,7 @@ expression = literal
            | comptime expression
            | static string expression
            | static assert expression
+           | build expression
            | unary expression
            | binary expression
            | parenthesized expression;
@@ -466,7 +504,7 @@ closure literal = "fn", capture list, "(", [parameter list], ")", ":", type, "is
 > Trace: D21, D118, D126, D197
 > Covers: Kyokai closure literals have mandatory explicit capture lists, block and one-expression forms, and lower to the fixed callable-family substrate.
 
-Compile-time evaluation is visible at the call site. `static_assert` is a compile-time assertion form. `static "..."` is the bridge from ordinary escaped source text to `StaticString`.
+Compile-time evaluation is visible at the call site. `static_assert` is a compile-time assertion form. `static "..."` is an explicit spelling for the same `StaticString` type produced by plain escaped and raw multiline literals.
 
 ```ebnf
 comptime expression = "comptime", expression;
@@ -539,4 +577,31 @@ yield statement = "yield", expression, ";";
 The grammar intentionally rejects several shapes that would make the language bigger without making programs clearer: tuple syntax, class declarations, inheritance syntax, exceptions, `try/catch`, wildcard imports, block-local imports, macro definitions, pipeline `|>`, body-level target `when`, pattern guards, `_` discard patterns, `Drop` declarations, implicit destructor hooks, general `async`/`await`, and safe module-level mutable globals.
 
 > Trace: D47, D62, D108, D123, D147, D156, D205, D207, D208
-> Covers: Kyokai's grammar enforces the accepted non-goals instead of leaving forbidden mechanisms as unspecified parser gaps.
+> Covers: Kyokai's grammar enforces the accepted non-goals instead of leaving forbidden mechanisms as unclassified parser gaps.
+
+## Configuration And Construction Grammar
+
+The following productions extend the grammar:
+
+```ebnf
+configuration rejection declaration = "compile_error", "(", expression, ")", ";" ;
+build expression = "build", type, "do", { statement }, produce statement, { statement }, "build", ";" ;
+produce statement = "produce", expression, ";" ;
+```
+
+`compile_error(message);` is legal only at declaration scope and in compile-time-only declaration-guard positions admitted by `when`. Its argument is an ordinary expression whose required static type is `StaticString`; the grammar does not restrict the argument to literal syntax. Reaching it during selected compilation emits the stable `compile_error` diagnostic with the source span and exact static-text message. It is not a runtime statement and has no value.
+
+> Trace: D467
+> Covers: Selected configuration rejection has one protected compile-time grammar form.
+
+`build T do ... produce expr; ... build;` is an expression. Every non-diverging path reaches exactly one `produce` targeting the nearest enclosing build expression. `produce` exits only that expression. General uninitialized declarations such as `let x;` are illegal. Partial record values, omitted fields, hidden defaults, and double initialization are illegal.
+
+> Trace: D500
+> Covers: Multi-line construction is explicit grammar with exactly-one-production and definite-initialization rules.
+
+## Cycle Rejection Grammar
+
+Import cycles and workspace package dependency cycles are illegal. The grammar has no cycle-breaking declaration, recursive import group, signature knot, or alternate package-cycle syntax.
+
+> Trace: D433-D434
+> Covers: Module and package cycles are rejected rather than hidden behind a second recursive-module mechanism.

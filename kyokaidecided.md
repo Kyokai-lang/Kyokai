@@ -4,7 +4,7 @@
 
 Linear types enforcing boundaries on resource ownership. Every resource explicitly created, explicitly used, explicitly destroyed. Nothing hidden. Nothing implicit. Nothing undefined.
 
-This document is the public readable extraction of the shape Kyokai has already accepted. It is not the full normative spec. The eventual normative home is `kyokaispec/`; new public D-points and live proposal shape belong in `Kyokaishape.md`.
+This document is the public readable extraction of the shape Kyokai has already accepted. It is not the full normative spec. The eventual normative home is `kyokaispec/`; new public D-points normally live in PRs/MRs, with `Kyokaishape.md` serving as index/archive or temporary proposal storage.
 
 ---
 
@@ -21,7 +21,7 @@ This document is the public readable extraction of the shape Kyokai has already 
   - 3.5: [Naming Convention Principles](#35-naming-convention-principles)
 4. [Work Items — Prioritized by Hardness and Severity](#4-work-items--prioritized-by-hardness-and-severity)
 
-For active public proposals and new D-points, see `Kyokaishape.md`.
+For active public proposals and new D-points, see the relevant PR/MR; `Kyokaishape.md` is the index/archive when a point is not directly carried by a PR/MR.
 
 ## Maturity State Tracker
 
@@ -32,7 +32,7 @@ Use the highest honest state that is currently true:
 | State | Meaning | Evidence To Record Here |
 | --- | --- | --- |
 | `SHAPE_DECIDED` | The design point is decided in public accepted-shape docs. | D-point IDs, accepted-shape section, and any public thread/PR link if applicable. |
-| `SPEC_EXTRACTED` | The rule has a normative home outside the planning document. | `kyokaispec/` path and short note on the covered rule scope. |
+| `SPEC_EXTRACTED` | The rule has a normative home in the specification. | `kyokaispec/` path and short note on the covered rule scope. |
 | `CALCULUS_DRAFTED` | The behavior is represented in `lambda_K` scope or explicitly excluded from it. | Calculus document path and whether the feature is included or explicitly out of scope. |
 | `CALCULUS_PROVEN_PAPER` | The sequential core proof obligation is discharged at paper level. | Proof document path and theorem/scope name. |
 | `PARSER_ACCEPTED` | Surface syntax is parsed into AST nodes with source spans. | Parser implementation path and positive/negative parser test path. |
@@ -50,19 +50,2559 @@ Current high-level tracker:
 | Area | Key decisions | Current maturity | Spec home | Conformance | Implementation | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | Project identity, philosophy, and license boundary | D1, D5, D87, D143/D241, D263 | `SPEC_EXTRACTED` | `kyokaispec/src/language/00-introduction.md`, `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/rationale/00-rationale-index.md`, `kyokaispec/src/rationale/01-language-design.md`, `kyokaispec/src/appendices/a-license.md`, `kyokaispec/src/appendices/c-austral-differences.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` for identity, self-contained fork scope, no-language-UB policy, inherited goals, attribution, rationale boundaries, license/provenance, Austral-difference indexing, inherited-file retirement status, and proof-roadmap scope | planned | partial docs/tooling metadata | Rationale and appendix extraction is present; implementation/proof maturity still requires conformance tests and the actual `lambda_K` paper proof. |
-| Core syntax and declarations | D8-D18, D23-D24, D35-D43, D46, D47, D50, D54-D59, D61, D71-D72, D75-D76, D78, D98, D106, D109, D128, D135/D261, D138, D179, D205-D206, D210, D213-D214 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for lexical, grammar, module/import/visibility, declarations, patterns, expressions, evaluation, statements, control-flow, ownership-visible pattern/control-flow joins, protected built-ins, and current syntax examples | planned | inherited Austral parser only | Later unsafe and broader toolchain chapters still need extraction. |
+| Core syntax and declarations | D8-D18, D23-D24, D35-D43, D46, D47, D50, D54-D59, D61, D71-D72, D75-D76, D78, D98, D106, D109, D128, D135/D261, D138, D179, D205-D206, D210, D213-D214 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for lexical, grammar, module/import/visibility, declarations, patterns, expressions, evaluation, statements, control-flow, ownership-visible pattern/control-flow joins, protected built-ins, and current syntax examples | planned | inherited Austral parser only | Unsafe and broader toolchain contracts are extracted in their owning chapters. |
 | Type system, ownership, borrows, and implicit completions | D6, D7a/D7b, D14, D24, D30/D30a, D34, D46, D72, D87, D104, D159, D188, D190, D192-D195, D213, D238-D240 | `SPEC_EXTRACTED` | `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for universes, nominal identity, generics, typeclasses, inference, pattern movement, temporaries, checker states, regions, borrows, movement, built-in type families, and example applications | planned | inherited Austral checker only | Implementation still needs conformance tests and compiler work before checker maturity can move beyond spec extraction. |
+| Closed-graph tautology and package coherence clarifications | D278-D279 | `SPEC_EXTRACTED` | `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Error handling, contracts, defer, panic/TPOE | D2, D2a/D2b, D15/D15a, D24, D53, D58, D84, D89, D111, D119, D121-D122, D124-D125, D129, D140, D142, D207, D233, D246, D253, D259-D260 | `SPEC_EXTRACTED` | `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for contract syntax, function contract declaration placement, result/old scoping, fallible patterns, `Result`/`Optional` built-ins, `or` lowering, defer/errdefer path behavior, deferred checker states, panic/todo/unreachable behavior, TPOE, runtime-fatal, diagnostics, and examples | planned | inherited Austral behavior only | Implementation still needs conformance tests and runtime/compiler work before maturity can move beyond spec extraction. |
-| Capabilities and authority | D20/D20a/D20b, D48/D162, D67, D85, D211-D212, D245, D248, D255-D256 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for sealed capability declarations, root authority, acquire/derive/split/surrender, borrowing, task transfer, unsafe authority, FFI authority flow, tests/tools/plugins, dynamic loading, raw I/O broker patterns, startup built-ins, and capability examples | planned | inherited Austral capability shape only | Stdlib authority APIs and toolchain audit surfaces still need extraction in their later chapters. |
+| Capabilities and authority | D20/D20a/D20b, D48/D162, D67, D85, D211-D212, D245, D248, D255-D256 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for sealed capability declarations, root authority, acquire/derive/split/surrender, borrowing, task transfer, unsafe authority, FFI authority flow, tests/tools/plugins, dynamic loading, raw I/O broker patterns, startup built-ins, and capability examples | planned | inherited Austral capability shape only | Standard-library authority APIs and toolchain audit surfaces are extracted in their owning chapters. |
 | FFI, unsafe, ABI, layout, and backend safety | D20/D242/D242a, D31, D42, D73, D80, D89, D113a/D113b, D139, D199, D228, D245, D250-D251, D257 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md` for unsafe modules, unsafe contracts, raw FFI, explicit C ABI surface, callbacks, unwinding, dynamic loading/plugins, volatile/MMIO, inline assembly, layout classes, move/result placement, generated-C safety, LLVM lowering, debug/source mapping, and backend failure rules | planned | inherited C backend only | Implementation still needs safe Kyokai boundary wrappers, full ABI/backend tests, and UB-closure generated-code tests before maturity can move beyond spec extraction. |
 | Concurrency, atomics, channels, poller, and signals | D3, D3a/D3b, D90-D95, D100-D101, D141, D146, D156, D164, D168, D183-D184, D212, D234-D237, D247-D248, D252, D256, D258 | `SPEC_EXTRACTED` | `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for task groups, spawn/capture/failure, SPSC channels, select, cancellation/deadlines, poller/event loops, signals, atomics, locks, task transfer, broker patterns, happens-before, recognized concurrency built-ins, and spawn examples | planned | planned | Implementation still needs conformance tests, runtime primitives, and backend atomic validation before maturity can move beyond spec extraction. |
 | Standard library foundation and admission policy | D40, D40a, D44, D64, D67, D74, D77, D85, D102, D117, D146, D152, D171, D201, D220, D229-D232, D250-D251, D259-D260, D263 | `SPEC_EXTRACTED` | `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/stdlib/10-crypto-policy.md`, and `kyokaispec/src/stdlib/11-transitional-ffi-tracking.md` for stdlib admission, contract fields, pure-Kyokai implementation policy, transitional FFI tracking, allocators, containers, text/bytes/paths, collections, iterators/generators, numerics/math accuracy, capability-gated external-world APIs, concurrency primitives, crypto policy, and core formatting/error protocols; language chapters remain the syntax and built-in source for the same rules | planned | inherited Austral stdlib only | Implementation still needs admitted Kyokai stdlib modules, conformance tests, audit metadata, and transitional FFI records before maturity can move beyond spec extraction. |
+| Concurrency and linear-stdlib critique cluster | D280-D290 | `SPEC_EXTRACTED` | `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, and stdlib admission docs | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Usability, comptime, platform, FFI, and pinning critique cluster | D291-D301 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, and target/stdlib admission docs | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Observability, analysis tooling, testing workflow, stdlib tiers, licensing boundary, public decision workflow, performance/cache identity, RIIK audit, capability attenuation, and KBI diffing | D302-D311 | `SPEC_EXTRACTED` | `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/10-crypto-policy.md`, `kyokaispec/src/appendices/a-license.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, `PROJECT_STANDARDS.md`, `Kyokaishape.md`, and `phase.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Proof-claim honesty, syntax/file-model closure, adoption docs, daily debug/span/docs rules, lock semantics, generic edge rules, proof-tooling boundary, CLI extensions, and target contract schema | D312-D313, D315-D321 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/d-formalization-roadmap.md`, `kyokailang/kyokai/kyokaicalculus/lambda_k_research.md`, and docs/examples | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Granular critique closure: unsafe grammar, bit records, arenas, test generation, TLS, cancellation, backtraces, ABI, formatting, beginner scaffolds, workspace discovery, external diagnostics, embed builtins, builtin formatting identity, UFCS receiver exports, `Auto`, `Never`, and pattern legality | D322-D340 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Second granular critique closure: range loops, split readiness waiting, runtime fatal surface, spans/dynamic loading, freestanding targets, compiler-owned capabilities, Result combinators, borrow checker tables, expected-type flow, callbacks, generation/audit schema, formatter, channels, memory model, safe unreachable, implicit completions, containers, TPOE taxonomy, comptime, typeclass coherence, generators, rendering, allocation failure, `.koi`/KBI schema, and arithmetic | D341-D365 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| External systems-language critique closure: maturity honesty, doc-comment strictness, terminator reaffirmation, named modulo APIs, literal ambiguity rejection, static text and text views, nominal return values, generational handles, universe reaffirmation, typeclass admission, borrow-model reaffirmation, defer diagnostics, propagation linting, failure hooks, capability bundles, module split reaffirmation, vendor-first package discipline, allocator-context rejection, collection syntax reaffirmation, UFCS reaffirmation, iterator-first generators, structured taskgroups, unsafe audit reaffirmation, file build constraints, essential CLI path, stdlib first slice, layout fact builtins, proof-scope reaffirmation, and license-boundary reaffirmation | D366-D395 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/a-license.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Toolchain, package manager, diagnostics, formatter, docs, releases | D25-D29, D31, D51, D78-D80, D83, D86, D105, D137, D144, D148-D151a, D155, D157, D200, D218, D220-D226, D243-D245, D264-D270 | `SPEC_EXTRACTED` | `kyokaispec/src/toolchain/00-toolchain-overview.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md` for CLI, project shape, artifacts, diagnostics, formatting, tests, docs, LSP, audit, reproducibility, package ecosystem, releases, generation, REPL/eval, playground contracts, build output/cache layout, concrete `.koi` artifact format, project creation, diagnostic explanation/fixing, toolchain health, package inspection/offline workflows, and property/fuzz daily-use controls | planned | inherited Austral CLI only | Implementation still needs compiler/package-manager/tooling work and conformance tests before maturity can move beyond spec extraction. |
+| Toolchain privacy, feature instances, startup authority, paths, floats, hashing, OS errors, clocks, fatal redaction, native toolchains, generated-source provenance, executable examples, Unicode algorithms, env/args, atomic file updates, networking, test isolation, codecs, diagnostics, allocation-failure testing, behavior SemVer, process status, CPU dispatch, and package naming | D396-D419 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, and `kyokaispec/src/stdlib/10-crypto-policy.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Source encoding, randomness, terminal services, package artifacts, lockfiles, bleedring toolchain management, scratch execution, docs metadata, deprecation, caches, bindgen, and advisories | D420-D431 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/10-crypto-policy.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Integrated FFI/toolchain/concurrency/safety contracts: non-C ABI tables, import/package cycle bans, fixtures, SPSC broker discipline, multi-binary targets, edition-specific `.koi`, loop filtering rejection, C export wrappers, signal handlers, formatter recovery/localization, loader policy, compressed `.koi` transport, lock fairness, spawn-shareable registry, bench/property reports, LSP refactor safety, volatile/MMIO domain, failure taxonomy, inline asm, partial-error state, callback/TLS FFI, borrow/reborrow tables, unsafe instances, package provenance, authority ceilings, generational handles, embedded fatal hardware contracts, and generator sandboxing | D432-D465 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Validated wrappers, compile-time configuration errors, task-transfer packaging rejection, parameter access syntax reaffirmation, conditional typeclass instances, channel backpressure, nested defer failure, poller/protocol state, compiler explain modes, hot reload tooling contract, string literal allocation, claim tiers, and public-doc slogan cleanup | D466-D478 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Modal wording, implementation-choice boundaries, full implementation conformance, proposal/search labels, policy selection, target-contract variation, specified nondeterminism, tooling-only assistance, tracked D-point dependencies, experimental absence, and modal audit process | D479-D487 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/00-toolchain-overview.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/appendices/b-decision-traceability.md` | planned | planned | Extracted as clarification over existing shape; this is not a semantic reopening. |
+| Strict-linearity pain-point closure: resource-flow refactors, sound prototyping, graph/slot-map patterns, recovery payloads, context bundles, callback invocation classes, linear test fixtures, branch-join diagnostics, hole-free collections, generic container universes, early release tooling, FFI wrapper kits, `build` expressions, and stdlib cold-start ladder | D488-D501 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/05-collections.md`, and `kyokaispec/src/stdlib/11-transitional-ffi-tracking.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Infrastructure, public docs, CLI output, Analysis Server, editor/debug bundles, showcase, PR/MR D-points, no-maybe docs, generated C/artifacts, docs/website layout, examples, compiler architecture, OSS infrastructure reuse, repo/org topology, package docs, local docs cache, repository-owned `kdocs/`, metadata-only docs indexing, numeric admission evidence, file-role diagnostics, community surfaces, web topology, website taxonomy, package badges, spec-writing guide, and service board | D502-D525 | `SPEC_EXTRACTED` | `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, `docs/infrastructure/services.md`, website source, `examples/`, and phase/status docs | planned | planned | Normative toolchain destinations and public workflow/service records are present; website and service implementation remain planned. |
+| Package-index trust and daily toolchain critique cluster | D272-D277 | `SPEC_EXTRACTED` | `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Formal calculus and proof | D143/D241 | `SPEC_EXTRACTED` | `kyokaispec/src/appendices/d-formalization-roadmap.md` for proof scope, paper-proof obligations, exclusions, milestones, research-note status, and later mechanization plan | not applicable | research note exists | `lambda_K` paper proof is still not drafted; maturity has only moved from accepted shape to normative roadmap extraction. |
 
 Update this tracker whenever a row moves to any higher maturity state from the shared `phase.md` maturity vocabulary. Do not mark maturity based on intent; mark only completed work with a path or concrete artifact.
 
 ---
+
+## Accepted Shape Routing Record: D280-D290
+
+This cluster records the accepted rules for generic task transfer, spawn failure, explicit high-concurrency I/O, `select`, cancellation safety, fatal cleanup, refutable linear patterns, iterator regions, linear collections, generic cleanup, and intentional discard. The normative specification chapters named in the tracker carry the extracted contracts.
+
+### D280: Generic Task Transfer Classification
+
+Generic task transfer is structural only when a type asks for that structural check. A generic user type is `task_local` by default. A generic user type declares `task_transfer structural` to request structural transfer classification. For such a type, the compiler computes transferability from stored fields after generic substitution. `Optional[T]`, `Box[T]`, `Buffer[T]`, and user wrappers are task-transferable only when their concrete stored fields are task-transferable.
+
+Kyokai does not add user-written conditional transfer syntax such as `task_transfer when T: task_transfer`, and it does not add a Rust-style `Send`/`Sync` marker typeclass ecosystem. Opaque, unsafe-backed, target-backed, or foreign-backed types need an explicit unsafe transfer contract recorded in `.koi` before safe code may treat them as task-transferable. `.koi` records task classification facts for public and internal types that can cross package boundaries.
+
+### D281: Spawn Failure And Capture Ownership
+
+Spawn capture transfer is atomic at successful child-task creation. If `spawn` succeeds, captured linear values are consumed from the parent and owned by the child. If `spawn` fails before the child exists, captured linear values remain owned by the parent. A normal spawn failure result contains the spawn error, not a capture bundle. An implementation must reserve or allocate whatever it needs before consuming captures, or internally roll back capture consumption before reporting failure. No linear value may be considered consumed by a task that was not created.
+
+### D282: Explicit Poller High-Concurrency Canon
+
+Kyokai has 1:1 OS-thread tasks as the language task model. High-concurrency I/O uses explicit `Poller` APIs over platform readiness or completion mechanisms such as epoll, kqueue, IOCP, io_uring, WASI poll facilities, or target-specific equivalents. High-concurrency servers combine explicit Poller/event-loop APIs, bounded worker pools, channels, deadlines, cancellation tokens, and capability-gated I/O. The standard library and docs provide canonical examples for accept loops, connection state machines, timeout handling, backpressure, graceful shutdown, and handoff to worker pools.
+
+No async/await, virtual-thread parking, hidden reactor, hidden executor, task migration, or M:N scheduler is part of Kyokai semantics. `glow`, `vibe`, and other slang async spellings are rejected as core syntax.
+
+### D283: `select` With Poller Readiness
+
+`select` waits on channel send/receive arms, deadline/cancellation arms, and Poller readiness tokens admitted by a closed standard-library `Selectable` surface. If exactly one arm is ready, that arm runs. If multiple arms are ready and no explicit fair mode is selected, the implementation may choose any ready arm; this choice is nondeterministic program behavior and must not be used for correctness. If an explicit fair mode is selected, the fairness contract named by that mode controls arm choice. If no arm is ready and a default arm exists, the default runs immediately. If no arm is ready and no default or deadline can progress, the task blocks according to the selected blocking contract. If all channel arms are closed and no Poller, deadline, or default arm can progress, `select` produces a structured exhaustion result, not a silent spin. Livelock and fairness diagnostics are tooling, not default semantics.
+
+### D284: Cancellation Safety Classes
+
+Blocking and cancellable APIs declare one cancellation-safety class: `NoEffectOnCancel`, `PartialProgress`, `ConsumesOnCancel`, or `UncancellableBlocking`. The class appears in the API contract and generated docs. `NoEffectOnCancel` means cancellation returns control without changing user-visible resource state. `PartialProgress` APIs state exactly which values, offsets, buffers, handles, or resources can have advanced. `ConsumesOnCancel` APIs state exactly which linear values are consumed and what recovery value is returned; if no recovery value exists, the API contract says so explicitly. `UncancellableBlocking` APIs state that cancellation is not observed until the operation returns or the target reports an interruption. POSIX `EINTR` and Windows cancellation behavior are target-contract facts, not hidden standard-library folklore. Tests for cancellable standard-library APIs include cancellation and interruption cases on targets whose contract exposes those events.
+
+### D285: Fatal Cleanup Boundary
+
+Kyokai separates normal cleanup from fatal termination. On normal scope exit and recoverable explicit cleanup paths, linear obligations must be consumed exactly once. On panic cleanup, registered `defer` actions run in the decided order. If a `defer` panics while panic cleanup is already running, execution escalates immediately to runtime-fatal. After runtime-fatal escalation, no further user defers are guaranteed to run.
+
+TPOE and runtime-fatal termination do not promise user cleanup. The execution context is dead. Linear resources may be abandoned only because the execution context is being terminated; this is not normal linear consumption and cannot be observed as a valid continuation. External resources must document that fatal termination may skip cleanup. Freestanding targets define their fatal action: trap, halt, reset, or a target-specific fatal handler.
+
+### D286: Refutable Patterns With Linear Scrutinees
+
+Refutable pattern sugar lowers to an explicit core `case` before linearity checking. Every success and failure path must account for every linear payload in the scrutinee. A `while let` condition over an owned linear scrutinee is legal only if each iteration and the final failure path satisfy exact-use obligations. `break`, `continue`, `return`, and panic paths from inside the loop are checked against the current linear state and deferred cleanup state. Diagnostics name the unaccounted variant or payload path when a refutable pattern loses ownership.
+
+### D287: Iterator Borrow Regions And Drain Cleanup
+
+An iterator yields owned values or borrowed values according to its iterator item type. Borrowed item types carry a region tied to the iterator borrow or an explicitly named region from the iterator API. `for` creates a per-iteration borrow region for borrowed iteration. A yielded borrow cannot escape the loop body unless the iterator API exposes a named region that permits escape. Drain iterators over linear elements are themselves linear and must be exhausted, returned, or finalized by an explicit cleanup operation. Generators preserve suspended linear states and registered defers across yield points; abandonment follows the same explicit finalization rules as other linear iterators.
+
+### D288: Linear Standard Collections And Raw Storage
+
+Standard collections support `Linear` keys and values only when their admission record defines the full ownership contract for that collection. APIs that remove or replace entries return owned linear values or require an explicit cleanup callback or operation. Drain APIs over linear elements are linear and must be exhausted or finalized. Entry APIs state whether keys and values are moved, borrowed, replaced, or left in place on every success, failure, allocation-failure, cancellation, and panic-cleanup path. Collection internals use an audited standard raw-storage abstraction for uninitialized and partially initialized memory when they need such storage. That abstraction records initialization state and exposes safe wrappers before collection code outside the raw-storage module can use it. Every collection admission record documents invalidation, allocation, failure, cleanup, iteration order, and concurrency behavior.
+
+### D289: `Cleanable[T]`
+
+`Cleanable[T]` is a standard cleanup contract used by generic containers and drains. For `Free` types, `Cleanable[T]` is satisfied trivially and performs no hidden runtime action. For `Linear` types, `Cleanable[T]` requires an explicit implementation that consumes the value through a named cleanup operation. `Cleanable` is never run automatically at scope exit. Container APIs state when they require `Cleanable[T]` and when they return owned values instead. The compiler diagnostic set includes a missing-cleanup-contract diagnostic that suggests adding `Cleanable[T]` when a generic linear cleanup obligation cannot be discharged.
+
+### D290: Narrow Generic Destruction And Intentional Free Discard
+
+Kyokai does not run destructors automatically at scope exit and does not add a `drop` keyword for linear values. Domain-named cleanup remains the standard style, for example `closeFile(file)`, `destroyMutex(mutex)`, or `freeBuffer(buffer)`. Linear resources are consumed by explicit domain operations, explicit `defer` registrations, or explicit generic cleanup APIs. `Destroyable[T]` exists only as a manual generic cleanup contract. It is never auto-run by scope exit. `Cleanable[T]` uses `Destroyable[T]` only when a container or drain API explicitly requires that relationship in its contract.
+
+`discard expr;` is allowed only for `Free` values and exists to silence must-use or ignored-result diagnostics with intent. `slay`, `yeet`, and other slang cleanup keywords are rejected as core syntax.
+
+---
+
+## Accepted Shape Routing Record: D291-D301
+
+This cluster records the accepted rules for tuple pressure, local anonymous records, nominal record update, explicit error conversion, must-use diagnostics, numeric edge cases, bounded compile-time evaluation, macro rejection, asset embedding, tooling-only verification, no-macro codecs, WASM/WASI targets, cross-target platform contracts, direct C ABI FFI, and practical pinned construction. The normative specification chapters named in the tracker carry the extracted contracts.
+
+### D291: Tuples, Local Anonymous Records, And Nominal `with` Update
+
+Kyokai has no tuple syntax and no positional anonymous product types. Public APIs, exported signatures, `.kyo` declarations, and `.koi` artifacts use nominal named records for multi-value shapes. `Pair` and `Triple` are library records only if the standard library admits them; the parser, type checker, and `.koi` writer do not treat them specially.
+
+Kyokai admits local anonymous named-field records inside function bodies for temporary multi-value results. These local anonymous records cannot appear in `.kyo` public APIs, `.koi` artifacts, typeclass instances, public record fields, exported constants, or cross-package artifact identity. They are resolved inside the declaring body before public interface generation.
+
+Kyokai admits nominal `with` record update for named records only. The result type is the same nominal record type as the source record. For `Free` records, `with` copies or reuses unmentioned fields according to Free value rules. For `Linear` records, `with` consumes the old record, replaces listed fields, and forwards every unlisted field exactly once into the new record. A listed replacement field is evaluated before the new record is completed and is checked by the move/borrow rules for that field type. The old value of a replaced linear field is not silently destroyed; the final syntax must either move it to an explicit binding/cleanup path or reject the update. `with` does not introduce structural subtyping, row polymorphism, duck typing, or anonymous public record identity.
+
+### D292: Explicit Error Conversion And Structured Fatal Payloads
+
+Error conversion is never implicit. `or return as TargetError` invokes an explicit visible conversion through an `ErrorConvertible[SourceError, TargetError]` instance selected by typeclass resolution. If no visible coherent instance exists, the program is rejected. Without `as TargetError`, `or return` keeps exact existing error behavior and requires the enclosing return error type to match the source error type. Named error sets are syntax sugar for Kyokai union/error types, not a second runtime mechanism.
+
+Error values expose source-chain or backtrace fields only when the error type or standard protocol explicitly declares those fields and construction provides them. Panic and TPOE payloads are structured diagnostic values governed by the fatal-diagnostic rules. Slang forms such as `yeet` and HTTP-status panic names are rejected.
+
+### D293: `must_use` And Intentional Free Discard
+
+Declarations may be marked `must_use` with an optional reason string. The standard `Result` type is must-use by default. Functions returning dangerous status, handles, builders, or security-sensitive values are marked must-use by their API contract when ignoring the value would hide failure, security state, ownership state, or required finalization. Ignoring a must-use value emits a diagnostic under the compiler-integrated lint system.
+
+`discard expr;` explicitly acknowledges and silences discard diagnostics only for `Free` values. Linear values still cannot be discarded by `discard` unless consumed by a valid cleanup operation.
+
+### D294: Numeric Edge Cases
+
+`Int128` and `Nat128` are core integer types. Literal inference rejects generic literal overflow at compile time when the target type is known. Inclusive range loops where start equals end run exactly once. Range lowering must not overflow at `Index.max` or equivalent max values.
+
+Safe Kyokai code cannot mutate a global floating-point rounding mode. Float literal patterns are illegal except through explicit predicate or named classification APIs such as `isNaN`, or exact named constants where specified. Unsafe or target-specific rounding/FPU controls are not safe Kyokai operations. Any such operation must live in an unsafe or capability-gated target API with an explicit target contract.
+
+### D295: Bounded Comptime And Macro Rejection
+
+Compile-time evaluation is deterministic value evaluation under the D202/D203 limits. It cannot perform ambient filesystem, network, process, clock, randomness, root-capability, or host-environment effects. Declaration guards may inspect only target, edition, feature, profile, and configuration facts admitted by the manifest and target contract.
+
+Kyokai has no token macros, derive macros, hygienic source macros, procedural macros, AST macros, source-rewriting macros, or macro expansion phase. Compile-time evaluation cannot generate new types, declarations, functions, syntax, modules, typeclass instances, or `.koi` interface items.
+
+Kyokai exposes only the closed compiler facts accepted by spec text as compile-time constants or built-ins: size, alignment, layout class, target facts, and public-interface metadata explicitly recorded in `.koi`. These facts are read-only. They are not a user reflection system and cannot enumerate private implementation details across module boundaries.
+
+Generated code belongs in manifest-declared `[generate]` steps. Generators emit real `.kyo`/`.kai` source or generated artifacts with provenance recorded by the toolchain. Generated source is checked as source, not hidden expansion inside expressions or declarations.
+
+### D296: Embedding, Static Assertions, And Tooling-Only Verification
+
+`@embedBytes(path)` embeds the exact bytes of a file at compile time. `@embedText(path)` embeds the exact bytes of a file after validating that they are well-formed UTF-8 text. The path argument must be a compile-time string literal or compile-time constant string admitted by the compile-time evaluation rules. Embedded paths are resolved relative to the declaring source file's package root. The resolved path must stay inside the package or an explicitly declared generated-output root.
+
+Missing files, unreadable files, directory paths, invalid UTF-8 for `@embedText`, and package-boundary escapes are compile-time errors. Embedded file contents and normalized relative paths participate in the reproducible build identity and in `.koi` provenance when the embedded value affects public interface shape or generated artifacts. Embedded values are immutable and grant no runtime filesystem capability.
+
+`static_assert(expr, message)` evaluates `expr` at compile time. `expr` must produce `Bool`; `message` must be a compile-time string. Failure is a compile-time diagnostic. `static_assert` may inspect only deterministic compile-time inputs admitted by Kyokai's compile-time evaluation rules. `based`, `bless`, and other slang assertion names are rejected as core syntax.
+
+Source-level SMT-backed `verify` syntax is rejected as Kyokai language semantics. The compiler is the verifier for Kyokai's static semantics: parsing, names, types, linearity, borrowing, capabilities, contracts that are statically checkable, compile-time evaluation, and target contract checks. `kyokai verify` is a tooling-only proof-analysis command. It reads source, `.koi`, contracts, `lambda_K` models, generated proof obligations, and solver backends. It does not make invalid Kyokai valid, does not replace the compiler, does not silently participate in type checking, and does not silently run during builds. Verification reports must state proof scope, assumptions, solver or proof backend, timeout policy, unknown/inconclusive behavior, and whether each obligation is proven, refuted, unknown, skipped, or out of scope.
+
+### D297: Codecs, Schemas, Bindgen, And No Macros
+
+Kyokai does not add derive macros, source macros, token macros, or unrestricted type reflection for codecs. Standard library and toolchain ergonomics use `Encode`, `Decode`, `Schema`, format-specific contracts, manifest-declared `[generate]` code generation, and `kyokai bindgen`.
+
+Generated codec and binding files carry provenance. Unsafe bindings generated from C headers still require unsafe contracts for ownership, lifetime, callbacks, layout, failure, and target variance. External schema formats such as Protocol Buffers, FlatBuffers, and Cap'n Proto follow the same visible generated-source model.
+
+### D298: WebAssembly/WASI Target
+
+Kyokai remains a native systems language with multiple backend and target families. WebAssembly/WASI is an accepted target family under the target-tier system. A WASM/WASI target is usable only after its target record defines the same target-contract fields as native targets: pointer width, integer layout, endianness, stack behavior, panic/fatal behavior, import/linking model, allocator/runtime requirements, and available standard library modules.
+
+WASI host resources map to explicit Kyokai capabilities. Preopened directories, clocks, random sources, sockets, environment, arguments, and process-like authority are not ambient. Host imports must be declared in the target/build contract or package manifest. Undeclared host authority is rejected. Threads, atomics, shared memory, dynamic loading, and filesystem behavior are available only when the selected WASM/WASI target contract says they are available. Browser WASM and WASI are separate target contracts. WASM-only Kyokai is rejected.
+
+### D299: Platform Contracts And Cross-Target Parity
+
+Every supported target tier must name its platform contract document or structured target record. Platform contracts include handle/file-descriptor authority, inheritance behavior, path model, environment/argument model, process spawning, time/random source availability, filesystem semantics, stack/guard behavior, signal or console-control behavior, callback thread rules, and cancellation/deadline interruption behavior.
+
+POSIX targets must state how safe wrappers handle `EINTR`: retry, expose a typed cancellation/deadline/error case, or reject the wrapper as unavailable. Windows targets must state how Kyokai capabilities wrap HANDLE-like resources, security descriptors/ACL-sensitive authority, overlapped IO, console handles, and COM apartment/thread-affinity requirements when COM APIs are used. Foreign callback contracts must state which thread or executor may invoke the callback and which Kyokai values may cross that boundary.
+
+Safe portable APIs expose only behavior guaranteed by the selected target contract. Target-specific APIs live behind target guards or platform modules. If a standard library or toolchain feature is accepted for one supported OS family, and equivalent primitives exist on another supported target, the feature must specify and implement the target contract for those targets before it is claimed portable. POSIX-only behavior cannot silently enter the portable standard library. Maintainers may merge target-specific implementation work before all target work is complete only when the API remains marked target-specific or unstable; before the API is marked stable or portable, maintainers must close the parity gap or explicitly remove the portability claim.
+
+### D300: Direct C ABI FFI And Non-C Wrapper Policy
+
+Kyokai's direct FFI target is the selected target's C ABI. Native Rust ABI interop, native Zig ABI interop, and native C++ ABI interop are rejected. Rust, Zig, and C++ may interoperate with Kyokai only through explicit C-compatible wrappers or explicit stable C-shaped ABI records.
+
+C++ interop uses `extern "C"` wrappers, COM-like C-compatible vtables, or explicit ABI records. C++ exceptions, templates, object lifetime, and native name mangling do not cross the Kyokai FFI boundary directly. Rust interop uses `extern "C"` functions and `repr(C)`/C-compatible wrapper types only. Rust panics and Rust-native layout do not cross the Kyokai FFI boundary directly. Zig interop uses C ABI wrappers only. Zig-native calling or lowering details are not Kyokai foreign contracts.
+
+`extern union` may represent C untagged unions only inside unsafe/FFI contracts. Reading a union arm requires an unsafe contract stating which arm is valid. C variadic functions are unsafe-only and require target ABI support. Safe wrappers must translate to typed Kyokai APIs. C macros are not imported as runtime declarations. Bindgen may translate simple constants, inline-like wrappers, or reject macros with diagnostics.
+
+Foreign callbacks must state ownership, thread, lifetime, reentrancy, panic/unwind, and capability rules. Dynamic loading and plugin APIs must use ABI records with version fields, symbol names, calling conventions, layout hashes, and failure contracts. Arbitrary `transmute` remains unsafe. A safe byte-view/layout conversion is admitted only when the source bytes, alignment, size, initializedness, padding policy, provenance, and target validity predicate are all checked or guaranteed by a named API contract. Kyokai sum types have no implicit foreign ABI. Foreign tags and payloads are modeled with explicit extern records/unions and wrappers.
+
+### D301: Pinning, Emplacement, Stack Storage, And Large Arrays
+
+D89b remains the pinning baseline: address-stable source types are explicit pinned declarations, and stable heap storage uses `PinBox[T]` or other pinned containers accepted by their own explicit D-points. Compiler optimizations such as RVO/NRVO do not create source-level no-move guarantees. A pinned value may be constructed only through APIs that specify final storage before initialization begins.
+
+In-place construction APIs for `PinBox`, ordinary `Box`, arenas, fixed buffers, and stack slots must specify storage ownership, initialization state, failure cleanup, and whether the resulting value is movable or pinned. In-place construction failure must not leak partially initialized linear fields; cleanup order and responsibility must be specified.
+
+Projection from a pinned record to pinned fields is safe only for fields whose declaration and container rules preserve address stability. Moving a field out of a pinned value is illegal unless the field type or rule explicitly permits it. Large array initialization may use repeat/fill/build APIs only when element copying, cloning, moving, or generator evaluation is explicit and legal for the element type. Stack allocation APIs must state stack-size interaction, overflow failure mode, target support, and whether the allocation is statically or dynamically sized. Unsafe pinned abstractions still require audit contracts at the unsafe boundary.
+
+---
+
+## Accepted Shape Routing Record: D302-D311
+
+This cluster records accepted shape for production observability, compiler-backed editor analysis, property/fuzz/bench workflow, standard-library tiers, the existing license boundary, public decision workflow, build-cache identity, RIIK audit discipline, capability attenuation, and `.koi`/KBI interface diffing. The normative specification chapters and workflow documents named in the tracker carry the extracted contracts.
+
+### D302: Observability, Profiling, And Diagnostic Events
+
+Kyokai programs do not emit telemetry automatically. Structured logging, tracing, metrics, profiling, allocator event capture, and diagnostic-event streams require explicit logger, tracer, metrics, profile, report, or event sinks. A sink is either an ordinary value passed to the API or a capability-bearing handle whose authority is visible in the function signature or object state. Hidden global telemetry, hidden network export, hidden profiling hooks, and silent release-build event capture are rejected.
+
+The standard observability vocabulary contains `LogRecord`, `Span`, `SpanEvent`, `MetricPoint`, `DiagnosticEvent`, `ProfileSample`, and `AllocationEvent`. `LogRecord` contains severity, message or structured fields, module/target, source span when available, timestamp policy, and attached error/result context when supplied. `Span` and `SpanEvent` contain span identity, parent identity when present, name, module/target, timing data, structured fields, and explicit status/failure data. `MetricPoint` contains metric identity, kind, numeric value or distribution bucket, labels, unit, timestamp policy, and aggregation identity. `DiagnosticEvent` uses the same code, severity, span, category, and suggestion vocabulary as `kyokai check` and command-line JSON diagnostics. `ProfileSample` records profile kind, selected target, selected profile, selected backend, compiler compatibility class, sample counter or timestamp, frame data when available, and whether debug symbols, frame pointers, and source maps were enabled. `AllocationEvent` records allocator identity, allocation/deallocation/reallocation kind, size, alignment, result status, source span when available, and allocation-site metadata when instrumentation is enabled.
+
+Trace context propagation is explicit. Context moves through values, through taskgroup inheritance rules written in the concurrency spec, or through declared framework APIs. Trace context is not ambient authority. Build profiles request debug symbols, frame pointers, profiling metadata, allocator instrumentation, coverage instrumentation, source maps, trace hooks, and profile report emission through explicit fields. Release profiles do not retain debug-only `debug` output, hidden telemetry, profiler hooks, allocator event capture, or trace hooks unless the profile explicitly opts in.
+
+`cold`, `hot`, `likely`, and `unlikely` are optimization hints only. Ignoring them preserves accepted programs, runtime behavior, diagnostics meaning, `.koi`, public API compatibility, and type checking. These hints do not license unreachable-code assumptions, ownership changes, branch removal, contract weakening, or fatal-path elision. Machine-readable observability reports are written under `kyokai-out/<target>/<profile>/<backend>/<package>/reports/` unless the command explicitly sends them to stdout or another user-selected report path.
+
+### D303: Analysis Server And Editor UX
+
+Kyokai ships a first-party Analysis Server. `kyokai lsp` is the LSP frontend for that server, not a second analyzer. Other future protocol frontends read the same server facts. The server shares the compiler parser, resolver, type checker, linearity checker, borrow checker, capability checker, unsafe checker, implicit-completion registry, lowering pipeline, manifest reader, and `.koi` reader. Analysis diagnostics use the same diagnostic codes, severity meanings, spans, help text, and machine-readable categories as `kyokai check`.
+
+The Analysis Server exposes semantic tokens or equivalent protocol metadata for moved values, consumed linear values, live immutable borrows, live mutable borrows, capability values, unsafe modules, unsafe contracts, generated source, public interface declarations, body-only declarations, selected target guards, and stale generated provenance. Inlay hints cover inferred types, inserted implicit completions, selected typeclass instances, selected receiver-module lookup, resolved target guards, capability flow, moved/consumed state, and generated import candidates.
+
+The server exposes lowering views for parsed surface syntax, typed elaboration, implicit completions, desugarings, tautology inputs, and backend-relevant public interface facts. Interface/body sync reports missing body definitions, stale interface declarations, visibility drift, public API drift, `.koi` diff classifications, and stale generated-source provenance. Ownership diagrams, borrow timelines, capability-flow views, unsafe-audit views, package graph views, and SemVer-impact views are projections of compiler/toolchain facts, not separate semantics.
+
+Code actions may add imports, qualify names, insert explicit completions, insert missing `defer` cleanup skeletons, navigate to unsafe audit contracts, apply machine-applicable fixes, and organize imports. A code action must not silently change runtime behavior, ownership transfer, capability authority, target selection, public API identity, unsafe boundary meaning, or `.koi` compatibility. Generated files expose source-origin metadata so rename, go-to-definition, diagnostics, SemVer checks, docs, and `.koi` provenance can trace back to generator inputs when that provenance exists.
+
+### D304: Property Tests, Benchmarks, Fixtures, Fuzzing, And Replay
+
+Kyokai testing recognizes `test`, `property`, `bench`, `fixture`, and `fuzz` artifacts in package metadata and command discovery. These are first-class toolchain concepts because stdlib admission, compiler conformance, RIIK, codec generation, FFI wrappers, math, collections, diagnostics, and packages need replayable evidence.
+
+Property tests use typed `Gen[T]` generators, typed shrinkers, deterministic seeds, sample-count policy, failure classification, replay records, and minimized regression cases. A property failure prints the seed, shrink path or minimized case when available, source span, package/profile/target/backend identity, and a replay command. Regression cases promoted from failing property runs become ordinary package test artifacts with stable replay metadata.
+
+Fuzz targets support byte-oriented inputs and structure-aware inputs. A structure-aware fuzz target defines the input decoder/generator and failure behavior explicitly. Fuzzing records corpus directories, crash directories, minimized reproducers, coverage mode when supported, dictionary/input-shape metadata when supplied, and deterministic replay commands. Coverage-aware property/fuzz integration is accepted, but coverage instrumentation must not change accepted source semantics, `.koi`, ownership checking, or diagnostics meaning.
+
+Benchmarks define warmup, measurement count or duration, selected profile, target, backend, CPU/host metadata that affects interpretation, statistical report output, noise caveats, and optional profiling hooks. Fixtures that allocate or acquire linear resources declare setup, teardown, failure cleanup, fixture ownership, parallelism rules, and what happens when setup fails after partial acquisition. `kyokai test`, `kyokai bench`, and `kyokai fuzz` write user-visible reports under the standard `reports/` output tree and can emit machine-readable reports for CI.
+
+### D305: Standard Library Tiers
+
+The Kyokai standard library is tiered by stability and release obligation: `Core`, `Systems`, `Extended`, `Experimental`, and `Internal`. The tiers are public contract categories, not separate languages.
+
+`Core` contains language-adjacent essentials required for ordinary checked programs: primitive protocols, `Result`, `Optional`, formatting contracts, basic containers, allocators, spans, iterators, and core diagnostics support. `Systems` contains stable systems APIs: files, paths, environment, process, time, random, networking when admitted, concurrency primitives, atomics, platform contracts, and FFI support wrappers. `Extended` contains useful batteries whose API shape is stable enough to ship but not required for every minimal toolchain profile. `Experimental` contains incubating APIs with explicit instability markers and no silent promotion to stable tiers. `Internal` contains implementation-support modules used by compiler, runtime, package manager, generated helpers, tests, or stdlib internals; it has no public compatibility promise unless a module is promoted by D-point and admission record.
+
+GUI, graphics, hot reload, high-level application frameworks, and large domain libraries are rejected as `Core` language requirements. They may enter `Extended` or `Experimental` only through the same admission process as other official modules. Every stable `Core`, `Systems`, or `Extended` module has an admission record covering contract, failure modes, allocation behavior, authority/capability behavior, blocking/concurrency behavior, platform behavior, tests/oracles, fuzz/property plan when applicable, compatibility policy, and owner/maintenance status. Reserved package/index namespaces may host official extended packages without making them core language requirements. Promotion from `Experimental` to a stable tier requires an admission record and compatibility review; there is no silent promotion by age or popularity.
+
+### D306: Licensing Boundary Explanation
+
+D263 remains closed. Kyokai compiler, package manager, formatter, LSP, backends, build tools, and other toolchain source are GPL-3.0-or-later unless a file states a compatible stronger boundary. Kyokai runtime, standard library, target helpers, startup code, and target-linked support libraries use GPL-3.0-or-later WITH GCC Runtime Library Exception 3.1 unless a file states another project-approved compatible boundary.
+
+Ordinary Kyokai user source code and resulting target programs are not forced under GPL merely because they are compiled by Kyokai or linked with exception-covered runtime, standard library, startup, or target-helper components through ordinary compilation/linking. Distributing modified Kyokai compiler, package manager, formatter, LSP, backend, or other toolchain source follows GPL-3.0-or-later obligations. Distributing modified exception-covered runtime/stdlib/target-helper source follows GPL-3.0-or-later WITH GCC Runtime Library Exception 3.1 obligations for those files. Project docs may explain this boundary, but must not present the project summary as legal advice.
+
+### D307: Public Decision Workflow And Maturity Tracking
+
+D-points are required for semantic, compatibility, stdlib public API, toolchain contract, runtime, unsafe/FFI/backend, package-index, governance, or release-shape changes. D-points are not required for typo fixes, behavior-preserving refactors, test-only additions, or bookkeeping. A D-point may start in `Kyokaishape.md`, a GitHub Discussion, a GitHub Issue, or a PR labeled `dpoint-needed` or `dpoint`. If a D-point starts outside `Kyokaishape.md`, `Kyokaishape.md` gets a tracker row linking the public thread/PR and naming the current owner/status.
+
+A PR that changes accepted language/toolchain/stdlib behavior must either reference existing accepted shape/spec text or carry/point to the D-point final wording that accepts the new behavior. Acks count only after final wording exists. Final wording must include the exact semantics, illegal forms, interactions, spec target, and implementation/test/proof impact.
+
+The normal public path is: proposal opens, shape is debated, final wording is written, community acks final wording, maintainer accepts, `kyokaidecided.md` is updated, `kyokaispec/` is updated when the spec home exists, and conformance/implementation status is tracked. The lead maintainer may close a point with an explicit `Lead YES` without waiting for the community ack count. `Lead YES` does not remove the requirement for final wording, traceability, and accepted-shape extraction. A solo-maintainer decision uses the same artifacts with fewer participants: final wording, maintainer acceptance, accepted-shape extraction, spec target, and phase/status update.
+
+Every accepted D-point gets a reverse index entry mapping D-point ID to `kyokaidecided.md`, `kyokaispec/` path when extracted, test/conformance path when present, implementation path when present, and calculus/proof path when relevant. Status uses the maturity states defined in `Kyokaishape.md` or their direct successors. A status row may name target milestone, release gate, implementation phase/subphase, owner, and open blockers.
+
+Language edition version, KBI/.koi version, package-index schema version, compiler compatibility class, and toolchain release version are distinct version axes. A source syntax/semantics change may require an edition bump even when KBI does not change. A public interface artifact format change requires a KBI/.koi version or compatibility-class update even when source syntax does not change. A package-index metadata schema change requires package-index schema versioning even when compiler semantics do not change. `phase.md` is a readable implementation/proof status board with phases, gates, percentages, blockers, and closed evidence. It orders work, but it must not become the normative source for semantics.
+
+### D308: Performance, Cache Identity, Incremental Builds, And Stack Defaults
+
+Kyokai does not promise normative wall-clock compile-time or runtime performance numbers, but an official toolchain that is chronically unusable for ordinary projects is a toolchain-quality failure. The local build cache is part of the official toolchain shape. Deleting it must not change accepted programs, diagnostics meaning, final artifacts, `.koi`, or runtime behavior.
+
+Build identity inputs for cache reuse and artifact reproducibility include source contents, manifest contents, lockfile contents, selected features, selected profile, selected target, selected backend, compiler compatibility class, `.koi` inputs, generator inputs, admitted environment inputs, target records, codegen-affecting flags, debug/source-map policy, sanitizer policy, frame-pointer policy, LTO policy, target CPU/features, and profile-controlled instrumentation. Cache reuse is valid only when the recorded build identity matches the requested build identity and the cached content hash verifies.
+
+Remote or shared artifact caches are accepted as cache-aside infrastructure. A toolchain is not required to contact a remote cache, but any fetched artifact must validate by content hash, build identity, package identity, target/profile/backend identity, and compiler compatibility class before use. Debug info path policy is explicit. Reproducible profiles support path remapping or normalized paths and record whether absolute paths are embedded.
+
+Generated C backend flags are part of the backend contract. Flags that change language semantics or introduce backend undefined behavior are rejected unless explicitly modeled by an unsafe/target contract. Stack defaults, task stack defaults, guard-page behavior, overflow detection behavior, and per-target/profile overrides are explicit profile or target-contract fields. Incremental compilation may change build time only. It cannot change accepted programs, diagnostics meaning, `.koi` content, public interface diffing, generated source provenance, or runtime behavior. Failure to honor an explicitly requested profile/backend feature is a build error, not a silent downgrade. Cache metadata and timing/performance reports are user-visible reports when requested, not language semantics.
+
+### D309: RIIK Unsafe Boundary And Stdlib Audit
+
+RIIK does not mean "rewrite first, audit later". Stable stdlib modules are implemented in safe native Kyokai by default for pure data-structure, formatting, parsing, iterator, codec, and deterministic computation domains when the team understands the algorithm and can meet the admission evidence bar. FFI or existing mature libraries are used for OS boundaries, hardware interfaces, crypto primitives, libm-quality numerics, platform services, and other domains where correctness depends on external standards, side-channel review, target quirks, or mature upstream verification that Kyokai has not yet reproduced.
+
+A stable stdlib module with unsafe internals identifies each unsafe primitive, invariant, caller obligation, failure mode, aliasing/provenance rule, cleanup rule, and the safe APIs that contain it. Collections and allocators isolate raw storage, initializedness, aliasing, growth, movement, panic/TPOE/failure cleanup, and partial-initialization logic behind small audited internal modules. Math APIs publish accuracy contracts, special-value behavior, target FPU assumptions, rounding assumptions, exception/flag policy, oracle/reference sources, and differential-test sources. Crypto APIs name external standards, test vectors, side-channel claims, key/secret cleanup behavior, randomness requirements, review requirements, and allowed implementation strategies before stable admission.
+
+Transitional FFI modules carry replacement tracking and unsafe contracts. Replacing FFI with native Kyokai does not remove the admission requirement. Property tests, fuzzing, conformance vectors, differential tests, sanitizer runs where applicable, and audit reports are admission evidence, not optional decoration. `Unsafe_Module` use inside stdlib is tracked as part of public stdlib admission status.
+
+### D310: Capability Attenuation And Resource Limits
+
+Capability attenuation is a one-way operation from a stronger sealed capability value to a weaker sealed capability value according to a declared capability rule. An attenuation API names the stronger input capability, weaker output capability, allowed operations, lifetime relationship, thread-transfer classification, revocation/closure behavior when applicable, and failure behavior. A weaker capability exposes only the operations named by its capability type and contract.
+
+Attenuation does not grant new authority, widen lifetime, widen thread-safety, widen target availability, bypass package policy, or bypass unsafe/capability restrictions. Attenuated capabilities remain sealed and unforgeable. Unsafe code cannot construct them except through approved internal constructors covered by D245/D255 and the capability module's audit contract.
+
+Manifest boundary declarations state what external resources a package, generated tool, plugin, test, command, or build script expects. They are audit/policy inputs, not implicit function arguments. The compiler/toolchain must not synthesize runtime capabilities merely because a manifest names a resource. Capability graph/lattice documentation is accepted for review and audit, but source semantics are the explicit operations and types, not hidden algebra inference.
+
+Resource-limit primitives such as semaphores, permits, rate limits, bounded task slots, and bounded connection slots are ordinary linear stdlib capabilities or synchronization objects with explicit acquire, release, try-acquire, deadline/cancellation, fairness, and failure contracts. WASI preopens, Capsicum-like narrowed descriptors, process handles, filesystem subtrees, network listeners, random sources, clocks, and plugin resources all flow through explicit capability values and attenuation APIs.
+
+### D311: `.koi` KBI Sections, Provenance, And Interface Diffing
+
+`.koi` is a versioned Kyokai Binary Interface / checked package interface artifact, not an opaque cache file. The KBI version identifies the artifact schema, canonical encoding rules, compatibility class, and minimum reader behavior. `.koi` sections have canonical encoding, canonical ordering, canonical string/path normalization, canonical integer encoding, and canonical hash rules.
+
+Required sections include package identity, package version, source language edition, KBI version, compiler compatibility class, selected feature set, target-independent public interface, exported declarations, visibility, type/universe facts, typeclass definitions, typeclass instances, generic bodies/materialization metadata where needed, capability/interface contracts, unsafe/public audit metadata, docs metadata, dependency `.koi` digests, and provenance. Provenance records include source digests, manifest digest, lockfile digest when present, generator records, embedded-file digests when public artifacts depend on them, compiler compatibility class, selected profile-relevant public settings, selected features, and dependency `.koi` digests. Target-specific or backend-specific sections are allowed only when their target/backend identity is included in the section key and artifact hash.
+
+`.koi diff` classifies interface changes as `breaking`, `additive-minor`, `patch-compatible`, or `unknown-manual-review`. Publishing to the official index fails if `.koi diff` detects a breaking public interface change without a major version bump or an explicit maintainer override record. Local builds and private indexes choose policy, but `kyokai semver-check`, `kyokai publish --dry-run`, and `kyokai koi diff` report the diff classification when requested.
+
+Hash mismatch, non-canonical encoding, unsupported KBI version, unsupported compatibility class, incoherent instance/interface data, dependency digest mismatch, or malformed provenance is a hard error. `.koi` is consumed by compiler checking, package compatibility, docs, the Analysis Server, SemVer checks, reproducibility, binary cache identity, and audit tooling. It is not a dumping ground for private compiler query caches.
+
+---
+
+## Accepted Shape Routing Record: D312-D313 And D315-D321
+
+This cluster closes accepted shape for proof-claim honesty, syntax/file-model closure, adoption documentation, daily debug/span/docs behavior, synchronization semantics, generic and closure edge rules, proof-tooling boundaries, daily CLI workflow extensions, and structured target contracts.
+
+### D312: Formal Proof Scope And Future Mechanization
+
+Kyokai labels claims as `intended-by-spec`, `implemented-and-tested`, `conformance-backed`, `paper-proven`, or `mechanically-proven`. Every safety claim names the feature scope and evidence tier. Public docs cannot say "proven safe" without naming what was proven, by what artifact, and what was excluded.
+
+The first `lambda_K` paper proof covers the sequential core only: ownership, movement, exact linear use, borrowing, lexical region end, capabilities as values, checked failure, and defined terminal failure. It does not prove concurrency, FFI, backend correctness, standard-library algorithms, crypto, libm accuracy, package behavior, LSP behavior, formatter behavior, docs generation, or reproducible builds.
+
+Data-race freedom claims distinguish safe Kyokai source, unsafe modules, foreign code, atomics, backend behavior, and target memory-model assumptions. Selective mechanized proof may begin before whole-language mechanization for high-risk surfaces: borrow/linearity core lemmas, atomics/happens-before fragments, backend lowering lemmas, unsafe stdlib kernels, and target ABI contracts. Each mechanized artifact names theorem scope, proof assistant, artifact path, theorem names, trusted base, assumptions, and excluded features.
+
+### D313: Syntax Closure And Body-Only Modules
+
+Kyokai keeps the accepted syntax direction for block terminators, `do`, semicolons, no tuples, `.kyo`/`.kai`, package/module resolution, and receiver-module lookup. Syntax complaints route to rationale, formatter, LSP, examples, interface sync, migration docs, and teaching material, not a syntax redesign.
+
+A `.kyo` interface is required for public/importable interface declarations. A `.kai` body may exist without a paired public `.kyo` when the module is package-private, executable-internal, test-only, or otherwise not exporting a public interface. A body-only module does not publish public declarations into `.koi` except toolchain metadata needed for package/build identity.
+
+Kyokai does not add global ADL, dependency-wide method search, or local import free-for-all. Receiver-module lookup stays narrow. Ceremony reduction happens through body-only/private modules, generated interface sync, formatter, LSP navigation, and examples.
+
+### D315: Adoption Guides And Public Comparison Docs
+
+Kyokai public documentation includes the normative spec plus audience-specific adoption guides. Required adoption material before serious public adoption includes C-to-Kyokai, Rust-to-Kyokai, Zig-to-Kyokai, Austral-to-Kyokai, an FFI cookbook, a capability/security guide, a linear resources guide, a high-concurrency Poller server example, an embedded/freestanding example, package/toolchain workflow docs, and RIIK stdlib design notes.
+
+Comparison docs state where Kyokai is stricter, less ergonomic, more explicit, less mature, or intentionally different from prior art. Austral inheritance is explained inside Kyokai docs so readers do not need to read the Austral spec first. Examples state whether they are accepted, experimental, or aspirational when the implementation is not caught up. Guides link back to spec sections or accepted shape for normative detail.
+
+### D316: Debug, Formatting, Spans, Docs, And Unicode Diagnostics
+
+`debug expr;` uses ordinary `Displayable` formatting resolution. Stable Kyokai has no separate debug-rendering protocol. Adding one requires a new accepted D-point that defines protocol identity, lookup, `.koi` facts, formatting failure, and migration behavior. A missing formatter for `debug` reports a dedicated diagnostic naming `Displayable` and the expression type. `debug` does not consume linear values and obeys debug/profile stripping and purity rules.
+
+`Span[T]` is the standard immutable borrowed view of contiguous elements. `SpanMut[T]` is the standard mutable borrowed view. Their ownership, aliasing, length, and invalidation contracts are normative. Their exact representation is not public ABI unless an ABI contract says so. Display of borrowed views is provided through ordinary library instances when element/display constraints are satisfied.
+
+Documentation comments use one specified CommonMark-like profile with Kyokai code fences and intra-doc links defined by the docs toolchain. Source text is UTF-8, but identifiers remain within Kyokai's accepted ASCII identifier syntax. Non-ASCII identifier characters are rejected with a targeted diagnostic that distinguishes invalid identifier syntax from invalid source encoding. Standard rendering remains deterministic and locale-independent unless an explicit localization API is used.
+
+### D317: Mutex, RwLock, Condvar, And Liveness Tooling
+
+Standard `Mutex[T]` and `RwLock[T]` are non-reentrant. Reentrant locks require a distinct type and accepted D-point. Standard locks do not poison after panic/TPOE. TPOE is fatal, and recoverable poisoning is not Kyokai's default model.
+
+Lock APIs include blocking, try, and deadline/timeout variants when target support exists. Lock guards are linear and must be explicitly consumed by unlock or another specified operation. Condition variables require exact rules for associated lock type, wait atomicity, spurious wake behavior, deadline behavior, and linear guard transfer.
+
+The compiler does not guarantee general deadlock freedom. Tooling may provide best-effort lock-order, wait-graph, channel-graph, taskgroup, runtime trace, and liveness diagnostics. Such diagnostics are tooling facts unless a specific API contract says a deadlock condition is detected and reported at runtime.
+
+### D318: Generic Variance, Nested Inference, And Closure Storage
+
+User generic type constructors remain invariant. Only spec-named built-in borrow/view types get region-shortening coercions, and only when shortening cannot create mutation, lifetime, or linearity holes. Users cannot declare arbitrary variance annotations.
+
+Nested generic inference follows the forward-only inference model: inference proceeds from explicit arguments, receiver/parameter positions, and already-known expected types only in the allowed direction. The compiler does not solve arbitrary global constraints. Diagnostics identify the generic parameter and expression that failed to provide the needed type or region information.
+
+Closure literals have explicit capture lists and local storage by default. Converting a closure to an escaping/owning callable that requires heap or arena storage uses an explicit storage/allocator API and returns allocation failure explicitly. Closure environment layout is not public ABI unless a callable/FFI contract says so.
+
+### D319: Proof Tooling Without Dependent Source Semantics
+
+Kyokai rejects algebraic effect handlers, dependent types, arbitrary refinement types, finite range types, and user proof sections as core source-language features. Capabilities remain the built-in authority/effect boundary. Const generics remain compile-time values, not propositions.
+
+Tooling may prove bounds, discharge checks, produce proof reports, guide optimization, and surface LSP facts. Those results do not change whether source type-checks. Stable Kyokai has no proof-result source-semantics lane and no profile where failure to prove changes source validity. Adding either surface requires a new accepted D-point that defines the exact proof artifact, trusted base, source rule, profile interaction, diagnostics, and fallback behavior. Under the accepted shape, failure to prove remains a tooling or optimization failure, not a source-language type error.
+
+### D320: Examples, Local Install, CLI Extensions, And Migrations
+
+Manifests declare examples as first-class package targets with names, roots, required features, supported profiles, supported targets, and docs visibility. `kyokai run --example <name>` builds and runs a selected example through ordinary package/profile/target rules.
+
+`kyokai install --path <path>` installs executable targets into an explicit prefix or configured user tool directory and records package identity, source provenance, compiler compatibility class, target, profile, and features.
+
+Kyokai supports external developer CLI extensions through executable discovery: unknown safe extension commands resolve to `kyokai-<name>` only from configured tool directories or `PATH` according to documented precedence. Built-in commands always win over external extensions unless the user explicitly invokes an extension namespace such as `kyokai ext <name>`. External extensions cannot shadow security-sensitive built-ins such as `build`, `check`, `test`, `publish`, `vendor`, `audit`, or `fix`.
+
+External extensions never receive hidden project authority. The toolchain passes explicit args, a current workspace metadata path or JSON via stdin when requested, and declared capability/env access. Extensions that mutate manifests, lockfiles, source, cache, or output trees must run through declared command classes and audit/report their changes. `kyokai help <extension>` delegates help to the extension in a specified way. `kyokai extension list` reports discovered extensions, paths, trust source, and version/provenance when available.
+
+`kyokai migrate --edition <edition>` produces a plan/diff first and writes only with an explicit write flag. Human-judgment migrations are reported as blockers, not guessed rewrites.
+
+### D321: Structured Platform Contract Schema
+
+Every supported target has a structured platform contract record. The record includes target triple, `Arch`, `Os`, `Abi`, libc/environment, support tier, pointer width, endianness, alignment/data-layout facts, calling conventions, object format, linker model, stack/guard behavior, atomic support, thread support, panic/fatal behavior, startup model, runtime requirements, and backend compatibility.
+
+The record includes stdlib availability and platform behavior for IO, filesystem paths, env/args, process, time, random, networking, signals/console control, dynamic loading, WASI/host resources, and capability mappings. It also includes runtime hook ABI names such as `fatalHandler`: symbol name, calling convention, argument layout, return behavior, and whether returning is illegal.
+
+The compiler, package manager, docs, Analysis Server/LSP, FFI checks, and stdlib admission consume the same target contract data. Unknown, unsupported, missing, or contradictory fields are build errors when required by the selected target/profile/API.
+
+---
+
+## Accepted Shape Routing Record: D322-D340
+
+This cluster records accepted rules for unsafe contract grammar, `bitrecord` parsing, arena APIs, property generation, TLS, cancellation, backtraces, stable ABI, rich formatting, beginner scaffolds, workspace discovery, external tool diagnostics, asset embedding, builtin formatting lookup, UFCS receiver exports, `Auto` classification, closed `Never` lifting, and pattern legality. The normative chapters named in the maturity tracker carry the extracted contracts.
+
+### D322: Unsafe Contract Grammar And Audit Coverage
+
+Unsafe contracts are structured source declarations, not comments and not detached audit files. A module marked unsafe must contain at least one body-level declaration of the form `unsafe contract Name is ... audit;`. The contract body contains one or more coverage entries. Each coverage entry names a compiler-produced unsafe operation key and then states the safety facts for that operation in structured fields.
+
+The compiler produces operation keys during parsing and elaboration for every unsafe facility used by the module. Operation key classes include foreign declaration, foreign call wrapper, callback registration, raw pointer read, raw pointer write, raw pointer-to-borrow conversion, volatile access, inline assembly block, dynamic library open, dynamic symbol lookup, raw signal handler, trusted capability acquisition, layout reinterpretation, target-specific intrinsic, and every unsafe primitive accepted by a closed D-point after D322. A key includes enough stable identity for diagnostics and audit output: operation class, source span, declaration or expression identity, target guard when present, and public wrapper exposure when present.
+
+A `covers` entry must bind one operation key or an explicitly declared module-wide invariant. The entry's field vocabulary is closed. Accepted fields are `assumes`, `requires`, `preserves`, `forbids`, `maps_failure`, `owns`, `borrows`, `transfers`, `target`, `threading`, `lifetime`, `layout`, `reentrancy`, `cleanup`, `exports`, and `evidence`. Fields that do not apply are omitted. Free prose is allowed inside field values, but the field name itself must be known to the grammar and emitted in audit output. The `evidence` field accepts proof or verification material such as a `lambda_K` lemma, target ABI document, property/fuzz test suite, sanitizer run, model-checker result, or external standard reference. Evidence strengthens audit status but is not required for ordinary FFI.
+
+The compiler rejects an unsafe operation with no matching coverage entry. The compiler rejects a coverage entry whose operation key matches no unsafe operation unless the entry is explicitly marked `module_invariant`. Multiple entries are allowed to cover one operation only when their coverage classes are disjoint or when an entry is explicitly marked `additional_invariant`. Unsafe contracts do not prove safety by themselves and do not weaken Kyokai's no-language-UB rule; they make the trusted boundary visible, structured, reviewable, and machine-discoverable.
+
+Audit tooling groups reports by module, operation key, source span, contract name, target guard, safe wrapper, public API exposure, evidence status, and stale/missing coverage diagnostics. `.koi` records public unsafe/audit summaries for exported APIs that depend on unsafe contracts.
+
+Rejected shapes: Kyokai does not accept prose-only safety comments as sufficient coverage, does not move primary unsafe contracts to external TOML/YAML files, and does not require full formal proof for every unsafe module.
+
+### D323: `bitrecord` Grammar And Bit Access Semantics
+
+`bitrecord` uses declaration syntax because it defines a nominal value type. Its terminator is `build;`, the same semantic terminator family used for type-building declarations such as records and unions. Kyokai does not add a special `bits;` terminator because the terminator marks declaration category, not low-level flavor.
+
+The syntax is `bitrecord Name: Backing is ... build;`. `Backing` must be an unsigned fixed-width integer type accepted for the selected target, initially `Nat8`, `Nat16`, `Nat32`, `Nat64`, and any accepted wider unsigned fixed-width integer type. A `bitrecord` item is one of `field name: bit N;`, `field name: bits Hi..Lo;`, or `reserved bits Hi..Lo;`. Bit numbers are zero-based from the least-significant bit. Alternate bit numbering is rejected by this decision. Ranges are inclusive and must satisfy `Hi >= Lo` and `Hi < bit_width(Backing)`.
+
+Field and reserved ranges must not overlap. A bit position not covered by a field or reserved declaration is a diagnostic in strict profiles and a formatter/lint finding in profiles that allow incomplete reserved masks. A single-bit field has type `Bool` unless the declaration explicitly requests a one-bit unsigned view type admitted by the integer rules. A multi-bit field has the smallest unsigned integer view that can represent the range width unless it declares an explicit unsigned view type of matching width.
+
+Construction, field read, and field update lower to masks, shifts, and checked range operations. They never lower to C bitfields and never inherit C bitfield layout behavior. Bitrecord fields have no address and no borrow semantics. Taking `&value.field` or `&!value.field` is illegal. A `bitrecord` value has exactly the storage and alignment of its backing integer unless a separate ABI contract says the type is only a logical view.
+
+`toBits(value)` returns the exact backing integer. `fromBits(bits)` preserves the backing integer exactly and does not validate reserved bits unless a named constructor or contract chooses to reject nonzero reserved bits. Endianness is not part of bit numbering. Serializing a `bitrecord` across byte boundaries uses the backing integer plus explicit endian conversion helpers.
+
+Rejected shapes: Kyokai does not model bit fields with ordinary records plus annotations, does not use C bitfields, and does not require raw integer helper code for all register/protocol work.
+
+### D324: Arena API, Region Coupling, And Bulk Reset
+
+`Arena` is a first-class linear scoped allocation type, but it is not an ordinary `Allocator`. Ordinary allocators promise individually deallocatable storage. Arenas promise bulk lifetime management tied to a region. Treating an arena as an ordinary allocator is rejected because it lies about individual deallocation and makes escape bugs look like normal container use.
+
+An `Arena` is constructed fallibly from an explicit parent allocator, platform allocation source, or target-provided allocation capability. Construction records parent identity, chunk policy, alignment policy, maximum growth policy when present, selected target constraints, and profile constraints. Arena allocation failure returns `AllocError`; it is not TPOE by default.
+
+Safe arena allocation occurs only through an explicit borrow of the arena. Values produced by that allocation are arena-region-bound. The type of an arena-derived borrow or handle records that it cannot outlive the arena borrow region and cannot outlive the arena itself. Arena-backed values cannot be returned, stored in ordinary owning containers, sent to another task, or written into `.koi`-visible public state unless the API type exposes the required region relationship and the checker proves non-escape.
+
+`reset` either consumes the arena or requires an exclusive mutable borrow of the arena and is legal only when no live arena-derived borrow or arena-owned handle exists. `destroy` consumes the arena and releases all arena storage; it is legal only when no safe references can remain live. The checker must reject reset/destroy while arena-derived values remain live. Diagnostics name the allocation site, the live derived value, and the reset/destroy attempt.
+
+Arena-backed containers have separate admission records. Each arena-backed container states whether elements are bulk-abandoned, individually cleaned, or forbidden when `Linear`. A container that can hold `Linear` elements must provide an explicit cleanup strategy before arena reset or destroy can be safe. Ordinary `Buffer[T]`, `String`, and other individually deallocating containers do not silently accept `Arena` as an ordinary allocator.
+
+Public APIs returning arena-region-bound values record that region dependency in `.koi` so downstream packages can check non-escape. Unsafe internals that implement arena chunks, raw storage, alignment, or partial initialization require unsafe contracts under D322.
+
+### D325: Property Generators, Shrinking, And Fuzz Composition
+
+Kyokai property testing has a typed library surface and a toolchain replay contract. `Gen[T]` is a deterministic generator value parameterized by an explicit seed stream and size/config record. `Shrink[T]` is a deterministic shrink relation or iterator that yields smaller or simpler candidate values for a failing `T`. Generator and shrinker behavior is deterministic for the same compiler compatibility class, package version, target-independent generator implementation, seed, size policy, and generator configuration.
+
+A property test names its generators, shrinkers when not default, sample count, size policy, seed policy, target/profile/backend when relevant, and replay artifact path. A failing property records initial seed, generated value path, shrink path, minimized value when found, source span, target/profile/backend, dependency versions, and the exact replay command. A replay artifact is ordinary checked test input, not hidden global state.
+
+The standard library provides built-in generator and shrinker instances for primitive integers, floats, `Bool`, `String`, `ByteBuf`/bytes, `Optional`, `Result`, arrays, spans through owned backing data, and admitted common collections. User generators are ordinary values. Their only allocation path is an explicit allocator/config API, and allocation failure is reported through the testing API rather than silently aborting.
+
+Property testing and coverage-guided fuzzing are different engines. They share replay metadata, corpus promotion rules, minimization reporting, and failure artifact format. Structure-aware fuzzing uses an explicit `decodeFuzzInput(bytes) -> Result[T, DecodeError]` bridge before running a property over `T`. Coverage instrumentation never changes language semantics, ownership checking, `.koi`, diagnostics meaning, or whether a program type-checks.
+
+Corpus promotion turns minimized property/fuzz failures into checked regression artifacts. RIIK/std-lib admission records state whether property/fuzz evidence is required for a module, and the presence of property tests never weakens the required language or unsafe-contract rules.
+
+### D326: Thread-Local Storage And `TlsCapability`
+
+Safe thread-local storage is a standard-library API, not a module-level declaration form and not ambient mutable global state. Creating a TLS key requires `TlsCapability` or a narrower derived capability. A target that does not declare TLS support rejects imports or uses of safe TLS APIs for that target.
+
+`ThreadLocalKey[T]` is a handle to per-thread slots. The key handle itself is `Free` only when its representation carries no owned per-thread value. The stored per-thread values are owned by their thread-local slots. Storing a `Linear` value transfers ownership into the current thread's slot. Taking a value transfers ownership back out. Borrowing a stored value creates an ordinary borrow whose lifetime is bounded by the access operation and current thread.
+
+The API surface includes `createKey`, `set`, `getBorrow`, `getBorrowMut` where exclusive access can be proven, `take`, `clear`, and `destroyKey` or exact equivalents. `getBorrowMut` is legal only when the TLS implementation can guarantee exclusive access for the current thread and no nested borrow is live. Recursive initialization, nested access, and destructor reentry are specified diagnostics or runtime errors according to the API contract; they are not left to platform folklore.
+
+Destroying a key requires all per-thread slots to be empty, or it requires a `Cleanable[T]` cleanup contract and a specified runtime model for enumerating and cleaning slots. Thread exit behavior is explicit: stored values are taken and cleaned with `Cleanable[T]`, rejected at storage time if no cleanup path exists, or abandoned only during runtime-fatal process death where no continuation can observe the leak.
+
+TLS values do not cross task/thread boundaries unless the API explicitly moves them and `T` satisfies the accepted task-transfer rules. TLS use appears in audit, docs, and Analysis Server/LSP output as ambient-looking state backed by explicit `TlsCapability` authority. Kyokai rejects safe `thread_local var` syntax and rejects macro-defined TLS globals.
+
+### D327: Cancellation Source, Token, And Blocking Integration
+
+Cancellation is cooperative. Kyokai does not kill OS threads, inject exceptions, unwind foreign frames, or silently interrupt arbitrary blocking calls. Cancellation authority and cancellation observation are separate values.
+
+`CancellationSource` owns the authority to trigger cancellation. `CancellationToken` is the read-only observation handle passed to child tasks, blocking operations, Poller waits, channels, and library APIs that declare cancellation support. `CancellationSource` is the only safe value that can request cancellation for its associated token family. `CancellationToken` is `Free` when represented as a shareable read-only handle and cannot trigger cancellation.
+
+`source.token()` produces observation tokens. `source.cancel()` is idempotent and records the cancelled state with the memory ordering required by the concurrency model. Cancelling wakes admitted cancellable operations associated with the token. A cancelled token remains cancelled. Creating child sources or linked tokens requires an explicit API that states propagation direction, ownership, cleanup, and cycle behavior.
+
+Blocking APIs that accept a token state their cancellation-safety class from D284. A cancellable operation returns `Err(Cancelled)` only at specified cancellation points. If cancellation races with successful completion, the API contract states which result wins and what happens to ownership transfers. Cancellation is an ordinary structured exit for the affected operation and runs normal cleanup promised by that operation. Cancellation is not TPOE, not `panic`, and not runtime-fatal.
+
+Plain blocking APIs without token/deadline variants are allowed to wait indefinitely. They are not magically cancellable. Target-specific cancellation behavior such as POSIX interruption or Windows cancellation is represented through the target contract and the specific API contract.
+
+### D328: Backtrace Type, Capture Policy, And Error Attachment
+
+`Backtrace` is an opaque `Free` standard-library/runtime type. It represents a captured stack trace or a structured reason why capture was unavailable. Capturing a backtrace is best-effort, can be expensive, and can depend on target, profile, debug info, frame-pointer policy, symbol availability, and runtime support. Capture failure is not TPOE.
+
+Backtrace capture policy is controlled by explicit profile, CLI, environment, and target rules. The fatal runtime path, `panic`, TPOE reporting, and structured error APIs attach `Optional[Backtrace]` exactly when that policy says to attach it. A recoverable error carries a backtrace only when the error type or helper API explicitly stores it. Kyokai does not attach backtraces to all errors implicitly.
+
+Rendering a backtrace is tooling/runtime work over an opaque value. Rendering symbolizes frames when debug/source maps are available, shows raw frame addresses when symbols are unavailable, and redacts or truncates according to profile/tool policy. Rendering a backtrace must not affect program semantics. Backtrace values are not stable ABI payloads unless wrapped in a separate stable diagnostic format.
+
+Fatal payloads include fatal kind, diagnostic code, message, source span when available, `Optional[Backtrace]`, target/profile, and runtime phase. Freestanding fatal handlers receive `Optional[Backtrace]` only when the target/runtime contract provides capture support. The toolchain provides visualization, filtering, and source mapping over the captured value, and the runtime still carries the `Backtrace` value before any external tool sees the program.
+
+### D329: Stable ABI Declarations And Kyokai-Native ABI Islands
+
+Kyokai accepts `stable_abi` as an opt-in boundary feature for a constrained set of public layout types. It is not a promise for every public Kyokai type and it is not a freeze on ordinary source/interface evolution. Stable ABI creates deliberate ABI islands for plugins, dynamic loading, shared memory, long-lived binary data, and cross-version native boundaries.
+
+Only layout-eligible public boundary types can be marked `stable_abi`. Eligible shapes include fixed-width integers and floats, stable ABI records with fully public field layout, stable ABI enum/union forms with specified tag layout, and approved pointer/handle forms whose ownership and lifetime contract is explicitly stated. Ineligible shapes include ordinary Kyokai unions with private representation, types containing compiler-private fields, closure/environment types, non-stable generic parameters, raw pointers without ABI contracts, target-dependent layout without target indexing, and values with hidden cleanup semantics.
+
+`.koi` records the full stable ABI contract: type identity, ABI version, size, alignment, field order, field offsets, field types, padding policy when observable, tag layout for stable ABI unions/enums, calling convention when passed across an ABI boundary, endian assumptions when serialized, target constraints, and compatibility class. `.koi diff` treats stable ABI layout changes as breaking unless an explicit compatibility rule proves otherwise. A package cannot publish a stable ABI breaking change as a non-breaking SemVer update without an override record.
+
+Non-`stable_abi` public types use ordinary Kyokai source/interface compatibility and `.koi` checking. They do not gain a stable binary layout promise by being public. Stable ABI does not make unsafe reinterpretation safe. Reading bytes as a stable ABI type still requires validation or an unsafe contract unless the API receives a typed value from a trusted ABI boundary.
+
+This shape lets Kyokai move quickly in ordinary releases while making binary compatibility explicit where it matters. Rust-style "no stable native ABI" is rejected for Kyokai's plugin and long-lived boundary goals. Freezing all public records as stable ABI is also rejected because it would punish normal library evolution and optimization.
+
+### D330: Rich Formatting Through Typed Format Specs
+
+Kyokai keeps the string template language minimal and opinionated. `{}` remains the placeholder language. Expanding the string mini-language with width, radix, alignment, debug, precision, or locale syntax inside strings is rejected.
+
+Rich formatting exists through ordinary typed values. The standard library provides `FormatSpec` and narrower spec records such as integer format, float format, radix, alignment, fill, width, precision, sign policy, alternate form, and equivalent accepted fields. A formatted argument is wrapped explicitly with an API such as `formatWith(value, spec)` or an accepted equivalent. This keeps formatting power in type-checked values instead of stringly syntax.
+
+Formatting specs are `Free` values. Constant specs are validated at comptime. Non-constant specs are validated by ordinary construction APIs and return ordinary errors when construction can fail. Formatting to an owned string requires an explicit allocator and returns allocation failure. Formatting to a writer returns writer errors. No formatting API creates hidden allocation, hidden locale dependency, hidden terminal authority, or hidden I/O capability.
+
+Locale-sensitive formatting is not part of the default formatting surface. Localization requires explicit locale APIs. Debug rendering remains separate from user display through the debug/rendering rules; rich display specs do not become reflection or automatic debug dumping.
+
+### D331: Beginner Scaffolds Without Hidden Authority
+
+Kyokai does not add hidden terminal, environment, allocator, clock, filesystem, network, random, or root authority for beginner examples. The language does not get a teaching dialect, example-only syntax, hidden prelude, or ambient I/O just to shorten hello world.
+
+Beginner ergonomics come from generated real Kyokai code. `kyokai new` provides starter templates such as `cli-basic`, `cli-fallible`, `library`, `systems-tool`, `freestanding`, and target-specific variants when admitted. These templates generate ordinary Kyokai source that receives root authority where appropriate, derives narrower capabilities explicitly, passes allocators explicitly, handles fallible operations explicitly, and surrenders or destroys resources explicitly.
+
+Standard helper functions are allowed to package common authority derivations, but their signatures show every capability, allocator, writer, or target resource they require. Tutorials begin from generated scaffold files and explain the authority values in order. Examples state whether they are accepted by the language, implemented by the current compiler, target-specific, or aspirational implementation work.
+
+This keeps the explicit model intact while removing manual setup noise from the first project. New users see real Kyokai earlier, not a fake easier language that has to be unlearned afterward.
+
+### D332: Workspace Root Discovery And Manifest Precedence
+
+Kyokai workspace discovery is deterministic. Starting from the current working directory, the tool finds the nearest `kyokai.toml`. That manifest is the candidate package manifest unless it declares `[workspace]` and no `[package]`. The tool then walks upward looking for a `kyokai.toml` with `[workspace]`.
+
+An enclosing workspace is active only if its member list includes the candidate package path under normalized path rules. If an enclosing workspace exists but does not list the package, the command reports a detached-package or nested-workspace diagnostic instead of silently choosing whichever manifest is nearest. Nested workspaces are errors unless the command explicitly selects one with `--manifest-path` or `--workspace-root`.
+
+Kyokai allows root package workspaces only when the same manifest contains `[workspace]` and `[package]` and the workspace member rules explicitly include the root package, for example through `members = [".", ...]` or an exact equivalent accepted spelling. A manifest that combines `[workspace]` and `[package]` without making the root package membership explicit is rejected.
+
+`--manifest-path` selects a package or workspace manifest explicitly and disables ambiguous upward guessing except for validation required by the selected manifest. The Analysis Server/LSP uses the same discovery algorithm and reports all active package/workspace roots.
+
+### D333: External Tool Failure Diagnostics And Raw Output Policy
+
+Every external tool invocation has a tool record: tool kind, executable identity, version when known, arguments after redaction, target/profile/backend, working directory, environment policy, input artifacts, output artifacts, and trust source. Tool kinds include C compiler, assembler, linker, archiver, debugger, profiler, target runner, generator, formatter helper, docs helper, package helper, and external CLI extension.
+
+A failed external tool produces a Kyokai diagnostic category such as `backend-c`, `assembler`, `linker`, `archiver`, `debugger`, `profiler`, `runner`, `generator`, or `extension`. If source mapping exists, the primary diagnostic points to Kyokai source and generated C/assembly locations appear as secondary notes. If no source mapping exists, the diagnostic states that the error is external-tool-originated and points to the generated artifact or log path.
+
+Raw stdout/stderr is preserved in a report/log artifact by default. Normal terminal output summarizes the failure. Verbose mode can print raw output inline. JSON diagnostics include external tool kind, exit status or signal, mapped spans, raw log path, generated artifact path, and whether the mapping is exact, approximate, or unavailable.
+
+External raw-output presentation has four modes: `summary`, `inline`, `artifact_only`, and `json_only`. This presentation setting does not change whether raw logs are captured. A separate privacy/redaction mode suppresses or redacts raw-log capture, and diagnostics then state that evidence was intentionally not preserved. External CLI extensions use the same diagnostic wrapper and must label mutations, trust source, and authority requests.
+
+### D334: Rejected Meme Kernels
+
+`defer todo;`, `borrow ambient`, and `speculate { } or_else { }` are rejected as Kyokai source syntax. They do not enter the parser, type checker, or core language semantics.
+
+Release-blocking TODO tracking belongs to toolchain metadata, lints, issue policy, CI gates, or manifest policy. It does not use cleanup syntax and does not affect ownership typing. Parameter-threading pain is addressed by explicit context records, capability bundles, generated scaffolds, LSP assists, and API design. Kyokai does not add implicit dependency injection, dynamic ambient lookup, or hidden call-stack state.
+
+Optimistic execution and rollback belong to explicit library transaction APIs for domains that can actually roll back. A transaction API must represent every consumed value, failure mode, rollback obligation, and cleanup path through ordinary types and contracts. Kyokai does not add general rollback over arbitrary ownership.
+
+### D335: Embedded Asset Builtins
+
+Kyokai accepts two explicit asset embedding builtins: `@embedBytes(path_literal)` and `@embedText(path_literal)`. `@embedFile` is not the accepted final spelling because it does not say whether the result is bytes or validated text.
+
+Both builtins are reserved comptime expression forms, not normal functions and not macros. The lexical grammar reserves `@` only for accepted comptime builtin names. Unknown `@name` forms are parse errors, not user identifiers. The argument must be a compile-time string literal. Dynamic path expressions are rejected.
+
+Paths resolve relative to the package root by default. A path outside the package root is rejected unless a manifest-declared asset root explicitly grants it. Absolute paths are rejected in source packages. `..` segments and symlinks are normalized before root containment checks. Missing files, directories, symlink escapes, unreadable files, invalid text, and non-reproducible metadata produce distinct compile-time diagnostics.
+
+`@embedBytes` returns immutable static bytes and performs no UTF-8 validation. `@embedText` validates UTF-8 at comptime and returns immutable static text according to the accepted text/string view model. Both forms contribute the embedded file digest, normalized path, package identity, and asset-root identity to build identity, incremental cache keys, package hashes, generated provenance, and `.koi` provenance when exposed through public constants. Neither form allocates at runtime.
+
+### D336: Builtin Formatting Forms And Canonical Protocol Identity
+
+`debug expr;` is a statement builtin form. It is not parsed as an identifier call. `format(alloc, template, args...)` is an expression builtin form with call-like syntax. `writeFmt(writer, template, args...)` is builtin-checked for template/argument matching and lowers to an ordinary canonical standard-library writer operation after elaboration.
+
+Template checking uses canonical protocol identities recorded in the standard library and `.koi`, including the canonical `Kyokai.Format.Displayable` identity or its accepted final path. The compiler refers to that canonical identity without importing the unqualified name into user scope. This is compiler knowledge of a standard protocol, not a hidden prelude.
+
+Implementing `Displayable` for a user type still requires importing or qualifying the typeclass under normal import rules. Using `debug`, `format`, or `writeFmt` on a type without an applicable display implementation is a type error whose diagnostic names the canonical protocol and suggests explicit imports only when the user is writing an implementation declaration.
+
+The builtin names `debug`, `panic`, `todo`, `unreachable`, `format`, `writeFmt`, and accepted `@...` forms cannot be shadowed by local variables or imports. No formatting builtin creates hidden allocator, writer, terminal, or I/O authority.
+
+### D337: Receiver-Callable Exports And UFCS Fallback
+
+Receiver-module UFCS fallback remains narrow and explicit. A function is receiver-callable only if its declaration begins with the exact marker `receiver function`. Merely having a first parameter whose type matches the receiver is not enough.
+
+The receiver-callable marker is legal only on exported functions whose first parameter is a borrow or value of the nominal receiver type, or on a built-in receiver family explicitly owned by the declaring module. By default, only the receiver type's defining module is allowed to export receiver-callable functions for that type. Extension methods from arbitrary dependency modules are rejected by this decision because they reopen hidden lookup and coherence problems.
+
+Receiver-callable metadata is emitted into `.koi` with receiver type identity, function identity, first-parameter ownership/borrow mode, visibility, generic constraints, and package/module identity. UFCS resolution order is fixed: ordinary imported or unqualified lookup runs first. If no candidate exists, receiver-module fallback searches only the receiver type's defining module `.koi` receiver-callable exports for that receiver type.
+
+Receiver fallback never searches arbitrary dependency modules, wildcard surfaces, or functions that merely match by first parameter. If fallback finds more than one applicable candidate after type checking, the call is ambiguous and rejected. If ordinary lookup finds a unique type-correct candidate, that candidate wins and fallback is not used. The marker does not change calling convention, ownership, side effects, capabilities, or typeclass selection. It grants dot-call eligibility only.
+
+Kyokai does not add Rust-style `impl` blocks through this decision. Adding that model would require a separate D-point that reopens declaration ownership, coherence, docs, and `.koi` method surfaces.
+
+### D338: `Auto` Classification And Explicit Allocator Dispatch
+
+`Auto` classification is computed structurally after generic substitution. The classifier examines the instantiated declaration's stored fields, variant payloads, captured closure environment fields, and accepted built-in classification rules. An instantiated `Auto` type is `Linear` when any stored component is `Linear`; otherwise it is `Free`.
+
+Const generic and value generic arguments do not directly contribute to `Auto` classification. They affect classification only when they select, size, or otherwise determine stored fields whose type classification is known through accepted rules. No user code, comptime reflection, solver, or arbitrary type-level function runs during classification.
+
+Recursive `Auto` definitions are classified by a monotone fixed point over the declaration strongly connected component after substitution of known generic arguments. If any member requires `Linear`, dependent members become `Linear` through their fields. A cycle whose classification depends on an invalid, unbounded, or not-accepted type-level predicate is rejected with a classifier diagnostic.
+
+The compiler caches classification results per instantiated declaration and records public classification rules or resolved facts in `.koi` so downstream packages do not recompute private implementation details incorrectly. `.koi` exposes enough dependency metadata for checking while respecting visibility of private fields according to the interface rules.
+
+D82 rejects hidden typeclass dictionaries inserted for generic calls. It does not reject explicit runtime dispatch stored inside a named value such as an allocator handle when that handle's type, ownership, layout contract, and call surface are source-visible. Any allocator handle using function pointers, vtables, or equivalent dispatch is documented as explicit dynamic dispatch and must not be smuggled into generic typeclass resolution.
+
+### D339: Closed `Never` Lifting Without General Variance
+
+Kyokai has no general subtyping and no user-declared variance. User-defined generic type constructors are invariant. Kyokai does not add variance annotations or a subtype lattice through `Never`.
+
+`Never` expressions coerce to any expected type only at expression typing sites accepted by the `Never` coercion rules. In addition, Kyokai has a closed intrinsic conversion table for `Never` lifting through accepted standard/built-in constructors. Initial intrinsic conversions are `Optional[Never] -> Optional[T]`, `Result[Never, E] -> Result[T, E]`, and `Result[T, Never] -> Result[T, E]` when the target type is known.
+
+The intrinsic conversion table names constructor identity, parameter slot, source type, target type, ownership preconditions, and elaborated operation. The compiler elaborates each use into an explicit intrinsic conversion node. `.koi` records uses of intrinsic lifting or enough elaborated form for downstream tools to avoid inferring a hidden subtype relation.
+
+Diagnostics call these operations closed `Never` lifting conversions. They must not describe user-defined covariance, general variance, or general subtype conversion. User-defined generic types cannot opt into this rule. Adding such a facility would require a separate D-point that reopens variance/conversion declarations.
+
+This is intentionally a special case. It preserves `or return`, impossible-success/impossible-error ergonomics, and bottom-type usefulness without importing a broad metagame layer into Kyokai's nominal linear type system.
+
+### D340: Pattern Legality And Diagnostics
+
+Kyokai's pattern legality is table-driven. The spec contains a closed legal-pattern table by scrutinee category: union, record, integer, `Bool`, accepted char/text categories, enum-like zero-payload union, and catch-all. A pattern form not admitted for the scrutinee category is a type error, not parser behavior left to implementation choice.
+
+Floating-point literal patterns are illegal. Floating values must be tested with explicit predicates or comparison code that names NaN behavior. This rejects the NaN equality footgun instead of pretending float literal patterns are ordinary structural matches.
+
+`ignore` is a reserved contextual discard token only in pattern position. It does not bind and cannot be shadowed inside a pattern. `ignore` remains legal only where discarding is legal for the matched value. It cannot discard or hide a possibly linear payload. When a matched variant, field, or generic position can contain a `Linear` value, the pattern must bind that value explicitly and the selected arm must consume, move, borrow, or return it under ordinary linearity rules.
+
+For a generic scrutinee `T: Type`, a catch-all pattern is exhaustive only in the syntactic coverage sense. It is legal only when the arm accounts for the possibly linear value. Generic exhaustiveness is conservative: only syntactically catch-all coverage is exhaustive unless a constraint names a concrete closed union family.
+
+A normal identifier in pattern position binds unless the grammar identifies a constructor or qualified constructor. PascalCase names in pattern position are resolved through a fixed namespace order for constructors, types, and modules. If more than one interpretation is plausible or if a constructor is mistyped, diagnostics name the expected namespace and suggest qualification. Qualified constructor patterns use ordinary module qualification and do not trigger UFCS lookup.
+
+---
+
+## Accepted Shape Routing Record: D341-D365
+
+This cluster records accepted rules for range-loop edge cases, split channel/readiness waiting, runtime-fatal payloads, span and dynamic-loading lifetimes, freestanding targets, compiler-owned capabilities, `Result` combinators, borrow-checker tables, expected-type flow, foreign callbacks, manifest generation/audit schema, formatter/migration behavior, channel contracts, memory model, safe `unreachable;`, implicit completion registry rules, container admission, TPOE taxonomy, comptime determinism, typeclass coherence, generator suspension, rendering protocols, allocation failure, `.koi`/KBI schema, and arithmetic contracts. The normative chapters named by each point carry the extracted contracts.
+
+### D341: Range Loop Edge Cases, Inclusive Bounds, And Overflow-Free Iteration
+
+Spec homes: kyokaispec/src/language/10-statements-and-control-flow.md, kyokaispec/src/language/18-built-ins.md.
+
+1. `for i from A to B do Body od;` is an inclusive ascending integer range loop.
+2. `A` is evaluated exactly once before `B`. Both bound expressions use normal Kyokai expression semantics, including TPOE for overflow inside the bound expressions themselves.
+3. The loop variable type is the expected integer type from context or the smallest admitted integer type that can type both bounds under the literal/defaulting rules. If no single admitted integer type exists, the loop is a type error.
+4. Bound values are converted to the loop variable type before iteration begins. A failed conversion is a compile-time diagnostic when statically known and TPOE or typed conversion failure according to the conversion API when runtime-dependent.
+5. If `A > B`, the loop executes zero times. This decision accepts no descending syntax.
+6. If `A == B`, the body executes exactly once with `i == A`.
+7. Before each iteration, the current loop value is already known to be inside `[A, B]`.
+8. After the body runs for current value `B`, the loop terminates immediately. The implementation must not compute `B + 1` as part of the source semantics.
+9. After the body runs for a current value smaller than `B`, the implementation computes the next value using a checked successor operation whose precondition is `current < B`. Because `current < B`, the successor cannot overflow for a well-typed fixed-width integer range.
+10. `break` exits the loop without computing another successor. `continue` proceeds to the same endpoint check that normal fallthrough uses; if current is `B`, it terminates without successor arithmetic.
+11. The loop variable is immutable inside the loop body. Stable Kyokai has no mutable-loop-variable form. Taking a borrow of the loop variable follows Kyokai borrow rules and cannot survive the next iteration.
+12. `for i from 0 to Index.max do ... od;` is accepted and does not TPOE from hidden loop arithmetic.
+13. Any arithmetic written in `Body` still follows D365 checked arithmetic. The range-loop rule does not weaken user-written overflow checks.
+14. Step sizes, descending ranges, half-open ranges, and iterator sugar are not accepted by this point. Each requires its own endpoint-before-step rule before it enters Kyokai.
+15. Diagnostics for unsupported descending syntax say that D341 accepts inclusive ascending ranges only and suggest explicit `while` when the programmer needs a custom direction.
+
+
+### D342: select, Readiness Waiting, Fairness Non-Guarantee, And Starvation Diagnostics
+
+Spec homes: kyokaispec/src/language/15-concurrency.md, kyokaispec/src/stdlib/09-concurrency-primitives.md, kyokaispec/src/toolchain/05-diagnostics.md.
+
+1. `select ... pick;` is the channel-selection construct. Its admitted arms are channel send, channel receive, channel close-observation, deadline, cancellation-token observation, and default arms accepted by the channel/concurrency spec.
+2. `wait ... wake;` is the readiness-wait construct. Its admitted arms are Poller readiness tokens, timer/deadline tokens, cancellation-token observation, signal/process readiness tokens accepted by target contracts, and default arms accepted by the Poller spec.
+3. `select` does not directly wait on raw file descriptors, sockets, OS handles, or Poller backend handles. Such resources must be represented by channel operations or by `wait` readiness tokens.
+4. `wait` does not send or receive channel messages directly. Channel endpoints can expose explicit readiness tokens only through a standard adapter whose ownership and close behavior is specified; the adapter does not transfer the message itself.
+5. Every admitted arm kind has a table entry naming readiness, ownership transfer point, blocking behavior, cancellation behavior, deadline behavior, close/shutdown behavior, cleanup obligations, and target availability.
+6. If exactly one arm is ready, that arm is selected.
+7. If multiple arms are ready, Kyokai guarantees no fixed source-order priority unless the programmer selects an explicit biased/fair mode. The default mode does not promise starvation freedom.
+8. The selected arm's ownership transfer occurs at the arm-specific transfer point named in the table. An unselected send arm must leave the message owned by the sender; an unselected receive arm must not consume a message.
+9. Cancellation and deadline arms are readiness arms. If they win, the operation returns the typed cancellation/deadline result named by the construct, not `panic`, not TPOE, and not hidden unwinding.
+10. Target contracts record Poller backend behavior such as edge-triggered or level-triggered readiness, descriptor classes, signal wake support, and spurious wake policy. Target contracts cannot weaken Kyokai ownership transfer rules.
+11. LSP/lints warn on obvious starvation patterns such as fixed biased loops with always-ready arms. The warning is advisory and never changes semantics.
+12. `select` and `wait` lower to separate elaboration nodes so the Analysis Server can explain channel choice separately from external readiness waiting.
+
+
+### D343: Runtime-Fatal Surface: Backtrace Policy, Stack Size, ExitCode, And Fatal Hooks
+
+Spec homes: kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokaispec/src/language/18-built-ins.md, kyokaispec/src/toolchain/04-build-profiles-targets-linking.md.
+
+1. Kyokai defines four terminal categories: normal exit, explicit `panic`, TPOE contract violation, and runtime-fatal/internal failure.
+2. Normal hosted program termination returns `ExitCode`. `ExitCode` is a public standard type with a portable success value, a portable failure value, and target-specific integer mapping recorded in the target contract.
+3. Hosted `main` signatures are a closed accepted set. The initial accepted set is `main(root: RootCapability): ExitCode` and any already accepted fallible startup shape recorded by the startup D-points. Other signatures are diagnostics.
+4. `panic` is explicit programmer-requested abnormal termination. TPOE is a contract-violation termination. Runtime-fatal is runtime/toolchain support failure such as stack overflow, fatal allocation during an unreturnable runtime path, corrupted runtime invariant, or target fatal hook failure.
+5. Backtrace capture policy is resolved in this order: explicit CLI flag, profile setting, environment variable only when the selected profile permits runtime environment override, then target default.
+6. The accepted public control names are CLI `--backtrace=<off|short|full>`, profile key `panic_backtrace = "off"|"short"|"full"`, and hosted environment variable `KYOKAI_BACKTRACE=0|1|short|full` when environment override is enabled.
+7. A reproducible profile disables environment backtrace override by default. In that profile, `KYOKAI_BACKTRACE` is ignored and diagnostics say the profile rejected runtime override.
+8. Fatal payloads include terminal category, diagnostic code, message, source span when available, `Optional[Backtrace]`, target triple, profile, backend, runtime phase, and exit mapping when hosted.
+9. Stack overflow is runtime-fatal. Hosted target contracts state the detection class: guard page, stack probes, explicit bounds checks, OS signal/trap mediation, or unavailable. Freestanding target contracts state the same in freestanding terms.
+10. Default main stack assumption, task stack default, minimum stack, maximum configured stack, guard size, and overflow action are target/profile fields.
+11. `spawn` stack configuration is available only on targets whose target contract exposes configurable task stacks. A bad stack-size request returns a typed spawn/config error; it is never silently rounded into a different request.
+12. Freestanding fatal hooks are non-returning. Their ABI receives terminal category, diagnostic code, payload pointer/length or static message pointer/length, `Optional[Backtrace]` when supported, and target/runtime context allowed by the target contract.
+13. Fatal hooks cannot allocate or perform capability-requiring I/O unless those capabilities are passed explicitly or the target contract declares a fixed runtime sink such as a board debug UART.
+14. Returning from a fatal hook is runtime-fatal escalation on hosted targets and trap/halt/reset according to freestanding target contract.
+15. Tooling reports all configured fatal/backtrace/stack fields through `kyokai doctor --target` and profile inspection.
+
+
+### D344: Span, SpanMut, Buffer Views, Dynamic Loading Handles, And Symbol Lifetimes
+
+Spec homes: kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md, kyokaispec/src/language/16-unsafe-ffi-and-abi.md, kyokaispec/src/stdlib/08-io-files-env-process-time-random.md.
+
+1. `Span[T, R]` is the canonical read-only borrowed contiguous view of initialized elements of type `T` in region `R`. The anonymous spelling `Span[T]` uses the same anonymous-region rule as other common borrows.
+2. `SpanMut[T, R]` is the canonical exclusive mutable borrowed contiguous view of initialized storage or explicitly declared initialization-capable storage in region `R`.
+3. A span value contains view identity, base address, length, element type identity, mutability, initialization state, and region dependency. Source code observes it through safe APIs, not by reading raw fields.
+4. `Span` and `SpanMut` descriptors are `Free` only as non-owning borrow descriptors. Copying a descriptor does not copy elements, does not extend the region, and does not weaken aliasing rules.
+5. `Span[T]` allows shared reads. `SpanMut[T]` allows exclusive mutation. `SpanMut[T]` can be temporarily reborrowed as `Span[T]` under the accepted mutable-to-shared reborrow rule.
+6. Bounds-checked indexing of spans is TPOE on out-of-bounds unless an API returns a checked `Optional`/`Result` view.
+7. Viewing `Linear` elements never copies, clones, drops, or destroys them. APIs over `Span[LinearT]` must state whether they only observe, move out, initialize, overwrite, or consume elements. A generic span API that cannot satisfy linearity for `T: Type` must constrain `T: Free` or expose the linear operation explicitly.
+8. `SpanMut` over possibly-uninitialized storage is not the same type as `SpanMut[T]` over initialized `T`. Initialization-capable views use a separate admitted type or state marker and cannot be read until initialized.
+9. Public APIs returning spans record the region dependency in `.koi`. A span cannot be stored into a longer-lived owner, returned without its region relationship, or sent to another task unless its source region and task-transfer rules permit it.
+10. `DynLibrary` is a `Linear` handle acquired through a dynamic-loading capability and target contract. `openDynLibrary` returns `Result[DynLibrary, DynLoadError]`.
+11. `DynLibrary` is target-gated. On targets without dynamic loading, importing the API is a compile-time target-contract error.
+12. `lookupSymbol(lib: &[DynLibrary, R], name: Span[Nat8, R2])` returns an untyped `Symbol[R]` whose lifetime is tied to the borrow of `lib`. The symbol cannot outlive the borrowed library handle.
+13. `closeDynLibrary(lib: DynLibrary)` consumes the library and is legal only when no safe `Symbol` or typed wrapper borrowed from it remains live.
+14. Converting `Symbol[R]` to a typed callable value is unsafe unless a wrapper contract proves symbol name, calling convention, argument layout, return layout, ownership transfer, thread-safety, reentrancy, lifetime, and failure behavior.
+15. A typed dynamic symbol wrapper that escapes the library borrow must own or share a `DynLibrary` lifetime handle explicitly; safe code never gets a bare function pointer detached from the library lifetime.
+16. `.koi` records public dynamic-loading APIs, stable ABI dependencies, unsafe audit summaries, target guards, and symbol wrapper contracts.
+
+
+### D345: Freestanding Target Contract, Runtime Shims, Interrupt Boundaries, And No-OS Capability Surface
+
+Spec homes: kyokaispec/src/toolchain/04-build-profiles-targets-linking.md, kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokaispec/src/language/16-unsafe-ffi-and-abi.md.
+
+1. A target contract with `hosted = false` is freestanding. It must name architecture, ABI, object format, linker model, startup symbol, entry signature, stack model, fatal action, atomic availability, volatile/MMIO policy, interrupt support, allocator availability, and runtime helper requirements.
+2. Freestanding targets provide no filesystem, environment, process, terminal, networking, wall clock, dynamic loading, random source, or heap capability by default.
+3. `RootCapability` on freestanding is target-defined. It can be absent, board-supplied, split into sealed hardware capabilities, or provided by a runtime package. The compiler enforces the chosen entry signature from the target contract.
+4. Heap allocation is unavailable unless the program imports or defines an allocator accepted for the target. Standard APIs requiring allocation are unavailable until an allocator is passed explicitly.
+5. Startup code is explicit. The toolchain records whether startup is supplied by Kyokai runtime, board package, user object file, linker script, or external boot environment.
+6. Interrupt handlers are not normal functions. They require an accepted interrupt ABI wrapper with target contract fields for register save/restore, nesting, reentrancy, stack selection, allowed calls, allocation policy, blocking policy, panic/TPOE action, and capability access.
+7. Safe interrupt handler bodies cannot allocate, block, acquire root authority, take non-interrupt-safe locks, or call APIs lacking interrupt-safety admission.
+8. Volatile/MMIO access is unsafe or capability-gated and requires D322 unsafe contracts naming address range, width, alignment, ordering, side effects, and target device contract.
+9. Atomics are available only for widths/orderings declared by the target. Unsupported atomic operations are compile-time target errors, not runtime fallbacks that change memory semantics.
+10. Stack overflow detection can be guard-page, probe, explicit check, hardware trap, or unavailable. The target contract states which. When detection is unavailable, safe source still cannot rely on backend undefined behavior; the target is marked with that diagnostic limitation.
+11. Freestanding fatal action is one of trap, halt, reset, call non-returning hook, or target-specific action recorded in the target contract.
+12. Hosted-only stdlib modules are compile-time errors on freestanding. Freestanding-compatible modules carry admission records saying which target capabilities they require.
+13. Conformance for freestanding can be compile-only, emulator-backed, simulator-backed, hardware-backed, or proof/audit-backed. Each target tier records which evidence class it has.
+14. `kyokai doctor --target` prints the freestanding contract and refuses to call it hosted-compatible.
+
+
+### D346: Root Capability Derivation, Splitting, Surrender, And Authority API Surface
+
+Spec homes: kyokaispec/src/language/14-capabilities-and-authority.md, kyokaispec/src/stdlib/08-io-files-env-process-time-random.md.
+
+1. A `capability` declaration is a compiler-recognized sealed nominal `Linear` type. Its constructors are not user-callable unless declared as capability derivation functions in the defining module and accepted by the compiler's capability rules.
+2. `RootCapability` is available only through accepted startup entry signatures. User source cannot construct, clone, default-initialize, deserialize, embed, reflect, or transmute a root capability in safe code.
+3. Capability derivation is an explicit function or method declared by the capability-owning module. The signature states whether it borrows, mutably borrows, or consumes the stronger capability and what weaker capability it returns.
+4. Deriving a weaker capability never grants authority not present in the stronger capability. It can narrow path roots, network address ranges, environment variable names, process-spawn rights, dynamic-loading rights, random-source rights, clock rights, or target/device ranges.
+5. Splitting root authority uses explicit derivation APIs. Repeated derivation from a borrowed root is allowed only for capabilities whose declaration says the operation is duplicable in authority but not duplicating a linear resource. Otherwise derivation consumes or mutably borrows according to its signature.
+6. `surrender`, `close`, `destroy`, or a domain-specific consuming operation ends a capability value's authority according to its contract. Linear checking enforces exactly-once consumption.
+7. Capability values can be borrowed to perform operations without surrendering authority. Borrowing does not clone authority and cannot outlive the capability value.
+8. Capability values are `task_transfer` only when their declaration or target contract says the underlying authority can safely move across tasks. Task-local OS handles remain task-local.
+9. Unsafe code cannot forge a capability from raw bits. Unsafe internals of the capability-owning module can construct capability representations only under D322 unsafe contracts and only for the authority surface that module owns.
+10. The standard library contains modules such as filesystem, terminal, environment, process, network, clock, random, dynamic loading, and target/device authority. Those modules use compiler-recognized capability declarations; they do not define the capability system itself.
+11. `.koi` records capability declarations, derivation signatures, attenuation relationships, task-transfer classification, target guards, and public APIs requiring each capability.
+12. Capability docs and audit output show the authority graph as a compiler/tool projection. The graph is explanatory; source semantics are the declared sealed types and explicit functions.
+
+
+### D347: Result Combinators, Callable Ownership, Error Sources, And Ignored-Result Interaction
+
+Spec homes: kyokaispec/src/stdlib/02-core-result-optional-display-error.md, kyokaispec/src/language/09-expressions-and-evaluation.md.
+
+1. `Result[T, E]` is the standard recoverable-error carrier for operations that can succeed with `T` or fail with `E`.
+2. `Result` is `must_use` by default. Ignoring a `Result` is a diagnostic unless the value is explicitly consumed by `discardResult`, matched, returned, propagated, logged through an accepted API that consumes it, or otherwise handled by a named operation.
+3. Core combinators include `isOk`, `isErr`, `ok`, `err`, `map`, `mapErr`, `andThen`, `orElse`, `unwrapOr`, `unwrapOrElse`, `inspect`, and `inspectErr` or accepted final names.
+4. A combinator that applies a callable states whether the callable is borrowed, consumed once, or stored. The default callable argument for `map`/`andThen` is consumed exactly once only on the branch where it is invoked.
+5. If a callable captures `Linear` values, branch-sensitive linearity rules decide whether the capture is consumed, returned, or remains live. A combinator cannot silently drop an unused linear capture.
+6. `map` transforms `Ok(T)` into `Ok(U)` and leaves `Err(E)` unchanged. `mapErr` transforms `Err(E)` into `Err(F)` and leaves `Ok(T)` unchanged.
+7. `andThen` consumes `Ok(T)` through a callable returning `Result[U, E2]` and propagates `Err(E)` according to the declared error conversion or exact error type rule.
+8. Error-source/chaining helpers are typed. Kyokai does not use erased exception objects, hidden stack unwinding, or ambient global error state.
+9. Formatting a `Result` requires display/debug implementations for the rendered branch and follows D330/D362 allocation/writer failure rules.
+10. `.koi` records public `Result` signatures, must-use status, and combinator generic constraints.
+
+
+### D348: Borrow Checker State Transition Table, Partial Moves, And Linear Diagnostics
+
+Spec homes: kyokaispec/src/language/11-linearity-borrowing-and-regions.md, kyokaispec/src/toolchain/05-diagnostics.md.
+
+1. The checker runs after D238 elaboration and D239 implicit completions. It checks the explicit elaborated form, not unexpanded surface sugar.
+2. Each local linear binding has a state: `Live`, `SharedBorrowed(n)`, `MutBorrowed`, `PartiallyMoved(field-set)`, `Moved`, `Consumed`, or `PendingLoopConsumption`.
+3. `Live` means the whole value is available for move, borrow, field projection, or final consumption.
+4. `SharedBorrowed(n)` means one or more immutable borrows are live. Additional immutable borrows can be created; moving, consuming, mutable borrowing, and mutating the value are illegal.
+5. `MutBorrowed` means one exclusive mutable borrow is live. Shared borrowing, another mutable borrow, moving, consuming, and direct mutation outside the borrow are illegal.
+6. `PartiallyMoved(field-set)` means one or more fields of a record/variant payload have moved out. The remaining fields keep their own states. The parent value cannot be used as a whole until the moved fields are reinitialized where the type permits reinitialization.
+7. `Moved` means ownership has transferred and the binding cannot be used except where a legal reinitialization rule exists.
+8. `Consumed` means the value has been passed to a consuming operation, returned, destroyed, surrendered, or otherwise used exactly once.
+9. `PendingLoopConsumption` records attempted consumption inside a loop for a value defined outside the loop; the checker rejects unless the loop construct proves exactly-once consumption on every possible iteration/exit path, which plain loop forms do not prove.
+10. Borrow creation records source binding, borrow mode, region, source span, and parent projection path when borrowing a field.
+11. Borrow end returns the source state to the previous live/partial state only when no derived reborrow remains live.
+12. Auto-reborrow inserts temporary borrow states with source spans pointing to the call site and to the accepted implicit completion rule.
+13. Pattern matching over linear values must bind or consume every linear payload on every selected arm. A wildcard/`ignore` cannot hide a live linear payload.
+14. `defer` and `errdefer` register deferred consuming operations in the control-flow graph. The checker verifies that each deferred path consumes exactly the values it owns and that no path consumes the same value twice.
+15. `break`, `continue`, `return`, `panic`, TPOE sites, and `unreachable` are control-flow exits. Every live linear obligation must be consumed, returned, transferred into a registered cleanup path, or proven unreachable according to the terminal category rules.
+16. Diagnostics name the binding, current state, previous state-changing span, attempted illegal operation, and suggested legal action when one exists.
+17. The Analysis Server exposes these states so users can see moved, borrowed, consumed, and partially moved values directly.
+
+
+### D349: Literal Inference, Nested Generic Calls, Expected-Type Flow, And Elaboration Order
+
+Spec homes: kyokaispec/src/language/07-generics-and-typeclasses.md, kyokaispec/src/language/09-expressions-and-evaluation.md, kyokaispec/src/language/12-implicit-completions-and-elaboration.md.
+
+1. Kyokai uses local expected-type flow. It does not perform Hindley-Milner inference, global bidirectional inference across declarations, or solver-driven guesswork.
+2. Every expression is checked in one of two modes: `synthesize` produces a type from the expression itself; `check(ExpectedType)` checks the expression against a known expected type.
+3. Expected type flows from variable annotations, function parameter types, return type annotations, record field declarations, union constructor payload types, array element type/context, typeclass method signatures, explicit generic arguments, and assignment/update targets.
+4. Function call checking first resolves the callee identity and any explicit generic arguments. Then argument expressions are checked left-to-right against parameter expected types after generic substitution.
+5. Nested generic calls do not let an inner call infer an outer generic by solving backwards through arbitrary return types. If the expected type of the inner expression is known from the outer parameter, it is used; otherwise the inner expression must synthesize a unique type.
+6. Integer literals can be checked against an expected integer type. Without expected type, they use the accepted default integer literal rule. Out-of-range literals are compile-time diagnostics.
+7. Float literals can be checked against an expected float type. Without expected type, they use the accepted default float literal rule. NaN/Inf literal policy follows D294.
+8. `Never` uses D339 closed lifting only after the target expected type is known. It does not create a general subtype relation.
+9. Implicit completions run after name resolution and before borrow/linearity checking, in the fixed D238 pipeline. Each inserted completion records its source, target type, and rule ID.
+10. Typeclass instance selection occurs only after concrete type arguments and constraints are known enough to choose a unique coherent instance. Ambiguous instance selection is a type error.
+11. Expected-type flow never inserts allocation, capability acquisition, blocking, cleanup, or control flow. If an ergonomic operation would need one of those effects, it must be explicit source or an accepted explicit completion with its own D-point.
+12. `.koi` records enough generic parameter, constraint, defaulting, and elaboration metadata for downstream package checking to reproduce the same type decisions.
+13. Diagnostics show the local expected-type edge that failed: source expression, expected type source, synthesized type when any, and the missing annotation or explicit generic argument needed to continue.
+
+
+### D350: Foreign Callback Thread Affinity, Reentry, And Capability Transfer
+
+Spec homes: kyokaispec/src/language/16-unsafe-ffi-and-abi.md, kyokaispec/src/language/15-concurrency.md, kyokaispec/src/language/14-capabilities-and-authority.md.
+
+1. A foreign callback registration is an unsafe operation covered by D322.
+2. The callback contract states calling convention, argument layout, return layout, lifetime of the registration, unregister operation, thread or executor that can invoke it, reentry policy, panic/TPOE behavior, and ownership transfer rules for every value crossing the boundary.
+3. Kyokai values captured by a callback must be `Free`, pinned with an explicit lifetime owner, or moved into a linear registration handle whose cleanup unregisters the callback exactly once.
+4. Linear capabilities cannot cross into foreign callback state unless the registration handle owns them and the unsafe contract states when the foreign side can invoke, release, or return authority.
+5. A callback invoked on an unknown foreign thread cannot touch task-local Kyokai state, non-thread-transfer values, TLS without target support, or capabilities not declared callback-safe.
+6. Reentrant callbacks are rejected by default. A wrapper accepting reentry must state which Kyokai APIs are reentry-safe and how nested borrow/capability access is prevented.
+7. Callback panic/TPOE cannot unwind into foreign frames. The wrapper catches no exception; it terminates or reports through the registered fatal/error path according to the callback contract.
+8. Unregister consumes the registration handle. It is legal only when no callback invocation is active, or the contract states the synchronization protocol that waits for active invocations.
+9. `.koi` records exported callback wrappers, unsafe contract summaries, target guards, and capability/thread-transfer requirements.
+
+Example shape:
+
+unsafe contract PosixSignalRegistration is
+  covers raw_signal_handler install_sigint
+    assumes "handler is invoked by target signal machinery"
+    forbids "allocation, blocking, capability acquisition, non-async-signal-safe calls"
+    transfers "no Kyokai Linear value crosses into handler"
+    maps_failure "registration failure returns Result error"
+  audit;
+
+
+### D351: Manifest [generate], [audit], Tool Inputs, And Reproducible External Commands
+
+Spec homes: kyokaispec/src/toolchain/01-manifest-package-workspace.md, kyokaispec/src/toolchain/11-build-generation-and-playground.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md.
+
+1. Kyokai has no build-script DSL, no `build.kai` auto-execution, and no package code execution during dependency resolution.
+2. `kyokai.toml` contains declarative `[generate]` entries. Each entry has name, command, args, declared inputs, declared outputs, working directory policy, environment policy, target/profile applicability, dependency ordering, and trust/source classification.
+3. Commands are external executables or first-party Kyokai tool subcommands. They are not interpreted by a Kyokai-specific scripting language.
+4. Inputs can be source files, schema files, asset roots, target contract facts, profile facts, lockfile facts, or generated outputs from earlier declared steps. Undeclared input reads are diagnosed when detected and treated as reproducibility violations.
+5. Outputs must live in declared generated directories or declared source-controlled paths. Generated files carry provenance metadata tying them to generator name, command identity, input hashes, output hashes, target/profile, and compiler compatibility class.
+6. `[audit]` declares package audit policy: unsafe modules, FFI modules, generated-code trust, external command trust, capability requirements, allowed generated output roots, and required reports.
+7. Generator environment is closed by default. Environment variables are passed only when named in the manifest or target/profile contract.
+8. Generator failure produces D333 external-tool diagnostics with raw logs captured according to raw-output policy.
+9. Generator outputs are checked as real `.kyo`/`.kai`/asset files. They are not hidden compiler expansions.
+10. Build identity includes generator command identity, declared inputs, selected target/profile/backend, environment inputs, generator version when known, generated output hashes, and provenance records.
+11. `kyokai generate` runs generation explicitly. `kyokai build` runs required generation only when the manifest says generated outputs are build prerequisites and the user/profile policy allows generation.
+12. Package publishing rejects undeclared generated outputs, missing provenance, path escapes, or generator dependencies not represented in the lockfile/tool policy.
+
+
+### D352: Formatter Canonical Style, Terminator-Aware Editing, And kyokai migrate Command Surface
+
+Spec homes: kyokaispec/src/toolchain/03-cli.md, kyokaispec/src/toolchain/06-formatter.md, kyokaispec/src/language/02-lexical-syntax.md.
+
+1. `kyokai fmt` uses the same lexer, parser, concrete syntax tree, comments, doc comments, source spans, and token classification as the compiler front end.
+2. Formatting is canonical. Kyokai does not expose broad style knobs for brace placement, keyword case, terminator spelling, indentation family, import grouping philosophy, or expression layout philosophy.
+3. Allowed formatter configuration is limited to mechanical environment needs such as max line width, newline style, file include/exclude lists, generated-file policy, and check/write mode.
+4. The formatter preserves semantics. Formatting a valid file and then parsing it must produce an equivalent syntax tree and equivalent elaboration inputs.
+5. The formatter is terminator-aware: `qed`, `build`, `spec`, `drop`, `seal`, `mon`, `pick`, `join`, `audit`, `fi`, `od`, and accepted final terminators are formatted according to their construct identity.
+6. The formatter is comment-aware and doc-comment-aware. It can reflow documentation only under documented doc formatting mode; normal code formatting does not rewrite prose unexpectedly.
+7. `kyokai fmt --check` exits nonzero when formatting differs and prints stable diagnostics/paths.
+8. `kyokai fmt --write` writes only selected files and refuses to write generated or vendored files unless the command policy allows it.
+9. `kyokai migrate --edition E` is a compiler-assisted source migration command. It parses, resolves, and applies only accepted machine-applicable migrations for the selected edition.
+10. `kyokai migrate` produces a plan/diff by default. It writes only with an explicit write flag. Human-judgment migrations are reported as blockers.
+11. Formatter, migration, diagnostics, LSP fixes, and parser recovery share source edit machinery inside the monorepo so Kyokai does not duplicate style or rewrite logic across tools.
+12. External formatter plugins are rejected for canonical Kyokai source. External tools can format generated non-Kyokai assets only through declared tool commands.
+
+
+### D353: Channel Capacity, Close Semantics, Message Cleanup, And Backpressure Contracts
+
+Spec homes: kyokaispec/src/language/15-concurrency.md, kyokaispec/src/stdlib/09-concurrency-primitives.md.
+
+1. Kyokai's stable channel primitive is SPSC. D436 keeps MPSC, MPMC, and broadcast endpoints out of the core and Tier-1 primitive set; fan-in, fan-out, and pub/sub use explicit broker tasks over SPSC channels.
+2. A channel has two linear endpoints: `Sender[T]` and `Receiver[T]`. Endpoint cloning is rejected unless a different channel family explicitly accepts cloneable endpoints.
+3. Capacity is explicit at construction: rendezvous capacity `0`, bounded capacity `N`, or a separately admitted fixed/static capacity. Unbounded channels are rejected by this decision.
+4. `send(sender, value)` blocks until space/receiver readiness according to the operation contract. On success, ownership of `value` transfers into the channel. On failure or cancellation before transfer, the result returns ownership of `value` to the caller.
+5. `trySend(sender, value)` never blocks. It returns success with transferred ownership, or `Err(Full(value))`, `Err(Closed(value))`, or the accepted equivalent preserving ownership.
+6. `receive(receiver)` blocks until a value, close/exhaustion, cancellation, or deadline according to the operation contract. On success, ownership of the message transfers to the receiver.
+7. `tryReceive(receiver)` never blocks and returns value, empty, closed/exhausted, or equivalent typed result.
+8. Closing the sender consumes or mutably changes the sender endpoint according to the API. It prevents new sends and allows the receiver to drain buffered messages.
+9. Closing/destroying the receiver requires a cleanup policy for buffered messages. If `T` is `Linear`, the API must either return/drain all messages, consume them through an explicit cleanup function, or reject destruction while messages remain.
+10. Dropping either endpoint silently is impossible because endpoints are linear. Endpoint cleanup is a consuming operation.
+11. Backpressure is capacity-defined. A full bounded channel blocks `send` or returns `Full(value)` in nonblocking form; it does not allocate hidden extra storage.
+12. Cancellation/deadline-aware operations are separate names or explicit parameters. Cancellation points and transfer races follow D327.
+13. `select` over channel operations uses D342 channel `select` rules. Unselected send arms retain message ownership.
+14. `.koi` records channel endpoint types, capacity family, task-transfer classification, and public APIs exposing channels.
+15. Diagnostics for failed linear channel use name endpoint state, message ownership state, close/drain obligation, and failed operation.
+
+
+### D354: Safe Memory Model, Atomics, Data-Race Definition, And Backend Mapping
+
+Spec homes: kyokaispec/src/language/15-concurrency.md, kyokaispec/src/language/17-memory-layout-and-backend-contract.md, kyokaispec/src/stdlib/09-concurrency-primitives.md.
+
+1. Safe Kyokai code has no data races. A data race is two conflicting accesses to the same memory location from different tasks/threads, at least one write, without a Kyokai happens-before edge or accepted atomic operation.
+2. Mutable access requires unique ownership or an exclusive mutable borrow. Such values cannot be shared across tasks unless moved through an accepted transfer mechanism.
+3. Shared mutable state requires an accepted synchronization primitive such as `Mutex`, `RwLock`, channel transfer, atomic type, task join, or target-specific primitive with an admission record.
+4. Atomic operations are available only through typed atomic values. Supported widths, alignments, and operations are target-contract facts.
+5. Memory orderings are a closed enum: `Relaxed`, `Acquire`, `Release`, `AcqRel`, and `SeqCst`, plus any separately accepted target-specific ordering. Invalid ordering/operation combinations are compile-time errors when statically known.
+6. Happens-before edges include task start after successful spawn capture, task join completion, channel send-to-receive transfer, mutex unlock-to-lock, rwlock release-to-acquire, release/acquire atomic synchronization, and explicit fences accepted by the atomics API.
+7. Safe non-atomic shared mutable access that would race is rejected by type/borrow/task-transfer checking. It does not become backend UB.
+8. Unsafe code that performs raw shared mutation must have an unsafe contract naming synchronization, aliasing, provenance, target memory model, and why safe callers cannot observe a race.
+9. Backend lowering must preserve Kyokai atomic ordering and synchronization semantics for C and LLVM backends. It cannot weaken orderings, rely on LLVM poison, rely on C undefined behavior, or erase synchronization required by Kyokai semantics.
+10. Atomics over non-`Free` or non-bitwise-stable types are rejected unless a separate atomic wrapper contract is accepted.
+11. Volatile/MMIO is not synchronization. It has target/device side-effect semantics and requires volatile/MMIO contracts separate from atomics.
+12. Conformance includes litmus tests, generated-C/LLVM inspection where practical, sanitizer/thread tests for hosted targets, and target-contract compile tests for unsupported atomic widths.
+
+
+### D355: unreachable, Optimizer Assumptions, Trap Lowering, And No-UB Backend Contract
+
+Spec homes: kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokaispec/src/language/17-memory-layout-and-backend-contract.md, kyokaispec/src/language/18-built-ins.md.
+
+1. `unreachable;` is a safe source statement/expression of type `Never`.
+2. Reaching `unreachable;` at runtime triggers TPOE with diagnostic kind `UnreachableReached` and the source span.
+3. `unreachable;` is not `panic`; it is a contract-violation terminal path because the programmer asserted the path cannot be reached.
+4. Safe `unreachable;` never lowers directly to C undefined behavior, LLVM poison, a bare `__builtin_unreachable`, or an optimizer assumption without a preceding non-returning trap/fatal operation.
+5. The backend lowering for safe `unreachable;` is `emit_tpoe_unreachable(span/payload); noreturn`. After that non-returning call/trap, the backend is allowed to emit its own unreachable marker only as dead-code marker after control is already terminated.
+6. The compiler is allowed to remove an `unreachable;` branch only when its own accepted static analysis proves the branch cannot execute under Kyokai semantics.
+7. `todo;` remains panic-category incomplete-code termination. `panic(...)` remains explicit panic. `unreachable;` remains TPOE. All three have type `Never` but different terminal categories.
+8. An unsafe optimizer assumption form is not accepted by this D-point. Adding one requires a separate unsafe D-point and cannot affect safe `unreachable;`.
+9. Diagnostics and coverage reports distinguish statically unreachable code, source `unreachable;`, and backend dead-code markers.
+10. Conformance tests inspect generated C/LLVM for safe `unreachable;` lowering so no accepted safe program depends on backend UB.
+
+
+### D356: Implicit Completion Registry Closure, Proof Obligations, And Spec Index
+
+Spec homes: kyokaispec/src/language/12-implicit-completions-and-elaboration.md, kyokaispec/src/appendices/b-decision-traceability.md.
+
+1. Kyokai has a closed compiler-maintained implicit completion registry.
+2. Each registry entry has an ID, source pattern, required static context, inserted elaboration node, proof/evidence obligation, diagnostics label, `.koi` recording rule, and spec home.
+3. Accepted completions include only those already accepted by D-points, such as auto-reborrow, mutable-to-shared temporary reborrow, implicit `Unit` return, accepted `Never` lifting, accepted receiver fallback, and accepted formatting/template completions.
+4. A completion is legal only when it is uniquely determined by local static context.
+5. A completion cannot introduce hidden allocation, hidden blocking, hidden capability acquisition, hidden cleanup, hidden I/O, hidden thread spawn, hidden dynamic loading, or hidden control flow beyond the explicit accepted elaboration.
+6. The checker runs on elaborated nodes so linearity, borrowing, capability, contracts, unsafe, and backend-readiness checks see the inserted operation.
+7. The Analysis Server can show every inserted completion with its registry ID and source span.
+8. `.koi` records public-interface-affecting completions and enough elaborated form for downstream tools to reproduce compatibility checks.
+9. Adding a completion requires a D-point and spec extraction before implementation is accepted.
+10. The proof/calculus roadmap lists which completions are modeled in `lambda_K-seq`, which are surface-elaboration lemmas, and which are toolchain-only.
+
+
+### D357: Stdlib Container API Completeness, Admission Tables, And Unsafe Storage Contracts
+
+Spec homes: kyokaispec/src/stdlib/03-allocators-and-memory-containers.md, kyokaispec/src/stdlib/05-collections.md, kyokaispec/src/stdlib/01-admission-contracts.md.
+
+1. Every stable container has an admission table covering ownership model, allocator use, failure behavior, initialization state, invalidation rules, iteration order, complexity, linear element behavior, concurrency classification, unsafe internals, and `.koi` public API identity.
+2. Core container families include `Buffer`, fixed arrays, spans/views, deque/ring buffer, hash map/set, ordered map/set or sorted-buffer equivalent, string/text buffers, byte buffers, and arena-backed variants where accepted.
+3. Every operation states whether it reads, moves, copies, initializes, overwrites, swaps, removes, drains, or destroys elements.
+4. If `T: Linear`, removal/drain/destruction APIs must return elements, consume them through an explicit cleanup function, or statically reject the operation.
+5. Reallocation invalidates spans/borrows/iterators according to a table. Safe code cannot retain invalidated views because borrow rules reject mutation while views are live.
+6. Iterator APIs state whether the iterator borrows the container, consumes the container, or owns a snapshot. Linear iterators have exact cleanup obligations on early exit.
+7. Allocation failure returns `AllocError` by default. No stable container silently aborts on normal growth failure unless admitted as a named fatal-on-OOM runtime-support path.
+8. Unsafe storage internals are isolated behind small modules with D322 unsafe contracts for raw allocation, initializedness, pointer arithmetic, aliasing, movement, and partial cleanup.
+9. Hash containers state hash algorithm policy, seed policy, determinism guarantees, DoS-resistance claims, iteration-order contract, and compatibility behavior.
+10. Sorting/search APIs state stability, comparator contract, failure behavior, and behavior when comparator violates ordering requirements.
+11. Container docs and LSP expose invalidation and linear cleanup rules directly.
+
+
+### D358: TPOE Taxonomy, Trap Payloads, Runtime-Fatal Split, And Diagnostic Contract
+
+Spec homes: kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokaispec/src/toolchain/05-diagnostics.md.
+
+1. TPOE is the terminal category for contract violations in accepted safe Kyokai code.
+2. Initial TPOE kinds include arithmetic overflow, division by zero, invalid shift count, bounds failure, failed `require`, failed `ensure`, failed `static_assert` during comptime, reached `unreachable`, invalid enum/tag observation detected by safe checks, and other accepted contract failures.
+3. `panic` is a separate explicit abnormal termination category used by `panic` and `todo`.
+4. Runtime-fatal is a separate internal/runtime/toolchain support category used for stack overflow, fatal runtime allocation where no return path exists, corrupted runtime invariant, fatal hook failure, and target fatal actions.
+5. Recoverable failures use `Result`/`Optional`/domain result types and do not terminate by default.
+6. TPOE payloads include kind, diagnostic code, message, source span, `Optional[Backtrace]` according to D328/D343, target/profile/backend, and runtime phase.
+7. TPOE is not catchable inside the process and does not run user cleanup. The execution context is dead.
+8. Linear resources can be abandoned only because the process/task context is terminating and no valid continuation can observe the abandonment.
+9. Generated code must lower TPOE to a non-returning runtime path or target trap that preserves diagnostic payload as far as the target contract allows.
+10. Freestanding targets state their TPOE action: trap, halt, reset, fatal hook, or target-specific action.
+11. Diagnostics and docs must not call TPOE an exception, unwind, recoverable error, or panic unless the terminal category is actually `panic`.
+
+
+### D359: Comptime Evaluation Semantics, Traps, Panics, Const Generics, And Determinism
+
+Spec homes: kyokaispec/src/language/05-declarations.md, kyokaispec/src/language/09-expressions-and-evaluation.md, kyokaispec/src/toolchain/11-build-generation-and-playground.md.
+
+1. Comptime evaluation is deterministic evaluation of accepted pure expression forms under D18/D202/D203 limits.
+2. Comptime can evaluate literals, constants, pure arithmetic, pure boolean logic, pure constructors for comptime-admitted values, `static_assert`, target/profile/edition/feature facts, size/alignment/layout facts, and accepted asset embedding builtins.
+3. Comptime cannot perform ambient filesystem reads except `@embedBytes`/`@embedText`, network access, process spawning, environment reads, wall-clock reads, randomness, root-capability acquisition, dynamic loading, thread spawning, blocking I/O, or unsafe operations not explicitly accepted for comptime.
+4. Comptime cannot generate declarations, types, modules, syntax, typeclass instances, or `.koi` items. Generated code belongs to `[generate]`.
+5. A comptime expression that would TPOE at runtime becomes a compile-time diagnostic with TPOE kind and source span.
+6. `panic` during comptime is a compile-time diagnostic in the panic category. It does not run host unwinding into the compiler.
+7. `unreachable;` reached during comptime is a compile-time TPOE diagnostic.
+8. Const generic values must be comptime-evaluable, serializable into `.koi`, deterministic across hosts for the same target/profile/compiler compatibility class, and independent of host-local paths except normalized asset provenance.
+9. Floating comptime evaluation follows the target-independent compile-time float rules accepted for Kyokai, or is rejected when a value would depend on target floating environment not modeled by the language.
+10. Comptime budgets include step count, recursion depth, memory budget, and embedded asset byte budget. Exceeding a budget is a compile-time diagnostic, not silent fallback to runtime.
+11. `.koi` records const generic values, target dependencies, comptime diagnostics that affect public interface, and asset provenance that affects public constants.
+
+
+### D360: Typeclass Coherence Edge Cases, Generic Overlap, Unsafe Instances, And Link-Time Rejection
+
+Spec homes: kyokaispec/src/language/07-generics-and-typeclasses.md, kyokaispec/src/toolchain/02-module-resolution-and-koi.md.
+
+1. A typeclass instance identity is `(typeclass identity, receiver/concrete type identity or generic head, generic parameter pattern, constraint set, package identity, module identity)`.
+2. Instance selection is coherent: for any fully known call site, at most one instance can apply.
+3. Two instances overlap if there exists a substitution satisfying both instance heads and both constraint sets for the same typeclass target.
+4. Overlap is rejected even if the current package has no call site that uses the overlapping substitution.
+5. Constraint implication is conservative. If the compiler cannot prove two instances disjoint using accepted constraint forms, the instances overlap.
+6. Orphan rules decide which package or module is allowed to declare an instance. Coherence rules decide whether the package graph can be accepted.
+7. Initial orphan rule: an instance is legal only when the declaring package owns the typeclass or owns the receiver/concrete type. Built-in/std types and std typeclasses follow stdlib-owned exception records.
+8. Unsafe instances are not exempt from coherence. The unsafe contract can justify semantic promises, not ambiguous selection.
+9. Receiver-callable UFCS metadata does not create typeclass instances and does not participate in typeclass coherence except when an actual typeclass method call is resolved.
+10. Built-in and stdlib instances are encoded in the same `.koi` instance table as user instances.
+11. Dependency graph loading rejects conflicting instances before code generation and before monomorphization materializes bodies.
+12. Diagnostics name both instance declarations, package paths, the unifying substitution when printable, the orphan rule involved, and the import/dependency edge that introduced the conflict.
+
+
+### D361: Generator Borrow Capture, Suspension Regions, And Iterator Lifetime Checking
+
+Spec homes: kyokaispec/src/language/11-linearity-borrowing-and-regions.md, kyokaispec/src/stdlib/06-iterators-and-generators.md.
+
+1. A generator lowers to an explicit state-machine value whose environment fields are checked like record fields plus suspension-state rules.
+2. Any borrow that can remain live across `yield` must come from a parameter, captured field, or external region recorded on the generator type.
+3. A borrow created from a local temporary inside the generator body cannot live across `yield` unless the temporary itself is stored in the generator state and its region/lifetime relationship is representable.
+4. Creating a generator from borrowed inputs produces a generator value whose type records those borrow dependencies, even when region names are inferred in surface syntax.
+5. The generator value cannot outlive any captured borrow source.
+6. `next` mutably borrows the generator state for the duration of the resume operation.
+7. A yielded owned value transfers out according to the iterator/generator item contract. A yielded borrow is tied either to the `next` borrow of the generator or to an external region recorded on the generator type.
+8. Moving a generator moves its suspended state only when all stored fields permit movement. Pinned generators require D301 pinning rules.
+9. Destroying or draining a generator must consume or clean all stored linear fields on every suspension state.
+10. `.koi` records public generator environment dependencies, yielded item type, borrow regions, cleanup obligations, and task-transfer classification.
+11. Diagnostics name captured source, suspension point, generator value, and attempted escape.
+
+
+### D362: Displayable For Borrows, Spans, Pointers, Debug Rendering, And UTF-8 Guarantees
+
+Spec homes: kyokaispec/src/stdlib/02-core-result-optional-display-error.md, kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md, kyokaispec/src/language/18-built-ins.md.
+
+1. `Displayable[T]` renders valid UTF-8 user-facing text.
+2. `DebugRenderable[T]` or the accepted final debug protocol renders diagnostic/debug text. It can expose structure, type names, lengths, redacted addresses, and truncation markers.
+3. A shared borrow `&[T]` is displayable when `T` or the referent type has an applicable `Displayable` implementation. Rendering delegates by shared borrow and does not move the referent.
+4. A mutable borrow `&![T]` is displayable only through a temporary shared reborrow when Kyokai borrow rules allow it.
+5. `Span[Char/Text]` and accepted text spans display as text. `Span[Nat8]` displays as bytes only through a bytes formatting policy, not as arbitrary UTF-8 unless validated.
+6. Generic spans display only when their element type is displayable and the formatting API selects collection formatting with explicit length/depth policy.
+7. Raw pointers, addresses, dynamic symbols, unsafe views, and capability internals are not `Displayable` by default. They render through debug/audit APIs that label rawness and apply redaction policy.
+8. Formatting to a writer returns writer errors. Formatting to an owned string requires an allocator and returns allocation failure.
+9. Debug/fatal rendering uses bounded buffers and can truncate, but truncation must be labeled.
+10. No display/debug implementation consumes a linear value unless the API name and signature explicitly say it renders by consuming.
+11. `debug expr;` uses debug rendering, not user display, unless the debug rule explicitly delegates to display for safe scalar text.
+
+
+### D363: Allocation Failure Policy, Fallible APIs, OOM Boundaries, And Runtime-Fatal Allocation Sites
+
+Spec homes: kyokaispec/src/stdlib/03-allocators-and-memory-containers.md, kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokaispec/src/stdlib/01-admission-contracts.md.
+
+1. User-visible heap allocation returns `Result[..., AllocError]` or an API-specific error containing `AllocError`.
+2. Containers, strings, buffers, maps, channels, arenas, formatting-to-string, generated owned reports, and property/fuzz generators use fallible allocation by default.
+3. APIs that allocate must show allocator input unless they are using a statically owned/runtime-owned allocation source named by their contract.
+4. Runtime-fatal allocation sites are limited to runtime bootstrap before user code can receive an error, fatal-report construction where no continuation exists, compiler support paths that cannot return into user code, and target-declared emergency paths.
+5. Every runtime-fatal allocation site appears in a runtime allocation policy table with reason, phase, target behavior, fallback/truncation behavior, and test/audit evidence.
+6. Fatal/debug reporting prefers static/stack/bounded buffers and truncation over heap allocation.
+7. Freestanding targets have no heap unless an allocator is supplied by target runtime or user code.
+8. Allocation failure never becomes null dereference, C UB, partial-initialization leak, hidden data loss, or silent downgrade.
+9. Partial initialization cleanup for linear elements is mandatory in every fallible allocating API.
+10. RIIK/std-lib admission includes OOM tests, cleanup tests, and allocator-behavior documentation.
+
+
+### D364: .koi Serialization Schema, Generic Materialization Metadata, Provenance, And Compatibility Checks
+
+Spec homes: kyokaispec/src/toolchain/02-module-resolution-and-koi.md, kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md.
+
+1. `.koi` is the canonical Kyokai Binary Interface artifact for package/module public interface facts and selected compiler-required metadata.
+2. `.koi` uses one canonical sectioned binary encoding. Human-readable JSON/text is generated by `kyokai koi inspect`; it is not the authority.
+3. The header contains magic `KOI`, KBI version, language edition, compiler compatibility class, package identity, module identity, target/profile constraints when interface-affecting, endian marker for the artifact encoding, and section table digest.
+4. Required sections include string table, symbol table, exported names, type declarations, value declarations, generic declarations, constraints, typeclass declarations, instances, module imports, visibility, contracts, capability requirements, implicit completion records, stable ABI records, unsafe/audit summaries, const generic values, receiver-callable metadata, diagnostics metadata, and provenance.
+5. Extension sections include docs summaries, source map summaries, analysis-server hints, generated-source provenance expansion, benchmark/test metadata that affects public docs, and tool-specific caches explicitly marked non-authoritative.
+6. Each section has section ID, schema version, flags, byte length, canonical hash, required/extension bit, and compatibility policy.
+7. Generic declarations record parameter kinds, universe constraints, const generic values, where clauses, typeclass constraints, associated type requirements, body materialization requirements, and monomorphization/cache identity inputs.
+8. Generic bodies are not exposed beyond accepted interface rules. Downstream packages receive enough metadata for type checking, coherence, `.koi diff`, and materialization planning without violating visibility.
+9. Const generic values are encoded canonically with type, value, target dependency, comptime provenance, and normalized asset provenance when involved.
+10. Provenance records source file digest, normalized package-relative path, generated-file origin when any, generator identity, selected target/profile/backend when interface-affecting, and lockfile/package graph identity.
+11. Host-local absolute paths are excluded unless explicitly remapped by reproducible profile policy. Non-reproducible path leakage is a build/report diagnostic.
+12. Unknown required sections cause consumer rejection. Unknown extension sections are ignored only when the KBI version compatibility rule says they can be ignored.
+13. `.koi diff` classifies changes as compatible, additive, breaking, target-restricted, feature-restricted, provenance-only, docs-only, or unknown-incompatible.
+14. Stable ABI sections use D329 rules and make layout changes breaking unless an exact compatibility rule says otherwise.
+15. The package manager, compiler, Analysis Server, docs, audit, semver checker, and build cache consume the same `.koi` parser.
+
+Example inspection sketch:
+
+koi KBI-1 package "example.math" module "Example.Math"
+  requires edition "2026"
+  exports value add: function(Nat32, Nat32) -> Nat32
+  type Vec2: record stable_abi(size=8, align=4)
+  generic Buffer[T: Type]: Auto materialization=downstream
+  instance Displayable[Vec2] owner=example.math
+  provenance source="src/Example/Math.kyo" digest="..."
+
+
+### D365: Default Arithmetic, Checked/Wrapping/Saturating APIs, And Numeric Performance Contracts
+
+Spec homes: kyokaispec/src/language/18-built-ins.md, kyokaispec/src/stdlib/07-math-and-numerics.md.
+
+1. Default integer arithmetic in safe Kyokai is checked in every profile: debug, test, release, benchmark, and reproducible.
+2. Checked failures include signed overflow, unsigned overflow, division by zero, remainder by zero, invalid shift count, negating the minimum signed value, and every arithmetic contract failure listed in the numeric operation table.
+3. A checked arithmetic failure is TPOE, not panic, not recoverable error, and not backend UB.
+4. Wrapping arithmetic is available only through explicit `wrapping*` operations.
+5. Saturating arithmetic is available only through explicit `saturating*` operations.
+6. Checked-result arithmetic is available through explicit `checked*` APIs returning `Optional` or `Result` according to the stdlib numeric contract.
+7. Widening arithmetic, carry/borrow operations, mul-high, rotate, byte-swap, count-leading-zero, count-trailing-zero, and population-count APIs are provided for crypto, hashing, codecs, and big integer work without unsafe or FFI.
+8. Shift operations distinguish checked shifts, wrapping/masked shifts when explicitly requested, and rotate operations. Default invalid shift count is TPOE.
+9. Optimizers can remove arithmetic checks only when they prove the failure impossible under Kyokai semantics.
+10. Backend lowering cannot use C signed overflow, invalid shifts, LLVM poison, or unchecked assumptions to implement safe arithmetic.
+11. Unsafe target intrinsics for arithmetic exist only behind target gates and D322 unsafe contracts. They are not the semantics of safe arithmetic.
+12. Numeric APIs publish performance notes without changing semantics. A faster wrapping operation is a different source operation, not a release-mode reinterpretation of `+`.
+13. Conformance covers every integer width, including 128-bit integers where accepted, boundary values, cross-backend generated code, and sanitizer/execution tests where practical.
+
+---
+
+## Accepted Shape Routing Record: D366-D395
+
+This cluster records the accepted results of a systems-language critique pass. It distinguishes accepted clarifications, already-answered concerns, and rejected surfaces that conflict with Kyokai's language direction. The normative specification, workflow, phase, and standard-library documents named in the tracker carry the extracted contracts.
+
+### D366: User Joy, Honest Implicitness, And Lone-Programmer Goal Weight
+
+D366 accepts no new language, tooling, or governance semantics. The critique is recorded as documentation pressure already covered by existing accepted shape. Public Kyokai wording must not claim zero implicitness. The accurate claim is that accepted implicit elaborations are compiler-recorded, inspectable, and bounded, while authority, allocation, cleanup, scheduler behavior, exception-like exits, and safe-code undefined behavior are not hidden.
+
+### D367: Evidence-Tier Honesty For Spec, Compiler, Tests, And Maturity Rows
+
+Kyokai maturity tracking separates decision state, spec state, implementation state, conformance state, and proof state. `SHAPE_DECIDED` and `SPEC_EXTRACTED` do not imply parser support, checker support, runtime support, conformance tests, proof, or release readiness.
+
+A document cannot claim implemented, tested, proven, conformance-backed, or release-ready behavior without naming the implementation path, test/conformance path, proof artifact, or release artifact. Compiler behavior without accepted shape is inherited behavior or experimental behavior, not Kyokai semantics. Accepted shape without implementation remains Kyokai language intent, not compiler reality.
+
+Kyokai does not cap the number of D-points. Critique intake merges repeats and rejects duplicate surfaces instead of hiding open questions behind a numeric limit.
+
+### D368: Doc Comment Orphans And Diagnostic Style
+
+A Kyokai doc comment must attach to a valid attachable item according to the lexical/doc grammar. A doc comment that cannot attach is a compile-time error, not a warning. The diagnostic must include the orphan doc-comment span, the reason attachment failed, and a help message explaining how to convert it to an ordinary comment or move it onto an attachable item.
+
+### D369: Terminator Vocabulary, `qed`, And Display-Only Braces
+
+Kyokai keeps the accepted terminator vocabulary. Source code does not accept brace-block aliases, `end;` replacement forms, or optional alternate block syntax. Official compiler, formatter, `.koi`, and spec behavior follow Kyokai terminators only.
+
+Editor plugins, themes, folding modes, and local display overlays can render Kyokai source however a user wants, but those renderings are not Kyokai source, not formatter output, not copied into generated artifacts, and not a requirement on the Kyokai toolchain.
+
+### D370: Modulo Semantics, Precedence Budget, And Operator Dialect Control
+
+Kyokai does not add a `%%` operator. The `%` operator remains the checked truncating remainder operation with exact signed behavior in the numeric operation table. Division by zero and remainder by zero are TPOE in safe code.
+
+Euclidean and floor division/modulo behavior is exposed only through separately named numeric APIs. Each admitted numeric API records its exact public name, signed-input behavior, zero-divisor behavior, overflow behavior, and checked-result form in the numeric admission table before stable release. Those APIs participate in D365 operation families: checked default behavior, explicit checked-result forms, and explicit wrapping or saturating forms only where that operation family defines a meaningful result.
+
+Kyokai does not allow user-defined symbolic operators or package-defined operator precedence.
+
+### D371: Numeric Literal Ambiguity, `Index`, And Common Numeric Helpers
+
+Kyokai does not add a fallback integer type for genuinely ambiguous integer literals. An integer literal is accepted when its type is determined by expected type, suffix, local operator constraints, or other accepted literal-inference rules. If those rules leave more than one valid concrete numeric type, compilation fails and the diagnostic asks for a suffix, annotation, or explicit conversion.
+
+`Index` remains a distinct integer type. Arithmetic and comparison between `Index` and other integer families require explicit conversion unless an accepted built-in operation states otherwise.
+
+Safe arithmetic remains checked and profile-invariant under D365. Every admitted common numeric helper, including minimum, maximum, clamp, and absolute-value operations, is listed by its exact public name in the numeric API table with exact overflow and boundary behavior before stable release.
+
+### D372: Static Text, Owning String, And Region-Bound Text Views
+
+A Kyokai string literal denotes immutable compile-time UTF-8 text. Its type is `StaticString`; it is `Free` and performs no runtime allocation. Creating an owning `String` from literal/static text requires an explicit allocator-taking copy operation that returns allocation failure according to the string API contract.
+
+Kyokai admits `TextView[R]`, a `Free` non-owning immutable UTF-8 text view tied to region `R`. `TextView[R]` owns no storage. Its lifetime is tied to static storage, a borrow of an owning `String`, a validated byte/text container borrow, or another API that states the source region. A `TextView[R]` cannot outlive its source region and cannot mutate the source.
+
+Read-only text APIs prefer the view type. Owning `String` is used for mutation, ownership transfer, storage ownership, and APIs that explicitly need allocator-backed text. Map/set APIs can admit text-view keys only with equality, hashing, lifetime, invalidation, and storage rules in their collection admission records.
+
+### D373: Multi-Return Sugar Without General Tuple Types
+
+Kyokai does not add anonymous multiple return values, tuple return sugar, tuple types, tuple literals, or tuple destructuring. Functions return `Unit`, one named type, a nominal record/union, `Result`, `Optional`, or another accepted denotable type. Small aggregates that need multiple fields use nominal records with names. Recoverable failure uses `Result` unless a separate accepted D-point names a narrower domain-specific form.
+
+### D374: Handle/Generation Pools As First-Class Graph Resource Pattern
+
+Kyokai standard library admits generational handle and pool families. A handle is `Free`, copyable, comparable, and hashable when its fields satisfy the relevant protocols. It contains an index plus generation or equivalent stale-handle discriminator. The handle never owns the resource and never grants authority by itself.
+
+Each admitted generational-handle family has one nominal `Linear` owner type. That owner owns storage and controls allocation, lookup, mutation, removal, cleanup, and generation changes. Lookup through a handle returns the failure type declared by that family's API contract. Stale handles, wrong-owner handles, removed entries, and generation mismatches are recoverable lookup failures, not UB.
+
+Mutable access through a handle requires exclusive borrow of the owner or another accepted safe splitting rule. Capability-gated resources still require the relevant capability or capability-bearing owner; a copied handle cannot forge authority.
+
+### D375: Default Universe For User Records And Linear Opt-In Pressure
+
+D375 accepts no Free-by-default shift for user records. Kyokai keeps the accepted universe model from D30/D30a/D338. `Auto` remains the mechanism for generic/builtin universe-dependent classification. The compiler must not infer a broad Free default merely because a record appears to be plain data. Record universe diagnostics continue to report the accepted source of a type's Free/Linear/Auto classification.
+
+### D376: Typeclass Surface Admission And Cleanup Contract Review
+
+Every standard typeclass or compiler-recognized protocol requires the existing stdlib/language admission process. The admission record must state purpose, laws or invariants, compiler involvement, `.koi` representation, coherence behavior, diagnostics, and why plain functions do not suffice.
+
+Kyokai does not adopt an arbitrary numeric cap for typeclasses. `Cleanable` and `Destroyable` are not merged by this decision. A merge requires a separate D-point with concrete API examples proving the current distinction harmful.
+
+### D377: Borrow Strictness Modes And Mutable Borrow Elision
+
+D377 accepts no new borrow rule, no new strict-borrow lint, and no mutable-borrow elision. Borrowing remains governed by D6/D7a/D7b/D72/D238-D240. Additional borrow diagnostics require a separate D-point with exact source forms and checker behavior.
+
+### D378: Defer Locality, Bundled Cleanup, And TPOE Skip Diagnostics
+
+Kyokai adds a `defer-distance` diagnostic for linear resources. After acquiring or initializing a linear resource, cleanup must be registered before unrelated side-effecting work unless ownership is immediately transferred, returned, stored in an owner that takes responsibility, or consumed. The diagnostic is a lint unless project policy raises it.
+
+Kyokai accepts bundled defer grouping only as explicit LIFO cleanup registration. Each statement inside the bundle is checked with the same static and runtime rules as a single-statement `defer` body. The bundle cannot hide loops, conditionals, implicit destructor calls, or nonlocal control flow. Linear values consumed by bundled cleanup enter the same deferred checker states as single-statement defer.
+
+When runtime diagnostics are enabled, a TPOE report must state that user defers are skipped on the TPOE path. Kyokai does not add `scope(exit)` as an alias.
+
+### D379: Error Propagation Culture, `or return`, `errdefer`, And Propagation Lints
+
+Kyokai keeps `or return` as accepted by D15a/D227. It is Kyokai's statement-level `Result` exit sugar, not Odin's removed value propagation experiment and not a general expression operator.
+
+The compiler-integrated lint set includes `propagate-up`. It warns when a function repeatedly uses `or return` without adding context, mapping the error, locally handling a case, or documenting pass-through behavior. The lint is advisory by default and project-configurable.
+
+`errdefer` remains limited to structured error exits: `return Err(...)` and `or return`. It never runs on panic, TPOE, runtime-fatal, normal success, `break`, or `continue`.
+
+### D380: Failure Vocabulary, Assertion Surface, And Non-Recovering Hooks
+
+Kyokai documentation and diagnostics expose a small explanatory failure map: recoverable value errors, programmer bug termination, contract/TPOE termination, and runtime-fatal termination. This map is explanatory; the precise terms `Result`, `panic`, `todo`, `require`, `ensure`, TPOE, `unreachable`, and runtime-fatal keep their accepted semantics.
+
+Kyokai permits failure hooks for panic, TPOE, and runtime-fatal reporting. A hook receives read-only failure data, source location when available, and backtrace data according to policy. A hook cannot resume execution, cannot mark the failure handled, cannot run skipped user defers, cannot acquire new authority, and cannot allocate unless its API explicitly receives allocator authority. Termination continues after the hook returns or fails.
+
+Kyokai does not merge `assert`, `require`, contracts, panic, TPOE, and runtime-fatal into one keyword family.
+
+### D381: Capability Ceremony, Bundles, Scaffolds, And Ambient Authority Rejection
+
+Kyokai does not add ambient capability mode, tutorial capability mode, or automatic capability parameter passing. Capability-gated operations receive authority through explicit parameters, stored fields, startup entrypoint values, or explicit capability bundle values.
+
+Standard examples and scaffolds can define visible bundles such as CLI capability records. A bundle is a source-visible aggregate value whose fields name its authority. Passing a bundle is explicit authority flow and appears in source types and `.koi` when public.
+
+The standard library capability set stays documented by authority tables. It is not collapsed to an arbitrary count.
+
+### D382: Single-File Modules, `.koi` Artifacts, And Import Surface Simplicity
+
+Kyokai does not add a public single-file module mode with embedded body sections. A public/importable module interface uses `.kyo`. A module body uses `.kai` when a body is needed. Accepted body-only `.kai` cases remain limited to the already decided non-public/internal/test shapes.
+
+`.koi` remains a generated interface/build artifact and not higher authority than source. Import syntax remains governed by existing import and UFCS decisions; D382 accepts no new import form.
+
+### D383: Network Dependencies, Vendoring, Index Authority, And Dependency Culture
+
+Kyokai keeps network-capable package workflows, read-only package discovery, git/source dependencies, lockfiles, and package graph tooling as accepted shape. Network dependency resolution is explicit command/tool behavior, not an invisible side effect of parsing source.
+
+Vendoring is a first-class reproducibility workflow and is the documented default workflow for serious builds, audits, long-lived products, and offline/release work. Vendored dependencies record source identity, content hash, lockfile identity, and provenance. The package index is discovery and metadata, not canonical source authority.
+
+Kyokai does not require vendoring for every project and does not remove network dependencies. The tooling must make dependency source, transitive graph, content identity, license metadata when known, and vendor/cache state visible.
+
+### D384: Context Object, Default Allocators, Temp Allocators, And Hidden-Parameter Rejection
+
+Kyokai does not add implicit caller context, implicit allocator, implicit temp allocator, implicit logger, implicit random source, implicit assert handler, or hidden language calling-convention parameters.
+
+Kyokai also does not add a broad generic `Context` record merely to reduce parameter count. Specific explicit bundle records are allowed only when an API family earns them through normal stdlib admission and the fields represent a real cohesive capability/allocator/tooling surface.
+
+Allocator behavior remains governed by D44/D201/D250/D251: fresh owned allocation names its allocator or uses stored allocator identity according to the accepted storage-effect rules.
+
+### D385: Builtin Slices, Free Maps, Dynamic Arrays, And Data-Oriented Layouts
+
+Kyokai does not add builtin `map[K]V`, `[dynamic]T`, SoA/ECS syntax, or special Free-only owning collection syntax in this decision. Non-owning span and slice syntax remains the language-recognized view surface. Owning/growing collections remain standard-library types with explicit allocator, failure, invalidation, and cleanup contracts.
+
+Data-oriented layouts belong in admitted stdlib containers or manifest-declared code generation with generated-source provenance, not macros or hidden compiler rewrites.
+
+### D386: UFCS Resolution, Function Keyword Surface, And Receiver Sugar
+
+Kyokai keeps D254/D337 UFCS exactly: receiver-call syntax resolves through source-visible declarations, explicit imports, and receiver-callable exports. There is no dependency-wide ADL and no orphan method soup.
+
+D386 accepts no receiver declaration sugar and no callable keyword rename. Reversing the receiver-sugar rejection requires a new D-point with concrete justification, exact lowering, `.koi` identity, visibility, and diagnostics; no placeholder is accepted here.
+
+### D387: Generators, Iterator-First APIs, Linear Captures, And Hidden Allocation
+
+Kyokai's iterator protocol is the semantic base. A generator declaration lowers to a nominal iterator state-machine type. The lowered form exposes captured fields, suspension points, borrow regions, cleanup obligations, finalization behavior, and yielded item ownership to compiler dumps, diagnostics, `.koi` when public, and analysis tooling.
+
+A generator cannot heap-allocate hidden state. If generator construction needs heap storage, the construction API must take an explicit allocator and return allocation failure. Linear captures require explicit move capture. Borrow captures record their source region and cannot outlive it. Abandoning a generator follows the accepted linear iterator finalization rules.
+
+### D388: Taskgroup Discipline, Thin Threads, Select Limits, And Deadlock Tooling
+
+Kyokai language `spawn` remains structured and requires `taskgroup` according to D252. D388 accepts no user-level unstructured spawn, no lint-only unstructured spawn, and no new raw-thread escape hatch.
+
+Select-arm limits and deadlock tooling remain governed by their existing concurrency/tooling decisions. This D-point adds no new limit or stable lock prerequisite beyond those accepted surfaces.
+
+### D389: Unsafe Contract Surface, Embed Alias, And Bindgen Boundary
+
+Kyokai keeps `unsafe contract ... audit;` coverage as accepted by D245/D322. Plain `unsafe {}` blocks do not replace audit contracts. Unsafe operations must remain covered by source-level contracts with machine-readable coverage keys, caller obligations, invariants, and failure behavior.
+
+`@embedBytes` and `@embedText` remain the accepted embed surface. D389 accepts no `#load` alias.
+
+Bindgen, ABI scanners, header importers, and wrapper generators are tooling or manifest-declared generation steps. They do not become macros, do not execute implicitly during parsing, and do not make foreign declarations trusted without unsafe contracts and generated-source provenance.
+
+### D390: Compile-Time `when`, File Build Constraints, And Tooling-Only Verification Boundary
+
+Kyokai supports whole-file build constraints evaluated from explicit build inputs and the selected target contract before a file contributes declarations, body definitions, `.koi` facts, generated code, or semantic diagnostics. An excluded file is absent from semantic compilation. A requested tooling-only report can identify the exclusion reason, selected target facts, and build-constraint expression; that report cannot make the file contribute semantic facts.
+
+Declaration-level `when` guards remain accepted. Body-level target branching remains rejected. Platform variance belongs in selected files, declaration guards, target-specific modules, or source-visible abstraction.
+
+`kyokai verify` remains a tooling command. Ordinary `kyokai build` does not silently invoke SMT/proof tooling and does not make source valid or invalid based on solver results unless a separate accepted rule changes build policy.
+
+### D391: Minimal CLI Path, Zero-Config Build, Human Diagnostics, And Cache-Off Mode
+
+The essential Kyokai command tier is `check`, `build`, `run`, `test`, and `fmt`. Help output and first-week docs present this tier first. Other accepted commands remain available under analysis, package, release, audit, generation, docs, or advanced workflows.
+
+`kyokai build .` and `kyokai run .` work for a single-file or unambiguous single-package directory without a manifest. The command reports the inferred package name, target, profile, backend, output path, cache path, and whether defaults were synthesized. A manifest is required for dependencies, multiple public modules, target-specific source sets, package metadata, generation steps, publishing, or non-default profiles.
+
+Human diagnostics are primary. JSON diagnostics mirror the same codes, spans, notes, suggestions, and categories, but JSON schema design does not outrank human message quality.
+
+`KYOKAI_CACHE=off` disables cache reads and cache writes for a command. Disabling cache cannot change accepted semantics, diagnostics meaning, final artifact identity, `.koi` content, or runtime behavior.
+
+### D392: Standard Library First Slice, Transitional FFI Honesty, And One-Import Formatting
+
+Kyokai's first stable standard-library implementation slice is tracked in `phase.md`, stdlib direction documents, and admission records. The slice includes core `Result`/`Optional`/error/display contracts, allocators, spans, text/bytes, formatting, paths, files, process/env arguments, time, random, math basics, the JSON/CBOR foundation, threads/tasks/sync basics, and test support.
+
+Systems-tier modules can use libc, OS APIs, or mature external interfaces through unsafe contracts and transitional FFI tracking until native Kyokai implementations are admitted. This is the accepted OS/standards boundary, not a failure of RIIK.
+
+A minimal formatting path must be reachable through one obvious import or a built-in recognized formatting surface. Formatting still exposes allocation and writer failure according to D330/D336/D362.
+
+### D393: Layout Introspection Builtins, Profile Semantics, And C Backend Evidence
+
+Kyokai admits compile-time layout fact builtins named `sizeOf(T)`, `alignOf(T)`, and `offsetOf(T, field)`. They are constant expressions available only when the selected target/backend contract defines the queried Kyokai layout. Querying an opaque, unsized, target-undefined, non-layout-stable, or forbidden representation is a compile-time error.
+
+These builtins do not expose field iteration, type construction, runtime reflection, dynamic reflection, unsafe transmute permission, or layout mutation. Results are target-specific constants and are recorded in artifacts when they affect public ABI or `.koi` compatibility.
+
+Release, debug, test, and benchmark profiles cannot change source arithmetic, pointer, layout, or ownership semantics. Backend smoke tests, generated-code checks, and no-UB evidence are required before backend maturity claims advance.
+
+### D394: Proof Scope, Release Claims, And Unsafe/FFI Exclusion Honesty
+
+D394 accepts no new proof, release, or calculus semantics. The critique is already answered by D143/D241/D312/D319 and current calculus direction. First proof scope, unsafe/FFI exclusions, verification-tool boundaries, and mechanization order remain unchanged.
+
+### D395: Licensing Explanation, First-Run Disclosure, And Stdlib Relicensing Rejection
+
+Kyokai keeps the D263/D306 licensing boundary. Source files continue to carry the project-required per-file license disclosure. The toolchain, runtime, standard library, startup, and helper-code license split remains unchanged.
+
+D395 accepts no `kyokai new` first-run license prompt and no stdlib relicensing path. A license change requires a separate governance/legal decision with repository history, contributor permission, compatibility, and relicensing feasibility analysis.
+
+
+## Accepted Shape Routing Record: D396-D419
+
+### D396: Toolchain Telemetry, Network Contact, And Privacy Boundary
+
+Kyokai tooling performs no telemetry collection, crash upload, source upload, package graph upload, timing upload, host fingerprint upload, or background network contact by default. Network behavior is a command contract, not an implementation convenience.
+
+Commands are classified as `network-forbidden`, `network-capable`, or `network-required`. `kyokai check`, `build`, `run`, `test`, `fmt`, local `doc`, `lsp`, `fix`, `explain`, `--version`, and local `doctor` are network-forbidden. Stable Kyokai defines no command-specific network override for those local lanes. Package discovery, search, info, add, update, publish, explicit docs pulls, remote audit-feed refresh, and index synchronization are network-capable or network-required only because their command definitions name the remote source.
+
+`--offline` forbids all network use and fails when required inputs are not already available through workspace packages, vendored sources, or verified local caches. Adding telemetry or crash upload requires a separate accepted D-point with schema, opt-in flow, redaction, retention, endpoint, local inspection, and disable behavior. No such telemetry exists in accepted Kyokai.
+
+### D397: Dependency Feature Resolution, Target Features, Cache Deduplication, And Capability-Visible Package Surfaces
+
+A dependency package instance is identified by package name, source revision or content hash, edition, target contract, semantic profile inputs, and exact feature set. Feature selection is not globally unified across the dependency graph. Two dependents can instantiate the same package revision with different feature sets, and those instances produce distinct `.koi` identities.
+
+The compiler and package manager may share cache artifacts only after proving identical public `.koi`, identical backend-independent semantic facts, and compatible generated code inputs. Cache sharing cannot change diagnostics, audit output, build identity, or package graph reporting. Caches are keyed by package-instance identity, not only by package name.
+
+A feature that enables public APIs, capability-requiring APIs, generated code, unsafe contracts, or target-specific behavior appears in `.koi`, lockfile metadata, package graph inspection, and audit output. `kyokai clean` removes selected cache state by default. `kyokai clean --outputs` removes selected outputs. `kyokai clean --all` removes both selected outputs and caches for the owner root. `kyokai clean --global` is separate and must show the global cache roots it will touch before removal.
+
+### D398: Startup Authority Bundles Without Hidden Context
+
+Hosted startup still mints root authority only at process entry. Kyokai accepts explicit startup authority bundle records for common app shapes, but rejects `CliApp`, `AppEnv`, hidden context passing, implicit dependency injection, and compiler-passed app state.
+
+A startup bundle is an ordinary nominal value constructed visibly from `RootCapability` or narrower startup inputs. It is passed explicitly, stored explicitly, borrowed explicitly, and appears in public `.koi` when used in public APIs. Bundle fields are concrete authority values or borrowed views such as args, terminal streams, filesystem roots, environment authority, clock authority, random authority, process authority, network authority, cancellation/shutdown source, and allocator only when the admitted bundle contract includes it.
+
+Libraries must take the narrow authority value they need rather than the whole startup bundle. Passing `RootCapability` into general library code is linted as overbroad authority unless the function is an explicit authority-construction boundary. Capabilities remain security authority, not ceremony to be papered over.
+
+### D399: Path Semantics, Target-Native Paths, Unicode, Case, Symlinks, And Canonicalization
+
+`Path` is a nominal target-native path value, not an alias for `String`. Target-specific path behavior is not implicitness; it is recorded target reality. The implicitness Kyokai rejects is pretending that all paths are portable UTF-8 strings.
+
+Lexical path operations are pure and named as lexical operations. Filesystem-resolving operations require filesystem or directory authority and are named as resolving, canonicalizing, metadata-reading, opening, or link-following operations. No path equality, import identity, package identity, or cache identity uses implicit Unicode normalization, case folding, symlink resolution, or host-locale rules.
+
+Target contracts record separator rules, root and device forms, case-sensitivity behavior, symlink support, invalid byte or code-unit behavior, canonicalization limits, and unsupported forms. Portable APIs operate on Kyokai's specified portable path subset. Target-specific APIs expose target-native facts explicitly.
+
+### D400: Floating-Point Environment, NaN Policy, FMA, Rounding, And Reproducible Numerics
+
+Safe Kyokai float semantics default to strict IEEE 754 binary32 and binary64 behavior. Safe code does not depend on ambient rounding modes, fast-math flags, hidden reassociation, hidden FMA contraction, hidden flush-to-zero, hidden denormal policy, signaling-NaN traps, or backend-specific exception flags.
+
+Strict IEEE 754 behavior is the default language and stdlib correctness mode. An explicit optimized math API can name a relaxed policy in its own contract, but relaxed behavior cannot be silently selected by build profile. NaN payload bits are not portable semantic data unless a specific API states a target-bound payload contract.
+
+Target contracts record denormal behavior, FMA availability, rounding-mode support, exception-flag exposure, libm or native math oracle tier, and backend lowering evidence. Strict APIs and conformance tests use the recorded target facts; unsupported strict behavior is a target rejection, not silent weakening.
+
+### D401: Hashing, HashMap Order, Random Seeds, Determinism, And Reproducible Collections
+
+Hashing is split into explicit lanes: randomized hash maps for collision-resistance, deterministic hash maps for reproducible tools and tests, ordered maps for stable iteration, and user-supplied hasher policies for specialized needs.
+
+A default `HashMap` construction must name a hasher or seed policy or use a capability-derived randomized policy. A randomized construction path requires explicit random authority. A deterministic-hasher or deterministic-seed construction path exists for reproducible tools, tests, docs, package metadata, `.koi`, lockfiles, and generated artifacts. Ordered maps or sorted maps exist when stable visible iteration is part of the contract.
+
+Hash-map iteration order is not a public stable order unless the type or API name says deterministic or ordered. Build artifacts, docs JSON, `.koi`, lockfiles, package metadata, audit reports, and spec examples cannot depend on randomized hash iteration.
+
+### D402: OS Error Mapping, Raw Codes, Portable Categories, And Version Policy
+
+Every OS error value preserves the operation, portable category, raw target code, target family, and available context such as path, process, socket, source span, or tool phase. Portable categories are versioned. Raw target information is never discarded.
+
+Adding a portable category is compatible only when older tools can map it to an unknown or other-known category while preserving raw code and target family. Removing a category or changing its meaning is compatibility-breaking. Pattern matching over OS errors must acknowledge unknown or target-specific cases unless the selected target contract proves they cannot occur.
+
+Diagnostics print portable category first and raw target detail second. Tool JSON carries stable category keys, raw target fields, operation keys, and schema version.
+
+### D403: Time, Clocks, Sleep, Deadlines, Time Zones, And Testability
+
+Clock authority is split by observable power. Wall-clock authority reads civil/system time and can move backward. Monotonic-clock authority reads monotonic instants and durations for deadlines. Sleep authority permits blocking delay and names its clock source. Time-zone data is explicit data, not ambient OS locale.
+
+Deadlines use monotonic time unless the API name explicitly states wall-clock scheduling. Sleep APIs state overshoot behavior, interruption behavior, cancellation interaction, and target unsupportedness. Tests can inject fake wall and monotonic clocks through explicit fixtures without mutating global host time.
+
+APIs that format, parse, or convert civil time state their time-zone database source, version, allocation behavior, and invalid/ambiguous local-time behavior. Capability requirements appear in stdlib contracts, docs, audit output, and `.koi` for public APIs.
+
+### D404: Fatal Diagnostics, Crash Report Redaction, Secret Values, And Failure Hook Authority
+
+Fatal diagnostics are local by default. Crash upload does not exist in accepted Kyokai. Programs and tools can choose an explicit crash-report policy such as none, local file, or custom handler when the relevant API admits it.
+
+Secret-bearing values use `Secret[T]`, redacted environment/argument wrappers, or explicit redaction annotations in diagnostic payloads. Fatal reports must not print secret values, redacted env values, command args marked secret, raw tokens, private source snippets beyond configured limits, or arbitrary memory. Redaction happens before custom hooks receive payloads.
+
+Custom failure hooks require explicit authority and receive read-only structured payloads. They cannot resume execution, cannot mark a failure handled, cannot acquire new authority, cannot run skipped user defers, and cannot allocate unless allocator authority is explicitly passed.
+
+### D405: Native Toolchain Discovery, Linker Trust, `pkg-config`, Sysroots, And Host Leakage
+
+Target toolchain configuration lists exact compiler, linker, archiver, sysroot, SDK, include roots, library roots, and allowed discovery providers. There is no language-level fallback guessing. Fallbacks such as `zig cc`, `clang`, and `gcc` are ordered explicitly by project or toolchain configuration, with required version/range, flags, target triple, sysroot, and rejection diagnostic.
+
+`pkg-config` is allowed only when declared as a discovery provider. Its environment variables, sysroot behavior, package names, version constraints, queried fields, and captured output are recorded in build metadata. Host headers and libraries outside declared roots are rejected for reproducible builds.
+
+Verbose build plans and `doctor` report selected external tools, paths, versions, sysroots, provider outputs, and target contracts without printing secrets. Discovery results that affect code generation, linking, `.koi`, generated code, or reproducibility become build identity inputs.
+
+### D406: Generated Source Review Boundary, Provenance, `audit`, And `generate --check`
+
+Generated `.kyo`, `.kai`, helper source, bindings, schemas, and tool artifacts carry generator name, generator version, config hash, input hashes, target/feature set, output hash, human-edit policy, and safety/audit classification. Generated files cannot be treated as ordinary human-authored source when provenance is missing.
+
+`kyokai generate --check` verifies recorded provenance and either reruns generators or compares recorded output hashes according to the generation contract. Drift is a tool error. `kyokai audit` reports generated source, unsafe generated code, bindgen output, stale generation, missing provenance, hand-edited generated files, and generated safe wrappers.
+
+Generated code does not create safe API by itself. Unsafe generated declarations remain unsafe or wrapper-only until unsafe contracts, safe wrappers, stdlib/package admission, and audit records exist. Checked-in generated files are allowed only when provenance is present and the policy says check-in is allowed.
+
+### D407: Executable Spec Examples And PR-Based Public D-Point Workflow
+
+Normative examples have explicit status labels: `conformance`, `illustrative`, `historical`, `aspirational`, or `negative`. `kyokai doc --check-examples` validates accepted examples against current syntax, imports, feature labels, target/capability requirements, and spec maturity. Historical or Austral-derived examples are visibly marked and cannot be used as current Kyokai conformance unless updated.
+
+Public D-points normally live in pull requests or merge requests once they become real change proposals. `PROJECT_STANDARDS.md` owns the public D-point template. `Kyokaishape.md` is no longer the primary home for new D-point bodies; it can act as an index, archive, or migration ledger while active D-points live in public PR/MR threads.
+
+After final acks or `Lead YES`, the PR/MR must update `kyokaidecided.md`, the relevant `kyokaispec/` text when the spec home exists, traceability, phase/status docs, and conformance or test plans before merge. Issues and discussions can motivate D-points, but the open D-point that changes language/toolchain/stdlib semantics is a PR/MR artifact with final wording and reviewable diffs.
+
+### D408: Unicode Algorithms, Grapheme Boundaries, Case Mapping, Collation, And Version Pinning
+
+`String` remains validated UTF-8 text. Kyokai does not add competing Unicode-string types for ordinary text. Algorithmic views and operations are explicit APIs: bytes, Unicode scalars, grapheme clusters, display width, normalization, case folding, case mapping, and collation.
+
+The compiler, formatter, diagnostics, docs generator, package-name checker, and standard text APIs use pinned Unicode data versions recorded in toolchain version output and reproducibility metadata. Kyokai performs no implicit normalization, case folding, locale collation, or width calculation during equality, hashing, package resolution, import resolution, identifier lookup, or path handling unless a specific accepted rule says so.
+
+Locale-sensitive APIs require explicit locale/data values or capability-bearing data sources. They do not consult ambient process locale. Package names, module names, identifiers, and stable tool keys use byte-for-byte or explicitly specified ASCII/canonical rules, not human collation.
+
+### D409: Environment Variables, Process Arguments, Native Encoding, And Secret Handling
+
+Process arguments and environment names/values are target-native nominal values such as `ArgText`, `EnvName`, and `EnvValue`, not aliases for `String`. UTF-8 conversion is explicit and named as strict, lossy, or target-rendered conversion.
+
+Reading the current process environment requires `EnvCapability`; receiving startup args does not grant environment authority. Child process construction uses explicit environment builder modes: inherit none, inherit all, inherit selected, or set exact map. The selected mode appears in source or manifest/tool config.
+
+Secret env and arg values are wrapped or marked at construction. Diagnostics render secrets as redacted structured fields and never call ordinary display directly on secret values. Target contracts define encoding, invalid-value behavior, NUL handling, Windows environment-name case behavior, Unix byte behavior, and child-process quoting rules.
+
+### D410: Atomic File Updates, Temporary Files, Locks, Permissions, And TOCTOU Boundaries
+
+Atomic file update APIs are admitted under filesystem/directory authority, not through a new random capability. Atomic replacement requires authority to the containing directory plus the required file create/write/replace authority.
+
+The stdlib admits explicit temp file, temp directory, atomic write, replace file, no-follow open, and advisory lock APIs. Durability policy is explicit: best-effort, file-synced, file-and-directory-synced, or target-unsupported. Symlink-follow policy is explicit. Cross-filesystem replacement fails; it never silently copies and deletes as if that were atomic replacement.
+
+File locks are advisory unless the target contract says otherwise. Lock lifetime is tied to a Linear lock guard. APIs that check metadata and then open/use a path either document TOCTOU exposure or use handle-relative/no-follow forms when target support exists.
+
+### D411: Networking, DNS, Socket Addresses, TLS Hooks, And Capability-Gated Name Resolution
+
+Kyokai networking is capability-gated and includes server/client socket, DNS, TLS, blocking, deadline, cancellation, and poller-backed contracts without async/await. Pure numeric address parsing requires no authority. DNS/name resolution requires `ResolverCapability`. Socket creation, connect, bind, listen, accept, send, receive, shutdown, and socket option changes require `NetworkCapability` or narrower connect/listen/socket authority.
+
+Operations come in explicit families: blocking, try/nonblocking, deadline/until, and poller-backed. For operation verb `verb`, the public naming pattern is `verbBlocking`, `tryVerb`, `verbUntil(deadline)`, and `verbPoll(poller, token)`. The admitted socket verbs are `connect`, `accept`, `read`, `write`, `send`, and `receive`, producing names such as `connectBlocking`, `tryConnect`, `connectUntil(deadline)`, and `connectPoll(poller, token)`. Cancellation is cooperative through `CancellationToken` and poller readiness; Kyokai does not add hidden async runtimes or forced syscall interruption.
+
+TLS is not implicit in sockets. TLS configuration uses explicit values for certificate store, verification policy, randomness, time, resolver/network authority, and failure behavior. Tests can inject fake resolvers and loopback-only network authority. Audit output reports packages and APIs that require resolver, outbound-connect, listener, raw-socket, TLS, or network authority.
+
+### D412: Test Isolation, Parallelism, Fixtures, Capabilities, And Flake Control
+
+Default tests run sandboxed: no ambient environment, network, process spawning, real clock, random source, broad filesystem access, or host terminal mutation except declared fixtures and grants. Tests declare grants in test metadata, source annotations accepted by the test spec, or manifest test profiles.
+
+Integration tests can opt into host authority explicitly through named profiles or visible flags such as a final `--allow-host` equivalent. Active grants are shown in command output and CI logs. Parallel tests receive isolated temp directories, deterministic output capture, deterministic random/replay inputs when requested, and explicit fixture capabilities.
+
+Host-dependent tests are labeled. The label affects scheduling and reporting but does not hide authority. Fixture cleanup, timeout, cancellation, and failure reporting are part of the test harness contract.
+
+### D413: Structured Codecs, Canonical Encoding, Schema Evolution, And Resource Budgets
+
+Kyokai admits strict structured codec profiles rather than a vague JSON parser. Toolchain JSON uses a strict UTF-8 I-JSON-like profile: no duplicate keys, bounded nesting, bounded strings/containers, deterministic object ordering for emitted canonical mode, and exact numeric policy.
+
+User codec APIs expose named modes such as strict, permissive, streaming, and canonical. Every parser takes an allocator and resource budget or uses a stored allocator/budget admitted by its API contract. Duplicate-key behavior is explicit: reject, first, last, or collect by mode. Numeric behavior is exact integer, decimal, or float by API name and schema.
+
+Generated codecs record schema version, generator provenance, budget defaults, unknown-field policy, canonicalization policy, and compatibility behavior. Hand-written codecs use the same public codec contracts.
+
+### D414: Diagnostic Code Stability, Lint Compatibility, Suggestion Safety, And Tool Output SemVer
+
+Diagnostic IDs are stable machine keys. Human message prose can improve without changing the ID. Diagnostic IDs have lifecycle states: active, deprecated alias, and removed with a tool-schema compatibility boundary.
+
+Suggestions have safety classes: `note-only`, `manual`, `maybe-applicable`, `machine-applicable`, and `machine-applicable-safe`. `kyokai fix` applies only `machine-applicable-safe` suggestions by default. Suppressions bind to diagnostic ID plus optional scope, expiry, reason, and policy source.
+
+JSON diagnostic schema is versioned separately from human text. Changing machine-readable diagnostic fields, suggestion classes, suppression behavior, or code meanings follows the tool-output compatibility rules.
+
+### D415: Allocation Failure Injection, Resource Limits, And Deterministic OOM Testing
+
+The stdlib admits test allocators such as counting, fail-nth, fail-by-size/class, leak-checking, limit, and high-water allocators. Failure schedules are deterministic and serializable into test replay records, including algorithm, seed/count, allocation class, site id, target, and harness version.
+
+Allocator-aware stdlib tests must cover success, fail-first, fail-each-allocation, partial-initialization cleanup, and leak-check paths where applicable. Runtime-fatal allocation sites listed by allocation policy are tested separately and cannot be hidden inside fallible APIs.
+
+The compiler does not silently inject allocation failures into ordinary program semantics. Failure injection is test/tool behavior through explicit allocator values or harness configuration. Diagnostics identify allocation site id, requested size/alignment, owning allocator, operation, and cleanup state.
+
+### D416: SemVer For Behavior Contracts, Error Variants, Tool JSON, And Documentation Output
+
+Public compatibility includes source signatures, visibility, typeclass instances, associated types, capability requirements, allocation behavior, blocking behavior, error/result variants, panic/TPOE/runtime-fatal cases, iteration/order guarantees, target availability, docs JSON, diagnostic JSON, and declared security/performance contracts when those facts are part of the public contract.
+
+`.koi` records machine-readable compatibility facts for accepted surfaces that affect downstream checking, package publishing, SemVer tooling, docs, LSP, or audit output. Diff classes include source-breaking, ABI-breaking, behavior-contract-breaking, diagnostic/tool-output-breaking, additive-compatible, and documentation-only.
+
+Publishing reports contract diff classes and rejects version numbers that understate the diff unless an explicit maintainer override records why. Bug fixes can be non-breaking only when previous behavior was outside the stated contract or is declared as a security/bug correction. Tool output schemas have their own compatibility versions.
+
+### D417: Child Process Status, Termination Reason, Signals, Exit Codes, And Supervision Values
+
+Starting a process returns spawn/setup errors separately from a successfully started `Linear` child process handle. Waiting for a child returns structured `ProcessStatus`, not a raw integer and not a parent `panic` or TPOE.
+
+Process status distinguishes normal exit code, signal or host termination, core-dump flag when target exposes it, timeout kill, cancellation kill, exec failure reported after spawn where target semantics allow it, stopped/continued states when exposed, and target-unknown raw status. Raw target status is preserved for diagnostics.
+
+Dropping or cleaning a live child requires an explicit policy: wait, terminate then wait, detach when target supports it, or error. Supervision APIs operate on structured status and never convert child failure into parent abnormal termination automatically. Target contracts state status capabilities, signal mapping, exit-code width/range, and unsupported states.
+
+### D418: CPU Feature Detection, Runtime Dispatch, Portable SIMD, And Target Multiversioning
+
+Compile-time CPU features are explicit target/profile inputs when required for generated code correctness. Runtime CPU feature detection returns explicit feature-set values and does not silently change source semantics.
+
+Unsafe intrinsics require target-gated unsafe contracts unless wrapped by admitted safe APIs with portable fallback behavior. Safe accelerated APIs must declare dispatch policy, fallback semantics, feature probes, and reproducibility impact. A binary must not execute instructions outside its baseline target unless a runtime feature check selected that path.
+
+Portable SIMD APIs use explicit vector types and lane semantics. Targets may lower portable vector operations to SIMD or scalar code without changing results unless the API opts into a relaxed float/numeric mode. Artifacts record baseline CPU, enabled compile-time features, runtime-dispatch tables, and accelerated object provenance when these affect codegen.
+
+### D419: Package Names, Unicode Confusables, Normalization, Reserved Names, And Typosquat Policy
+
+Public package names use a strict ASCII grammar. Unicode package names are rejected for public index packages. Canonical comparison is exact and recorded: case policy, separator policy, length limits, allowed characters, and reserved-name rules.
+
+Names reserved for the standard library, official tools, examples, security advisories, project infrastructure, and official namespaces cannot be claimed by ordinary packages. Names colliding by canonical form are rejected. Names confusingly close to official or reserved names are rejected, not merely warned.
+
+Typosquat similarity to ordinary third-party packages is an index/audit advisory only; it is not source semantics and is not proof of malice. Git/source dependencies outside the public index record exact URL, revision, and package manifest name. Tooling warns when a non-index package name would fail public index policy.
+
+
+## Accepted Shape Routing Record: D420-D431
+
+This cluster closes the third local ambiguity pass around source bytes, randomness, terminal behavior, package artifacts, lockfiles, toolchain installation, scratch execution, docs metadata, deprecation, caches, C binding generation, and advisories. These accepted rules are integrated into the normative `kyokaispec/` chapters named in the maturity tracker.
+
+### D420: Source File Encoding, Shebangs, Newline Normalization, And Diagnostic Span Coordinates
+
+`.kyo` and `.kai` files are UTF-8 byte sequences. Invalid UTF-8 is a lexical error before parsing. A leading UTF-8 BOM is rejected with a diagnostic that names the byte position and offers removal as the fix. Source decoding is never host-text-mode decoding and never depends on locale, editor settings, platform newline translation, or filesystem text attributes.
+
+LF and CRLF terminate source lines. A CR byte not followed by LF is a lexical error. `kyokai fmt` writes LF. A missing final newline is accepted as source input, and `kyokai fmt` adds the final newline. Tabs are legal in comments and string/raw-string literal contents; indentation emitted by `fmt` uses spaces. Tabs outside admitted whitespace positions are rejected according to the lexical grammar.
+
+A Unix shebang is accepted only as the first two bytes `#!` on line 1 of an executable entry source file in a command mode that accepts executable source. The shebang line is not tokenized as Kyokai source. It remains part of source hashes, source maps, reproducible provenance, and line numbering, so diagnostics after a shebang still report their original file lines.
+
+Compiler spans, `.koi` source fingerprints, generated-source provenance, source maps, diagnostic JSON, formatter edits, docs examples, and LSP facts use the shared source-map algorithm. The canonical coordinate is byte offset in the original UTF-8 byte sequence plus derived line and column fields. Human diagnostic columns are render fields derived from the pinned Unicode/display-width algorithm and never replace byte offsets. Tool JSON carries byte offsets so editor/protocol encoding differences cannot change the compiler's source identity.
+
+### D421: Randomness, Entropy, Deterministic PRNGs, Replay Seeds, And Crypto Boundaries
+
+Kyokai splits randomness by authority and purpose. OS entropy access requires explicit entropy authority such as `EntropyCapability` or a narrower admitted random-source capability. Entropy APIs return ordinary `Result` values with target unsupported, temporarily unavailable, interrupted, permission, resource, and raw target error data mapped through the accepted OS-error policy. Entropy is environmental I/O, not a pure function.
+
+Cryptographic random generation is exposed through admitted secure-random APIs whose names state security intent. A crypto RNG construction records entropy source, reseed policy, blocking/unavailable behavior, target support, audit status, algorithm identity, and failure behavior. APIs that create keys, nonces, session tokens, salts, or other secrets accept only crypto-grade RNG values or entropy-derived secure RNGs. Deterministic PRNGs do not satisfy crypto RNG requirements.
+
+Deterministic PRNGs are separate named types. Their constructors take explicit seed values. Their contracts record algorithm name, algorithm version, state size, output-width behavior, endianness behavior, reproducibility scope, and output-sequence compatibility. PRNGs used by tests, fuzzing, package generation, docs examples, deterministic hash policies, or reproducible tools produce the same sequence for the same algorithm version, seed, target-independent inputs, and Kyokai compatibility class.
+
+Distribution helpers state range bounds, rejection sampling, modulo-bias behavior, allocation, failure, and target effects. A range API is unbiased unless its name explicitly says biased. Fuzz/property/replay metadata records PRNG algorithm, algorithm version, seed, shrink path, target, profile, toolchain version, and any external entropy grant. Hash-map randomized seeding follows the accepted hashing policy and cannot silently consume crypto entropy in reproducible build, docs, package, `.koi`, or test replay modes.
+
+No random API silently reads wall time, monotonic time, PID, thread ID, memory addresses, uninitialized memory, environment variables, or host process state as seed material. Freestanding and sandboxed targets without entropy state that absence in the target contract; importing entropy-required APIs for such targets is rejected unless the selected profile supplies an explicit entropy fixture or host grant.
+
+### D422: Terminal Capability, TTY Detection, Color Policy, Raw Mode, Prompts, And Display Width
+
+Terminal behavior is an explicit standard-library and toolchain service. `TerminalCapability` or a narrower terminal handle grants terminal authority. Byte-oriented stdout/stderr writers do not grant raw mode, echo control, prompts, cursor movement, color policy, terminal-size probing, pager use, or terminal mutation.
+
+Terminal handles expose structured facts: interactive status, stdin/stdout/stderr terminal association, width and height availability, color support class, hyperlink support class, target console kind, raw/cbreak/no-echo support, alternate-screen support, cursor-control support, and unsupported-feature diagnostics. These facts are target and handle observations; they are not hidden global compiler assumptions.
+
+Kyokai CLI color policy is exactly one of `auto`, `always`, `never`, or `machine`. `auto` reads declared terminal facts and accepted display-only environment policy inputs such as the no-color policy. `always` emits terminal styling only on human output streams. `never` emits plain human text. `machine` emits stable machine-readable output and forbids ANSI color, progress animation, cursor movement, and pager behavior. CI-stable commands use `machine` or explicit plain output.
+
+Raw, cbreak, and no-echo modes are entered through Linear guard values. Constructing the guard records the prior terminal mode. Consuming the guard restores that prior mode through the specified cleanup operation. Normal returns, error returns, and registered cleanup paths consume the guard exactly once. TPOE and runtime-fatal follow the global fatal contract and do not promise user cleanup beyond target/runtime fatal handling.
+
+Prompt APIs state echo policy, secret redaction, default value behavior, EOF behavior, cancellation behavior, non-interactive behavior, output stream, input stream, validation, and allocation. Secret prompts return secret-bearing values or redacted wrappers, not ordinary displayable text. Display-width APIs use the pinned Unicode data version and are separate from byte length, scalar count, grapheme count, and string length. Tool tests can inject terminal facts and color policy without mutating the real host terminal.
+
+### D423: Canonical Package Source Artifacts, Archives, Compression, Checksums, And Content Identity
+
+Kyokai source distribution uses a canonical package source artifact. Package identity for downloads, mirrors, vendoring, lockfiles, audits, and offline caches is the accepted content hash over the canonical source artifact representation, not whichever archive bytes a hosting provider returns.
+
+Canonical source artifacts use deterministic path ordering, exact package-root prefix rules, the accepted path policy, normalized executable/read/write file modes, no host owner or group metadata, normalized timestamps, exact symlink policy, exact file-type allowlist, and exact metadata stripping. The package tool rejects absolute paths, parent-directory escapes, duplicate canonical paths, unsupported file types, unsupported symlink forms, device files, sockets, FIFOs outside an admitted target package rule, and paths that violate the canonical name policy.
+
+Compression is transport unless an artifact kind explicitly defines compressed bytes as identity. The source-content hash is over canonical uncompressed content. Compressed artifact identity, when selected by an artifact kind, records compression algorithm, level, headers, dictionary, metadata policy, and compressed-byte hash. Package source hash algorithms are versioned by the toolchain/package-index schema. Hash migration records old and new hashes; old hashes remain readable for existing lockfiles under the compatibility policy.
+
+Lockfiles record package identity, source identity, canonical source hash, original transport, resolved Git revision for Git sources, index or mirror provenance, artifact format version, and hash algorithm. Vendored directories include a vendor manifest recording canonical source hash, original source, vendoring tool version, local modification status, and vendor timestamp policy. Audit and package graph output print both source provenance and canonical content identity.
+
+### D424: Lockfile Update Semantics, Resolver Determinism, Conflict Policy, And Offline Mode
+
+`kyokai build`, `kyokai check`, `kyokai test`, `kyokai doc`, and `kyokai run` do not mutate `kyokai.lock` unless the command line selects an explicit lockfile update mode. Graph mutation is a command choice, not a side effect of compiling.
+
+Lockfile modes are exact: `frozen`, `locked`, `update-selected`, `update-all`, `offline`, `repair`, and `explain-conflict`. `frozen` rejects a missing lockfile, stale lockfile, format drift, unresolved package graph, or any required lockfile write. `locked` uses the existing graph and rejects dependency resolution that needs graph changes. `update-selected` updates named packages and the minimal required transitive set. `update-all` resolves the whole graph under current manifests and policies. `offline` performs no network access and uses only workspace packages, vendored sources, and verified local caches. `repair` rewrites deterministic ordering/format without changing graph meaning. `explain-conflict` reports solver conflicts without writing a graph.
+
+CI defaults to `frozen` when a lockfile exists. A command that requires network access fails under `offline` unless every required source, index record, advisory snapshot, and artifact is already present in verified local storage. Yanks do not break existing locked builds by themselves. Security blocks, minimum-safe-version policy, malicious-package records, and explicit audit policy are separate inputs that appear in audit output and policy diagnostics.
+
+Lockfile formatting is deterministic and ordered by canonical package identity plus dependency edge information. Merge conflicts are resolved by rerunning the resolver from manifests plus the branch graph inputs; hand-edited conflicted lockfiles are not authoritative until `kyokai lock repair` validates graph identity, source hashes, resolver version, feature-resolution version, package artifact hashes, source provenance, and index metadata version. Resolver diagnostics include package, version or revision constraints, feature constraints, target constraints, yanks, advisories, and the minimal conflicting chain.
+
+### D425: `bleedring` Toolchain Management, Toolchain Pins, Version Output, Install Roots, And Caches
+
+Kyokai has a first-party toolchain manager named `bleedring`. The canonical user surface is `kyokai bleedring`. The bootstrap installer/proxy binary is `kyokaibleed`; after installation it delegates to `kyokai bleedring` and does not become a second package manager or a second build frontend.
+
+`kyokai bleedring` owns install, list, default, pin, override, remove, update-index, run, component, target, cache, and doctor subcommands for Kyokai toolchains. Toolchains are installed into content-checked install roots separated from project outputs and package caches. A toolchain installation records compiler version, stdlib version, runtime version, resolver version, `.koi`/KBI format version, package-index schema version, target metadata version, bundled component versions, build profile, host triple, supported target triples, release channel, commit, tag, build date, clean/dirty source state, checksum, and signature/provenance record.
+
+Toolchain selection order is exact: explicit CLI toolchain override, directory override, checked-in project toolchain file or manifest toolchain declaration, workspace toolchain declaration, user default selected by `bleedring`, then PATH fallback only for unmanaged legacy invocation without a stronger rule. A selected project pin can name an exact version, exact revision, exact release channel plus version, or exact toolchain manifest hash according to the release policy. A version range is accepted only for commands that explicitly perform resolution and write the resolved exact toolchain pin.
+
+Build, check, test, doc, run, fmt, lsp, and audit never self-update the compiler, stdlib, resolver, package index client, or installed components. Installing, removing, updating, or switching toolchains is an explicit `kyokai bleedring` command or an external package-manager action. CI setup installs an exact requested toolchain and verifies checksum/signature before use.
+
+`kyokai version --verbose` and `kyokai doctor` print the selected toolchain identity in a Hyprland-style full record: Kyokai version, branch, commit, clean/dirty state, build date, tag, commit count when available, release channel, compiler component version, stdlib version, runtime version, resolver version, formatter version, LSP version, docs generator version, package-index schema version, `.koi`/KBI version, target metadata version, host triple, selected target triple, enabled compile-time flags, installed components, external tool paths and versions when relevant, install root, global cache root, project cache root, and a version ABI string derived from the commit plus compatibility-critical component versions. The version ABI string is recorded in build provenance when it affects artifacts.
+
+Global caches, package source caches, installed toolchain caches, and project build caches are separate roots. Build-result caches are partitioned by toolchain identity, target contract, backend, profile, feature set, cache-format version, and relevant policy values. `kyokai clean` subcommands name which roots they affect and show global roots before destructive global cleanup. Self-hosted bootstrap toolchains record stage identity so stage0, stage1, and stage2 artifacts cannot be confused.
+
+### D426: REPL, `eval`, Playground, Scratch Execution, Sandbox Limits, And Persistence
+
+`kyokai repl`, `kyokai eval`, executable documentation examples, playground runs, tutorial scratch runs, and compiler-explorer-style executions use the scratch-execution contract. Scratch execution is a temporary package/session with declared edition, target, backend, dependency set, module namespace, profile, and artifact policy. It is not a privileged language subset and not a hole in the capability model.
+
+The default scratch profile grants no filesystem, environment, process, network, wall clock, monotonic clock, random source, terminal raw mode, host compiler, unsafe/FFI, package publish, or broad host authority. Grants are explicit command-line flags, manifest scratch-profile entries, or playground sandbox policy entries. Session startup and verbose output print active grants, target, resource limits, dependency set, and artifact cleanup policy.
+
+A REPL session persists definitions as ordinary declarations inside the temporary package namespace. Imports, visibility, `.koi` facts, capability flow, linear ownership, borrow rules, defer rules, and package dependency rules are ordinary Kyokai rules. `eval` for compile-time expressions cannot observe runtime capabilities, host state, time, randomness, filesystem, network, or process authority. It uses the same compile-time evaluation limits and reproducibility rules as other compile-time evaluation.
+
+Scratch execution enforces explicit CPU, memory, wall-time, output-size, file-count, process-spawn, network, and package-fetch limits. Limit exhaustion reports a structured tool/runtime status. It is not TPOE, not backend UB, and not a silent host kill presented as successful execution. Scratch artifacts are in-memory, temporary-directory, or named project-cache artifacts according to the selected policy; verbose output prints the location and cleanup rule. Web playground execution uses the same contract plus remote host disclosures and exact compiler/runtime/toolchain versions.
+
+### D427: Doc Comments, API Metadata, Docs JSON, Stability Tags, And Deprecation Markers
+
+Declaration doc comments attach only to the immediately following declaration. Module/file doc comments attach only to the containing module/file surface admitted by the lexical syntax. Doc comments cannot change type checking, visibility, ownership, borrowing, code generation, capability requirements, runtime behavior, or `.koi` semantics except by contributing documented metadata fields that tools consume.
+
+Kyokai docs have prose plus a closed machine-readable tag set. The admitted tags cover parameters, return value, errors, capabilities, allocation, blocking, cancellation, TPOE, panic/runtime-fatal behavior, safety and unsafe contracts, examples, deprecation, replacement, stability, target availability, feature requirements, security notes, and audit notes. Unknown tags are `kyokai doc --check` diagnostics. Unknown tags never create semantics.
+
+Executable examples inside docs carry status labels from the accepted example policy: conformance, illustrative, historical, aspirational, or negative. Doc tests compile and run only examples whose label and target/capability grants admit execution. Examples that require capabilities state those grants in docs metadata and test harness policy.
+
+Deprecation metadata names the deprecated declaration or tool surface, since-version, reason, replacement when one exists, fix availability, fix safety class, lint code, and removal class. Docs JSON contains declarations, visibility, signatures, typeclass facts, contracts, capability facts, allocation/failure/blocking facts, docs tags, examples, deprecations, stability tags, target guards, source spans, and links under a versioned schema. LSP hover, docs HTML, semver-check, audit, and `kyokai fix` consume this single metadata model.
+
+### D428: Deprecation, Migration, Edition Transitions, Removal Policy, And Compatibility Windows
+
+Deprecation is accepted source/tool metadata attached to declarations, modules, typeclass instances, manifest keys, tool commands, command flags, diagnostic codes, docs JSON fields, or other public tool JSON fields. A deprecation record states since-version, reason, replacement, machine-fix availability, fix safety class, warning lint code, removal class, and compatibility axis.
+
+Using a deprecated item emits the recorded diagnostic lint by default. Project lint policy can escalate deprecation lints to errors through explicit policy. Suppression records include diagnostic ID, scope, reason, expiry, and policy source. Human message prose can improve while the diagnostic ID remains stable under the diagnostic compatibility rule.
+
+Deprecation alone does not make a breaking change non-breaking. Removing, changing, or weakening a public deprecated item follows the SemVer, edition, `.koi`/KBI, tool-output, and behavior-contract compatibility rules for that item kind. A deprecation with no replacement states that no replacement exists and records the reason removal is justified.
+
+Edition migrations are explicit source-semantics modes. `kyokai fix --edition` assists migration by applying safe machine-applicable fixes and validating parse/type/format afterward. Build/check/test/doc/run never silently rewrite source or lockfiles as part of migration. Tool command, flag, diagnostic-code, and JSON-field deprecations include aliases only under the accepted compatibility rule, and aliases remain visible in docs JSON and release metadata.
+
+### D429: Build Cache Keys, Eviction, Concurrent Access, Cache Poisoning, And Remote Cache Trust
+
+Every build-result cache entry records cache-format version, toolchain identity, version ABI string when available, source/input hashes, manifest hashes, lockfile hash, package source hashes, target contract, backend, profile, feature set, generated-source provenance, selected policy values, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, and output integrity hash. Cache hits are accepted only when every required key field matches exactly or through a compatibility rule named by the cache schema.
+
+Cache writes use atomic file-update rules and content/integrity hashes. Partial writes, missing metadata, mismatched hashes, unknown cache-format versions, and stale generated-source provenance are never consumed. Cache corruption is a tool diagnostic and triggers rebuild from source when the required sources and tools are available. A corrupted cache entry is not silently trusted and is not reported as a successful cache hit.
+
+Concurrent builds coordinate through explicit cache locks or content-addressed temporary paths. Lock acquisition, stale lock detection, unsupported locking, and lock timeout have stable diagnostics and fallback behavior. Eviction never deletes an entry held by an active build according to the cache-lock protocol. `kyokai clean` separates project outputs, project caches, package source caches, global caches, and installed toolchain caches.
+
+`kyokai build --no-cache` and the accepted cache-off mode produce correct artifacts without reading build-result caches. They still read declared source inputs, installed toolchains, package sources, vendored sources, and lockfiles according to their separate controls. Remote cache use is disabled by default. Enabling a remote cache requires explicit configuration, trust policy, endpoint identity, integrity checks, provenance validation, target/toolchain/profile match, and policy recording in build metadata. Remote cache entries cannot introduce new source, authority, package graph, or toolchain facts.
+
+### D430: Bindgen, Header Preprocessing, C Macro Modeling, Target Header Trust, And Generated FFI Provenance
+
+C header translation is a manifest-declared generation step. It is not an implicit compiler phase and not an ambient host-header scan. The generation config records target triple, ABI, C frontend identity, frontend version, sysroot/SDK identity, include paths, defines, undefines, language standard, extension mode, allowlist, blocklist, macro policy, inline-function policy, source header hashes, transitive include hashes when captured, and selected native toolchain discovery facts.
+
+Generated bindings record provenance in generated files, `.koi` metadata, audit metadata, and generation-check metadata. Provenance includes generator name, generator version, config hash, input headers, target, ABI, toolchain identity, source hashes, output hash, unsafe contract coverage, safe-wrapper coverage, and human-edit policy. Regeneration drift is detected by comparing provenance and content hashes; stale generated bindings fail `kyokai generate --check` or the selected generation-check mode.
+
+Object-like C macros become Kyokai typed constants only when the generator proves a single target-specific constant value and type category under the selected preprocessing configuration. Function-like macros are rejected unless a separately accepted wrapper category models the macro as generated helper code with explicit unsafe or safe contract. Inline C functions are rejected, emitted as unsafe foreign shims, or generated as audited helper code according to explicit config. They are never silently translated into safe Kyokai.
+
+Generated FFI declarations remain unsafe or wrapper-only until unsafe contracts and safe wrappers exist. Bindgen output alone does not create safe Kyokai APIs. Header translation cannot use ambient include paths, host SDKs, default compiler defines, or host libraries outside the selected target/toolchain contract. A package that wants host SDK bindings declares the SDK identity and target contract explicitly.
+
+### D431: Security Advisories, Vulnerability Audit, Yank Interaction, Patch Policy, And Minimum Safe Versions
+
+Kyokai defines a Kyokai Security Advisory schema, `KYSA`, as an OSV-compatible advisory document with Kyokai package identity extensions. Advisory records include advisory ID, package identity, source identity, affected version or revision ranges, patched ranges, severity, vulnerability category, publication timestamp, update timestamp, source URL, withdrawn/superseded status, exploit notes when present, migration notes when present, and machine-readable affected artifact kinds.
+
+Yanks are append-only package-index metadata and are not vulnerability records. Advisories can reference yanked versions, but yanks, vulnerabilities, malicious-package blocks, license findings, unmaintained-package findings, unsafe-contract audit findings, and minimum-safe-version policy are distinct signals. The package manager does not treat one signal as a synonym for another.
+
+`kyokai audit` evaluates the resolved lockfile graph against KYSA advisories, yanks, license policy, unsafe-contract audit findings, malicious-package policy records, unmaintained-package records, and organization policy. Audit output is human-readable and machine-readable under a versioned schema. It reports dependency path, package source, locked revision or version, artifact hash, advisory match, patched candidates, yank status, license status, unsafe/audit status, policy action, and exemption status.
+
+Build/check/test do not silently contact advisory services. Advisory refresh is an explicit command or an explicitly configured CI/audit mode. Policy actions are exact: allow, warn, deny, deny-above-severity, deny-malicious, deny-unpatched, deny-yanked-new-resolution, and ignore-by-recorded-exemption. Exemptions record advisory ID or policy record ID, package identity, dependency path or scope, reason, actor, creation time, expiry, and review policy. Known malicious package or revision blocks can reject new resolution and can reject locked builds only when the selected audit/build policy says locked-build denial is active.
+
+
+## Accepted Shape Routing Record: D432-D465
+
+This cluster records integrated FFI, toolchain, concurrency, and safety surfaces that were previously phrased as open hooks after D420-D431. It is accepted shape and does not reopen earlier TPOE, capability, lint, formatter, package, or concurrency decisions. D455 follows D222: there is no separate `kyokai lint` command. D464 follows D358/D380: embedded fatal behavior is a target-contract clarification, not a new exception or cleanup model.
+
+### D432: Non-`"C"` Foreign ABI Strings And Calling-Convention Admission
+
+Kyokai admits foreign ABIs through a closed target-contract table. Foreign blocks use Kyokai block syntax:
+
+```text
+foreign "ABI_NAME" is
+    ...
+mon;
+```
+
+`"C"` is the portable baseline ABI for targets that admit FFI. `"system"` is admitted only on targets whose target contract maps it to an exact platform calling convention. Target-specific ABIs such as `stdcall`, `cdecl`, `win64`, `sysv64`, `aapcs`, or vendor ABIs are admitted only when the selected target contract lists them.
+
+Each ABI table entry defines parameter passing, return passing, aggregate layout, varargs legality, callback legality, reentrancy class, and unwinding behavior. Foreign unwinding into Kyokai is rejected unless an ABI table entry explicitly admits an unwind boundary. Unknown ABI strings are compile-time errors. Adding an ABI string requires a D-point and a target-contract update.
+
+### D433: Module Import Cycle Protocol
+
+Kyokai module import graphs are acyclic. A module cannot import itself directly or indirectly through `.kyo`, `.kai`, generated interface artifacts, or re-export chains.
+
+The compiler rejects cycles before type checking and emits a diagnostic that prints the complete cycle path. `.koi` artifacts never encode module cycle witnesses. A design that requires mutual module visibility must split shared declarations into a lower acyclic module or merge the mutually dependent declarations into one module.
+
+### D434: Workspace Package Dependency Cycle-Breaking
+
+Kyokai workspace and package dependency graphs are acyclic at package identity level. A package cannot depend on itself directly or indirectly through normal dependencies, dev dependencies, generated packages, tool packages, target-specific dependencies, or re-exported package surfaces.
+
+The resolver rejects the workspace before build planning and prints the package cycle path. Cycle-breaking artifacts are not admitted. Shared code belongs in an acyclic lower package, and build tooling belongs in a tool package that does not import the package it generates for.
+
+### D435: Linear-Aware Shared Test Fixtures
+
+Kyokai test fixtures are explicit test-harness declarations with ownership class: `case`, `module`, or `workspace`.
+
+A fixture that creates linear resources must return either a per-test owned value with statically checked cleanup, or a shared broker handle that leases fresh linear resources to each test case and reclaims them through an explicit teardown contract. Linear resources are not shared directly between parallel tests.
+
+Shared fixtures are legal only when the shared value is Free immutable data, a compiler-admitted synchronized primitive, or a fixture broker whose lease/release protocol is recorded in test metadata. Fixture setup failure is a structured test failure. Contract violation inside fixture code remains TPOE, caught by the test harness as a failing test process according to the existing test-runner rules.
+
+### D436: MPSC, MPMC, And Broadcast Channel Admission Or Permanent Rejection
+
+Kyokai core concurrency admits SPSC channel endpoints only. MPSC, MPMC, and broadcast endpoints are rejected as core language primitives and rejected from the Tier-1 primitive stdlib channel set.
+
+Fan-in, fan-out, and pub/sub are expressed through explicit broker tasks connected by SPSC channels, poller registration, and named queue policies. A broker type documents capacity, fairness, backpressure, cancellation, close behavior, and linear message ownership. User code does not receive a hidden shared channel endpoint that multiple producers or consumers mutate implicitly.
+
+### D437: Multiple Runnable Binary Targets Per Package
+
+A Kyokai package can declare multiple executable targets in the package manifest. Each executable target is a named build-graph node with root module, entrypoint, output name, profiles, target filters, generated-input dependencies, and startup capability bundle.
+
+`kyokai build <target>` builds the named executable. `kyokai run <target>` runs the named executable. A package can mark exactly one executable as the default run target. Library-only packages declare no executable targets. Example/demo targets remain separate from production executables in audit, release metadata, and install policy.
+
+### D438: Cross-Edition `.koi` Interface Normalization
+
+`.koi` artifacts are edition-specific. A consumer loads a `.koi` artifact only when the artifact edition, KBI major version, target contract, and compatibility class match the consumer's declared requirements.
+
+Cross-edition use is not implicit. A tool can generate a separate migration witness that records every semantic mapping from one edition to another. That witness is an audit artifact, not a normal `.koi` replacement. It cannot silently change ownership, capabilities, unsafe contracts, layout, failure behavior, or ABI. Mixed-edition workspaces rebuild package interfaces per edition boundary instead of pretending one `.koi` is version-agnostic.
+
+### D439: Refutable And Filtering `for-in` Loops
+
+`for Pattern in expr` requires an irrefutable pattern. Refutable patterns in `for-in` are compile-time errors.
+
+Filtering iteration is expressed with explicit `case` inside the loop, `while let` forms that expose the matched value, or named iterator adapters whose ownership behavior and allocation behavior are part of their API contract. No loop form silently discards a linear payload on a non-matching pattern.
+
+### D440: Kyokai-to-C Export Borrow Wrapper Patterns
+
+C-exported Kyokai functions cannot expose Kyokai reference or borrow types in their exported ABI signature.
+
+Admitted C-facing wrapper categories are opaque handle, pointer-length view, nullable pointer where the target ABI admits it, and by-value `extern record` values approved by the ABI table. Each exported wrapper has an unsafe export contract naming lifetime window, aliasing rule, invalidation operation, thread rule, reentrancy rule, and cleanup responsibility.
+
+A pointer-length view does not transfer ownership. An opaque handle transfers only the authority stated by its constructor/export contract.
+
+### D441: Raw User Signal Handler Unsafe Contract
+
+Raw signal handlers and interrupt handlers are unsafe-only. Installing one requires an unsafe contract naming signal/interrupt set, handler symbol, target mask/priority rules, allowed memory operations, and reentrancy class.
+
+Handler code cannot allocate, lock ordinary locks, call ordinary Kyokai APIs, consume linear values, run destructors, access non-signal-safe foreign APIs, or re-enter Kyokai except through target-contract-listed signal-safe bridge APIs.
+
+The safe default surface is a `SignalWatcher`/poller integration that converts signals into ordinary events outside the raw handler. Embedded targets can admit ISR bridge APIs, but each bridge must name MMIO/atomic access width, allowed registers, and fatal behavior.
+
+### D442: Import-Sorting Formatter Mode
+
+Default `kyokai fmt` preserves import order. A workspace or package manifest can set `fmt.sort_imports = true`; when set, all tools use the same deterministic import sorting rule.
+
+Sorting groups imports by standard library, same workspace, external package, and target-gated import group. Within each group, imports sort by canonical package path and imported item name using byte-stable ordering. Formatter output remains idempotent. LSP format-on-save follows the manifest setting only.
+
+### D443: Formatter Parse-Error Subtree Recovery Mode
+
+Default `kyokai fmt` requires a complete parse. Parse failure produces diagnostics and writes no file.
+
+A workspace or package can enable `fmt.recover_partial = true` for editor workflows. In recovery mode the formatter formats only parse-valid subtrees and leaves invalid ranges byte-for-byte unchanged. CLI recovery writes files only with an explicit `--write-partial` flag; otherwise it prints a preview or returns LSP workspace edits. CI and `kyokai fmt --check` use strict mode unless the manifest explicitly admits partial formatting for that command.
+
+### D444: Human Diagnostic Localization
+
+Kyokai diagnostic identity is locale-independent. Diagnostic code, JSON field names, machine fix keys, category names, and conformance goldens use canonical English identifiers.
+
+Human CLI rendering can be localized through explicit locale selection. Missing translations fall back to English. `kyokai explain CODE` always exposes canonical English normative text and can additionally render localized prose. Localization never changes compiler behavior, diagnostic identity, fix applicability, or test expectations.
+
+### D445: Dynamic Linking Loader Policy
+
+Dynamic linking is admitted only when the target contract admits it. Each binary target declares linked shared objects, expected soname/install-name/import-library identity, allowed runtime search roots, and whether system default search paths are allowed.
+
+ELF targets record `RUNPATH`/`RPATH` policy explicitly. macOS targets record `install_name` and `@rpath` roots explicitly. Windows targets record import libraries, delay-load policy, and DLL search roots explicitly. Reproducible profiles reject ambient `LD_LIBRARY_PATH`, current-directory DLL search reliance, or host-discovered rpaths unless the manifest records the exact policy.
+
+### D446: `.koi` Compressed Wrapper Format
+
+KBI canonical bytes remain uncompressed for semantic hashing and compatibility checks.
+
+A compressed `.koi` transport wrapper contains canonical KBI bytes plus wrapper version, compression algorithm ID, uncompressed length, compressed length, and hash of the uncompressed canonical bytes. Tools decompress, verify the canonical hash, then operate on the canonical bytes. Unknown compression algorithms and hash mismatches are hard errors. Compression never changes `.koi` identity.
+
+### D447: `RwLock` Fairness And Writer-Starvation Policy
+
+Kyokai Tier-1 `RwLock[T]` uses `FairQueue` semantics. Lock requests enter a FIFO fairness queue. Multiple readers acquire together only when no earlier writer is queued. Once a writer is queued, later readers do not bypass it.
+
+Targets whose OS primitive cannot provide this behavior must implement the fairness layer in the Kyokai stdlib/runtime or reject Tier-1 `RwLock` admission for that target. `ReaderPreferring` and target-defined priority are rejected for the standard `RwLock`.
+
+### D448: Spawn Immutable Capture Extensibility For Synchronized Primitives
+
+Immutable spawn capture by shared reference is allowed only for types in the closed compiler/stdlib `SpawnShareable` registry.
+
+Initial registry: immutable `Free` values, `Atomic[T]` for admitted atomic `T`, `Mutex[T]` with admitted lock contract, `RwLock[T]` with D447 fairness contract, and explicitly admitted SPSC channel endpoints whose transfer class allows shared observation. User code cannot implement `SpawnShareable`. Adding a new spawn-shareable primitive requires a D-point, stdlib admission record, `.koi` transfer fact, and conformance tests.
+
+### D449: Benchmark And Property Statistical Methodology
+
+`kyokai bench` emits versioned JSON with methodology profile, compiler/toolchain version, target contract hash, optimization profile, clock source, warmup count, sample count, run count, min/median/mean/stddev, confidence interval, outlier policy, allocation metrics when enabled, and environment fingerprint.
+
+Comparisons are valid only when methodology profile, target contract, optimization profile, and clock class match. Mismatches produce warnings or CI failure depending on configured policy.
+
+Property tests record generator version, seed, shrink trace, sample count, discard count, and failing corpus artifact. Replaying a property failure uses the recorded seed and shrink trace exactly.
+
+### D450: LSP Rename And Refactor Safety Classes
+
+Kyokai LSP rename returns a `WorkspaceEdit` plus Kyokai rename safety metadata.
+
+Safety classes are `LocalPrivate`, `ModulePrivate`, `PackagePrivate`, `WorkspaceInternal`, and `PublicInterfaceChanging`. Public-interface renames require successful name resolution, visibility check, affected `.koi` diff, and user confirmation. Broken parse recovery allows local textual rename only when the symbol is fully resolved; unresolved symbols reject rename. Cross-package rename never applies edits until `kyokai check --affected` succeeds or the client requested dry-run.
+
+### D451: Volatile-Legal Type Domain Expansion
+
+Volatile operations apply only to the closed volatile-legal type domain.
+
+Admitted volatile types are fixed-width integers, fixed-width floats only when the target contract admits volatile float access, `bitrecord` register types with explicit layout, and `extern record` MMIO blocks whose fields are themselves volatile-legal. Volatile access records width, alignment, endianness when target-visible, read/write permissions, and side-effect class.
+
+Volatile is rejected for capabilities, borrows, linear resource handles, generic `T`, ordinary records, and synchronization. Atomic operations remain the synchronization surface.
+
+### D452: Stdlib Domain `Result` Types Vs Global Failure Taxonomy
+
+Every stdlib failure belongs to exactly one global failure category: `RecoverableResult`, `OptionalAbsence`, `ContractViolationTPOE`, `ProgrammerBugTPOE`, or `RuntimeFatal`.
+
+Domain error types such as `IoError`, `PathError`, `ParseError`, `NetError`, and `ProcessError` are recoverable `Result` errors unless their API contract explicitly says the condition is a contract violation. Stdlib APIs document the category in `.kyo` contract fields. `kyokai audit` rejects stdlib APIs whose implementation path and documented failure category disagree.
+
+### D453: Inline Assembly Constraint Language And Lowering Contract
+
+Inline assembly is admitted only inside `pragma Unsafe_Module`.
+
+An `asm` block declares target guard, template text, named operands, operand direction (`in`, `out`, `inout`, `lateout`), register class or explicit register, immediates, symbols, clobbers, memory effect class, flags effect class, stack effect, and fallthrough behavior.
+
+Operands are used exactly according to their direction. Unused named operands are compile-time errors. The compiler validates target availability before lowering. A backend that cannot represent an admitted asm form rejects compilation. Inline asm never introduces backend UB into safe Kyokai; all unsafety is contained in the unsafe module contract.
+
+### D454: Recoverable Errors, Partial Mutation, And Invariant Poisoning
+
+Fallible mutating APIs declare an error-state class: `NoMutationOnErr`, `PartialProgressOnErr`, `ConsumesOnErr`, or `PoisonedOnErr`.
+
+`NoMutationOnErr` guarantees observable state is unchanged. `PartialProgressOnErr` lists exactly which cursor, offset, buffer, handle, or state field can advance. `ConsumesOnErr` lists the linear resources consumed and the recovery values returned. `PoisonedOnErr` means the value remains owned but operations are restricted to inspection, repair, or destruction APIs named by the contract.
+
+Callers cannot infer rollback from `Err`. Stdlib APIs with partial mutation expose that class in `.kyo` docs and `.koi` metadata.
+
+### D455: Bug-vs-Recoverable Failure Classification And `Result` Abuse Diagnostics
+
+Tier-1 stdlib APIs must not encode programmer bugs, violated preconditions, impossible internal states, or invariant corruption as ordinary recoverable `Result`.
+
+Recoverable `Result` is reserved for expected environmental, input, protocol, resource, parse, filesystem, network, process, allocation, and domain failures. Contract violations use TPOE. Explicit programmer-requested abnormal termination uses `panic`. Runtime/toolchain support failure uses runtime-fatal.
+
+The compiler-integrated diagnostic set includes `misclassified_failure` for APIs whose declared failure category disagrees with their implementation or docs. The existing D379 `propagate-up` diagnostic remains the propagation-context warning; D455 does not create a separate `kyokai lint` command.
+
+Diagnostics are surfaced through the shared compiler/toolchain engine used by `kyokai check`, `kyokai build`, `kyokai test`, and LSP. Project policy in `kyokai.toml` can raise advisory diagnostics, but correctness violations remain compiler errors.
+
+### D456: Foreign Callback Reentrancy And Kyokai Re-Entry Contracts
+
+Every foreign callback contract declares a reentrancy class: `NonReentrant`, `ForeignReentrantOnly`, `KyokaiReentrant`, or `SignalReentrant`.
+
+Safe wrappers default to `NonReentrant`. A wrapper admits reentrancy only when it proves no active borrow, lock guard, half-consumed linear value, or capability attenuation frame can be violated by callback entry. Reentrant callbacks can receive owned linear values only through an explicit transfer into the callback frame. Reentering Kyokai outside the declared class is unsafe-contract violation.
+
+### D457: Foreign Thread-Local Error State And Concurrent FFI
+
+FFI wrappers that translate foreign thread-local error state must snapshot that state on the same thread immediately after the foreign call returns and before any Kyokai yield, spawn, poll wait, callback dispatch, allocation helper, logging call, or second foreign call.
+
+Wrapper contracts name the foreign error domain: `errno`, `GetLastError`, OpenSSL error queue, or another target/library-specific domain. Non-thread-safe foreign libraries require an explicit serialization capability or are rejected from safe wrappers. Bindgen records TLS error metadata in generated unsafe contracts.
+
+### D457a: Stdlib Poller Integration For Foreign Event Sources
+
+Kyokai stdlib provides first-party poller integration primitives for file descriptors, sockets, timers, process handles, and admitted foreign event sources.
+
+The admitted shape is `Poller`, `PollRegistration`, deadline/cancellation tokens, and SPSC event delivery into broker tasks. Libraries do not define competing scheduler runtimes for ordinary networking. A foreign event source integrates by implementing an unsafe adapter contract that names readiness source, wake mechanism, cancellation behavior, ownership of registered handles, and TLS-error snapshot obligations.
+
+This does not admit async/await, green-thread scheduling, Rayon-style parallel iterators, or hidden work-stealing as language semantics.
+
+### D458: Free-Field Projection From Linear Records Under Active Borrows
+
+A `Free` field can be projected from a `Linear` record without consuming the record only when the record definition marks the field as independently projectable or the compiler proves no cross-field invariant can be violated.
+
+During an active mutable borrow of another field, projection of a `Free` field is legal only when the two fields are in disjoint field regions and the record has no declared invariant tying them together. Handle+payload records, capability-bearing records, and unsafe-backed records default to non-independent fields unless their admission record says otherwise.
+
+### D459: Auto-Reborrow Suspension Across Control-Flow Joins
+
+Auto-reborrow suspension across `if`, `case`, loop back-edges, `break`, `continue`, `return`, and error propagation is defined by a published elaboration table.
+
+At every control-flow join, the checker computes active access paths. A suspended mutable borrow resumes only when exactly one mutable path to the referent exists and no shared path conflicts with it. If two branches produce incompatible borrow states, the program is rejected and the diagnostic names the join point and conflicting paths. Conformance tests include every table row.
+
+### D460: Unsafe Module Typeclass Instance Forgery And Audit
+
+Typeclass instances declared in unsafe modules are marked as unsafe-origin instances in `.koi`.
+
+Coherence rules apply equally to safe and unsafe instances. Security-sensitive typeclasses, including equality, ordering, hashing, display, parsing, serialization, and capability/authority traits, require explicit instance admission for secret-bearing, capability-bearing, unsafe-backed, or foreign-backed types. `kyokai audit` reports unsafe-origin instances and rejects policy-denied instances at dependency admission.
+
+### D461: Package Provenance Attestation And Transparency Log
+
+Published Kyokai package versions are identified by canonical source archive hash plus package identity, version, edition, and manifest hash.
+
+The public index maintains an append-only transparency log of published package hashes. Lockfiles record content hash, log inclusion proof, consistency checkpoint, publisher identity, and index identity. Clients verify lockfiles against cached or fetched log proofs before build. Mirrors are untrusted transport; they cannot change package bytes without hash/log failure.
+
+Build provenance attestations record builder identity, toolchain version, inputs, generated outputs, and environment class. Attestations supplement the content log and do not replace it.
+
+### D462: Manifest-Declared Authority Ceilings And Link-Time Confused-Deputy Checks
+
+A package manifest can declare an authority ceiling listing the maximum capability families the package and its transitive dependencies are allowed to require.
+
+`kyokai audit` computes capability requirements from `.koi` metadata and rejects a dependency graph that exceeds the root ceiling unless the root manifest explicitly elevates the ceiling with a recorded reason. Dependencies cannot raise the application ceiling. Diagnostics name the dependency path, required capability, and declaration that introduced it.
+
+### D463: Generational Handles And Slot-Map Safety
+
+Kyokai admits generational handles as a stdlib container pattern.
+
+Safe generational handles are nominal values containing slot index and generation identity. Raw integer slot IDs are not admitted as safe authority-bearing handles. Freeing a slot invalidates all handles with the old generation. Reusing a slot increments generation according to the container's documented width and wrap policy.
+
+Lookup with a stale handle returns a recoverable stale-handle error for checked APIs. Unchecked access APIs are unsafe or TPOE-on-contract-violation, never backend UB. Handles do not own the stored resource and do not bypass linear ownership of values removed from the container.
+
+### D464: Freestanding And Embedded TPOE Resource Abandonment
+
+D464 does not create a new failure mode. Freestanding and embedded Kyokai use the already accepted terminal categories: normal exit, explicit `panic`, TPOE contract violation, and runtime-fatal/internal failure.
+
+On freestanding targets, TPOE keeps D358 semantics: it is non-catchable, does not run user defers, does not unwind, and does not resume. The selected target contract states the fatal action using the existing D358 target-action surface: trap, halt, reset, existing fatal hook, or target-specific fatal handler.
+
+The purpose of D464 is only to make hardware consequences explicit. Drivers and MMIO/DMA APIs document which external hardware resources can remain active or externally observable after TPOE/runtime-fatal termination, because fatal termination is not normal linear cleanup. That documentation is part of the stdlib/API contract fields, not a new cleanup mechanism.
+
+Recoverable embedded conditions, such as device timeout, busy peripheral, missing clock, denied register access, allocation failure, or unsupported target feature, use `Result`/`Optional` APIs where already appropriate. They are not TPOE unless the caller violated a stated contract. TPOE stays for contract violations; runtime-fatal stays for corrupted runtime/toolchain/target-support failure.
+
+### D465: `[generate]` Sandbox, Capability Boundaries, And Build-Time Code Execution
+
+`[generate]` steps run in a default-deny build sandbox.
+
+Each generator declares command identity, tool package or executable target, input roots, output roots, environment variables, network authority, process-spawn authority, filesystem read/write grants, and target/toolchain dependencies. The generator receives no `RootCapability` and no ambient application authority.
+
+The build rejects reads outside declared inputs and writes outside declared outputs when the host sandbox can enforce it. On hosts with weaker sandboxing, `kyokai audit` marks the build as weaker and CI policy can reject it. Generated outputs record generator config hash, input hashes, tool hash, output hashes, and sandbox authority in provenance metadata. Undeclared generator authority is a build error, not a warning.
+
+## Accepted Shape Routing Record: D466-D478
+
+This cluster records accepted rules for validated wrapper types, configuration diagnostics, rejected task-transfer packaging syntax, parameter access spelling, conditional typeclass instances, explicit channel backpressure, nested abnormal cleanup, non-transactional I/O protocol state, compiler explain modes, hot reload as a toolchain development service, string literal allocation identity, safety-claim tiers, and public-document slogan cleanup. The normative specification chapters named in the tracker carry the extracted contracts.
+
+### D466: Validated Wrapper Types And Construction-Time Invariants
+
+Kyokai admits validated wrapper types as nominal types with construction-time validation. A validated wrapper is a public nominal type whose raw representation is private to its defining module. Code outside the defining module cannot construct the value by writing the raw field directly.
+
+A validated wrapper exposes at least one constructor with the shape `makeX(input...): Result[X, XValidationError]` or an equivalent named constructor recorded in `.koi`. Validation failure is a recoverable domain error. Validation failure is not TPOE, not `panic`, and not runtime-fatal. TPOE is used only when the caller violates a documented precondition of the validation API itself, such as passing an invalid borrowed view or violating an unsafe contract.
+
+Validated wrappers do not implicitly convert to the underlying representation. Reading the underlying value requires a named borrowing or extraction API such as `asStaticText`, `asBytes`, `intoRaw`, or a domain-specific equivalent. `intoRaw` consumes the wrapper when returning an owned linear representation.
+
+Validators are pure by default. A validator that reads files, uses locale data, allocates, consults randomness, performs I/O, or depends on target state declares the required capability and failure classes in its admission record. `.koi` records the public wrapper type, constructor names, error type, validator purity/effect class, underlying representation visibility, and extraction APIs.
+
+Kyokai rejects a generic magic type such as `Constrained[T, Predicate]` as core language semantics. Libraries can define generic helper patterns, but the compiler does not treat arbitrary predicate types as proofs.
+
+### D467: `compile_error` And Configuration-Guard Diagnostics
+
+Kyokai admits `compile_error(message);` as a protected compile-time built-in. The argument type is `StaticString`. The built-in is legal at declaration scope and in compile-time-only declaration guard positions accepted by the `when` model. It is not a runtime expression and has no value.
+
+When `compile_error(message);` is present in an active file or active declaration selected by `when`, compilation fails with stable diagnostic code `compile_error` and the exact source span of the built-in. The diagnostic includes the provided `StaticString` message. The compiler does not continue past this point as if the declaration exists.
+
+When `compile_error(message);` is inside an inactive `when` branch or an excluded file, it is semantically absent and produces no diagnostic.
+
+`compile_error` complements `static_assert`. `static_assert(condition, message);` is used when a deterministic compile-time boolean expression is checked. `compile_error(message);` is used when the selected configuration itself is unsupported and no boolean proof expression is needed.
+
+Kyokai rejects token-pasting, macros, conditional token streams, body-level target branching, and build-script-generated diagnostics as part of this decision.
+
+### D468: Task-Transfer Isolation Packaging Rejection
+
+Kyokai rejects `recover`, `transfer package`, `isolate`, and equivalent task-transfer packaging syntax as core language semantics.
+
+Task transfer is decided only by the accepted D280 rules: a type is `task_local` by default, declares `task_transfer structural` to request structural transfer classification, or provides an explicit unsafe transfer contract for opaque, foreign, target-backed, or unsafe-backed representations. A value cannot become task-transferable by entering a packaging block.
+
+The compiler checks task transfer at the transfer point: `spawn`, channel transfer across task boundaries, or any other accepted task-transfer operation. The check consumes or borrows exactly as the operation specifies. External borrows, non-transferable fields, capability leaks, open poller registrations, raw foreign handles without transfer contracts, and non-transferable synchronized primitives produce compile-time diagnostics.
+
+The Analysis Server and `kyokai explain --linearity` can emit a task-transfer graph report showing the rejected field path, borrow path, capability path, or unsafe-contract gap. That report is tooling-only and never changes whether the source type-checks.
+
+Runtime borrow counting, reference-count uniqueness tests, and dynamic graph isolation are rejected as safe Kyokai task-transfer semantics.
+
+### D469: Parameter Access Kinds On Functions And Methods
+
+Kyokai rejects new parameter access keywords such as `let`, `read`, `inout`, `consume`, `sink`, `set`, and equivalent aliases in function and method signatures.
+
+The accepted parameter access surface remains:
+
+- an owned parameter consumes or receives ownership according to ordinary move/linearity rules;
+- `&[T]` is an immutable borrow parameter;
+- `&![T]` is an exclusive mutable borrow parameter;
+- return values and named out-parameters use existing explicit result and borrow rules;
+- method receiver access is expressed through the same owned, immutable-borrow, and mutable-borrow forms after UFCS/method desugaring.
+
+The compiler, generated docs, Analysis Server, and `.koi` metadata classify each public parameter into derived documentation roles: `consume`, `read_borrow`, `mut_borrow`, `return_owned`, `return_borrow`, or `capability`. These roles are derived facts, not source syntax, and cannot change overload resolution, type checking, borrowing, or ownership.
+
+A function signature that attempts to combine a rejected access keyword with Kyokai parameter syntax is a compile-time syntax error. Diagnostics explain the equivalent accepted Kyokai spelling.
+
+### D470: Conditional Typeclass Instances And Specialization Witnesses
+
+Kyokai admits conditional typeclass instances with explicit compile-time constraints.
+
+An instance declaration can state constraints over type parameters, universes, layout facts, task-transfer facts, and typeclass witnesses. The instance is available only when those constraints are satisfied after generic substitution. `.koi` records the instance head, constraint list, exported methods, behavior contract, complexity contract, and any capability or allocation requirements.
+
+Coherence is global over the selected package graph. For any concrete use site, exactly one visible instance can satisfy the requested typeclass and type arguments. Two instances whose constraints overlap for the same concrete type are rejected unless one is private and not visible to the same resolution context. Ambiguous conditional instances are compile-time errors.
+
+Kyokai rejects behavior-changing specialization. A more constrained instance cannot silently override a less constrained instance for the same public typeclass behavior. Performance specialization is admitted only when it preserves the same observable behavior, same failure classes, same ownership effects, same capability requirements, and same public contract. Such specialization is an implementation choice, not a different instance visible to source semantics.
+
+Public packages changing conditional instance availability or constraints treat that as a `.koi` and SemVer-relevant API change.
+
+### D471: Channel Backpressure Policy
+
+Kyokai bounded channels use explicit backpressure only.
+
+A bounded channel has a declared capacity. When the channel is full, a blocking send operation blocks at the named send call, a nonblocking send operation returns a typed `Full(value)` result preserving ownership, and a deadline/cancellation-aware send returns the accepted timeout or cancellation result preserving ownership when transfer did not occur.
+
+The runtime scheduler cannot silently mute, throttle, park, deprioritize, or delay a task because the task previously sent to a busy receiver unless the task is currently inside a documented blocking, waiting, deadline, cancellation, or poller operation.
+
+Overload management is expressed with bounded capacities, broker tasks, worker pools, explicit queues, `trySend`, `sendBlocking`, deadline/cancellation variants, and `wait`/Poller integration. Hidden runtime backpressure is rejected as Kyokai language and stdlib semantics.
+
+### D472: Panic-During-Defer And Nested Abnormal Exit
+
+Kyokai defines abnormal-exit cleanup in three states: normal cleanup, panic cleanup, and runtime-fatal termination.
+
+On normal structured scope exit, normal `return`, recoverable `Err` return, `break`, `continue`, and accepted panic initiation, eligible `defer` actions run in D2/D2a order. A `defer` action must satisfy ordinary linearity rules.
+
+During panic cleanup, a `defer` action that completes normally allows cleanup to continue. A `defer` action that calls `panic`, reaches TPOE, triggers runtime-fatal, violates an unsafe contract, or fails in a way its cleanup contract classifies as nonrecoverable escalates immediately to runtime-fatal. After runtime-fatal escalation begins, no additional user `defer` actions run.
+
+TPOE and runtime-fatal do not promise user cleanup. Linear values abandoned after runtime-fatal escalation are abandoned because the execution context is dead; that abandonment is not a normal consume operation and cannot be observed by safe continuation.
+
+The compiler-integrated diagnostic `defer_may_fail` is emitted when a `defer` action calls an API whose contract admits recoverable failure or panic/TPOE without an explicit cleanup-failure policy. Project policy can raise this advisory diagnostic, but correctness violations remain compiler errors.
+
+### D473: Poller/Select Protocol State And Non-Transactional I/O Composition
+
+Kyokai stdlib I/O, Poller, and protocol APIs are non-transactional unless their contract explicitly states `NoMutationOnErr` or `NoEffectOnCancel`.
+
+Every multi-step I/O or protocol API declares:
+
+- state advancement class: `NoProgress`, `PartialProgress`, `StateAdvanced`, `ConsumesOnErr`, or `Poisoned`;
+- cancellation class from D284;
+- error-state class from D454;
+- buffer state after success, error, timeout, cancellation, EOF, close, and protocol rejection;
+- whether user-visible cursors, offsets, sequence numbers, handshake states, poller registrations, or deadlines advanced;
+- whether secrets were written into buffers and which zeroization API consumes or mutates those buffers afterward.
+
+Poller readiness is not proof that an operation will complete. Readiness tokens authorize attempting the operation under the target backend contract. The operation can still return would-block, interruption, partial progress, EOF, timeout, cancellation, target error, or protocol error according to its contract.
+
+Edge-triggered, level-triggered, one-shot, completion-based, signal-wakeup, descriptor-close, spurious-wakeup, and rearm behavior are target-contract facts. Target contracts cannot weaken Kyokai ownership transfer, buffer-state, or linear cleanup rules.
+
+Stdlib examples must show accept loops, read/write loops, TLS-like handshake loops, HTTP-like protocol loops, cancellation paths, timeout paths, and buffer reset/zeroize paths using the accepted state classes.
+
+### D474: Compiler Explain Modes For Linearity, Defer, And Lowering
+
+D474 does not create a second analysis system. It concretizes the accepted D303/D485 toolchain shape.
+
+`kyokai explain` is a frontend over compiler-produced facts. It reads the same parser, resolver, type checker, linearity checker, borrow checker, capability checker, lowering pipeline, and `.koi` facts as `kyokai check`, `kyokai build`, LSP, and the Analysis Server.
+
+Accepted explain modes are:
+
+- `kyokai explain --linearity <span-or-symbol>`;
+- `kyokai explain --borrows <span-or-symbol>`;
+- `kyokai explain --defer <function-or-span>`;
+- `kyokai explain --lowering <span-or-symbol>`;
+- `kyokai explain --koi <symbol>`;
+- `kyokai explain --diagnostic <code>`.
+
+Explain output has human and versioned JSON forms. JSON output records compiler version, target, profile, backend, source spans, symbol identity, phase, and diagnostic codes. Explain output cannot make code valid, cannot suppress diagnostics, cannot change lowering, and cannot replace the spec.
+
+### D475: Hot Reload Toolchain Development Service
+
+Hot reload is admitted as a Kyokai toolchain development service, not as core language semantics.
+
+The surface belongs to toolchain profiles, build generation, dynamic loading policy, and development runtimes. It is enabled only by an explicit profile field such as `toolchain.hot_reload = true` and only on targets whose target contract supports dynamic code replacement.
+
+Hot reload requires an explicit `HotReloadCapability`. The capability is available only from development, test, or tool roots, not from ordinary production root capability.
+
+Reloadable declarations must have stable `.koi` identity, stable ABI fingerprint, stable layout dependencies, stable capability requirements, and stable failure contract. The reload operation rejects changes to type layout, function ABI, typeclass instance identity, capability requirements, public `.koi` identity, active stack frames, task state, poller registrations, and linear resource ownership.
+
+Reload changes code only. Linear state is closed and rebuilt explicitly by user code when needed. Failed reload returns a structured toolchain/runtime error.
+
+### D476: Ordinary String Literal Storage And Allocator Identity
+
+A source string literal `"..."` denotes non-allocating static program data. Evaluating a string literal does not call an allocator, does not acquire a capability, does not construct an owning linear `String`, and does not perform runtime I/O.
+
+The literal expression type is `StaticString`. `StaticString` is a non-owning immutable view of compiler-emitted static bytes plus encoding metadata accepted by the text spec.
+
+`literal.toStringIn(allocator)` constructs an owning linear `String` from `StaticString` literal or static text. It takes the destination allocator explicitly, returns `Result[String, AllocError]`, preserves UTF-8 validity from `StaticString`, and returns ownership of the new `String` allocation to the caller.
+
+No contextual typing rule retargets `"..."` into an owning `String`. Function parameters that require owning `String` reject a bare literal and suggest the explicit allocator constructor. Public APIs exposing literal/static text facts record those facts in `.koi`.
+
+### D477: Claim Taxonomy And Evidence Labels
+
+Kyokai keeps the normative design contract: accepted safe Kyokai semantics contain no language-level undefined behavior. This statement applies to source programs that pass the safe Kyokai checker and do not cross unsafe, foreign, backend, target, or toolchain contracts incorrectly.
+
+Kyokai documentation and tool output label safety claims by scope:
+
+- `SafeCore`: single-task safe language semantics excluding FFI, unsafe modules, backend lowering bugs, target faults, and concurrency primitives;
+- `SafeConcurrent`: SafeCore plus accepted task, channel, lock, atomic, poller, cancellation, and happens-before rules;
+- `SafeFFIWrapped`: safe Kyokai wrappers over foreign or target APIs whose unsafe contracts and capability requirements are satisfied;
+- `UnsafeModule`: code inside unsafe modules, inline asm, volatile/MMIO, raw pointers, raw callbacks, dynamic loading, foreign calls, and target intrinsics;
+- `BackendConforming`: generated C/LLVM/native code has been checked against the backend contract for the selected target/profile.
+
+Each tier has an evidence state: `designed`, `specified`, `mechanized`, `tested`, or `conformance_checked`. Evidence state is maturity tracking, not a different language semantic.
+
+The compiler can print tier and evidence metadata in `kyokai doctor`, `kyokai audit`, build reports, and package audit output. The compiler must not imply that unsafe modules, incorrect foreign contracts, backend bugs, or target faults are covered by SafeCore.
+
+Public docs replace vague slogans with tiered claims. They do not remove the zero-language-level-UB design contract.
+
+### D478: Retire Obsolete Slogans In Public Docs
+
+D478 adds no new language semantics.
+
+D478 is a public-document cleanup rule. When an accepted D-point defines the precise rule, public docs must use that precise rule instead of slogans.
+
+The banned slogan table includes:
+
+- `no shared memory` is replaced by the D90/D354/D342/D353 accepted concurrency vocabulary;
+- `unsafe only at syscalls` is replaced by the D20/D245/D453/D456/D499 unsafe and FFI surface;
+- `no hidden allocation` is replaced by allocator/capability rules plus D120/D476 string-literal rules;
+- `zero UB` is replaced by D73 plus D477 claim-tier wording;
+- `no async` is replaced by D282/D342/D353/D473 explicit Poller/channel/wait story.
+
+The concurrency rationale must list accepted happens-before sources. The unsafe/FFI rationale must list accepted unsafe surfaces. The goals chapter must use D477 tier labels after D477 is accepted.
+
+Public documents state the precise rule directly. A D-point citation is supporting traceability, not a substitute for the rule text.
+
+## Accepted Shape Routing Record: D479-D487
+
+This cluster is a modal-wording clarification over existing accepted shape. It does not reopen D280-D478 or any earlier decision. It states how to read and rewrite words such as `may`, `should`, `optional`, `if provided`, `if admitted`, `implementation-defined`, `unspecified`, `where relevant`, `future`, and `later` when they appear in accepted Kyokai material.
+
+### D479: Modal Vocabulary, Conformance Duties, And Hidden Implementation Choice
+
+Normative Kyokai text uses direct obligation and rejection language for behavior: `must`, `is required to`, `is`, `rejects`, `is illegal`, and `does not`. `Should` has no normative force in accepted shape or the spec. If the behavior is required, spec extraction rewrites it as a requirement. If the wording is only rationale, it remains in rationale prose and cannot be cited as a language, stdlib, toolchain, package, or runtime rule.
+
+`May` is legal in accepted shape only when the same rule falls into one of these closed categories: source permission, non-observable optimization under D480, target-contract variation under D483, policy-selected behavior under D482, tooling-only assistance under D485, or future/experimental/absent boundary under D486. `Optional`, `if provided`, `if admitted`, `if implemented`, and `where relevant` are illegal in normative text unless the same paragraph names the exact conformance tier, full-conformance rule, target guard, manifest/config switch, API admission record, or separate-D-point boundary.
+
+Kyokai rejects `implementation-defined` and `unspecified` for observable safe-language behavior. A conforming implementation is correct only when every accepted behavior has one exact normative status: required, rejected, target-gated, policy-selected, tooling-only, experimental-only, or absent from accepted stable Kyokai pending a separate D-point. These statuses classify accepted text and proposal workflow; they do not license partial implementations to omit accepted stable surfaces. Private implementation choice is not a Kyokai semantic category.
+
+### D480: Non-Observable Optimizations, Cache Sharing, Deduplication, And Backend Choice
+
+A compiler, backend, package manager, or cache is permitted to share, deduplicate, scalarize, vectorize, fold, reuse, or skip work only when the transformation preserves every observable Kyokai fact. Observable facts include accepted program or rejection result, diagnostic code and primary span class, `.koi`/KBI contents, public and internal semantic facts visible to the current compilation, contract evaluation behavior, capability/unsafe/audit records, target contract identity, generated-source provenance, package/build identity, stable tool JSON, required debug/profiling identity for the active profile, and runtime behavior defined by the language or stdlib contract.
+
+Timing, memory use, emitted instruction sequence, object-file section names, and cache hit rate are not language-observable unless the active benchmark, profile, debug, or reproducibility contract makes them observable. Identical-code folding, generic-body sharing, cache reuse, portable SIMD lowering, scalar fallback, and backend helper substitution require a proof or deterministic check that all semantic inputs match. If the implementation cannot prove the match, it must not share.
+
+Cache keys include toolchain compatibility, target contract, profile, backend, edition, KBI major version, dependency identities and hashes, feature-set package instance, source/generator inputs, relevant environment/toolchain discovery facts, and selected policy values. A failed optimization precondition falls back to the non-shared conforming implementation, or rejects only when the user explicitly requested that optimization as a required build policy.
+
+### D481: Full Implementation, Target-Gated Surfaces, And Proposal Labels
+
+A conforming Kyokai implementation must implement the full accepted language, toolchain contract, and standard-library surface for the support tier it claims. A partial implementation must label itself partial, experimental, bootstrap-only, or non-conforming; it must not call itself a full Kyokai implementation.
+
+Target-gated surfaces are not optional omissions. A target-gated surface is required exactly when the selected target contract declares the needed capability, OS family, ABI, hardware feature, host facility, or toolchain feature. If the selected target contract lacks the required fact for a target-gated surface, import or use fails with a stable diagnostic before lowering. That rejection is the conforming behavior for that target.
+
+Compatibility-only surfaces are accepted Kyokai only when isolated in named compatibility modules with warnings or contract metadata. They are still implemented by a full implementation that claims the compatibility module tier. Experimental-only surfaces are not stable Kyokai. They are non-default, excluded from stable `.koi`, rejected by stable builds unless the project opts into the exact experiment, and do not count toward full conformance.
+
+`Absent` is not an implementation availability class or implementation mode. It is a D-point, proposal, issue, PR/MR, or search label meaning the feature is rejected, pending outside accepted shape, or absent from stable Kyokai. Reversing absence requires a new D-point. `PROJECT_STANDARDS.md` owns the public labels/tags for `required`, `target-gated`, `compatibility-only`, `experimental-only`, `tooling-only`, `absent`, `rejected`, and `blocked-on-dpoint` so public git workflow can be searched without making `Kyokaishape.md` the primary public discussion surface. Spec text does not say `if Kyokai provides X`; it says whether `X` is required for full conformance, target-gated by named target facts, compatibility-only, tooling-only, experimental-only, or absent from accepted Kyokai.
+
+### D482: Policy-Selected Behavior, Configuration Precedence, And Reproducibility Recording
+
+Policy-selected behavior is valid only when the spec names the policy key, allowed values, default value, command-line flag if any, manifest/config location if any, environment variable if any, precedence order, and artifact/reproducibility effect. Default precedence is explicit CLI flag, command-specific config, package manifest, workspace config, user tool config, documented display-only environment variable, then tool default. A rule that uses another order must state it explicitly.
+
+Policy values that affect build outputs, `.koi`, diagnostics JSON, package resolution, generated source, tests, audit reports, docs JSON, or cache keys are recorded in the build plan or relevant artifact metadata. Policy values that affect only human terminal rendering are not semantic build inputs, but the tool still documents them and exposes the effective value through verbose or diagnostic output when requested. Hidden host state is not a policy source unless a D-point explicitly admits that exact variable or host fact and states whether it is display-only or semantic. A policy request that cannot be honored fails explicitly when the user selected it as required; the tool does not silently use a different behavior.
+
+### D483: Target-Contract Conditional Behavior And Platform Differences
+
+Every target-dependent behavior accepted by Kyokai is represented in the selected target contract or in a target-specific module contract. The target contract records at least OS family, ABI family, filesystem semantics, path representation class, process/env/argument encoding class, clock availability, signal/event model, blocking interruption model, atomic support, CPU feature baseline, dynamic linking support, native toolchain requirements, freestanding fatal action, and capability families exposed by the host.
+
+Portable APIs expose only behavior guaranteed by the target contract. If the target lacks the required fact, import or use is rejected with a stable diagnostic before lowering. Target-specific APIs are visibly target-guarded in source and `.koi` and cannot be mistaken for portable APIs. Backend lowering cannot silently change a target contract fact. If a backend cannot implement a required target fact, the build fails for that backend, target, and profile combination. Target variation is never `implementation-defined`; it is selected-target-defined and serialized into build identity, `.koi` compatibility facts, and relevant audit reports.
+
+### D484: Specified Nondeterminism, Fairness, Scheduling, And Replay Boundaries
+
+Kyokai does not use `unspecified` for observable safe behavior. Cases with multiple allowed outcomes are specified nondeterminism. A specified-nondeterministic rule states the event set, eligibility rule, allowed choices, forbidden assumptions, fairness/starvation contract if any, and whether deterministic or replay modes exist.
+
+Default `select` does not promise source-order priority or starvation freedom. Explicit biased or fair modes have named contracts when admitted. Hash-based collection iteration order is not program logic; code requiring stable order uses ordered collections or deterministic hash APIs accepted for that purpose. Scheduler and OS readiness order are not source-visible ordering guarantees; happens-before remains governed by D90 synchronization sources. Test, fuzz, property, and benchmark tools that offer replay record the seed, schedule/order class, target, profile, timing parameters, and relevant policy values needed for that replay mode. Conformance tests for nondeterministic behavior assert membership in the allowed set or trace property, not one private implementation's ordering.
+
+### D485: Tooling Assistance, Lints, Code Actions, Reports, And Nonsemantic Help
+
+Tooling assistance never changes whether a source program is accepted unless an accepted compiler rule or explicit project/tool policy raises that diagnostic class to an error. Tooling outputs are classified as diagnostic, lint, audit finding, proof obligation, proof result, code action, formatter edit, docs check, package advisory, benchmark report, or trace report. Each class has stable IDs, severity rules, machine-readable JSON shape, and human rendering rules under D414 and D416.
+
+Code actions are classified as note-only, manual, maybe-applicable, machine-applicable, or machine-applicable-safe. Automatic application uses only the accepted safe class by default and validates parse, type, and format results after edit. Proof and analysis reports state scope, assumptions, unknown/inconclusive results, target/profile/tool version, and whether the result is advisory or policy-blocking. LSP, docs, audit, and explain tools use compiler-produced facts or accepted `.koi` facts where available; they do not invent alternate semantics.
+
+### D486: Future, Experimental, Separate-D-Point, And Absence Boundaries
+
+`Future`, `later`, `possible`, `if demand warrants`, `separate D-point`, and similar wording never accepts language, stdlib, toolchain, package, or runtime behavior. A feature absent from `kyokaidecided.md` or `kyokaispec/` is absent from stable Kyokai, even if it appears in roadmap, rationale, critique, examples, or implementation experiments.
+
+Accepted shape must not hand a semantic requirement to an unnamed, unopened, or untracked future D-point. If accepted text says another D-point is responsible for part of a rule, that D-point must already exist as an issue, discussion, PR/MR, or pending plan entry with an identifier and linkable title. A D-point with a semantic dependency cannot move into `kyokaidecided.md`, phase closure status, or spec extraction until all blocking dependencies are decided, explicitly rejected, or explicitly marked nonblocking with the exact reason.
+
+When review discovers that accepted wording depends on a missing decision, a maintainer opens the missing D-point and ties it back to the original point before merge. The original point remains blocked on that dependency unless the dependent part is removed from accepted shape. Experimental features are non-default, explicitly named, excluded from stable package compatibility unless marked experimental, and rejected by stable builds unless the project opts into the exact experiment. Experimental `.koi` facts are marked experimental and cannot satisfy stable dependency requirements. Reversing a rejected or absent feature requires a new D-point with final wording and acceptance. Phase order can say when work happens; it cannot justify a wrong or weakened language shape and cannot make a planned feature accepted.
+
+### D487: Accepted-Text Modal Audit And Spec-Extraction Rewrite Rule
+
+Every spec-extraction PR/MR and every accepted-shape update runs a mechanical modal grep or lint over touched normative text for `may`, `should`, `optional`, `if provided`, `if admitted`, `if implemented`, `future`, `later`, `where relevant`, `unspecified`, `implementation-defined`, and equivalent phrasing. The lint is intentionally blunt. It can produce false positives, but no hit is ignored. Each hit is either rewritten away or classified in the review record.
+
+Each hit is resolved as one of: required/rejected rewrite, source permission, D480 optimization, D481 full-conformance/target-gated rule, D482 policy choice, D483 target contract, D484 specified nondeterminism, D485 tooling-only assistance, D486 experimental/absent boundary, tracked D-point dependency, or rationale-only non-normative prose. Normative spec text states the applicable category locally so the reader does not need a separate planning source to understand the rule. `kyokai doc --check-examples` includes a modal-wording lint for public spec and accepted-shape files. Until that command is implemented, PR review runs the same mechanical lint and records every classification manually. A modal hit that cannot be classified without changing semantics becomes a new pending D-point, not a silent accepted rewrite.
+
+## Accepted Shape Routing Record: D488-D501
+
+This cluster closes the strict-linearity pain-point pass. It does not weaken Kyokai's linear, capability, no-hidden-effect, or no-language-UB rules. The accepted shape is tooling, stdlib/API convention, diagnostics, and narrow syntax where the syntax preserves explicit ownership.
+
+### D488: Resource-Flow Refactoring, Constructor Migration, And Linear API Change Assists
+
+Kyokai accepts first-party resource-flow refactor assists as tooling-only behavior.
+
+`kyokai fix`, `kyokai explain`, and the Analysis Server expose compiler-backed refactor lanes for record field addition and removal, constructor argument changes, capability parameter changes, cleanup and `defer` insertion, total destructuring repair, branch-join repair, fixture-builder repair, public `.kyo` signature repair, `.koi`/KBI diff repair, downstream package call-site migration, and generated docs/examples migration.
+
+Each assist reports source package, target/profile/config instance, changed public surface, affected constructors, affected patterns, affected branch joins, affected cleanup obligations, affected test fixtures, affected public interfaces, affected `.koi` facts, affected downstream packages, and whether the edit is safe to apply automatically.
+
+A machine-applicable-safe edit is accepted only after parse, type, linearity, borrow, capability, contract, format, and selected target/config checks pass after application. When exactly one semantically correct explicit repair exists, the tool can produce a machine-applicable-safe workspace edit. When more than one repair is valid, the tool produces an ordered migration checklist and non-applied candidate edits.
+
+No refactor assist inserts hidden cleanup, hidden allocation, hidden authority, hidden default field values, hidden branch behavior, or affine discard. All edits become explicit Kyokai source checked by the same compiler pipeline.
+
+### D489: Sound Prototyping, Stubs, And Throwaway-Code Discipline
+
+Stable Kyokai has no mode that permits unconsumed linear values, hidden cleanup, skipped capability checks, skipped borrow checks, skipped contract checks, or ignored `.koi` compatibility.
+
+`todo;`, `panic(message)`, explicit test-fatal helpers, and recoverable `Result` stubs are the accepted unfinished-code surfaces. They follow the accepted failure taxonomy and do not consume unrelated live linear values.
+
+Scratch tooling such as `kyokai new --scratch` and `kyokai test --scratch` is tooling-only. It generates explicit source: fixture builders, narrow capability bundles, explicit `defer` and `errdefer` skeletons, placeholder recovery records, and non-release manifest markers.
+
+Release builds reject scratch-only modules and scratch package markers. Promotion requires removing the marker and passing the normal parse, type, linearity, capability, contract, and package checks. Commenting out cleanup remains a compile-time error when it leaves a linear value live. Tool repair suggestions are limited to explicit source shapes: move cleanup to `defer`, return the owned value, add a recovery payload, transfer ownership to a fixture, or consume through the named release operation.
+
+### D490: Graphs, Cyclic Data, Slot Maps, And Ownership-Indexed Data Structures
+
+Safe Kyokai graph-like data structures use explicit owners rather than ambient shared ownership. Accepted safe families are arena-owned graphs, generational slot maps, pinned intrusive collections, owner-record state machines, and domain-specific registries with nominal handles.
+
+The owning container is `Linear` and owns node or edge storage. External references are `Free` nominal handles, generation-checked keys, or region-bound borrows. Safe handles are never raw integers.
+
+Lookup through a handle returns the container's declared failure type for missing, stale, wrong-owner, removed, or wrong-generation handles. Handle failure is not undefined behavior.
+
+Removing a node with linear payload returns the payload and incident linear resources, consumes them through a named teardown operation, or rejects until dependent edges and handles are resolved. Pinned intrusive structures require pinned node types, explicit owner APIs, and unsafe audit records for internal pointer invariants. Safe APIs never expose relocation, dangling traversal, or hole states.
+
+`Rc`, `Arc`, tracing garbage collection, and safe shared mutable graph ownership remain rejected as the default graph solution.
+
+### D491: Partial-Failure Recovery Payloads And Transactional Builder APIs
+
+A fallible operation that consumes or partially transforms linear inputs declares its error-state class: no-mutate-on-error, partial-progress, consumes-on-error, or transactional-builder.
+
+When failure leaves owned linear values alive, the error variant carries a named recovery payload record. Public APIs do not use anonymous tuples for recovery. Recovery payloads are `must_use`. Each field is a live ownership obligation that the caller consumes, retries, returns, or transfers.
+
+Transactional builders expose `begin`, step/add operations, `commit`, and `abort`. `commit` consumes the builder and returns the completed value or a named failure/recovery payload. `abort` consumes the builder and performs the contract's explicit recovery behavior.
+
+`errdefer` remains the local cleanup tool. Recovery payloads are required when ownership crosses the failing function boundary. `kyokai explain failure-flow` shows the owned-resource state before the failing operation, the recovery payload shape, and the caller obligations.
+
+### D492: Read-Only Access, Context Passing, And Capability Bundle Ergonomics
+
+Observation uses immutable borrows: a function that only observes a value accepts `&[T]` and returns only its computed result. Mutation uses `&![T]` with explicit borrow scope and accepted reborrow elaboration. Observation of a linear value does not consume and return that value.
+
+Allocator, logger, clock, random, filesystem, network, terminal, process, audit, and cancellation authority are passed as explicit values or explicit nominal bundles. A bundle is source-visible nominal data. It has no ambient lookup, no implicit parameter passing, no hidden authority minting, and no hidden allocation.
+
+Public APIs take the narrowest authority surface that satisfies the operation. Passing `RootCapability` or a broad app context into a leaf API is diagnosed as overbroad authority unless the API is an explicit authority-construction boundary.
+
+`.koi`, docs, Analysis Server hover, and audit output record bundle fields and parameter roles: read borrow, mutable borrow, owned consume, returned ownership, and capability authority.
+
+### D493: Callback Invocation Classes, Repeated Stateful Callbacks, And Linear Captures
+
+Callable values are classified as `CallableRead`, `CallableMut`, `CallableOnce`, or `CallableState`.
+
+`CallableRead` is repeatedly callable and captures only `Free` values by value or immutable borrows valid for each call. `CallableMut` is repeatedly callable through a unique mutable borrow of the callback value. It can mutate captured state. It cannot consume a captured linear field unless it replaces that field with a valid value before returning.
+
+`CallableOnce` consumes the callback value when invoked. It is the class that consumes linear captures. `CallableState[S]` consumes state `S` and returns the next state or a named terminal result on each call. Event loops, protocol machines, and repeated linear-state callbacks use this class.
+
+FFI callback wrappers name invocation class, reentrancy class, thread-affinity, userdata layout, cleanup path, and capability requirements. Repeated foreign callbacks cannot hide linear state behind an untyped shared pointer. `.koi` records public callback invocation classes.
+
+### D494: Linear Test Fixtures, Assertion Failure, And Teardown Semantics
+
+Assertion failure is panic-class test failure unless the assertion explicitly tests a TPOE contract. `defer` cleanup runs for assertion failure according to D2b. TPOE does not run user cleanup.
+
+`Kyokai.Test` provides linear fixture handles and cleanup registration. Registering cleanup is source-visible and consumes or borrows exactly the fixture authority named by the API. Test cleanup actions run LIFO at test or subtest scope exit. They lower to checker-visible cleanup obligations and cannot leave live linear resources.
+
+Parallel tests receive explicit isolated capability bundles. Fixture cleanup has no authority beyond its bundle. The Analysis Server inserts fixture cleanup skeletons and warns when setup acquires a linear resource before cleanup registration or transfer.
+
+### D495: Branch Symmetry Diagnostics, Linear Join Tables, And Pass-Through Assistance
+
+Every branch join computes a state table for each pre-branch linear binding: unconsumed, borrowed-read, borrowed-write, consumed, moved-to-state, returned, or diverged.
+
+A join is legal only when every non-diverging branch leaves each binding in the same state or returns a named result/state value that accounts for ownership. Diagnostics show each branch, the first statement that changed each binding state, the expected state, and the mismatching state.
+
+Analysis Server actions can move common cleanup after the join, introduce a named `NextState` or recovery record, split early-return arms, or generate a typestate record/union. No action inserts dummy destruction, hidden pass-through, hidden affine discard, or a hidden default value.
+
+### D496: Hole-Free Linear Collections, Element Extraction, Replacement, And Drain APIs
+
+Safe indexing of a collection containing `Linear` elements never moves the element out by value. It returns a borrow, mutable borrow, optional borrow, or result borrow according to the collection contract.
+
+Moving a linear element out is legal only through named invariant-preserving APIs: `pop`, `removeAt`, `swapRemoveAt`, `replaceAt`, `takeOnly`, `drain`, `intoIter`, or an admitted domain-specific equivalent.
+
+`replaceAt` returns the old value and leaves the slot initialized with the new value. Neither value is destroyed. `swapRemoveAt` declares order destruction. `removeAt` declares order preservation and shifting cost.
+
+`drain` and `intoIter` consume the collection or create a linear drain token. A linear drain must be exhausted or explicitly finalized. Unsafe internals can track uninitialized slots only inside audited modules with initialized-length and capacity invariants. Safe APIs never reveal holes.
+
+### D497: Generic Linearity Families, Container Universes, And Code-Size Controls
+
+Generic containers declare universe behavior. `Auto` containers are `Free` only when every stored field or element is `Free`; otherwise they are `Linear`.
+
+Operations declare preconditions. Borrowing lookup is available for all admitted element types. Copying lookup is available only for `Free` elements. Moving extraction is available only through D496 APIs. Discard or clear without returning elements is available only for `Free` elements or named consuming destroy operations.
+
+`.koi` records operation preconditions: `T: Free`, `T: Linear`, `T: Hashable`, `T: TotalOrder`, `T: task_transfer`, pinning facts, invalidation facts, and capability/target requirements.
+
+Materialization follows D82a/D82b. Deduplication is allowed only when observable semantic facts match. Code-size controls are toolchain policy and never change source semantics. Docs render separate operation tables for `Free`, `Linear`, pinned, target-gated, and capability-gated cases.
+
+### D498: Early Resource Release, Lock Scope Hygiene, And Deadlock-Avoidance Tooling
+
+Every admitted resource type documents at least one named consuming release operation or an accepted `defer` cleanup path.
+
+Users shorten lifetime through lexical scopes, explicit release calls, ownership transfer, or `defer` placed inside the smallest owning scope.
+
+Compiler-integrated warnings cover resource acquired far before cleanup registration, `defer` in long-running loops, lock guard live across blocking calls, lock guard live across `spawn`/`join`/`select`/`wait`, nested lock acquisition without declared order, and large buffers/arenas retained across unrelated blocking work.
+
+These warnings do not prove liveness or deadlock freedom. They are diagnostics over explicit source. Lock-order metadata, when used, is explicit API/type metadata checked by tooling.
+
+### D499: FFI Wrapper Kits, Unsafe Translation Layers, And Safe Boundary Admission
+
+`kyokai bindgen` generates raw `foreign` declarations, extern records, constants, layout checks, target configuration facts, compile/link probes, and unsafe wrapper skeletons.
+
+Generated bindings are unsafe-only until a safe-wrapper admission record exists. A safe-wrapper admission record states foreign library version range, headers, target triples, symbol set, compile/link flags, ownership, aliasing, lifetime, initialization, thread-safety, callback, allocator, error-state translation, capability, cleanup, provenance hash, and audit owner.
+
+Capability-bearing foreign operations require explicit Kyokai capability parameters in the safe wrapper. Transitional stdlib FFI wrappers are tracked in `stdlib/11-transitional-ffi-tracking.md` with replacement or permanent-boundary criteria.
+
+### D500: Definite Initialization, Multi-Line Construction, And Builder-Block Ergonomics
+
+Safe Kyokai rejects general uninitialized local declarations such as `let x;`. A binding is introduced by a value expression, function result, initialized pattern, or accepted construction form.
+
+The accepted construction form is the `build` expression:
+
+```text
+let value: T = build T do
+    statements...
+    produce expr;
+build;
+```
+
+`produce expr;` exits the nearest enclosing `build` expression and yields `expr`. Every non-diverging path through the `build` body reaches exactly one `produce` of the declared result type.
+
+`return` inside a `build` body exits the enclosing function and must satisfy the accepted linearity, `defer`, `errdefer`, and recovery rules. `produce` exits only the `build` expression. `break`, `continue`, `yield`, and generator suspension do not target `build`.
+
+Every produced value is fully initialized before `produce`. Partial records, omitted fields, hidden defaults, and double initialization are rejected. Linear values acquired inside `build` are moved into the produced value, consumed visibly, returned in a named recovery payload, or rejected as live at block exit.
+
+The `build` expression lowers before type, linearity, borrow, capability, and contract checking into explicit control-flow joins. The lowered form contains no hidden destructor, rollback, allocation, defaulting, or exception path.
+
+### D501: Standard-Library Cold-Start Mitigation, Admission Ladder, And Canonical Utility Surface
+
+Kyokai's stdlib is a batteries-included systems stdlib, not a tiny placeholder.
+
+The roadmap has these admission tiers: Core Pure, Core Containers, Core Text/Bytes/Paths, Core IO/OS, Core Testing/Diagnostics, Core Networking, Core Codecs, Core Crypto Policy, and Extended Protocols.
+
+Each tier has a public checklist covering modules, D85 contract fields, conformance tests, target-contract dependencies, transitional FFI status, unsafe-audit status, docs/examples, and tier-named proof obligations. Parser, codec, collection, numeric, allocator, networking, and protocol APIs add property or fuzz tests to that checklist.
+
+Tier-1 usability requires admitted foundations for buffers, strings and text views, paths, files, environment and arguments, formatting, tests, JSON/CBOR foundation, sockets/DNS foundation, time, random, process, and common collections.
+
+Pure algorithms prefer native Kyokai. Transitional FFI is allowed for system boundaries and protocols only with an admission record. `PROJECT_STANDARDS.md` requires new stdlib PRs to include the admission record, tests, docs, and transitional-FFI tracking when applicable.
+
+
+## Accepted Shape Routing Record: D502-D525
+
+This cluster records the accepted infrastructure, public documentation, CLI output, Analysis Server, website, package-docs, examples, compiler-architecture, and follow-up rules. Normative contracts are extracted into the specification chapters; workflow and infrastructure contracts are routed into the workflow documents, service board, and public contribution guide named in the tracker. D525 replaces the mandatory central package-doc artifact repository with repository-owned `kdocs/`, metadata-only index records, and direct retrieval from exact indexed revisions.
+
+### D502: Spec Table Discipline And Public Contract Matrices
+
+Kyokai spec chapters that define user-visible behavior include the applicable contract matrix. The matrix requirement is chapter-family specific rather than one universal table.
+
+Language behavior tables list syntax, static semantics, ownership/linearity impact, borrow impact, capability impact, lowering phase, runtime behavior, failure category, diagnostics, `.koi` facts, examples, illegal forms, and related D-points.
+
+Toolchain behavior tables list command/API surface, inputs, outputs, policy keys, target/profile/backend effects, cache/artifact effects, network authority, diagnostics, human output lanes, JSON schema version, reproducibility facts, prompts/interactivity, exit classifications, examples, and related D-points.
+
+Standard-library behavior tables list module/API, ownership, allocation, capabilities, blocking, cancellation, failure, invalidation, complexity, determinism, target gates, unsafe/FFI status, tests/oracles, docs examples, and admission status.
+
+A spec PR/MR that adds accepted behavior without the applicable table is incomplete. Rationale-only, historical-only, and workflow-only documents mark that role explicitly instead of silently skipping required behavioral fields.
+
+### D503: CLI Output, Color, Prompt, And Human/Machine Report Contract
+
+Official Kyokai commands expose human output and stable machine output. Machine output modes are `json` and `json-lines` with explicit schema versions. Human output is stable enough for users to recognize lanes, but scripts consume machine output.
+
+The common CLI policy surface includes `--message-format=human|json|json-lines`, `--color=auto|always|never|machine`, `--verbose`, and `--quiet`, Each command's D502 matrix lists whether it accepts those shared flags and every command-specific restriction. A restriction absent from that matrix does not exist. `machine` color policy forbids ANSI styling, progress animation, cursor movement, pager behavior, and prompts.
+
+Human output lanes are fixed: command header, selected toolchain, selected workspace/package, target/profile/backend, dependency resolution, authority or network use, progress, diagnostics, artifact paths, cache/provenance facts, suggestions, and next actions. A command omits an empty lane rather than printing filler.
+
+Diagnostic output uses accepted diagnostic codes, spans, labels, severity, explanations, and fix IDs. A suggestion that corresponds to a code action uses the same fix ID in human output, JSON output, `kyokai fix`, and Analysis Server responses.
+
+Color is display policy only. Color never carries the only copy of information. `NO_COLOR`, explicit CLI policy, and machine modes disable color according to D422.
+
+Prompts are legal only for commands whose contract declares interactivity. `build`, `check`, `test`, `fmt --check`, `doc --check`, `fix --check`, `explain`, `audit`, and every CI or machine-output invocation are noninteractive. An interactive command prints the prompt reason, default action, authority/network consequence, and noninteractive flag that would select the same action.
+
+Machine output records schema version, command, toolchain identity, workspace/package identity, target, profile, backend, policy values, diagnostics, artifact paths, cache facts, authority/network actions, fix IDs, and exit classification. Exit classifications distinguish success, diagnostics-failed, tool-usage error, target/toolchain unavailable, dependency/index failure, sandbox failure, internal compiler error, and interrupted execution.
+
+### D504: Full Analysis Server Feature Surface
+
+Kyokai's Analysis Server is a required first-party toolchain component once the editor protocol is shipped. `kyokai lsp` is a protocol frontend over that server, not a separate analyzer.
+
+The feature surface is divided into lanes: navigation, editing, diagnostics, ownership, branch/defer, capability/audit, package/build, docs, lowering/debug, migration, and CI/eval.
+
+Navigation includes completion, hover, go-to definition, go-to type, references, rename, document symbols, workspace symbols, call hierarchy, type hierarchy, implementation lookup, module/interface-body pairing, and generated-source origin navigation.
+
+Editing includes formatter integration, organize imports, manifest-aware package edits, safe workspace edits, safe fix preview, resource-flow refactors, public signature migration, `.koi`/KBI diff migration, test skeleton generation, docs skeleton generation, and example/doc-test insertion.
+
+Diagnostics include compiler-backed diagnostics, warning categories, explanation links, fix IDs, diagnostic provenance, stale generated-source reports, stale interface/body reports, target/profile guards, and JSON identity matching CLI output.
+
+Ownership and branch/defer lanes expose moved values, consumed values, live immutable borrows, live mutable borrows, reborrow chains, branch-join tables, pass-through obligations, `defer`/`errdefer` obligations, drain/finalization obligations, partial-initialization state, builder-block state, task-transfer graphs, and early-release opportunities.
+
+Capability/audit lanes expose required capabilities, capability flow, overbroad authority warnings, unsafe-origin instances, unsafe contracts, dependency authority trees, manifest ceilings, audit records, FFI boundary wrappers, and generated binding provenance.
+
+Package/build/docs lanes expose workspace roots, package graph, lockfile/index/vendor facts, SemVer impact, docs metadata, generated package docs, `kdocs/` cache state, examples, and doc-test status.
+
+Lowering/debug lanes expose `kyokai explain` views, parsed surface syntax, typed elaboration, implicit completions, lowered core, generated C, source maps, layout facts, `.koi`/KBI facts, and backend provenance.
+
+Every feature is backed by compiler/toolchain facts. The Analysis Server never defines parsing, type checking, ownership, borrowing, capability, package, formatting, or target semantics that diverge from the compiler and toolchain spec.
+
+### D505: Debugger, Editor, And Dev-Environment Setup Bundles
+
+Kyokai ships official editor setup bundles for Neovim, VS Code-compatible clients, and Zed after the Analysis Server launch protocol is stable. Additional editor bundles are admitted through the same thin-client rule.
+
+Each bundle starts the same Analysis Server binary, consumes the same diagnostic/fix/explain protocol, invokes the same formatter command, reads the same package/workspace discovery facts, and displays the same source-map/generated-code/debug artifacts.
+
+Debug setup is based on the official source-map and generated-artifact contract. Editor clients can display Kyokai source, generated C, lowered core, `.koi`, layout facts, capability facts, selected toolchain, target, profile, backend, and provenance. These views are read-only unless a separate code action produces ordinary source edits.
+
+Editor bundles are versioned against the toolchain and Analysis Server protocol. A bundle targeting an incompatible server version fails at startup with a diagnostic naming expected version, actual version, selected toolchain, and update command.
+
+No editor plugin defines different parsing, type checking, formatting, linting, package resolution, ownership, borrowing, capability, target, or docs semantics.
+
+### D506: `kyokai-showcase` And Ecosystem Discovery
+
+Kyokai maintains `kyokai-showcase` as an editorial discovery surface separate from the package index. `Awesome-Kyokai` is not the official name.
+
+Showcase entries are discovery entries. They do not imply package safety, official support, capability admission, stdlib admission, SemVer correctness, vulnerability status, audit status, or provenance strength.
+
+Each entry records project name, repository, license, category, package/index link when present, generated-docs link when present, supported toolchain version, last checked date, status, maintainer-provided description, and whether it is official, community, experimental, educational, or archived.
+
+Showcase ordering is editorial. Search ranking, security/advisory badges, provenance badges, docs-quality badges, compatibility badges, official/community labels, and showcase labels remain separate facts.
+
+### D507: Public D-Point PR/MR Workflow And `Kyokaishape.md` Retirement Boundary
+
+New public D-points normally live in PRs/MRs labeled `d-point` once they become concrete proposals. `dpoint-needed` marks a PR/MR that revealed the need for a D-point but does not yet carry final wording.
+
+Issues and discussions collect motivation, critique, early alternatives, and user pressure. They do not become accepted shape by themselves.
+
+A D-point PR/MR carries final wording, accepted-shape extraction, spec edits when the spec home exists, a conformance/test plan, phase/status updates, and implementation links when relevant.
+
+`Kyokaishape.md` is no longer the normal home for new D-point bodies. It remains an index, archive, migration ledger, and temporary holding area for points without a PR/MR.
+
+Public D-points state one explicit rule directly. When rejected alternatives matter for future review, describe them by behavior and rationale rather than by option letters. Accepted public docs never require readers to reconstruct a rule from a menu of alternatives.
+
+A PR/MR that changes accepted semantics does not merge until `kyokaidecided.md`, the spec home or workflow-only destination, traceability, and phase/status rows are updated. `Lead YES` can close final wording directly; it does not skip exact final text, accepted-shape extraction, traceability, or status updates.
+
+### D508: Spec Completeness Gate And No-Maybe Public Docs
+
+Every accepted D-point has a public destination before implementation treats it as stable: normative language spec, normative toolchain spec, normative stdlib contract, workflow-only project standard, service/infrastructure record, or historical-only archive note.
+
+Public docs do not use `if Kyokai provides`, `maybe`, `future`, unbounded `should`, unbounded `implementation-defined`, unbounded `unspecified`, or equivalent wording for accepted stable behavior. They state the rule, target gate, policy key, tooling-only boundary, experimental boundary, workflow-only boundary, or absence.
+
+Compiler/source behavior that differs from `kyokaispec/` or `kyokaidecided.md` is a bug unless the behavior is behind a documented non-default experimental flag or branch-local prototype and excluded from stable Kyokai.
+
+A semantic PR/MR does not merge until spec/docs/traceability/status updates land in the same diff or the PR explicitly records that the change is experimental-only and excluded from stable Kyokai.
+
+### D509: Output Artifacts, Generated C, And Standalone Compiler Use
+
+`kyokai-out/` has documented artifact lanes for final binaries/libraries, `.koi`, generated C, objects, docs, reports, source maps, diagnostics JSON, audit reports, and provenance.
+
+Requested generated C is written under `kyokai-out/<target-triple>/<profile>/<backend>/<package-name>/c_output/` unless `--out-dir` selects a different output root under D264. Internal backend-generated C used only for compilation can remain in `.kyokai-cache/` and is disposable.
+
+`--emit-c=single` writes one deterministic C translation unit per declared backend artifact boundary. Each backend contract declares whether that boundary is the final link unit or package, and the declaration is versioned with the generated-file schema. `--emit-c=split` writes deterministic split files plus source-map and provenance records. Manifest/profile policy can request the same modes.
+
+Generated C output records source package, source revision or workspace identity, selected toolchain, target, profile, backend, `.koi`/KBI version, source-map file, generated-file schema, and whether the file is intended for inspection only or also participates in the target compile.
+
+Direct compiler use is accepted through official commands that bypass package discovery only when all required inputs are explicit. Direct compiler mode uses the same parser, resolver, type checker, linearity checker, borrow checker, capability checker, backend contract, diagnostics, target contract, output layout, and provenance rules as `kyokai build`. It does not define alternate semantics.
+
+### D510: Repository `docs/` And Website Source Layout
+
+Kyokai keeps public documentation source in the main monorepo by default.
+
+Doc families are separated by role: `kyokaispec/` for normative spec, `docs/guide/` for tutorial and book material, `docs/reference/` for non-normative quick references derived from the spec, `docs/stdlib/` for stdlib docs source hooks and generated-doc integration notes, `docs/toolchain/` for CLI/package/workflow guides, `docs/contributing/` for contribution process, `docs/infrastructure/` for service operations, and `website/` for public website source.
+
+The official website renders or links the spec, accepted-shape/decided page, guides, toolchain docs, stdlib docs, examples, generated package docs, roadmap/status, security/advisories, package index, showcase, and governance/D-point pages.
+
+Website prose that describes behavior links to `kyokaispec/` or `kyokaidecided.md`. Website prose is non-normative unless it embeds or quotes exact normative spec text.
+
+Manual website-only copies of spec rules are rejected when generated inclusion or direct linking can represent the same rule.
+
+### D511: Examples Directory, Example Taxonomy, And CI Coverage
+
+Kyokai maintains an official `examples/` tree with `examples/demo/` for a tour-style runnable demo and `examples/all/` for aggregate compile/check coverage.
+
+Example categories include basics, ownership, borrowing, capabilities, stdlib, allocators, text/formatting, files/paths, networking, concurrency brokers, poller loops, FFI wrappers, packages/workspaces, tests, diagnostics, generated C, and real-tool examples.
+
+Each example declares status: accepted, experimental, implementation-pending, or archived. Accepted examples compile under CI for their declared target once implementation exists. Runnable accepted examples run in CI when their target/capability requirements are available.
+
+Examples that require filesystem, network, terminal, process, unsafe/FFI, target-specific OS services, or external tools declare those requirements in metadata.
+
+Examples are not the spec. An example demonstrating behavior links to the accepted D-point or spec section.
+
+### D512: Compiler Repository Architecture And Review Boundaries
+
+Kyokai's compiler architecture targets explicit ownership areas: source text, lexer/parser/CST, surface AST, name resolution/imports, package/workspace loading, type/universe checking, linearity/borrow checking, capability checking, contract checking, elaboration/lowering, typed core IR, `.koi`/KBI, diagnostics, formatter, Analysis Server facts, backend-independent IR, C backend, LLVM backend migration target, runtime support, stdlib admission tools, and CLI/toolchain commands.
+
+Each area declares input invariants, output invariants, diagnostic/span obligations, and tests.
+
+Review ownership follows these areas. A PR/MR crossing multiple areas states why the boundary crossing is required and which invariants connect the areas.
+
+This architecture is a migration target. Inherited Austral code can be adapted incrementally, but new Kyokai work does not deepen inherited coupling.
+
+### D513: Reusing Open-Source Website, Playground, Docs, And CI Infrastructure
+
+Kyokai admits reuse, forks, and adaptations of OSS infrastructure for website, playground, docs hosting, package docs, CI helpers, static-site tooling, and generated-doc tooling when license compatibility, security model, maintenance burden, and Kyokai contract fit are reviewed.
+
+Website structure can borrow Odin-style static language-site organization and deployment patterns. Playground infrastructure can borrow Rust Playground-style frontend/backend separation, container isolation, no-network sandboxing, resource limits, compile/run views, and generated-output views. Package-docs infrastructure can borrow Odin package-doc generation, pkg.go.dev module-derived docs, and docs.rs sandbox lessons while preserving Kyokai's Git-backed source identity and package-index model.
+
+Infrastructure reuse never imports another language's package trust model, execution authority, registry semantics, documentation authority, release model, syntax, or branding.
+
+A reused service receives a Kyokai adapter contract naming source of truth, input/output data, auth model, sandbox authority, generated artifacts, deployment owner, update policy, license obligations, and security review status.
+
+Forked web, docs, playground, or CI code is tracked as infrastructure, not language semantics.
+
+### D514: Monorepo, GitHub Organization, And Repository Split Policy
+
+Kyokai moves under a GitHub organization as the public governance and discovery home. The current personal-profile repository can remain a transition mirror until the organization migration is complete.
+
+The main Kyokai monorepo owns compiler, stdlib, runtime, toolchain, spec, docs source, website source, examples, tests, CI, official editor bundles, and project workflow while a single repository remains reviewable.
+
+Separate repositories are admitted for package-doc/index data, package-index metadata when isolated permissions are required, and `kyokai-showcase`. Additional repository splits require a D-point or governance decision.
+
+A repository split records source of truth, release coupling, CI coupling, issue ownership, docs sync, version compatibility, auth/secrets boundary, deployment owner, and archival/migration policy.
+
+Manual mirroring of docs or generated website artifacts across repositories is rejected unless automation records source commit identity and generated-output identity.
+
+### D515: Package Docs, Index Auth, Ownership Claims, And Derived Documentation Hosting
+
+Package docs are derived from package source, `.koi`, manifests, doc comments, examples, target/profile facts, and admitted docs metadata. Source remains ordinary Git under the accepted dependency model; the package-docs service is not canonical package source hosting.
+
+`kyokai doc` maintains a generated `kdocs/` directory at the package root. A standalone package therefore has `project-root/kdocs/`; a workspace repository has one `kdocs/` directory under each published member package root. `kdocs/` records package identity, repository URL, exact revision, checked tag when present, selected toolchain, docs schema, target/profile docs contexts, `.koi` digest, source-map/docs provenance, license, advisory state, generation command, generated-file digest tree, and deterministic search projection.
+
+Public package-doc indexing is derived metadata. Package owners publish docs metadata through the same package-index PR/MR or signed automation path used for release metadata. Stable Kyokai admits no additional package-index ownership flow. Adding one requires a new accepted D-point that defines identity, authorization, revocation, recovery, audit, and migration behavior before use. Early Kyokai uses signed commits and reviewed metadata instead of requiring a custom login service.
+
+The package index records ownership claims, repository reachability, source revision, version/tag, package-root path, `kdocs/manifest.toml` digest, docs-schema version, docs search projection, package-index identity, yanks/advisories, provenance, and generation status. A docs page can be verified, stale, missing, malformed, schema-incompatible, digest-mismatched, generated from a different target context, generated from an untrusted revision, or unavailable for direct browser rendering; the UI reports that state explicitly.
+
+A generated docs host does not grant package trust, SemVer trust, vulnerability clearance, official support, or source authority.
+
+### D516: Local Package Documentation Storage And Offline Docs Cache
+
+`kyokai doc` writes generated project documentation to `<package-root>/kdocs/` by default for project-local documentation. When build-output documentation is requested through the D264 output-root policy, the toolchain writes docs under `kyokai-out/<target-triple>/<profile>/<backend>/<package-name>/doc/`.
+
+`kyokai doc --open` renders local docs. `kyokai docs --pull <pkg>` fetches package docs metadata and docs artifacts for one package. `kyokai docs --pull all` fetches docs for the resolved dependency graph.
+
+The local docs cache is keyed by package identity, version or revision, selected toolchain, target/profile docs context, `.koi` digest, docs schema version, feature-set package instance, and dependency graph identity.
+
+The Analysis Server and `kyokai doc --open` read local generated docs first. They perform no network access unless the user invokes an explicit network-capable docs action under the toolchain network policy.
+
+Remote package docs are repository-owned generated artifacts retrieved from exact indexed revisions. Any later Kyokai-operated mirror is cache-aside derived infrastructure only. Local docs generated from checked source and `.koi` facts remain authoritative for the checked workspace.
+
+`kyokai clean docs` removes local generated docs and docs cache entries without removing source, manifest, or lockfile data.
+
+### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index
+
+Every package published to the official Kyokai package index contains a generated `kdocs/` directory at that package's root in the exact indexed Git revision. A workspace repository containing several publishable packages contains one `kdocs/` directory under each published package root. `kdocs/` is a tracked publication artifact committed to the package repository. The official Kyokai infrastructure does not require a second upload of the full documentation tree.
+
+`kdocs/manifest.toml` records package identity, package version, repository URL, exact source revision, package-root-relative path, docs-schema version, selected toolchain identity and compatibility class, `.koi` digest, selected target/profile documentation contexts, feature-set package instance, dependency-graph identity, source-link facts, license metadata, advisory state, generation command, generated-file digest tree, deterministic documentation-search projection digest, and active-content classification. The manifest and every indexed file path are package-root-relative canonical paths. Absolute paths, `..`, symlink escapes, mutable branch references, and files outside `kdocs/` are illegal.
+
+`kyokai doc` generates `kdocs/`. `kyokai doc --check` verifies that checked package source, `kyokai.toml`, `.koi` facts, generated files, digests, docs metadata, and exact source revision agree. It exits unsuccessfully when `kdocs/` is absent, stale, malformed, generated from another package revision, or inconsistent with the package instance.
+
+`kyokai publish --dry-run` validates the release record and staged publication `kdocs/` tree without creating index metadata. `kyokai publish` requires the published source tree, including `kdocs/`, to be committed and reachable at one exact Git revision before it generates a ready-to-submit package-index PR/MR payload. The payload records package identity, version, repository URL, exact Git revision, package-root path, source digest, `kdocs/manifest.toml` digest, docs-schema version, docs status, raw-file adapter class, and deterministic compact search projection. It does not upload package source, copy the full `kdocs/` tree into Kyokai infrastructure, or require a custom Kyokai account.
+
+The official package index is the central documentation discovery index. The package repository at the exact indexed Git revision is the documentation storage location. The official website retrieves documentation files through a reviewed forge raw-file adapter, verifies recorded digests, and renders structured `kdocs/` data through the official renderer. Publisher-controlled HTML, scripts, stylesheets, executable content, and active embeds are not injected into the official Kyokai website origin. Pre-rendered HTML inside `kdocs/` is a package-hosted derived artifact; the official renderer does not treat it as trusted page markup.
+
+`kyokai docs --pull <pkg>` fetches the package's exact indexed Git revision or verified `kdocs/` subtree, verifies recorded digests and schema compatibility, and stores the result in the local docs cache. `kyokai docs --pull all` performs the same operation for the resolved dependency graph. `kyokai doc --open` renders verified local documentation without network access. The Analysis Server performs no background docs fetch.
+
+The official browser docs surface reports `verified`, `missing`, `stale`, `malformed`, `schema-incompatible`, `digest-mismatch`, `target-context-mismatch`, `untrusted-revision`, or `browser-render-unavailable` explicitly. An unsupported Git host does not make the package unavailable: toolchain retrieval through the pinned Git revision remains valid while the official browser surface reports `browser-render-unavailable` until a reviewed adapter exists.
+
+`kyokai-package-docs` is absent from the required bootstrap repository set. A future docs mirror is cache-aside infrastructure only. Adding one requires a separate service decision defining storage budgets, retention, regeneration, active-content policy, failure states, and deployment ownership. A mirror never becomes package authority, publication authority, canonical documentation storage, or a package-publication requirement.
+
+### D517: Numeric Stdlib Admission, Oracles, And Test-Vector Culture
+
+D517 does not reopen whether Kyokai admits numeric and math APIs. It closes the evidence requirement for stable numeric stdlib admission.
+
+Every stable numeric or math API has an admission record before stable admission. The record names algorithm source, license/provenance, special-case table, accepted rounding/error bound, NaN behavior, infinity behavior, signed-zero behavior, integer overflow/underflow behavior, target/FPU dependencies, oracle implementation, test-vector source, fuzz/property strategy, and proof/audit status.
+
+Transitional FFI math wrappers are allowed only with a tracking record that states why native Kyokai is not admitted yet and what evidence replaces or retires the wrapper.
+
+Generated docs include special-case and error-bound tables for stable math APIs.
+
+### D518: File-Role Diagnostics For `.kyo`, `.kai`, And `.koi`
+
+Diagnostics, docs, CLI output, Analysis Server hovers, and package/artifact reports name Kyokai file roles before or alongside extensions.
+
+`.kyo` is an interface source file. `.kai` is a body/source implementation file. `.koi` is a compiled interface artifact.
+
+A diagnostic involving one of these files states the role, expected location, whether it is source or generated, and the command or rule that produced or expected it.
+
+The compiler rejects attempts to edit, import, parse, or use `.koi` as source with a diagnostic explaining that `.koi` is generated artifact input to the compiler/toolchain, not source code.
+
+### D519: Official Forum, Discussions, And Community Support Surfaces
+
+Kyokai's initial public discussion surfaces are GitHub issues and PRs/MRs. GitHub Discussions is the admitted initial support and pre-proposal venue. Its service record states whether the organization has enabled it; disabled service status means the venue is unavailable, not that another venue silently gains its role.
+
+A forum, Matrix/Discord room, mailing list, or equivalent community venue is admitted only as support and pre-proposal infrastructure. It is not normative spec, accepted shape, package trust, vulnerability authority, release authority, or implementation authority.
+
+A discussion that becomes a semantic, toolchain, stdlib, package-index, governance, or release-shape change must be converted into a D-point PR/MR under D507 before acceptance.
+
+The website lists each official venue with purpose, moderation status, expected response scope, archival/searchability status, and authority boundary.
+
+### D520: Public Web Service And Subdomain Topology
+
+Kyokai public web services are role-separated even when initially served by one deployment.
+
+Initial service roles are main website, normative spec/docs, decided-shape/governance, package index/search, generated package docs, playground/sandbox runner, advisories/security, releases/downloads, community/forum, and showcase.
+
+Each role declares source repository/path, deployment target, deployment owner, auth model, data source, cache policy, privacy/logging policy, artifact identity, and authority class: normative, derived, editorial, interactive, or operational.
+
+Suggested subdomain aliases are conventional deployment names, not language semantics: `www`, `docs`, `pkg`, `play`, `forum`, `security`, `releases`, and `showcase`. The selected deployment names are recorded in the service board; alias naming does not alter authority.
+
+A service cannot become package source authority, accepted-shape authority, semantic authority, vulnerability authority, or execution authority unless a D-point explicitly gives it that role.
+
+### D521: Website Page Taxonomy, Public Copy Sources, And OSS Theme/Content Borrowing
+
+The Kyokai website page taxonomy includes home, install/`bleedring`, language tour, guide/book, spec, decided shape, stdlib docs, toolchain docs, examples/demo, package index, generated package docs, playground, community, governance/D-points, contributing/spec-writing, releases, security/advisories, roadmap/status, showcase, and news/blog.
+
+Website copy that describes behavior links to spec or accepted shape and does not become normative by itself.
+
+Borrowed OSS website code, themes, components, page structure, deployment workflow, or content require license compatibility, attribution, provenance notes, local modification notes, and removal of foreign branding/semantics.
+
+Kyokai does not copy another language's package, registry, forum, playground, docs, release, or trust authority model merely because it reuses visual or infrastructure patterns.
+
+### D522: Package Ranking, Search, Badges, And Trust Separation
+
+Package search ranking, showcase curation, docs quality, provenance status, vulnerability/advisory status, compatibility status, official/support status, and deprecation/yank status are separate displayed facts.
+
+Kyokai does not publish one combined trust score. A package can be popular and unsafe, well-documented and unaudited, official and deprecated, experimental and highly ranked in search, or community-maintained and strongly proven.
+
+Search ranking inputs are documented. Security/advisory badges come from the advisory system. Provenance badges come from content/log verification. Docs-quality badges come from docs generation and docs checks. Official/community/showcase labels come from editorial policy.
+
+`kyokai add`, `kyokai audit`, package-index UI, and package docs warnings use provenance, advisory, compatibility, and policy facts rather than showcase placement.
+
+### D523: Public Spec-Writing And Accepted-Shape Authoring Guide
+
+Kyokai provides a public spec-writing and accepted-shape authoring guide in `docs/contributing/spec-writing.md` and links it from `PROJECT_STANDARDS.md`.
+
+The guide explains D-point anatomy, final-shape wording, rejected alternatives, modal-word rules, required contract tables, spec homes, examples, diagnostics, target gates, toolchain behavior, stdlib admission records, traceability, and PR/MR checklists.
+
+The guide is self-contained and links the public sources contributors use.
+
+A D-point PR/MR that asks contributors to write spec prose links this guide and identifies the specific spec chapter/table template required.
+
+### D524: Public Infrastructure Work Board And Service Ownership Records
+
+Kyokai maintains an infrastructure/service ownership board once more than one official public service exists.
+
+Each service record names role, repository/path, owner, deployment target, source-of-truth input, generated artifacts, auth model, secrets policy, data retention, privacy/logging policy, backup/restore policy, incident contact, status, and relevant D-points.
+
+The board distinguishes normative/spec services, derived docs/search services, interactive sandbox services, community services, release/security services, and editorial services.
+
+Infrastructure status does not decide language semantics. A service that needs semantic, package, release, vulnerability, or execution authority must point to an accepted D-point and spec section.
+
 
 ## 1. Austral As It Stands
 
@@ -182,16 +2722,16 @@ These can be implemented using only existing language features. The compiler alr
 | `Kyokai.Math.Trig`                | `sin()`, `cos()`, `tan()`, `asin()`, `acos()`, `atan()`, `atan2()` — Taylor/Chebyshev polynomial approximations. NOT wrapping libm. Pure computation.                                             | 6/10 — needs careful numerical analysis for precision. Reference: FDLIBM, Cephes, musl libm source. These are pure math — no syscalls, no state, just polynomials. |
 | `Kyokai.Math.Exp`                 | `exp()`, `ln()`, `log2()`, `log10()`, `pow()`, `sqrt()` via Newton-Raphson and range reduction                                                                                                    | 6/10 — same as trig, pure computation                                                                                                                              |
 | `Kyokai.Compare`                  | `PartialEquality`, `Equality`, `PartialOrder`, `TotalOrder` + instances for ALL builtin types. Currently only interfaces exist.                                                                   | 2/10 — mechanical                                                                                                                                                  |
-| `Kyokai.Compare.Span`             | `spanEquals()`, `spanCompare()`, `spanStartsWith()`, `spanEndsWith()`, `spanContains()`, `spanFind()`, `spanFindLast()` — the kind of byte comparison code `bfetchaust` had to carry locally        | 3/10 — pure byte comparison loops                                                                                                                                  |
+| `Kyokai.Compare.Span`             | `spanEquals()`, `spanCompare()`, `spanStartsWith()`, `spanEndsWith()`, `spanContains()`, `spanFind()`, `spanFindLast()` for ordinary byte-oriented workloads                                     | 3/10 — pure byte comparison loops                                                                                                                                  |
 | `Kyokai.String.Ops`               | String comparison, concatenation, slicing, searching, trimming, case conversion, all built on top of `Span` and `Buffer`                                                                          | 4/10 — builds on Compare.Span                                                                                                                                      |
-| `Kyokai.String.Format`            | Integer-to-string, float-to-string formatting. What bfetchaust's `appendIndexDecimal` does but generalized.                                                                                       | 5/10 — number formatting is surprisingly tricky (Dragonbox/Ryū for floats)                                                                                         |
+| `Kyokai.String.Format`            | Generalized integer-to-string and float-to-string formatting.                                                                                                                                   | 5/10 — number formatting is surprisingly tricky (Dragonbox/Ryū for floats)                                                                                         |
 | `Kyokai.Collections.SortedBuffer` | In-place sorting of `Buffer` contents. Quicksort, mergesort, insertion sort. Pure algorithms on existing `Buffer`.                                                                                | 3/10                                                                                                                                                               |
 | `Kyokai.Collections.RingBuffer`   | Fixed-capacity ring buffer. Useful for I/O buffering.                                                                                                                                             | 3/10                                                                                                                                                               |
 | `Kyokai.Collections.Deque`        | Double-ended queue built on ring buffer                                                                                                                                                           | 3/10                                                                                                                                                               |
 | `Kyokai.Bits`                     | Bitwise utilities: `rotateLeft()`, `rotateRight()`, `byteSwap()`, `setBit()`, `clearBit()`, `testBit()`                                                                                           | 1/10                                                                                                                                                               |
 | `Kyokai.Ascii`                    | `isDigit()`, `isAlpha()`, `isAlnum()`, `isSpace()`, `isUpper()`, `isLower()`, `toUpper()`, `toLower()`                                                                                            | 1/10                                                                                                                                                               |
 | `Kyokai.Args`                     | Command-line argument parsing. Uses existing `argumentCount()` and `nthArgument()` builtins. Flag/option/positional parsing.                                                                      | 4/10                                                                                                                                                               |
-| `Kyokai.Result`                   | `Result[T, E]` union type. `ok()`, `err()`, `isOk()`, `isErr()`, `unwrapOr()`, `map()`, `flatMap()`. This is what bfetchaust lacks for error propagation.                                         | 2/10                                                                                                                                                               |
+| `Kyokai.Result`                   | `Result[T, E]` union type. `ok()`, `err()`, `isOk()`, `isErr()`, `unwrapOr()`, `map()`, `flatMap()` for explicit error propagation.                                                              | 2/10                                                                                                                                                               |
 | `Kyokai.Optional`                 | Enhanced `Optional[T]` with `map()`, `flatMap()`, `unwrapOr()`, `isSome()`, `isNone()`                                                                                                            | 2/10                                                                                                                                                               |
 
 
@@ -210,7 +2750,7 @@ These need C FFI or pointer arithmetic internally, but expose a safe linear API.
 
 | Module                                                      | What It Provides                                                                                                                                             | Hardness             | Why Unsafe                                           |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- | ---------------------------------------------------- |
-| `Kyokai.IO.File`                                            | File I/O: `open()`, `read()`, `write()`, `close()`, `seek()`, `stat()`. This is what bfetchaust's `BfetchAust.Posix` does.                                   | 5/10                 | Syscalls (`open`, `read`, `write`, `close`, `fstat`) |
+| `Kyokai.IO.File`                                            | File I/O: `open()`, `read()`, `write()`, `close()`, `seek()`, `stat()`.                                                                                      | 5/10                 | Syscalls (`open`, `read`, `write`, `close`, `fstat`) |
 | `Kyokai.IO.Terminal`                                        | Terminal I/O with capability-secure API.                                                                                                                     | 4/10                 | `isatty()`, terminal ioctl                           |
 | `Kyokai.IO.Stdin` / `Kyokai.IO.Stdout` / `Kyokai.IO.Stderr` | Standard streams with capability                                                                                                                             | 3/10                 | File descriptors 0/1/2                               |
 | `Kyokai.IO.Dir`                                             | Directory operations: `openDir()`, `readDir()`, `closeDir()`, `mkdir()`, `rmdir()`                                                                           | 5/10                 | `opendir`, `readdir`, `closedir` syscalls            |
@@ -226,7 +2766,7 @@ These need C FFI or pointer arithmetic internally, but expose a safe linear API.
 | `Kyokai.Collections.HashSet`                                | Hash set built on HashMap                                                                                                                                    | 3/10 (after HashMap) | Delegates to HashMap                                 |
 
 
-**c-ward reference** (`c-ward/`): The c-ward project demonstrates which POSIX functions can be implemented safely. Key finding: most `string.h` functions (`strlen`, `memcpy`, `memcmp`, `memset`) can be implemented purely. Most `stdio.h` buffered I/O can be implemented safely on top of raw `read`/`write`. The unsafe boundary is narrower than expected — it's primarily the syscall interface itself.
+**POSIX-wrapper prior art**: Safe wrapper designs demonstrate that most `string.h` operations (`strlen`, `memcpy`, `memcmp`, `memset`) can be implemented as pure routines and that buffered I/O can be built safely on top of raw `read`/`write`. The unsafe boundary is narrower than expected: it is primarily the syscall interface itself.
 
 ---
 
@@ -253,12 +2793,12 @@ Extending Austral while respecting its vision. These are the Kyokai invariants t
 
 These are deliberate departures:
 
-- `**Kyokai.`* namespace** instead of `Standard.`* — clean break, clearly different project. "Boundary" (境界) is the project identity — every type, resource, and capability has explicit boundaries. The namespace reflects that. **[STAGE: DECIDED_CORE_SEMANTICS | D1 → Option A]**
+- `**Kyokai.`* namespace** instead of `Standard.`* — clean break, clearly different project. "Boundary" (境界) is the project identity — every type, resource, and capability has explicit boundaries. The namespace reflects that. **[STAGE: DECIDED_CORE_SEMANTICS | D1 → `Kyokai.` namespace break]**
 - **Richer stdlib** — Austral's stdlib is intentionally minimal because Borretti was focused on the compiler. Kyokai's stdlib is the goal.
 - **Kyokai uses copyleft for the toolchain and a runtime exception for target-linked runtime/stdlib code** — the compiler stays reciprocal, while programs built with Kyokai are not forced to adopt the compiler's GPL license merely because they link the Kyokai runtime, standard library, or compiler-emitted helper code.
 **Rules**:
   1. Kyokai-owned compiler and toolchain source files are licensed under `GPL-3.0-or-later` unless a file has an explicitly stated compatible license notice.
-  2. "Compiler and toolchain" includes the frontend, parser, resolver, type checker, linearity checker, capability checker, optimizer, C backend, future LLVM backend, package manager, formatter, LSP, documentation generator, test runner, conformance harness, and ordinary compiler support tools.
+  2. "Compiler and toolchain" includes the frontend, parser, resolver, type checker, linearity checker, capability checker, optimizer, C backend, LLVM backend migration target, package manager, formatter, LSP, documentation generator, test runner, conformance harness, and ordinary compiler support tools.
   3. Kyokai-owned runtime library, standard library, startup code, compiler support library, target-side panic/TPOE helpers, allocation/runtime shims, and compiler-emitted target helper code that may be linked, copied, embedded, or otherwise combined into user target programs are licensed under `GPL-3.0-or-later WITH GCC-exception-3.1`.
   4. Source files covered by the runtime exception must carry an SPDX notice of `SPDX-License-Identifier: GPL-3.0-or-later WITH GCC-exception-3.1` or an equivalent explicit notice naming GPLv3-or-later plus the GCC Runtime Library Exception 3.1.
   5. Compiler/toolchain-only source files must carry `SPDX-License-Identifier: GPL-3.0-or-later` or an equivalent explicit GPLv3-or-later notice.
@@ -278,7 +2818,7 @@ These are deliberate departures:
   3. Standard output subdirectories are `bin/`, `lib/`, `koi/`, `gen/`, `doc/`, `reports/`, and inspectable `obj/` when a profile or flag asks for object files as user-visible artifacts.
   4. Tool-private incremental state is written under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<backend>/<package-name>/`.
   5. `--out-dir <path>` selects the user-visible output root for the command. `--cache-dir <path>` selects the disposable cache root for the command.
-  6. `kyokai clean` removes cache state by default. `kyokai clean --outputs` may remove output artifacts. `kyokai clean --all` removes both selected output and cache roots, but not source files, `kyokai.toml`, `kyokai.lock`, or package index/cache state outside the selected cache root.
+  6. `kyokai clean` removes cache state by default. `kyokai clean --outputs` removes output artifacts. `kyokai clean --all` removes both selected output and cache roots, but not source files, `kyokai.toml`, `kyokai.lock`, or package index/cache state outside the selected cache root.
   7. `kyokai run` executes from the output tree unless a target runner requires staging. Test/bench harness private state may live in the cache tree, while requested reports live under `reports/` or stdout.
   8. The output path is not a source semantic input. It becomes a build-identity input only when artifact contents record paths; reproducible profiles must use path remapping unless absolute path embedding is explicitly requested.
   **Why this fits Kyokai**: target/profile/backend/package facts already affect artifact identity, so the directory tree should say those facts out loud. Keeping `kyokai-out/` separate from `.kyokai-cache/` also keeps user-inspectable products separate from disposable compiler machinery.
@@ -306,7 +2846,7 @@ These are deliberate departures:
   5. Workspace templates write `[workspace].members` and do not infer package membership from directory shape.
   6. Template expansion is deterministic for the same toolchain version and flags.
   7. The commands may create starter `.kyo`/`.kai`, test, doc, or CI files only through documented template behavior or explicit flags.
-  8. Project creation commands do not resolve dependencies, contact package indexes, or run generated source unless a future explicit flag says so.
+  8. Project creation commands do not resolve dependencies, contact package indexes, or run generated source. Stable `kyokai init` and `kyokai new` expose no flag that changes this rule.
   **Why this fits Kyokai**: daily use starts at project creation. If the first command hides layout policy, the whole explicit package model starts with a lie.
   **[STAGE: DECIDED_CORE_SEMANTICS | D266 -> `kyokai init` and `kyokai new` with deterministic templates and explicit layout]**
 - **Diagnostic explanation and safe fix application are first-party daily tooling** — diagnostic codes matter only if users can ask what they mean, and automatic fixes matter only if they are bounded by the same compiler truth as the diagnostic.
@@ -316,11 +2856,24 @@ These are deliberate departures:
   3. The explanation includes meaning, common causes, repair patterns where known, related codes, and spec/doc anchors when available.
   4. Online documentation may mirror the catalog, but the installed local catalog is authoritative for codes emitted by that installed compiler.
   5. `kyokai fix` is separate from `kyokai fmt`: formatting changes layout; fixing applies compiler suggestions.
-  6. `kyokai fix` applies only `machine-applicable` suggestions by default. `maybe-incorrect` and `manual-only` suggestions require explicit user action and must not be silently applied.
+  6. `kyokai fix` applies only `machine-applicable-safe` suggestions by default. `machine-applicable` edits require explicit opt-in. `maybe-applicable`, `manual`, and `note-only` suggestions require explicit user action or remain advisory and must not be silently applied.
   7. Fix application rejects stale spans, overlapping edit sets not already merged by the diagnostic engine, and edits that fail parse/format validation.
   8. If validation fails, the command leaves original files unchanged or restores them before reporting failure.
   **Why this fits Kyokai**: linearity, borrowing, capabilities, and contracts will create unfamiliar errors. The compiler must teach the rule and apply only the repairs it can honestly prove.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D267 -> local diagnostic explanations plus checked `kyokai fix` for machine-applicable suggestions]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D267 -> local diagnostic explanations plus checked `kyokai fix` for `machine-applicable-safe` suggestions by default]**
+- **External tool failures are wrapped in Kyokai diagnostics without hiding raw details** — backend, C compiler, linker, debugger, profiler, and platform-tool failures are user-facing Kyokai toolchain events. They must not fall through as unexplained host-tool noise.
+**Rules**:
+  1. When the C backend, LLVM backend, assembler, linker, archiver, debugger, profiler, memory profiler, runner, or generated-code compilation fails, Kyokai emits a Kyokai diagnostic with a stable code or category.
+  2. The diagnostic names the failing phase, selected target, backend, profile, tool path where known, process exit status or signal, and the command class that failed.
+  3. Raw stdout, stderr, command arguments, and environment details that are safe to report are attached as diagnostic notes or machine-readable fields; they are not discarded.
+  4. Structured output modes preserve the Kyokai diagnostic wrapper and include raw external-tool payloads in explicit fields.
+  5. `kyokai debug` launches or prints a debugger plan for the selected executable using the selected target/profile/backend debug contract. It does not invent a separate build mode.
+  6. `kyokai profile` and `kyokai memprofile` are official entry points for profiling and memory profiling workflows. When host support is unavailable, they fail with ordinary diagnostics and explain the missing tool or permission.
+  7. Debug/profiling commands may delegate to host tools, but Kyokai remains responsible for the command plan, artifact selection, and diagnostics around that delegation.
+  8. `kyokai eval` and `kyokai repl` start with no `RootCapability`. Filesystem, network, process, clock, randomness, and other external-world authority must be granted through explicit sandbox/profile options or capability injection rules.
+  9. An eval or REPL session that receives sandbox capabilities reports those capabilities before execution and records them in structured session metadata where supported.
+  **Why this fits Kyokai**: systems work touches host tools constantly, but Kyokai should still speak Kyokai when those tools fail. Eval also has to respect the capability story or it becomes a back door in the first tool users reach for.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D277 -> external tool errors wrapped as Kyokai diagnostics; official debug/profile/memprofile workflows; eval/repl start without root authority]**
 - **Local toolchain health is inspectable through `--version` and `doctor`** — installation and target setup failures should not be discovered only after a long build reaches the linker.
 **Rules**:
   1. `kyokai --version` works without a project and prints toolchain version, source/release identity, supported editions, diagnostic schema version, host triple, default backend, and KBI compatibility range.
@@ -364,8 +2917,8 @@ These are deliberate departures:
   6. The working research note for this effort is `kyokailang/kyokaicalculus/lambda_k_research.md`; that note is not itself the normative proof, but it records the current proof scope, theorem shape, and prior-art map.
   **Why this fits Kyokai**: zero-UB and ownership claims stay explicit, but the document stops bluffing about what has and has not yet been proven.
   **[STAGE: DECIDED_CORE_SEMANTICS | D143/D241 → phased formalization plan; paper proof for sequential `λ_K` before `v1.0`; `lambda_k_research.md` is the current research note; mechanized proof after self-hosting, likely in Coq]**
-- `**defer` statement** — Zig-style scope-exit semantics. `defer destroyByteBuf(x);` appears at declaration point and runs when the enclosing scope exits. This matches Austral's linearity scope model — linear variables must be consumed before their scope exits, and scope-exit defer does exactly that. Includes future `errdefer` extension for error-path cleanup. **[STAGE: DECIDED_CORE_SEMANTICS | D2 → Option B, Zig-style]**
-- **Concurrency: Structured Concurrency + Linear Channels** — option C, implemented incrementally (spawn/join → channels → task groups). All communication through channels, no shared memory. Linear types enforce data-race freedom by construction. Everything explicit — no implicit priority inheritance, no hidden thread scheduling. **[STAGE: DECIDED_CORE_SEMANTICS | D3 → Option C, all explicit]**
+- `**defer` statement** — Zig-style scope-exit semantics. `defer destroyByteBuf(x);` appears at declaration point and runs when the enclosing scope exits. This matches Austral's linearity scope model — linear variables must be consumed before their scope exits, and scope-exit defer does exactly that. `errdefer action(value);` registers source-visible LIFO cleanup for structured error exits only: `return Err(...)` and `or return`. It does not run on panic, TPOE, runtime-fatal termination, normal success, `break`, or `continue`. **[STAGE: DECIDED_CORE_SEMANTICS | D2 → source-visible LIFO scope-exit cleanup]**
+- **Concurrency: visible structured task groups, ownership-transfer channels, explicit synchronization, and explicit readiness waiting** — child tasks are scoped by `taskgroup`; SPSC channels transfer ownership; shared-memory code uses the accepted explicit atomics and lock APIs; cooperative cancellation, `select`, and `Poller` readiness APIs are source-visible. Kyokai adds no language-level `async`/`await`, no hidden scheduler, no unstructured `spawn`, and no implicit priority inheritance. **[STAGE: DECIDED_CORE_SEMANTICS | D3/D90/D282/D342/D353/D354 → structured tasks, ownership-transfer channels, explicit synchronization, and explicit Poller readiness]**
 - **Kyokai tasks are 1:1 OS-thread executions, not green-thread or M:N runtime tasks** — structured concurrency does not hide a scheduler underneath the language's explicit task surface.
 **Rules**:
   1. Every live child task created by `spawn` executes on one operating-system thread for the duration of that task's execution.
@@ -891,11 +3444,11 @@ These are deliberate departures:
   9. Near-term engineering priority remains language completion and self-hosting progress, not trying to out-build LLVM immediately. Keeping the C backend healthy serves that priority; later LLVM work serves the performance and feature ceiling.
   **Why this fits Kyokai**: C keeps the language grounded and portable, while LLVM gives the project a clear path to advanced optimization and target features. The important line is explicit: C remains part of Kyokai, but C does not own Kyokai.
   **[STAGE: DECIDED_CORE_SEMANTICS | D4 → C retained as bootstrap/reference/portability backend; LLVM becomes the long-term primary optimizing backend after self-hosting; backend constraints do not define the language]**
-- **Hard fork** — Kyokai is not Austral. Borretti's philosophy ("intentionally minimal") is different from Kyokai's goal ("production-ready systems language"). The compiler is ~12K lines of OCaml — manageable for a hard fork. Cherry-picking upstream bugfixes is still possible, but Kyokai is its own project with its own direction. **[STAGE: DECIDED_CORE_SEMANTICS | D5 → Option A]**
-- **Anonymous-by-default regions** — Kyokai makes `&[T]` a complete type meaning "borrow of T in an anonymous, scope-bounded region the compiler manages internally." There is no hidden slot, no elision rule, no inference — `&[T]` IS the type, the way `Int32` IS a 32-bit integer without anyone calling stack allocation "implicit." Named regions (`&[T, R]` with `generic [R: Region]`) remain available for the rare case (~1% of functions) where a return type references a region from an input parameter. Borretti himself identified the region parameter boilerplate as "the only downside" of Austral's borrow system and stated his intent to make reference types "just `&T`" (blog: `2023-06-12-second-class-references.md`, lines 139–141). Austral's own compiler ALREADY creates anonymous regions at expression level — `&x` in source calls `anonymous_region()` in `DesugarBorrows.ml` (lines 140–143) without the programmer naming anything. Option E extends this same principle from expressions to type signatures. Eliminates ~40 lines of `generic [R: Region]` headers from bfetchaust. Full research and compiler implementation notes in the D6 section below.
-**Why Option E over Option A (fully explicit)**: Option A forces every function that takes a borrow to declare `generic [R: Region]` — pure boilerplate that adds zero semantic information in 99% of cases. The region parameter is not a choice the programmer makes; it's compiler bookkeeping. Forcing it on every signature violates the readability research (section 3.4): eye-tracking shows boilerplate is wasted fixation time.
-**Why Option E over Option C (Rust-style elision)**: Option C has the compiler apply rules to fill in blanks (`_`), which IS implicit — "what the person wrote down isn't what's happening." Option E has no blanks to fill; the type is what you wrote.
-**[STAGE: DECIDED_CORE_SEMANTICS | D6 → Option E, anonymous-by-default regions]**
+- **Hard fork** — Kyokai is not Austral. Borretti's philosophy ("intentionally minimal") is different from Kyokai's goal ("production-ready systems language"). The compiler is ~12K lines of OCaml — manageable for a hard fork. Cherry-picking upstream bugfixes is still possible, but Kyokai is its own project with its own direction. **[STAGE: DECIDED_CORE_SEMANTICS | D5 → independent hard fork]**
+- **Anonymous-by-default regions** — Kyokai makes `&[T]` a complete type meaning "borrow of T in an anonymous, scope-bounded region the compiler manages internally." There is no hidden slot, no elision rule, no inference — `&[T]` IS the type, the way `Int32` IS a 32-bit integer without anyone calling stack allocation "implicit." Named regions (`&[T, R]` with `generic [R: Region]`) remain available for the rare case where a return type references a region from an input parameter. Austral's own compiler already creates anonymous regions at expression level: `&x` in source calls `anonymous_region()` in `DesugarBorrows.ml` without the programmer naming anything. D6 extends this same principle from expressions to type signatures and removes repetitive `generic [R: Region]` headers from borrow-heavy code.
+**Why named regions are not required for ordinary borrows**: Requiring named regions on every borrow forces every function that takes a borrow to declare `generic [R: Region]` — pure boilerplate that adds zero semantic information in 99% of cases. The region parameter is not a choice the programmer makes; it's compiler bookkeeping. Forcing it on every signature violates the readability research (section 3.4): eye-tracking shows boilerplate is wasted fixation time.
+**Why this is not Rust-style elision**: Rust-style elision has the compiler apply rules to fill in blanks (`_`), which IS implicit — "what the person wrote down isn't what's happening." The anonymous-by-default form has no blanks to fill; the type is what you wrote.
+**[STAGE: DECIDED_CORE_SEMANTICS | D6 → anonymous-by-default regions]**
 - **Auto-reborrow**: when `out: &![T]` and a function expects `&![T]`, the compiler automatically inserts `&~` (reborrow). This is not hidden behavior - it follows the same tautology logic as D8 implicit `Unit` return. When a mutable reference is passed where a mutable reference is expected, exactly one valid operation exists.
 
   | Expression      | Meaning                                              | Valid? | Why                                                   |
@@ -912,9 +3465,9 @@ These are deliberate departures:
   - `&![T]` (mutable ref) -> function expects `&[T]` -> compiler inserts a temporary immutable read reborrow of the referent
   - `&[T]` -> function expects `&![T]` is never legal
 
-  Eliminates 200+ `&~out` tokens from bfetchaust. The programmer still sees the function signature declaring `&![T]` - mutability remains visible at the declaration site.
+  Eliminates repeated `&~out` forwarding tokens in resource-heavy code. The programmer still sees the function signature declaring `&![T]` - mutability remains visible at the declaration site.
   **Why not keep explicit `&~` (Austral's approach)**: `&~` repeats information already encoded in the type system. When `out: &![ByteBuf]` and `appendByte` takes `&![ByteBuf]`, there is no second valid interpretation to distinguish.
-  **Why not UFCS alone**: Pure UFCS without auto-reborrow provides near-zero benefit for bfetchaust's primary pattern. `(&~out).appendByte(27)` is the same character count as `appendByte(&~out, 27)` and just relocates the ceremony.
+  **Why not UFCS alone**: Pure UFCS without auto-reborrow provides near-zero benefit for repeated mutable-buffer operations. `(&~out).appendByte(27)` is the same character count as `appendByte(&~out, 27)` and just relocates the ceremony.
   **[DECIDED: D7b -> auto-reborrow, same logic as D8]**
 - **Mutable-to-immutable borrow coercion is a read reborrow, not a subtype relation**: Kyokai allows `&![T]` where `&[T]` is expected, but this is specified as a temporary immutable reborrow of the referent rather than as general borrow subtyping.
   **Rules**:
@@ -928,7 +3481,7 @@ These are deliberate departures:
   **[STAGE: DECIDED_CORE_SEMANTICS | D187 -> mutable-to-immutable borrow coercion by temporary immutable read reborrow; not a subtype relation]**
 - **UFCS dot syntax** — `expr.f(args)` is pure syntactic sugar for a call with `expr` as the first argument. The dot does not create virtual dispatch, implicit `self`, hidden allocation, or a second callable value model.
 **What UFCS is**: Argument reordering plus explicit lookup. `out.appendByte(27)` lowers to a call whose first argument is `out`. The compiler first resolves `appendByte` through ordinary file-scope imports exactly as it would for `appendByte(out, 27)`. D254 adds one narrow fallback when ordinary lookup finds no candidate: receiver-module extension lookup over an explicit exported surface of the receiver type's defining module. There is no global method search, no dependency-wide ADL, no virtual dispatch, and no lookup based on arbitrary type signatures.
-**What UFCS enables**: Subject-Verb-Object (SVO) ordering. Research (section 3.4) shows ~~80% of natural languages use SVO or SOV word order; Austral's `appendByte(&~~out, 27)` is VSO — the least common ordering. UFCS gives the programmer the OPTION to write SVO when it improves readability, while the function-call form remains valid for cases where VSO is clearer or where there's no natural subject.
+**What UFCS enables**: Subject-Verb-Object (SVO) ordering. Research (section 3.4) shows ~~80% of natural languages use SVO or SOV word order; Austral's `appendByte(&~~out, 27)` is VSO — the least common ordering. UFCS gives the programmer the choice to write SVO when it improves readability, while the function-call form remains valid for cases where VSO is clearer or where there's no natural subject.
 **Where UFCS helps** (clear subject, repeated operations on same receiver):
   ```austral
   -- Before (VSO, with D6-E + D7b auto-reborrow + D12 integer inference):
@@ -950,7 +3503,7 @@ These are deliberate departures:
   writeAll(stdout_fd, &out);      -- neither argument is "the object"
   renderFetch(out, system_type, distro, kernel, ...);  -- 11 args, no natural subject
   ```
-  **How the full bfetchaust `ansi` function looks with all decided changes (D6-E + D7a + D7b + D8 + D12)**:
+  **How a representative `ansi` helper looks with anonymous regions, UFCS, auto-reborrow, implicit `Unit` return, and literal typing (D6, D7a, D7b, D8, D12)**:
   ```austral
   -- Current Austral:
   generic [R: Region]
@@ -990,10 +3543,10 @@ These are deliberate departures:
   3. When a call does not fit UFCS naturally, the programmer writes the ordinary function-call form.
   **Why this fits Kyokai**: one visible left-to-right call style is enough, and Kyokai does not need a second pipeline surface that overlaps almost perfectly with UFCS.
   **[STAGE: DECIDED_CORE_SEMANTICS | D108 → reject `|>`; UFCS remains the sole built-in left-to-right chaining sugar]**
-- **Implicit Unit return** — functions declared `: Unit` do not require `return nil;` at the end of their body. When execution reaches the end of a `: Unit` function, the function returns `Unit`. This is NOT implicit return of arbitrary expressions (like Rust's last-expression-is-return-value). It applies ONLY to `: Unit` functions, ONLY at the end of the function body, and ONLY because `Unit` has exactly ONE inhabitant (`nil`). `return nil` communicates zero bits of information — the function signature `: Unit` already declares there is nothing to return, and `nil` is the only value of type `Unit`. This is the same principle as auto-reborrow (D7b): when there is exactly one valid operation, requiring the programmer to write it explicitly is ceremony, not explicitness. Explicit early returns (`return nil;` or `return;` mid-function) remain required because they signal that control flow is leaving the function body early — that IS meaningful information. Eliminates 18 `return nil;` lines from bfetchaust.
+- **Implicit Unit return** — functions declared `: Unit` do not require `return nil;` at the end of their body. When execution reaches the end of a `: Unit` function, the function returns `Unit`. This is NOT implicit return of arbitrary expressions (like Rust's last-expression-is-return-value). It applies ONLY to `: Unit` functions, ONLY at the end of the function body, and ONLY because `Unit` has exactly ONE inhabitant (`nil`). `return nil` communicates zero bits of information — the function signature `: Unit` already declares there is nothing to return, and `nil` is the only value of type `Unit`. This is the same principle as auto-reborrow (D7b): when there is exactly one valid operation, requiring the programmer to write it explicitly is ceremony, not explicitness. Explicit early returns (`return nil;` or `return;` mid-function) remain required because they signal that control flow is leaving the function body early — that IS meaningful information. This removes repeated trailing `return nil;` lines from `Unit`-heavy code.
 **Why not keep `return nil;` required (Austral's approach)**: `return nil` is a tautology in information theory — it states the only possible outcome. The function signature already makes the return type explicit. Requiring `return nil` is like requiring you to write `if true then ... end if` — technically more explicit, but the explicitness carries no information.
 **Why not implicit return of expressions (Rust-style)**: Rust's `fn foo() -> i32 { 42 }` where the last expression is the return value is a DIFFERENT feature. That's implicit because the programmer chose not to write `return`. Kyokai's implicit Unit return is not a choice — there is only one value of type `Unit`, so there is nothing to choose. This distinction matters: Kyokai will NOT adopt Rust-style last-expression-as-return for non-Unit functions.
-**[STAGE: DECIDED_CORE_SEMANTICS | D8 → Option B, implicit Unit return]**
+**[STAGE: DECIDED_CORE_SEMANTICS | D8 → implicit Unit return]**
 - **Two-category block terminators** — Kyokai replaces Austral's generic `end X;` terminators with a system split into two categories, each with a clear rationale.
 **Category 1: Pure Control Flow — Reversed Keywords (Algol 68 style).** For branching and looping, the closing keyword is the reverse spelling of the opening keyword. This is battle-tested from Algol 68 (the grandfather of Bash's `if/fi`, `case/esac`).
 
@@ -1084,9 +3637,9 @@ These are deliberate departures:
 
   seal;
   ```
-  **Why not Austral's `end X;` (Option A)**: `end if; end for; end if; end for; end;` is verbose boilerplate that carries information only when nesting is deep. Kyokai code is shallow by design (linear types prevent deep branching). The verbosity cost is paid on every construct; the readability benefit is collected only at deep nesting that almost never occurs.
-  **Why not braces `{}` (Option D)**: Braces work but are generic — `}` tells you nothing about what it closes. Kyokai's terminators are self-documenting: `fi` tells you an `if` ended, `qed` tells you a proof ended, `drop` tells you a borrow ended, and `mon` tells you a foreign gateway ended. This is strictly more informative than `}` at zero extra cost (most terminators are 2–5 chars).
-  **Why not uniform `end;` (Option B/C)**: Gets the worst of both worlds — verbose like Ada but uninformative like braces.
+  **Why not Austral's `end X;`**: `end if; end for; end if; end for; end;` is verbose boilerplate that carries information only when nesting is deep. Kyokai code is shallow by design (linear types prevent deep branching). The verbosity cost is paid on every construct; the readability benefit is collected only at deep nesting that almost never occurs.
+  **Why not braces `{}`**: Braces work but are generic — `}` tells you nothing about what it closes. Kyokai's terminators are self-documenting: `fi` tells you an `if` ended, `qed` tells you a proof ended, `drop` tells you a borrow ended, and `mon` tells you a foreign gateway ended. This is strictly more informative than `}` at zero extra cost (most terminators are 2–5 chars).
+  **Why not uniform `end;`**: Gets the worst of both worlds — verbose like Ada but uninformative like braces.
   **`build` keyword collision note**: `build` conflicts with the builder pattern (`buf.build()`). Convention: name builder-finalization functions `new` instead. This is already natural in Kyokai since constructors are just functions.
   **[STAGE: DECIDED_CORE_SEMANTICS | D9 → Two-category terminators: reversed keywords (`fi`/`od`/`esac`) + semantic boundary words (`qed`/`build`/`spec`/`drop`/`seal`/`mon`/`pick`/`join`/`audit`)]**
 - **The D111 revisit keeps the existing terminator names intact; later D127 adds `mon;` for foreign blocks without renaming the already decided spellings** — borrow scopes continue to close with `drop;`, and Kyokai does not introduce synonym terminators for the existing constructs.
@@ -1098,10 +3651,10 @@ These are deliberate departures:
   **[STAGE: DECIDED_CORE_SEMANTICS | D111 → keep D9 unchanged; `drop` retained]**
 - **Not-equal operator: `!=`** — Kyokai switches from Austral's `/=` (Ada/Haskell convention) to `!=` (C/Rust/Zig/Go/Python/JavaScript convention). `/=` is used by exactly two actively maintained languages (Haskell and Ada) and is visually ambiguous — it looks like "divide-equals" (Python's `/=` IS a divide-and-assign operator). `!=` is universally recognized; the cognitive cost of parsing it is zero. Trivial compiler change (lexer token swap).
 **Why not keep `/=`**: Creates genuine confusion for programmers from Python/JavaScript/etc. where `/=` means divide-assign. Kyokai gains nothing from preserving Ada heritage in a symbol that 99% of programmers read incorrectly on first encounter.
-**[STAGE: DECIDED_CORE_SEMANTICS | D10 → Option B, switch to `!=`]**
+**[STAGE: DECIDED_CORE_SEMANTICS | D10 → switch to `!=`]**
 - **Keep `camelCase` naming** — Kyokai keeps Austral's naming convention: `camelCase` for functions/variables, `PascalCase` for types and modules. Research (Binkley et al. 2009) shows `camelCase` has slightly higher accuracy, and Sharif & Maletic (2010) shows `snake_case` is slightly faster on first fixation — but the difference is small; **consistency dominates both**. Changing from Austral's convention would force every existing Austral program to be rewritten for zero measurable benefit.
-**Why not `snake_case` (Option B)**: The research difference is negligible. Consistency matters more than convention choice. Austral is already consistent with `camelCase`. Migration cost is high, benefit is near-zero.
-**[STAGE: DECIDED_CORE_SEMANTICS | D11a → Option A, keep camelCase]**
+**Why not `snake_case`**: The research difference is negligible. Consistency matters more than convention choice. Austral is already consistent with `camelCase`. Migration cost is high, benefit is near-zero.
+**[STAGE: DECIDED_CORE_SEMANTICS | D11a → keep `camelCase`]**
 - **Ownership-signaling naming patterns** — Kyokai adopts Rust's API naming conventions (adapted to camelCase) as a mandatory convention for the standard library and recommended for user code. These patterns encode **cost, ownership, and allocator semantics** directly into function names, which is especially powerful in a linear type system where the most important question at any call site is "does this consume my resource, borrow it, or allocate a fresh owned result?"
 **The rules**:
   1. `**as*`** (e.g., `asSpan`, `asBytes`): Free conversion. Borrows input (`&[T]`), returns a view or borrow. **No allocation, no ownership transfer.**
@@ -1121,8 +3674,8 @@ These are deliberate departures:
   No external linter needed. The compiler IS the linter. This fits Kyokai's "one tool, the compiler" philosophy. These are warnings, not errors — the programmer can ignore them with good reason.
   **[DECIDED: D11b → Adopt ownership-signaling naming patterns, compiler-warned]**
 - **Bidirectional integer literal inference** — when a numeric literal appears in a position where the expected type is known (function parameter, binary operator operand, variable initializer with explicit type annotation), the compiler infers the literal's type from context. `makeByteBuf(16384)` instead of `makeByteBuf(16384 : Index)`. This is NOT full type inference — it pushes a KNOWN type from a declaration into a literal. The type is visible in the function signature. Ambiguous cases (multiple valid types) still require explicit annotation.
-**Why not keep fully explicit (Option A)**: `(16384 : Index)` restates information already in the function signature. The parameter is declared `cap0: Index` — writing `: Index` again at the call site adds zero information. Same principle as D7b (auto-reborrow) and D8 (implicit Unit return): when there is exactly one valid interpretation, requiring the programmer to restate it is ceremony.
-**[STAGE: DECIDED_CORE_SEMANTICS | D12 → Option B, bidirectional inference for literals]**
+**Why not keep fully explicit**: `(16384 : Index)` restates information already in the function signature. The parameter is declared `cap0: Index` — writing `: Index` again at the call site adds zero information. Same principle as D7b (auto-reborrow) and D8 (implicit Unit return): when there is exactly one valid interpretation, requiring the programmer to restate it is ceremony.
+**[STAGE: DECIDED_CORE_SEMANTICS | D12 → bidirectional inference for literals]**
 - **Numeric literals may use `_` separators as purely lexical readability markers** — Kyokai adopts the modern consensus spelling for large constants while keeping the lexer rules fully explicit.
 **Rules**:
   1. `_` may appear only between two digits in the same digit run of an integer or floating literal.
@@ -1144,7 +3697,7 @@ These are deliberate departures:
   **[STAGE: DECIDED_CORE_SEMANTICS | D261 → closed numeric literal suffix set for fixed-width integer, `Index`, and floating literals]**
 - **Keep `do` in pattern matching** — Kyokai keeps Austral's `case x of when Foo do ... esac;` syntax with `do` instead of switching to `=>`. This keeps the symbol count low — `do` is a keyword (searchable, pronounceable, consistent with `for/while ... do`), while `=>` is a symbol that adds visual noise in a language already using `->` for something else. The `do` keyword is also already established in D9's terminator system (`do`/`od` for loops) — reusing it for `when` clauses maintains internal consistency.
 **Why not `=>` (Ada convention)**: Even though Ada uses `=>`, Kyokai is not Ada. `=>` adds another symbol to memorize, and Kyokai already uses `->` (function return type arrow). Keeping `do` means one less symbol in the language. The `when Foo do` reads naturally as English: "when it's Foo, do this."
-**Why not `match` (Option C)**: `case`/`when` is already Austral's vocabulary. Changing the keyword gains nothing and breaks compatibility.
+**Why not `match`**: `case`/`when` is already Austral's vocabulary. Changing the keyword gains nothing and breaks compatibility.
 **[STAGE: DECIDED_CORE_SEMANTICS | D13 → Keep `do` in when-clauses]**
 - **Keep reference/reborrow syntax** — Kyokai keeps Austral's reference operators unchanged: `&x` (immutable borrow), `&!x` (mutable borrow), `~x` (dereference), `&~x` (reborrow). The `~` vs `*` debate is cosmetic — changing it would affect 200+ occurrences for zero semantic benefit. With UFCS (D7a) and auto-reborrow (D7b) already decided, most `&~` occurrences are eliminated anyway (UFCS removes the explicit first argument, auto-reborrow handles the remaining cases). The few remaining explicit uses of `~` and `&~` are infrequent enough that the syntax choice is a non-issue.
 **Why not change `~` to `*`**: Kyokai is not C and is not Rust. `~` is Austral's operator, it works, it's compositional (`&` + `~` = `&~`), and UFCS/auto-reborrow make it rare in practice. Changing it is churn for zero gain.
@@ -1203,7 +3756,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   **Prior art:**
   - **Rust**: Has BOTH `?` (sugar) AND `let...else` (RFC 3137, stabilized 1.65). They coexist — proving even with sugar, the explicit form is wanted.
   - **Swift**: `guard let x = expr else { return }` — diverging pattern match since Swift 1.0, considered one of the language's best features.
-  - **Odin**: GingerBill tried prefix `try`, removed it because it "optimizes for typing not reading", replaced with suffix `or_return` — 350+ uses in `core:math/big` alone.
+  - **Odin**: the Odin design history tried prefix `try`, removed it because it "optimizes for typing not reading", replaced with suffix `or_return` — 350+ uses in `core:math/big` alone.
   - **Borretti**: "all potentially-throwing operations return union types. This can be made less onerous through syntactic sugar." He explicitly validated sugar for linear type systems.
   `**defer` vs `errdefer` patterns (prerequisite from D2):**
   ```kyokai
@@ -1223,21 +3776,21 @@ A diverging pattern match that flattens nesting by binding the success variant i
       return Ok(file);  // file consumed here on happy path
   qed;
   ```
-  The linearity checker requires two new variable states beyond Austral's current four: `Deferred` (registered with `defer`, consumed on ALL exits, borrows allowed) and `ErrDeferred` (registered with `errdefer`, consumed on ERROR exits only, must be explicitly consumed on happy path). This is a D2 implementation detail that must be specified before D15 can work.
+  The linearity checker records two cleanup-reservation facts layered over the D348 ownership state set: ordinary-cleanup reservation from `defer` (consumed on all eligible exits, borrows allowed) and error-exit cleanup reservation from `errdefer` (consumed on structured error exits only, must be explicitly discharged on the happy path). This is a D2 implementation detail that must be specified before D15 can work.
   **[STAGE: DECIDED_CORE_SEMANTICS | D15 → Two-layer error propagation: `let...else` base + `or return` sugar]**
-- **`defer` and `errdefer` create explicit linearity-checker states, not hidden reference capture** — cleanup is registered where the programmer writes it, and the checker records which future exit path consumes the linear value.
+- **`defer` and `errdefer` create explicit linearity-checker reservation facts, not hidden reference capture** — cleanup is registered where the programmer writes it, and the checker records which future exit path consumes the linear value. These reservation facts are layered over the D348 ownership state set.
 **Rules**:
-  1. `defer action(value);` registers a consuming scope-exit action immediately. Any linear value consumed by that deferred action enters the `Deferred` checker state at the `defer` statement.
-  2. A `Deferred` value may be borrowed under the ordinary borrow rules, but it may not be moved, consumed by another operation, reassigned, returned, sent, or registered in another consuming cleanup action.
+  1. `defer action(value);` registers a consuming scope-exit action immediately. Any linear value consumed by that deferred action gains an ordinary-cleanup reservation fact at the `defer` statement.
+  2. A value with an ordinary-cleanup reservation may be borrowed under the ordinary borrow rules, but it may not be moved, consumed by another operation, reassigned, returned, sent, or registered in another consuming cleanup action.
   3. On every structured scope exit that runs ordinary cleanup, `defer` actions execute in reverse registration order.
   4. Deferred actions run after borrow scopes that were live in the body have ended. A deferred action may not capture or depend on a borrow whose lifetime does not reach the deferred action's execution point.
-  5. `errdefer action(value);` registers a consuming cleanup action for structured error exits only. Any linear value consumed by that action enters the `ErrDeferred` checker state at the `errdefer` statement.
-  6. An `ErrDeferred` value may be borrowed under ordinary borrow rules. On the success path, the program must explicitly consume, move, return, or otherwise discharge the value before the scope exits.
+  5. `errdefer action(value);` registers a consuming cleanup action for structured error exits only. Any linear value consumed by that action gains an error-exit cleanup reservation fact at the `errdefer` statement.
+  6. A value with an error-exit cleanup reservation may be borrowed under ordinary borrow rules. On the success path, the program must explicitly consume, move, return, or otherwise discharge the value before the scope exits.
   7. On a structured error exit, `errdefer` actions execute before ordinary `defer` actions from the same scope, with each category executing in reverse registration order.
-  8. `errdefer` does not run on ordinary success completion, `break`, `continue`, `panic`, or TPOE unless another already-decided rule classifies that exit as a structured error exit for the relevant scope.
+  8. `errdefer` does not run on ordinary success completion, `break`, `continue`, `panic`, or TPOE. Its structured-error triggers are `return Err(value)` and `or return`.
   9. TPOE remains immediate hard termination under D84 and does not run user deferred actions.
 **Why this fits Kyokai**: the programmer still writes every cleanup action explicitly, but the compiler gets exact states for values that have already been promised to future cleanup.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D246 → `Deferred` and `ErrDeferred` checker states; defer captures by immediate cleanup registration, not by late reference evaluation]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D246 → ordinary-cleanup and error-exit cleanup reservation facts layered over D348 ownership states; defer captures by immediate cleanup registration, not by late reference evaluation]**
 - `**let...else` and the `or ...` sugars have exact typing and linearity rules** — Kyokai does not leave these control-flow forms to ad hoc checker special cases.
 **Rules for `let...else`:**
   1. In `let P := E else Q do B fi;`, the scrutinee expression `E` is evaluated exactly once.
@@ -1300,10 +3853,10 @@ A diverging pattern match that flattens nesting by binding the success variant i
 **[STAGE: DECIDED_CORE_SEMANTICS | D16 → Keep semicolons]**
 - **Compile-time evaluation: `constant` expressions + `comptime` call-site keyword** — Two tools for two jobs. `constant` declarations are extended to support arithmetic/bitwise expressions over other constants (emitted as C constant expressions — zero compiler cost). `static_assert(expr, "msg")` validates invariants at compile time (emitted as `_Static_assert`). For computed constants (lookup tables, precomputed arrays), the `comptime` keyword at the **call site** forces compile-time evaluation of any pure function over `Free` types. This is Zig's model, not Rust's: the programmer writes `comptime computeEscapeTable()`, making the phase determination explicit and visible in source. There is no `const fn` annotation on function definitions — a function is a function, and whether it runs at compile time or runtime is determined where it's called. Only `Free`-universe types are eligible for `comptime` evaluation (linear types represent runtime resources and cannot exist at compile time). Kyokai's existing `Free`/`Linear` universe distinction makes this check trivial — the compiler already knows which universe every type belongs to.
 **Why `comptime` call-site, not `const fn` definition-site**: Rust's `const fn` creates implicit phase determination — the same function call silently evaluates at compile time in a `const` block and at runtime in a `let` block. Identical syntax, completely different execution. This violates Kyokai's principle: "if two programs look identical, they behave identically." The `comptime` keyword makes the phase visible, the same way `defer` makes scope-exit visible.
-**Why both D and B together**: They serve different purposes and don't compete. `constant` handles simple named values (`constant PAGE_SIZE: Index := 4096;`). `comptime` handles computed values (`constant ESCAPE_TABLE: Array[Bool, 256] := comptime computeEscapeTable();`). Linear types make `comptime` simpler to implement than Rust's `const fn` was — there's no need for a "const-safe subset" analysis because the `Free`/`Linear` boundary already exists.
+**Why both forms exist**: They serve different purposes and don't compete. `constant` handles simple named values (`constant PAGE_SIZE: Index := 4096;`). `comptime` handles computed values (`constant ESCAPE_TABLE: Array[Bool, 256] := comptime computeEscapeTable();`). Linear types make `comptime` simpler to implement than Rust's `const fn` was — there's no need for a "const-safe subset" analysis because the `Free`/`Linear` boundary already exists.
 **Implementation**:
   ```kyokai
-  // Simple constants (Option D):
+  // Simple constants:
   constant PAGE_SIZE: Index := 4096;
   constant MAX_HEADERS: Index := PAGE_SIZE * 2;
   static_assert(MAX_HEADERS >= 512, "Buffer too small");
@@ -1343,7 +3896,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
              or other `comptime` expressions
      = help: if you need this value at runtime, remove `comptime`
   ```
-  **[STAGE: DECIDED_CORE_SEMANTICS | D18 → Option D + B: const expressions + `comptime` call-site keyword]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D18 → const expressions + `comptime` call-site keyword]**
 - `**comptime` evaluation is deterministic, host-independent, and governed only by explicit compile-time inputs** — Kyokai does not allow compile-time execution to smuggle hidden host state into the language or the build result.
 **Rules**:
   1. For a fixed source program, selected target triple, language edition, compiler version, and explicit build options, a `comptime` expression has exactly one language result or one compile-time error.
@@ -1424,7 +3977,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   10. Const parameters participate in monomorphization identity exactly by their evaluated values.
   **Why this fits Kyokai**: it closes the real semantic holes around shape-bearing types while keeping the facility narrow, explicit, deterministic, and auditable.
   **[STAGE: DECIDED_CORE_SEMANTICS | D188 -> exact `Index` const-generic argument forms, value-equality rule, evaluation failure behavior, and in-scope use of const parameters]**
-- **`StaticString` gives `comptime` text a distinct `Free` type without collapsing it into runtime `String`** — compile-time text metaprogramming is supported, but Kyokai does not retarget ordinary string literals contextually or imply a hidden compile-time heap for runtime strings.
+- **`StaticString` gives source literals and `comptime` text one distinct `Free` type without collapsing it into runtime `String`** — text literal evaluation allocates nothing and compile-time text metaprogramming does not imply a hidden runtime-string heap.
 **Syntax**:
   ```kyokai
   constant banner: StaticString := static "Kyokai";
@@ -1434,8 +3987,8 @@ A diverging pattern match that flattens nesting by binding the success variant i
   ```
   **Rules**:
   1. `StaticString` is a distinct text type from `String`. It represents immutable UTF-8 text backed by compiler-managed or program-static read-only storage and is a `Free` type.
-  2. Ordinary `"..."` literals remain `String` in all contexts. Kyokai does not contextually reinterpret them as `StaticString`.
-  3. The literal bridge to `StaticString` is explicit: `static "..."`.
+  2. Plain escaped `"..."` literals and raw multiline literals produce `StaticString` in every context. They do not allocate and do not contextually become owning `String`.
+  3. `static "..."` is an explicit equivalent spelling for a `StaticString` literal. It does not create a second literal type.
   4. `comptime` functions may take and return `StaticString` because it is `Free`.
   5. During compile-time evaluation, `StaticString` results live in compiler-managed memory. When materialized into the compiled program, they become embedded read-only data.
   6. There is no implicit conversion between `String` and `StaticString`.
@@ -1443,7 +3996,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   8. `StaticString` supports the ordinary explicit text operations needed for metaprogramming, including `length`, `isEmpty`, `slice`, `concat`, `startsWith`, `endsWith`, `find`, and `asBytes() -> Span[Nat8, Static]`.
   9. D18 does not imply general heap-style compile-time allocation of runtime `String` values. Compile-time text metaprogramming goes through `StaticString`, not hidden runtime-string construction.
   **Why this fits Kyokai**: compile-time string work becomes powerful enough for metaprogramming, format checking, and generated tables, while the boundary between static text and owned runtime text remains explicit.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D120 → distinct `StaticString` with explicit `static "..."` bridge; no contextual literal retargeting; explicit allocator-taking conversion to `String`]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D120 clarified by D420/D476 -> plain escaped, raw multiline, and explicit `static "..."` literals produce non-allocating `StaticString`; owning `String` requires explicit allocator-taking conversion]**
 - **Conditional compilation: three-tier model with `when` declaration guards** — Three tools for three shapes of platform-specific code. **Tier 1 (whole-file)**: When a module is inherently platform-specific (syscall wrappers, renderer backends), use separate `.kai` body files sharing the same `.kyo` interface. Build system (C01) selects which to compile. **Tier 2 (`when` declaration guards)**: When only a few functions differ by platform, use `when` guards on the declaration signature: `function pageSize(): Index when target.os == Os.Linux is ... qed;`. A false `when` guard makes the declaration semantically absent from the current build. For alternate platform definitions of the same declaration in a selected shared module, exactly one definition must be active for the current target; overlapping active matches and zero active matches are both compile-time errors. `when` guards are **declaration-level only** — never inside function bodies. Body-level platform branching should extract into a `when`-guarded helper. **Tier 3 (typeclass abstraction)**: For large platform abstractions (renderer, windowing), use typeclasses. `typeclass Renderer[R: Linear]` with platform-specific instances. This is an existing language feature — no D19 work needed.
 `**target` is a language-level built-in** — `target` is a compile-time constant record with four fields: `target.os` (`Os` enum), `target.arch` (`Arch` enum), `target.abi` (`Abi` enum), and `target.endianness` (`Endian` enum). All four are compile-time constants set by the build system or derived deterministically from the selected target, and they are evaluable by D18's comptime machinery. The `os`/`arch`/`abi` fields follow the LLVM target triple model (`arch-os-abi`), while `endianness` gives the target byte order explicitly for D117. The fields are built-in enums (not strings) — this is what makes exhaustiveness checking real, same as `case` on a sum type.
 `**Os`, `Arch`, `Abi`, and `Endian` define target vocabulary, not an automatic cartesian product** — the set of legal target triples and their support guarantees is fixed explicitly by D80. An enum variant existing does not by itself make every `os/arch/abi` combination valid.
@@ -1499,7 +4052,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   **[STAGE: DECIDED_CORE_SEMANTICS | D123 → keep D19's declaration/module/typeclass model; no body-level inline platform branching]**
 - `**Result`/`Optional` are language-level built-in types, not library types** — D15's error propagation (`let...else`, `or return`) depends on `Result` and `Optional` the same way branching depends on `Bool`. If the language's own control flow constructs operate on these types, they're already type system primitives — treating them as library types is architectural fiction. `Result[T, E]`, `Optional[T]`, `Ok`, `Err`, `Some`, `None` are built-in constructors alongside `true`, `false`, `nil`. No module, no import, no prelude entry. They simply ARE the language.
 `**Ok`/`Err`/`Some`/`None` are keywords** — same as `true`, `false`, `nil`. They cannot be shadowed or used as variable names. If `None` could be a variable name, `or return Err(e)` would become ambiguous when `Err` is shadowed. The cost is four reserved identifiers. The full keyword list: `true`, `false`, `nil`, `Ok`, `Err`, `Some`, `None`.
-**Why not prelude (Option B)**: A prelude is a hidden import. "Nothing hidden, nothing implicit" means if you can't see the import, it shouldn't exist. Making them built-in types eliminates the import entirely — there's nothing to import because they're not in a module.
+**Why not prelude**: A prelude is a hidden import. "Nothing hidden, nothing implicit" means if you can't see the import, it shouldn't exist. Making them built-in types eliminates the import entirely — there's nothing to import because they're not in a module.
 **What IS and ISN'T built-in**:
 
   | Item                          | Classification                                  | Treatment                      |
@@ -1675,7 +4228,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   2. Arity-2 through arity-4 callbacks use the matching `Callable2`/`Callable3`/`Callable4` family, with corresponding `CallableMut*` and `CallableOnce*` variants.
   3. Code that truly needs more than four callback parameters must use an explicit named record payload with the arity-1 family.
   **No implicit capture and no hidden closure machinery.** Capture sets remain a programmer choice, not a tautology, so they stay visible in source. D118 adds explicit-capture closure literals, but those literals still lower to this same `Callable` substrate rather than introducing implicit environment analysis or hidden heap semantics.
-  **Why `Callable` typeclasses instead of per-callback typeclasses (Option D's ceremony)**: Parallel to D23 — `Equality` and `TotalOrder` exist as standard typeclasses rather than opening general operator overloading. `Callable`/`CallableOnce` exist as standard typeclasses rather than requiring a new typeclass per callback shape.
+  **Why `Callable` typeclasses instead of per-callback typeclasses**: Parallel to D23 — `Equality` and `TotalOrder` exist as standard typeclasses rather than opening general operator overloading. `Callable`/`CallableOnce` exist as standard typeclasses rather than requiring a new typeclass per callback shape.
   **Implementation**:
   ```kyokai
   // Bare function pointer (Free, no captures):
@@ -1826,6 +4379,20 @@ A diverging pattern match that flattens nesting by binding the success variant i
   **Why not infer workspaces from folder layout**: that would make project structure an ambient convention rather than part of the contract. If the workspace exists, it must be written down.
   **Why not make `internal` workspace-visible**: visibility should track the package boundary, not the accidental fact that two packages happen to live in the same repository.
   **[STAGE: DECIDED_CORE_SEMANTICS | D78 → explicit package/workspace model + exact manifest-declared module-root file mapping]**
+- **`kyokai.toml` uses a fixed TOML schema with explicit workspace inheritance, target conditions, features, and generation capability declarations** — manifest syntax is not whatever a parser accepts today. The toolchain reads `kyokai.toml` as TOML 1.0.0 and rejects unknown semantic tables or ambiguous inheritance.
+**Rules**:
+  1. `kyokai.toml` is parsed as TOML 1.0.0. Future TOML changes are not automatically accepted unless Kyokai updates this rule.
+  2. Workspace dependency inheritance is explicit: a workspace root may define shared dependency entries, and a member package may opt into one by name. The member manifest must still show that it is using the inherited dependency.
+  3. A workspace-inherited dependency entry cannot silently override a member's direct dependency. If both exist for the same dependency name, the manifest must choose one spelling or compilation fails.
+  4. Target-conditioned dependencies live in explicit target tables keyed by legal D80 target triples or by approved target predicates. Unknown triples, unsupported predicate keys, and overlapping target conditions that select incompatible dependencies are errors.
+  5. Features are named optional dependency/configuration sets. A feature may enable optional dependencies, other features, or documented compile-time configuration values; it may not execute code.
+  6. Feature names use the package-name character discipline unless a later D-point narrows them further. Feature resolution is deterministic, recorded in `kyokai.lock`, and included in reproducible build identity.
+  7. Default features, if present, are named explicitly by the manifest. A dependency may request `default_features = false` only through documented manifest syntax, and the lockfile records the final selected feature set.
+  8. `[generate]` steps are sandboxed records with declared command, inputs, outputs, environment allowlist, working directory, target/profile conditions, and capability requirements.
+  9. Generation steps cannot receive ambient filesystem, process, network, or root authority. Any capability-like permission for generation is declared in the manifest and surfaced by `doctor`, `generate`, `build`, and `publish --dry-run`.
+  10. Generated files must be declared as source-tree outputs or generated-output-tree artifacts. Hidden source injection into the compiler is illegal.
+  **Why this fits Kyokai**: large real projects need feature flags, target-specific dependencies, and build generation, but Kyokai should make those knobs visible in one manifest instead of hiding behavior behind executable build scripts.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D276 -> TOML 1.0.0 manifest schema; explicit workspace inheritance; target-conditioned dependencies; optional-dependency features; sandboxed `[generate]`]**
 - **Import collisions are errors at the import site, and selective imported names use explicit `as` renaming when disambiguation is needed** — Kyokai does not let import order silently choose winners, and D254's receiver-module UFCS fallback never repairs an ambiguous file scope.
 **Rules**:
   1. A selective import may rename an introduced unqualified name with `as`, for example `import PkgA.Util (Hash as UtilHash);`.
@@ -1896,6 +4463,41 @@ A diverging pattern match that flattens nesting by binding the success variant i
   7. If a yanked revision is also compromised in a way that should block even locked builds, that is a separate security-policy mechanism and must not be smuggled into yank semantics.
   **Why this fits Kyokai**: package resolution stays reproducible and append-only while giving the ecosystem a visible way to stop new projects from selecting known-bad releases.
   **[STAGE: DECIDED_CORE_SEMANTICS | D244 → append-only yanks ignored by new resolution but honored by existing lockfiles]**
+- **The official package index is Git-hosted/static metadata over Git-hosted source, not crates.io-style central source hosting** — Kyokai keeps the D51 dependency identity model and adds the missing trust/discovery layer without making the project operate a full registry service at bootstrap.
+**Rules**:
+  1. Package source remains hosted in ordinary Git repositories. The official index records metadata about those repositories; it does not become mandatory source storage.
+  2. A dependency resolved through an index still records source URL, exact Git `rev`, content hash, package identity, selected features, and lockfile identity. The index never replaces `rev` as the source of truth.
+  3. The official index is representable as a normal Git repository or static file tree. Its records are append-only where history matters and are suitable for mirroring by static hosting.
+  4. Canonical public package identity uses scoped names such as `@owner/name`. The index records owner identity, owner teams where supported, repository URL, declared versions/tags, exact revisions, content hashes, licenses, docs links, yanks, advisories, takedowns, and maintainer-transfer records.
+  5. Bootstrap publishing may be implemented as reviewed index pull requests or signed metadata commits tied to existing forge identity. Token/API publishing, MFA, and automated owner management are allowed later, but they do not change package identity or dependency resolution semantics.
+  6. Private indexes are additional configured Git/static index URLs with the same record schema. Private packages do not require the official index.
+  7. Authenticated mirrors and source replacement must be explicit configuration. A mirror may provide index metadata or immutable source archives only when the lockfile identity and content hash match.
+  8. Anti-squatting, legal takedown, name-dispute, owner-transfer, and security records are index metadata. They do not rewrite existing lockfile meaning.
+  **Why this fits Kyokai**: a crates.io-shaped service would force Kyokai to operate auth, databases, artifact storage, CDN, moderation, takedowns, backups, and uptime before the language has an ecosystem. Static Git metadata gives Kyokai scoped identity and governance while preserving the already-decided Git-revision dependency model.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D272 -> Git-hosted/static package index; scoped names; signed append-only metadata; private indexes; source remains ordinary Git]**
+- **Immutable package proxies are optional cache-aside infrastructure, not the package source of truth** — Kyokai may grow Go-style durability and performance infrastructure without turning the index into a central package host.
+**Rules**:
+  1. The toolchain may fetch immutable source archives from configured proxies or mirrors by content hash.
+  2. A proxy entry is valid only when it matches the locked package identity, source URL, Git `rev`, and content hash.
+  3. Proxies are cache-aside infrastructure: they improve availability and speed, but package identity remains the Git source plus exact revision and hash.
+  4. A proxy is not required for bootstrap, for local development, or for private packages.
+  5. If no proxy is configured or reachable, the toolchain may fetch from the declared Git source or use a valid `kyokai vendor` directory.
+  6. A proxy must not silently serve different source for the same lockfile identity. Hash mismatch is a hard error.
+  7. Proxy metadata, if present, is signed or hash-checked index metadata and is never trusted ahead of the lockfile.
+  **Why this fits Kyokai**: production users need protection from disappearing repositories and rate limits, but v1 does not need a hosted archive empire. Content-addressed mirrors solve availability later without changing dependency meaning now.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D273 -> optional immutable cache/proxy by content hash; Git source identity unchanged; vendor/offline fallback remains valid]**
+- **Package advisories and security holds are separate from yanks** — a yank controls ordinary new resolution; advisory and hold metadata controls security reporting and policy failure. Kyokai does not overload one word to mean withdrawal, malware response, embargo, CVE tracking, legal removal, and maintainer dispute handling.
+**Rules**:
+  1. The package index may contain typed advisory records for vulnerability, malware, compromised-credential, abandoned-package, legal-takedown, name-dispute, and maintainer-transfer cases.
+  2. Advisory records name the package identity, affected version or revision ranges, fixed versions or fixed revisions when known, advisory kind, severity where known, timestamps, actor identity, and links to CVE, OSV, RustSec-style, or project-native advisory records where available.
+  3. Embargo records may exist in restricted index metadata before public disclosure, but released public metadata must preserve append-only history once published.
+  4. A security hold is stronger than a yank: it may cause `kyokai audit`, CI policy, update policy, publish validation, or an explicitly strict build policy to fail even when an existing lockfile remains reproducible.
+  5. Security holds do not rewrite source, mutate lockfiles, or silently change dependency resolution. They report policy failure against the exact locked dependency graph.
+  6. `kyokai audit` must report yanks, advisories, holds, affected ranges, fixed versions, and signed maintainer or project response notes when the configured index supplies them.
+  7. Legal takedown and name-dispute metadata records visibility and governance state; it does not erase historical lockfile meaning or pretend the package never existed.
+  8. Private indexes may define private advisory records, but those records must use the same structural fields so tooling can report them without a second security model.
+  **Why this fits Kyokai**: yanks are about resolution. Security records are about trust, response, and policy. Keeping them separate lets builds remain reproducible while still letting serious projects fail CI on known-bad code.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D274 -> typed advisories, embargo metadata, security holds, CVE/OSV links, affected ranges, fixed revisions, and signed response notes]**
 - **Package names have one canonical grammar** — Package names are stable manifest identities, not loose human labels. They appear in `[package].name`, `[dependencies]` workspace references, CLI package selection, lockfiles, and `.koi` artifacts, so the grammar must be fixed and toolable.
 **Grammar**: a package name must match `^[a-z][a-z0-9-]{0,63}$`.
 **Additional restrictions**:
@@ -1983,6 +4585,18 @@ A diverging pattern match that flattens nesting by binding the success variant i
 **Code materialization is a separate decision family**: D82 fixes dispatch semantics only. The questions of how concrete bodies are materialized, where cross-package instantiations are emitted, and which deduplication optimizations are allowed are split into D82a and D82b.
 **Why this fits Kyokai**: runtime behavior stays explicit and no hidden polymorphic machinery enters the calling convention, while compile-time and code-size strategy is forced into its own explicit decisions instead of being smuggled in as backend folklore.
 **[STAGE: DECIDED_CORE_SEMANTICS | D82 → static generic/typeclass dispatch; no runtime dictionaries or trait objects]**
+- **Typeclass coherence closes over package artifacts, and unsafe modules do not get orphan-instance powers** — D81's coherence rule is not just a source-file rule inside one compiler invocation. The checker must assemble the actual package graph, `.koi` instance metadata, imports, visibility, and generic constraints before accepting instance resolution.
+**Rules**:
+  1. An instance is legal only when the defining package owns the typeclass or owns at least one nominal type head in the instance head.
+  2. Unsafe modules get no exception to the orphan rule. `unsafe` can admit low-level operations under audit; it cannot admit incoherent behavior into the package graph.
+  3. Internal, private, test-only, or unsafe visibility does not allow a foreign typeclass for a fully foreign type across a package boundary.
+  4. Generic instances are legal only when overlap checking can prove that no other visible legal instance may apply to the same concrete call after substitution.
+  5. Associated-type bounds and associated-type equality constraints in `where` clauses participate in overlap and ambiguity checking. They are not decorative documentation.
+  6. Recursive instance resolution must be rejected unless the compiler can prove a finite, well-founded resolution path under the accepted typeclass rules.
+  7. `.koi` verification and package linking must reject conflicting instance metadata before downstream code can depend on either candidate.
+  8. Diagnostics for a `.koi`-level conflict must name the conflicting packages, modules, instance headers, typeclass, and at least one overlap witness when generics are involved.
+  **Why this fits Kyokai**: typeclass behavior is public package behavior. If package order, unsafe scope, or artifact loading order can change instance selection, the language has hidden semantics. Kyokai rejects that.
+  **[STAGE: DECIDED_CORE_SEMANTICS | D279 -> Rust-style orphan boundary; unsafe modules get no coherence exception; `.koi` conflicts are hard errors]**
 - **Allocator dispatch under D44 is explicit runtime state, not a D82 dictionary exception** — D82 bans hidden compiler-inserted dictionaries for generic and typeclass dispatch. It does not ban an allocator handle that the programmer explicitly chose, passed, and caused a container to store as part of its own runtime state.
 **Rules**:
   1. D82's ban continues to apply to hidden generic/typeclass witness passing and trait-object-style dispatch.
@@ -2001,7 +4615,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
 **Why this fits Kyokai**: explicit languages should have explicit build identity. "Same inputs, same outputs" is the build-system form of "nothing hidden."
 **[STAGE: DECIDED_CORE_SEMANTICS | D83 → reproducible by default, with explicit build identity]**
 - **One `kyokai` binary, with explicit package/workspace/profile/target semantics** — Kyokai's toolchain surface is a single command-line binary named `kyokai`. The CLI is manifest-driven: the nearest relevant `kyokai.toml` determines whether the current scope is a standalone package or a workspace root (D78). The CLI does not guess hidden project structure beyond that manifest lookup.
-**Core subcommands**: `build`, `run`, `check`, `test`, `fmt`, `doc`, `repl`, `eval`, `lsp`, `audit`, `init`, `new`, `add`, `clean`.
+**Core subcommands**: `build`, `run`, `check`, `test`, `fmt`, `doc`, `repl`, `eval`, `lsp`, `audit`, `init`, `new`, `add`, `update`, `remove`, `search`, `info`, `tree`, `why`, `outdated`, `vendor`, `login`, `logout`, `owner`, `yank`, `publish`, `clean`, `debug`, `profile`, and `memprofile`.
 `**new` and `init` must write explicit layout information**: package manifests generated by toolchain commands must include the required `[layout] module_root = "src"` entry unless the user explicitly chooses a different relative module-root path at creation time.
 **Package/workspace selection**:
   - If the current manifest is a package manifest, `build`, `check`, `doc`, and `test` operate on that package.
@@ -2032,10 +4646,19 @@ A diverging pattern match that flattens nesting by binding the success variant i
   - `kyokai add --git <url> --rev <rev>` writes `{ git = "<url>", rev = "<rev>" }`.
   - `kyokai add --git <url> --tag <tag>` resolves the tag to a commit and writes both `tag` and `rev`.
   - If a future convenience flag such as `--head` exists, it must resolve HEAD immediately and write the resulting `rev`; the manifest still stores the immutable pin, not the moving reference.
-  `**doc` follows visibility**: generated documentation includes public API by default and excludes `internal` declarations unless a future explicit flag says otherwise.
+  **Mutation commands are Kyokai-shaped, not a generic registry shell**:
+  - `kyokai update` updates selected dependencies by resolving explicit package/index policy into new immutable `rev` pins and lockfile entries.
+  - `kyokai remove` follows D269 and reports whether a removed direct dependency remains reachable transitively.
+  - `kyokai login`, `kyokai logout`, `kyokai owner`, `kyokai yank`, and `kyokai publish` operate only against configured indexes that actually support those operations. Plain Git dependencies do not require index login.
+  - `publish` validates manifest identity, version metadata, package ownership, source reachability, `.koi` production, docs generation, SemVer report, yanks/advisories state, and reproducible package metadata before submitting anything to an index.
+  - Commands that mutate source files, manifests, lockfiles, package metadata, index records, vendor directories, or output/cache roots support `--dry-run` when meaningful.
+  - Commands with nontrivial mutation plans support `--print-plan`, producing deterministic human-readable output by default and structured output when the global output format requests it.
+  - `--dry-run` performs all validation and resolution possible without committing the mutation, and reports exactly which files, lockfile entries, index records, vendor paths, output roots, or cache roots would change.
+  - `kyokai fix --dry-run` prints the edit plan and diagnostics without changing files. `kyokai clean --dry-run` prints the selected cache/output paths without deleting them. `kyokai publish --dry-run` performs local package validation without creating an index record.
+  `**doc` follows visibility**: generated documentation includes public API by default and excludes `internal` declarations. An explicit package-internal documentation mode can include `internal` declarations; private `.kai`-only declarations remain excluded from public generated docs.
   **Verbosity must expose the resolved build plan**: `--verbose` prints the selected manifest root, workspace/package scope, target triple, backend name, profile name, resolved compiler/linker tools, and the exact additional flags applied from target/profile configuration.
   **Why this fits Kyokai**: one tool is simpler, but the important part is that its behavior is manifest-defined and inspectable rather than conventional or magical.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D26 → single `kyokai` binary with explicit scope/profile/target semantics]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D26/D275 -> single `kyokai` binary with explicit scope/profile/target semantics plus bounded daily mutation commands, dry runs, and print-plan behavior]**
 - **Build profiles and target/toolchain configuration live in `kyokai.toml`, not in folklore** — Kyokai exposes binary/output policy through explicit manifest tables rather than hard-wired release folklore. Profiles describe optimization/debug/strip/LTO/identical-code-folding policy. Target tables describe which backend tools and extra flags implement a particular target triple. Package build tables describe what artifact kind a package produces.
 **Profile tables**:
   - Profiles are named using `[profile.<name>]`.
@@ -2279,7 +4902,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
 **Constructor classification rules**:
   1. A non-generic type declared `Free` is always `Free`.
   2. A non-generic type declared `Linear` is always `Linear`.
-  3. A generic type declared `Auto` is `Linear` iff at least one of its type arguments is `Linear`; otherwise it is `Free`.
+  3. A user-defined generic type declared `Auto` follows D338: after substitution it is `Linear` iff at least one stored field, stored union payload, or captured environment field is `Linear`; otherwise it is `Free`. Phantom and const arguments do not force `Linear` unless an accepted built-in rule says so or the argument selects, sizes, or otherwise determines a stored component. Built-in `Auto` constructors keep their closed constructor-specific rules.
   4. A generic type declared `Free` is always `Free`, regardless of its type arguments.
   5. A generic type declared `Linear` is always `Linear`, regardless of its type arguments.
 **Language-defined and special-form table**:
@@ -2291,7 +4914,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   6. Ordinary user-defined and standard-library nominal types follow the universe marker on their own declarations: `Free`, `Linear`, or `Auto`.
   7. No type gains a universe from its name, intended use, or ABI shape. The declaration or special-form classification rule is the only source of truth.
   **Why this fits Kyokai**: the linearity checker gets a closed auditable rule set, `Auto` stays a precise mechanism instead of a catch-all slogan, and special cases like borrows, raw pointers, and function pointers stay visibly non-owning.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D194 → explicit constructor-by-constructor universe classification for built-ins and special forms; no blanket generic-built-in rule]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D194 refined by D338 → explicit constructor-by-constructor built-in rules plus structural stored-component classification for user-defined `Auto`; no blanket generic-argument shortcut]**
 - **Type identity is recursive and nominal, not structural** — Kyokai does not equate types because they "look the same." Two fully resolved types are identical iff their canonical forms are identical under the language's nominal rules.
 **Canonicalization**:
   1. Name resolution must identify the declaration referenced by every nominal type name.
@@ -2511,10 +5134,11 @@ A diverging pattern match that flattens nesting by binding the success variant i
   4. Type-check and elaborate expressions, resolving overloads, generic arguments, literal types, expected-type sites, pattern types, and D254 receiver-module UFCS lookup.
   5. Insert only the closed set of D87-approved implicit completions: auto-borrow, auto-reborrow, mutable-to-immutable read reborrow, one-level field auto-deref, implicit `Unit` fallthrough, `Never` expression-site coercion, literal typing, and approved `let :=` inference.
   6. Record every inserted implicit completion as an explicit elaboration node with its source span and rule id.
-  7. Run the D239 tautology-check pass over those elaboration nodes.
-  8. Lower typed sugar such as `or return`, `let...else`, and `while let` into the checked core form while preserving the recorded ownership and pattern obligations.
-  9. Run linearity, borrow, exhaustiveness, and capability checks on the elaborated core, not on the raw surface AST.
-  10. Backend lowering starts only after these checks succeed.
+  7. Assemble the closed package graph needed for typeclass and interface facts: imports, visible instances, dependency `.koi` metadata, local instance declarations, and any typeclass-dependent declarations exposed by the selected target and feature set.
+  8. Run the D239 tautology-check pass over the recorded elaboration nodes after that closed graph exists.
+  9. Lower typed sugar such as `or return`, `let...else`, and `while let` into the checked core form while preserving the recorded ownership and pattern obligations.
+  10. Run linearity, borrow, exhaustiveness, and capability checks on the elaborated core, not on the raw surface AST.
+  11. Backend lowering starts only after these checks succeed.
   **Why this fits Kyokai**: programmers and compiler implementers can reason about one pipeline. Sugar becomes explicit before ownership checking, and every implicit completion is made auditable before backend lowering.
   **[STAGE: DECIDED_CORE_SEMANTICS | D238 → fixed syntax-lowering and typed-elaboration order before linearity]**
 - **Every D87 implicit completion is recorded and checked by a mandatory tautology-check pass** — Kyokai's implicit-operation rule is a compiler invariant, not a style promise.
@@ -2524,10 +5148,12 @@ A diverging pattern match that flattens nesting by binding the success variant i
   3. For each inserted completion, the tautology-check pass verifies that the operation is uniquely determined by the static types and surrounding context.
   4. The pass verifies that every alternative interpretation of the same source expression is statically ill-typed.
   5. The pass verifies that the insertion adds no allocation, side effect, blocking operation, capability use, or new control-flow edge beyond what the explicit source construct already implies.
-  6. A compilation unit is rejected if any implicit insertion lacks a registry entry or fails one of the listed obligations.
-  7. Adding a new implicit completion to Kyokai requires a new D-point or an explicit update to an existing D-point, plus a registry entry and conformance tests.
+  6. The pass runs after imports, target/feature selection, local instance discovery, dependency `.koi` loading, and typeclass coherence assembly, so typeclass-dependent completions are checked against the real closed dependency graph being compiled.
+  7. If adding or updating a dependency introduces an instance, interface fact, target fact, or feature-selected declaration that makes a recorded completion no longer unique, the package is rejected at compile time.
+  8. A compilation unit is rejected if any implicit insertion lacks a registry entry or fails one of the listed obligations.
+  9. Adding a new implicit completion to Kyokai requires a new D-point or an explicit update to an existing D-point, plus a registry entry and conformance tests.
   **Why this fits Kyokai**: D87 becomes mechanically enforceable. The compiler cannot quietly grow new implicit behavior merely because an implementation shortcut was convenient.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D239 → compiler-maintained implicit-completion registry plus mandatory tautology-check pass]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D239/D278 → compiler-maintained implicit-completion registry plus mandatory tautology-check pass over the closed package/typeclass/.koi graph]**
 - **Auto-reborrow and mutable-to-immutable read reborrow require a conformance matrix over the elaborated core** — the ergonomic removal of `&~` is allowed only because the compiler proves and tests that the explicit borrow core remains sound.
 **Required conformance coverage**:
   1. Owned value to immutable borrow.
@@ -3424,12 +6050,12 @@ A diverging pattern match that flattens nesting by binding the success variant i
   **[DECIDED: D47/D131 → no tuples; `Pair`/`Triple` remain ordinary records, but public APIs prefer domain-named result types]**
 - **Text, code-point, byte, and raw-string literals are distinct** — Kyokai gives each literal family one type and one clearly bounded meaning.
 **Literal forms**:
-  - `"..."` -> `String`
-  - `"""..."""` -> raw multi-line `String`
+  - `"..."` -> escaped `StaticString`
+  - `"""..."""` -> raw multi-line `StaticString`
   - `'A'` -> `Nat32` Unicode code point literal
   - `b'A'` -> `Nat8` byte literal
   **Rules**:
-  1. Ordinary string literals produce `String` and process escapes.
+  1. Ordinary escaped and raw multiline text literals produce `StaticString`; escaped literals process escapes and raw multiline literals do not.
   2. The standard escape family is `\\`, `\"`, `\'`, `\n`, `\r`, `\t`, `\0`, `\xNN`, and `\u{HEX...}`.
   3. Raw multi-line string literals process no escapes and preserve their contents exactly between the delimiters.
   4. A code-point literal must denote exactly one Unicode scalar value after escape processing. Surrogate code points are illegal.
@@ -3807,7 +6433,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
 
   **Why `debug` is a keyword, not `debug.print()` or `Debug.print()`**: `debug.print()` looks like module access (`Module.function()`), which would imply it's imported, has a module interface, and participates in the normal module system. It is none of those things. Making it a keyword puts it in the same syntactic category as `panic` — a built-in construct the compiler knows about and handles specially.
   **Why this is philosophically acceptable**: `debug` is explicitly NOT part of the program's intended behavior. It is development instrumentation. The `debug` keyword makes it visually distinct, the compiler warns about it, and release builds strip it. The capability model is not compromised because `debug` is defined as outside the model — the same way `panic` is outside normal control flow.
-  **Why not full capability enforcement (Option A)**: every language with capability-based I/O provides an escape hatch for debugging. Haskell has `Debug.Trace.trace`. Requiring `TerminalCapability` for ephemeral debug prints would force capability threading through every function just to add a temporary print statement. That is ceremony that impedes development for zero safety benefit — debug prints are ephemeral and stripped before shipping.
+  **Why not full capability enforcement**: every language with capability-based I/O provides an escape hatch for debugging. Haskell has `Debug.Trace.trace`. Requiring `TerminalCapability` for ephemeral debug prints would force capability threading through every function just to add a temporary print statement. That is ceremony that impedes development for zero safety benefit — debug prints are ephemeral and stripped before shipping.
   **[STAGE: DECIDED_CORE_SEMANTICS | D45 → `debug` keyword for development-only output; production I/O via `TerminalCapability`; `debug` is stripped in release builds]**
 - **The standard library follows the Rewrite-It-In-Kyokai (RIIK) principle: pure Kyokai implementations over FFI wrappers whenever mathematically and logically possible** — this is not a guideline; it is a design constraint that governs every standard library decision.
 **Rules**:
@@ -3968,19 +6594,19 @@ A diverging pattern match that flattens nesting by binding the success variant i
   build;
   ```
   **Rules**:
-  1. `RandomCapability` is acquired explicitly from `RootCapability`.
+  1. `EntropyCapability` is acquired explicitly from `RootCapability`.
   2. There is no ambient global RNG and no hidden thread-local safe RNG.
   3. OS entropy acquisition is capability-gated.
   4. Safe APIs provide explicit entropy-fill and seed-construction operations returning `Result[..., RandomError]` on ordinary failure.
   5. `FastRng` and `CryptoRng` are explicit mutable RNG-state values, not ambient services.
   6. RNG state values are linear so mutation stays explicit through `&!` operations.
   7. Constructing RNG state from explicit seed material requires no capability.
-  8. Constructing or reseeding RNG state from OS entropy requires `RandomCapability`.
+  8. Constructing or reseeding RNG state from OS entropy requires `EntropyCapability`.
   9. Fast non-cryptographic randomness and cryptographic randomness are distinct types, not a mode bit on one generic RNG surface.
-  10. Once an RNG state value has been constructed, ordinary draw and fill operations on that state do not require `RandomCapability`.
+  10. Once an RNG state value has been constructed, ordinary draw and fill operations on that state do not require `EntropyCapability`.
   11. The standard library includes both the explicit fast RNG surface and the explicit cryptographic RNG surface; Kyokai does not defer cryptographic randomness to FFI-only folklore.
   **Why this fits Kyokai**: entropy authority stays visible, deterministic replay remains possible through explicit seeds, and security-sensitive randomness is not confused with convenience PRNG state.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D173 → `RandomCapability` gates entropy acquisition; explicit `FastRng` and `CryptoRng` state values; no ambient RNG]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D173 → `EntropyCapability` gates OS entropy acquisition; explicit `FastRng` and `CryptoRng` state values; no ambient RNG]**
 - **Child-process creation is capability-gated through `ProcessCapability` and uses explicit OS-native text and process-configuration types** — spawning a process is operating-system authority and must not smuggle in shell parsing or ambient process-global state.
 **Core types**:
   ```kyokai
@@ -4051,7 +6677,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   5. `flush()` is explicit. There is no implicit flush-on-newline, flush-on-full, or flush-on-scope-exit beyond what the programmer writes with `defer`.
   6. Destroying a `BufferedWriter` without flushing is a linearity error — the writer must be flushed before it can be consumed by the destructor.
   7. Capability surfaces do not smuggle in buffering. A terminal, file, or socket capability yields raw unbuffered stream authority; ergonomic helpers may construct a buffered wrapper only through an explicit API that names buffering, takes an allocator, and takes a buffer size, such as `term.bufferedWriter(&!heap, 8192)`.
-  **Why this fits Kyokai**: `bfetchaust` had to implement its own `ByteBuf` because Austral provided no buffering abstraction. Kyokai provides one, but makes it explicit. The programmer sees the buffer size at construction, the allocator that backs it, and every flush point. No hidden allocations, no silent flushes, and no special capability-layer exception to the rule.
+  **Why this fits Kyokai**: Austral provides no adequate buffering abstraction for ordinary systems workloads. Kyokai provides one, but makes it explicit. The programmer sees the buffer size at construction, the allocator that backs it, and every flush point. No hidden allocations, no silent flushes, and no special capability-layer exception to the rule.
   **[DECIDED: D70/D133 → unbuffered by default; explicit `BufferedWriter[T]`/`BufferedReader[T]` wrappers only; capability APIs do not implicitly buffer]**
 - **Functions may declare `require` preconditions and `ensure` postconditions as part of their signature; failed contracts are TPOE** — Design by Contract is the syntactic surface for the value contracts that linear types cannot express. Linear types enforce lifecycle contracts (resource creation, use, destruction) at compile time. `require`/`ensure` enforce value contracts (input ranges, output guarantees, domain restrictions) at runtime.
 **Syntax**:
@@ -4178,7 +6804,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   6. D85's contract fields and the companion toolchain spec under D86 are the normative place where these non-capability effect facts are made explicit for the standard library and toolchain surfaces.
   **Why this fits Kyokai**: the language keeps the one effect boundary it truly cares about in the type system, while refusing to smuggle a broad secondary effect calculus into signatures and generic constraints.
   **[STAGE: DECIDED_CORE_SEMANTICS | D211 → capabilities are the only built-in effect-tracking mechanism; divergence/allocation/blocking/TPOE are not type-tracked and must be surfaced by explicit naming and contracts]**
-- **Kyokai has a backend-independent `asm` block syntax for inline assembly; it lives inside `pragma Unsafe_Module` and targets the instruction set, not the backend** — inline assembly is inherently unsafe and ISA-specific, but it should not be backend-specific. The syntax works with both the C backend (emitting `__asm__` in generated C) and the future LLVM backend (emitting LLVM inline asm constraints).
+- **Kyokai has a backend-independent `asm` block syntax for inline assembly; it lives inside `pragma Unsafe_Module` and targets the instruction set, not the backend** — inline assembly is inherently unsafe and ISA-specific, but it should not be backend-specific. The syntax works with both the C backend (emitting `__asm__` in generated C) and the LLVM backend migration target (emitting LLVM inline asm constraints).
 **Syntax**:
   ```kyokai
   // Only legal inside pragma Unsafe_Module
@@ -4200,7 +6826,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   6. The LLVM backend translates this to LLVM inline asm with appropriate constraints.
   7. The compiler does not attempt to understand or optimize assembly contents. It trusts the programmer's operand and clobber declarations.
   8. `asm` blocks do not participate in linearity checking — they are outside the safe language model. The surrounding unsafe module is responsible for correctness.
-  **Why not defer to FFI only (old Option D)**: D3b (atomics) proved that pushing core primitives to FFI loses type safety and compiler visibility. For the tiny number of functions that genuinely need inline asm (syscall wrappers, specific hardware instructions), a proper `asm` syntax is better than maintaining separate `.c` shim files. The syntax is designed once, works with both backends.
+  **Why inline assembly is not deferred to FFI-only shim files**: D3b (atomics) proved that pushing core primitives to FFI loses type safety and compiler visibility. For the tiny number of functions that genuinely need inline asm (syscall wrappers, specific hardware instructions), a proper `asm` syntax is better than maintaining separate `.c` shim files. The syntax is designed once, works with both backends.
   **[STAGE: DECIDED_CORE_SEMANTICS | D22 → backend-independent `asm` block syntax; `pragma Unsafe_Module` only; comptime ISA guard; named operand bindings; C backend emits `__asm__`, LLVM backend emits LLVM inline asm]**
 - **SIMD is a portable language feature with an explicit split between portable vectors and ISA-specific intrinsics** — Kyokai does not defer vector programming until the LLVM backend exists, and it does not define SIMD as "whatever intrinsics the current backend happens to expose."
 **Core type**: `Vector[T, N]`, where `T` is a fixed-width integer type, a fixed-width floating-point type, or `Bool` for mask vectors, and `N` is a positive comptime lane count.
@@ -4440,7 +7066,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   6. If the standard library provides a fatal-on-OOM convenience form, it must be explicitly named (for example `mustFormat`) and follow D74's runtime-fatal naming rule.
   7. For hex, padding, width, or alignment — use explicit named conversions: `x.toHex()`, `padLeft(s, 10, ' ')`. These are ordinary functions, not mini-language specifiers embedded in the format string.
   8. `{{` produces a literal `{` in output. `}}` produces a literal `}`. This is the only escape.
-  9. A richer formatting mini-language (width, radix, alignment, debug representation) is explicitly deferred to a future decision point if demand warrants it.
+  9. Width, radix, alignment, and debug-representation mini-language extensions are absent from stable Kyokai. Admitting any extension requires an accepted D-point and corresponding spec change.
   **Why minimal**: every formatting specifier is a mini-language feature that must be parsed, validated, documented, and maintained. Rust's `format!` supports `{:>10.2}` — that's a significant embedded DSL. Kyokai's philosophy is "no hidden complexity." If you need formatted numeric output, the formatting function is named and visible in source (`x.toHex()`, `padLeft(...)`), not hidden inside a format string that only the compiler can parse.
   **[STAGE: DECIDED_CORE_SEMANTICS | D40a → built-in `format(alloc, template, args...) -> Result[String, AllocError]` with comptime-checked `{}` only; explicit D74-aligned allocation failure; richer DSL explicitly deferred]**
 - **Non-allocating formatted output uses `writeFmt` over the same placeholder language, with explicit stream-failure semantics** — Kyokai provides a direct formatted-output path for streams without forcing an intermediate `String` allocation.
@@ -4787,7 +7413,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   4. The index records package metadata, repository URL, docs link, declared versions, tags when present, and dependency metadata derivable from manifests.
   5. `kyokai add <name>` may resolve through the official index, but the resulting manifest entry still records an explicit git source plus explicit revision as required by D51.
   6. The index does not introduce a `publish` command, registry-only package names, or registry-mediated trust semantics.
-  7. The index may host generated docs and API metadata, but those are derived mirrors, not the source of truth.
+  7. The index stores compact docs metadata, docs-search projections, and retrieval facts. Generated docs remain under each published package root at the exact indexed Git revision. A later Kyokai-operated mirror is cache-aside derived infrastructure only and is not the source of truth.
   8. Alternative third-party indexes are allowed; the language/toolchain model does not require exactly one global index.
   **Why this fits Kyokai**: discovery is essential for ecosystem growth, but D51's git-pinned dependency model remains the source of truth. The index is a lens, not a gatekeeper.
   **[STAGE: DECIDED_CORE_SEMANTICS | D221 -> official read-only package index (Go model); discovery only, not canonical storage; D51 git+rev dependency model unchanged]**
@@ -4820,11 +7446,11 @@ A diverging pattern match that flattens nesting by binding the success variant i
   4. Generated outputs are ordinary files in the source tree or declared generated directories with explicit paths; they are not hidden compiler-side ephemeral artifacts unless separately decided.
   5. Reproducibility rules from D83 apply to generation inputs and outputs.
   6. Comptime remains sandboxed and does not gain ambient filesystem or process access through this decision.
-  7. Asset embedding is provided by an explicit comptime facility such as `@embedFile(...)` or Kyokai-equivalent surface, with deterministic byte-for-byte embedding semantics.
+  7. Asset embedding is provided by an explicit comptime facility `@embedBytes(...)` or `@embedText(...)`, with deterministic byte-for-byte embedding semantics.
   8. FFI bindgen, protocol codegen, and asset embedding are thus handled by explicit manifest generation plus narrow explicit comptime embedding, not by a general executable build script language.
   9. No `build.kai`, no auto-running package code during dependency resolution, and no hidden pre-build execution model.
   **Why this fits Kyokai**: codegen is visible in the manifest, embedding is visible in source, and no package code runs as a side effect of dependency resolution.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D224 -> manifest-declared `[generate]` steps + `@embedFile` comptime extension; no `build.kai` or auto-execution]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D224/D335 -> manifest-declared `[generate]` steps + `@embedBytes`/`@embedText` comptime embedding; no `build.kai` or auto-execution]**
 
 ### 3.4 Readability Research - What Science Says
 
@@ -4871,7 +7497,7 @@ Austral uses **VSO (function-call) syntax** for everything — `appendByte(&~out
 - **Consistent casing matters more than which casing**: A codebase that consistently uses `camelCase` is read faster than one that mixes `camelCase` and `snake_case`, regardless of which convention is "better"
 - **snake_case vs camelCase**: Binkley et al. (2009) found `camelCase` had slightly higher accuracy for individual identifier recognition, but Sharif & Maletic (2010) found `snake_case` was identified faster on first fixation and preferred by experienced programmers. The difference is small; consistency dominates.
 
-**What Kyokai inherits from Austral**: `camelCase` for functions/variables, `PascalCase` for types and modules. This is consistent with itself. Changing it would impose a migration cost for no strong scientific reason. The recommendation is to **keep Austral's convention** and enforce it consistently.
+**What Kyokai inherits from Austral**: `camelCase` for functions/variables, `PascalCase` for types and modules. This is consistent with itself. Changing it would impose a migration cost for no strong scientific reason. Kyokai keeps Austral’s convention and enforces it consistently.
 
 #### Nesting Depth and Comprehension
 
@@ -5021,7 +7647,7 @@ Linear type interaction: `Result[File, Error]` is `Linear` because `File` is `Li
 
 **What**: `spanEquals()`, `spanCompare()`, `stringEquals()`, `stringCompare()`, plus `startsWith()`, `endsWith()`, `contains()`, `find()`.
 
-**Why critical**: bfetchaust had to manually implement byte-by-byte comparison (`Fetch.aum` lines 50-64). This is the most basic operation for any text processing.
+**Why critical**: Requiring each program to manually implement byte-by-byte comparison is unreasonable. This is a basic operation for text and protocol processing.
 
 **Implementation**: Pure Kyokai. No unsafe. Just byte comparison loops over `Span[Nat8, R]`. Implement `Equality` and `TotalOrder` typeclass instances for `Span` and `String`.
 
@@ -5029,35 +7655,21 @@ Linear type interaction: `Result[File, Error]` is `Linear` because `File` is `Li
 
 #### [C04] POSIX I/O Layer — H-5
 
-**What**: Safe, capability-secure file I/O. This is what bfetchaust's `BfetchAust.Posix` and `BfetchAust.FastIO` provide, but generalized and made part of the stdlib.
+**What**: Safe, capability-secure file I/O and explicit buffered I/O helpers as standard-library surfaces.
 
-**Why critical**: Without this, every program that does I/O must build its own POSIX wrapper from scratch. `bfetchaust` already proves the shape is needed; Kyokai should productionize it.
+**Why critical**: Without this, every program that does I/O must build its own POSIX wrapper from scratch. Kyokai standardizes the safe surface so programs do not each recreate the platform boundary.
 
-**Implementation**: The bfetchaust runtime modules are the reference implementation:
-
-- `BfetchAust.Posix` shows which syscalls are needed: `read`, `write`, `open`, `close`, `stat`, `uname`, `sysinfo`, `readlink`, `access`, `fork`, `waitpid`, `pipe`, `dup2`, `execvp`.
-- `BfetchAust.FastIO` shows the ByteBuf pattern: linear buffer with `make()`, `destroy()`, `append*()`, `writeAll()`.
-- Wrap these in capability-secure API following the pattern from Borretti's capabilities blog post.
-
-**Reference**: `bfetch/bfetchaust/runtime/BfetchAust.Posix.aui` for the syscall list, `bfetch/bfetchaust/runtime/BfetchAust.FastIO.aui` for the buffer API.
+**Implementation**: The first safe wrapper inventory covers `read`, `write`, `open`, `close`, `stat`, `uname`, `sysinfo`, `readlink`, `access`, `fork`, `waitpid`, `pipe`, `dup2`, and `execvp`. Buffered I/O uses a linear buffer with explicit construction, destruction, append operations, and `writeAll()`. Wrap these operations in capability-secure APIs following the capability rules stated in the Kyokai spec.
 
 ---
 
 #### [C05] Concurrency Model — H-10
 
-**What**: Safe concurrent programming primitives.
+**What**: Safe concurrent programming primitives built from visible structured task groups, ownership-transfer channels, explicit synchronization, cooperative cancellation, and explicit readiness waiting.
 
-**Why critical**: Borretti deliberately punted on this. But any real systems program needs threads or async I/O.
+**Accepted shape**: Every child task is created inside a `taskgroup` and joined before that group exits. SPSC channels transfer ownership of messages and expose explicit capacity, close, cleanup, and backpressure behavior. Shared-memory algorithms use the accepted explicit atomic, mutex, read-write-lock, and condition-variable APIs under the safe memory model. Cancellation uses explicit source/token propagation and named cancellation points. High-concurrency I/O uses explicit `Poller` readiness APIs and source-visible retry loops rather than language-level `async`/`await`. Ordinary blocking calls remain ordinary blocking calls. Kyokai does not add a hidden scheduler, unstructured task spawning, implicit cancellation, or implicit priority inheritance.
 
-**Why hardness 10**: This is the biggest design decision Kyokai faces. Options:
-
-1. **Message-passing with linear channels** (Erlang-like): Each thread gets its own linear capability. Communication via channels that transfer ownership of linear values. No shared memory → no data races. Most Austral-compatible because linearity already prevents aliasing.
-2. **Structured concurrency** (like Zig's or Swift's): Spawned tasks cannot outlive their parent scope. This aligns with Austral's lexical scoping model for regions.
-3. **Fork-join** (like Rayon): Safe parallel iterators. Simpler but less general.
-
-**Key insight**: Linear types already solve the hardest part of concurrency — aliasing. A linear value has exactly one owner. If you send it across a channel, you lose it. No data races by construction. This is explicitly stated in the resource-types rationale (`rationale/3.resource-types.md` lines 35-38): "Safe concurrency. A value of a linear type, by definition, has only one owner: we cannot duplicate it because we can only use it once. So imperative mutation is safe, since we know that no other thread can write to our linear value while we work with it."
-
-**Decision required**: Which model? This should be prototyped and experimented with before committing.
+**Implementation work**: Implement and test task groups, `spawn`/`join`, channels, `select`, cancellation tokens, deadlines, `Poller`, signal integration, explicit atomics and locks, backend atomic mappings, happens-before rules, diagnostics, and conformance examples. The accepted mechanics are tracked by D3, D90-D95, D100-D101, D141, D146, D156, D164, D168, D183-D184, D212, D234-D237, D247-D248, D252, D256, D282, D317, D327, D342, D353-D354, D388, D411, D457-D457a, and D473.
 
 ---
 
@@ -5067,7 +7679,7 @@ Linear type interaction: `Result[File, Error]` is `Linear` because `File` is `Li
 
 **What**: `defer consume(x);` at variable declaration point. Compiler ensures the deferred call happens on every exit path from the current scope.
 
-**Why high severity**: bfetchaust's 11-line destroy chain (`Fetch.aum` lines 387-397) demonstrates the problem. This is the #1 ergonomic complaint with linear types.
+**Why high severity**: Resource-heavy functions otherwise end with long manual destroy chains. This is a major ergonomic cost of linear types.
 
 **Why hardness 6**: Requires compiler modification:
 

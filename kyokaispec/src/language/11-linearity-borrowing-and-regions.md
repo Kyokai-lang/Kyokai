@@ -35,27 +35,29 @@ Borrow reference values of type `&[T]`, `&![T]`, `&[T, R]`, or `&![T, R]` are `F
 
 ## Checker States
 
-For every local linear binding, field path, pattern-bound payload, temporary owner, and deferred cleanup capture that may own a linear value, the checker tracks a state. The minimum observable state set is `Live`, `Moved`, `Destroyed`, `Deferred`, `ErrDeferred`, `BorrowedRead`, `BorrowedMut`, `SuspendedByReborrow`, and `Unavailable`.
+For every local linear binding, field path, pattern-bound payload, and temporary owner that can own a linear value, the checker tracks one ownership state. The minimum observable ownership-state set is `Live`, `SharedBorrowed(n)`, `MutBorrowed`, `PartiallyMoved(field-set)`, `Moved`, `Consumed`, and `PendingLoopConsumption`. Deferred cleanup registration is a separate control-flow reservation fact layered over that ownership state.
 
-> Trace: D2, D7b, D14, D187, D246
-> Covers: The checker has named ownership, borrow, and deferred-cleanup states rather than informal use counts.
+> Trace: D2, D7b, D14, D187, D246, D348
+> Covers: The checker uses the D348 ownership-state vocabulary and records deferred cleanup separately so cleanup registration cannot disguise ownership state.
 
 | State | Meaning | Legal next motions | Rejected motions | Trace |
 | --- | --- | --- | --- | --- |
-| `Live` | The current scope owns the value and no conflicting borrow is active. | Move, destroy, return, send, store, read-borrow, mutable-borrow, defer, errdefer. | Duplicate binding of the same owner; scope exit without discharge. | D89/D195 |
-| `Moved` | Ownership has left this place. | No value use; only diagnostics may refer to the old name. | Read, write, borrow, move again, destroy, defer, return. | D89 |
-| `Destroyed` | A visible consuming cleanup operation has consumed the value. | No value use. | Any later use or cleanup. | D2/D195 |
-| `Deferred` | A visible `defer` action has registered a consuming cleanup for this value. | Non-conflicting read borrows before scope exit. | Move, destroy now, return, send, store elsewhere, register another consuming cleanup. | D2/D2a/D246 |
-| `ErrDeferred` | A visible `errdefer` action owns cleanup for structured error exits only. | Success-path move, return, destroy, or other discharge; non-conflicting borrows. | Duplicate cleanup on the same path; scope success without discharge. | D2b/D227/D246 |
-| `BorrowedRead` | One or more immutable borrows are live. | More immutable borrows; reads through admitted access. | Move, destroy, mutable borrow, mutable write through the owner. | D14/D187 |
-| `BorrowedMut` | Exactly one mutable borrow is live. | Reads/writes through that mutable borrow; reborrow under the rules below. | Move owner, destroy owner, second mutable borrow, ordinary read borrow from owner. | D14/D187 |
-| `SuspendedByReborrow` | A mutable borrow is temporarily unusable while a nested reborrow is live. | Use the nested reborrow; end the nested region. | Use the suspended borrow, create conflicting borrows, move referent. | D7b/D187/D240 |
-| `Unavailable` | Control path cannot continue normally, such as after `return`, `break`, `continue`, `panic`, `todo`, or `unreachable`. | Join only with other paths according to `Never` and control-flow rules. | Treating the path as if it produced live ownership state. | D58/D191/D84 |
+| `Live` | The current scope owns the whole value and no conflicting borrow is active. | Move, consume, return, send, store, project a field, immutable-borrow, mutable-borrow, register `defer`, register `errdefer`. | Duplicate ownership; ordinary scope exit without discharge. | D89/D195/D348 |
+| `SharedBorrowed(n)` | One or more immutable borrows are live. | Create another immutable borrow; read through admitted access; end a borrow region. | Move, consume, mutable-borrow, mutate through the owner. | D14/D187/D348 |
+| `MutBorrowed` | Exactly one exclusive mutable borrow is live. | Read or write through that borrow; create an admitted nested reborrow; end the borrow region. | Move or consume the owner, create a conflicting borrow, mutate outside the borrow. | D14/D187/D348 |
+| `PartiallyMoved(field-set)` | The listed fields have moved out of a composite owner. Remaining fields retain their own states. | Use remaining fields; reinitialize moved fields where the declaration and assignment rules permit reinitialization. | Use the parent as a whole before legal reinitialization; hide an unaccounted linear field. | D98/D195/D348 |
+| `Moved` | Ownership transferred out of this place. | Reinitialize only where a legal assignment rule permits it. | Read, borrow, move again, consume again, register cleanup. | D89/D348 |
+| `Consumed` | A consuming operation, return, surrender, or destruction operation discharged the value. | No later value use. | Any later use or second discharge. | D2/D195/D348 |
+| `PendingLoopConsumption` | A loop body attempted to consume an owner created outside the loop. | Prove exactly-once consumption across every iteration and exit path. | Accept the loop when zero, one, and repeated iteration paths do not establish one discharge. | D32/D249/D348 |
 
-A compiler may split these states into finer internal states. It may not collapse them in a way that admits a duplicate consumption, hidden drop, escaped borrow, conflicting alias, or path-dependent cleanup hole.
+Borrow creation records source binding, borrow mode, region, source span, and parent projection path. Borrow end restores the preceding `Live` or `PartiallyMoved(field-set)` state only after every derived reborrow ends. A mutable borrow temporarily suspended by a nested reborrow remains represented by the active reborrow chain; it is not a separate ownership state.
 
-> Trace: D73, D195, D238-D240, D246
-> Covers: Internal implementation freedom cannot weaken the observable ownership state machine.
+A `defer` registration reserves its captured owner for ordinary cleanup. An `errdefer` registration records an error-exit cleanup edge while leaving the success path responsible for discharge. A control-flow path ending in `return`, `break`, `continue`, `panic`, `todo`, TPOE, or `unreachable` is checked at that exit and contributes no fake normal-join state.
+
+A compiler can split these states into finer internal states. It must not collapse them in a way that admits duplicate consumption, hidden drop, escaped borrow, conflicting alias, lost partial-move accounting, or a path-dependent cleanup hole.
+
+> Trace: D73, D195, D238-D240, D246, D348
+> Covers: Internal implementation freedom cannot weaken the observable D348 ownership state machine, borrow-chain accounting, or deferred-cleanup reservations.
 
 ## Movement
 
@@ -69,10 +71,10 @@ Kyokai's move model is as-if bytewise relocation. The language does not promise 
 > Trace: D73, D89, D199, D228
 > Covers: Move semantics are relocation semantics, not stable-address semantics, and backend lowering must preserve them without backend undefined behavior.
 
-Moving a record, union, array, buffer, iterator, closure, task capture, capability, or owning handle follows the same rule: ownership transfers exactly once. A move of a composite linear value moves the whole composite. Partial moves exist only where a surface construct explicitly admits them and specifies the resulting owner state for every field.
+Moving a record, union, array, buffer, iterator, closure, task capture, capability, or owning handle follows the same rule: ownership transfers exactly once. A whole-composite move leaves the source `Moved`. An admitted field extraction, destructuring step, or record-update step can instead leave the source `PartiallyMoved(field-set)`. Each remaining field keeps its own state, and the parent cannot be used as a whole until the moved fields are legally reinitialized or the remaining fields are discharged.
 
-> Trace: D89, D98, D195, D205-D206
-> Covers: Composite movement is whole-value movement unless a specified construct exposes field-by-field ownership.
+> Trace: D89, D98, D195, D205-D206, D348
+> Covers: Composite movement distinguishes whole-value `Moved` state from explicit field-by-field `PartiallyMoved(field-set)` accounting.
 
 A `Free` value may be copied where the type admits copying. A `Linear` value is never copied by ordinary assignment, argument passing, return, generic dispatch, closure capture, task capture, formatting, debugging, or backend lowering. Any operation that truly duplicates a resource must be a named API with its own contract.
 
@@ -81,15 +83,15 @@ A `Free` value may be copied where the type admits copying. A `Linear` value is 
 
 ## Destruction And `drop;`
 
-Kyokai has no hidden destructors. Leaving a scope does not call a type-specific cleanup operation merely because a linear value is live. If a linear value reaches ordinary scope exit still `Live` or success-live under `ErrDeferred`, the program is rejected.
+Kyokai has no hidden destructors. Leaving a scope does not call a type-specific cleanup operation merely because a linear value is live. If a linear value reaches ordinary scope exit still `Live` without an ordinary-cleanup reservation, or still success-live under an error-exit cleanup reservation, the program is rejected.
 
-> Trace: D2, D195, D246
+> Trace: D2, D195, D246, D348
 > Covers: Scope exit is not implicit destruction; every linear owner must be visibly discharged.
 
-A consuming cleanup operation is an ordinary function, method, or typeclass operation whose signature consumes the owner. Standard generic cleanup uses explicit contracts such as `Destroyable[T: Linear]`; the language does not synthesize structural destruction for user records or unions.
+A consuming cleanup operation is an ordinary function, method, or typeclass operation whose signature consumes the owner. `Destroyable[T]` is a manual domain cleanup contract. `Cleanable[T]` is the explicit generic container and drain cleanup contract: `Free` values satisfy it trivially without runtime action, while `Linear` values require a named consuming implementation. Neither contract runs automatically at scope exit, and the language does not synthesize structural destruction for user records or unions.
 
-> Trace: D2, D82/D82a/D82b, D195, D246
-> Covers: Generic cleanup is explicit static dispatch, not compiler-invented destructor behavior.
+> Trace: D2, D82/D82a/D82b, D195, D246, D289-D290
+> Covers: Generic cleanup is explicit static dispatch through manual contracts, never compiler-invented scope-exit destruction.
 
 The `drop;` terminator closes a borrow scope. It does not destroy the borrowed referent and does not discharge an owning linear value. When `drop;` is reached, all borrow references whose region is that borrow scope become unusable, and the owner state resumes according to the borrow kind that ended.
 
@@ -113,7 +115,7 @@ Named regions use `&[T, R]` or `&![T, R]` with an explicit `generic [R: Region]`
 > Trace: D6, D159/D188
 > Covers: Named regions are explicit API relationships for rare escaping-borrow signatures.
 
-A region cannot outlive the owner, temporary, or borrow scope that created it. A borrow value whose type contains an anonymous region may not be stored in a longer-lived place, returned from the function, captured by a closure or task beyond the region, placed into a global, or hidden in a container whose lifetime is not bounded by that region.
+A region cannot outlive the owner, temporary, or borrow scope that created it. A borrow value whose type contains an anonymous region must not be stored in a longer-lived place, returned from the function, captured by a closure or task beyond the region, placed into a global, or hidden in a container whose lifetime is not bounded by that region.
 
 > Trace: D6, D72, D118/D197, D164/D248
 > Covers: Anonymous-region borrow values are non-escaping and cannot be smuggled through storage or capture.
@@ -140,14 +142,14 @@ A borrow of a field, index projection, or slice projection borrows the selected 
 > Trace: D34, D36/D106/D132, D77, D187
 > Covers: Projection borrows carry enough owner-state restriction to prevent invalid field, element, slice, and iterator access.
 
-A static literal may be borrowed because its storage duration is part of the literal contract. An ordinary rvalue temporary may be immutably borrowed only for an immediate non-escaping use in the same statement. An ordinary rvalue temporary may not be mutably borrowed.
+A static literal may be borrowed because its storage duration is part of the literal contract. An ordinary rvalue temporary may be immutably borrowed only for an immediate non-escaping use in the same statement. An ordinary rvalue temporary must not be mutably borrowed.
 
 > Trace: D72/D213
 > Covers: Temporary borrowing is statement-scoped, non-escaping, and immutable-only for rvalues.
 
 ## Reborrowing
 
-`&~borrow` creates an explicit reborrow from an existing mutable borrow. During the reborrow region, the original mutable borrow enters `SuspendedByReborrow` and cannot be used until the nested reborrow ends.
+`&~borrow` creates an explicit reborrow from an existing mutable borrow. While the nested reborrow chain is live, the source mutable borrow is unavailable. The checker represents that restriction through the active reborrow chain and restores source availability only after every derived reborrow ends; it does not introduce a separate ownership state.
 
 > Trace: D7b, D14, D187
 > Covers: Reborrow creates nested temporary access and suspends the source mutable borrow.
@@ -179,7 +181,7 @@ A path that exits through `return`, `break`, `continue`, `panic`, `todo`, or `un
 > Trace: D43, D58/D191, D84, D121-D122
 > Covers: Diverging and exiting paths are ownership-checked locally and do not fake normal continuation.
 
-Inside loops, a linear value owned before the loop may not be consumed by the loop body unless the loop form's desugaring proves exactly one consumption across every possible zero-iteration, one-iteration, many-iteration, `break`, `continue`, and `return` path. Ordinary loops do not provide that proof for outside owners.
+Inside loops, a linear value owned before the loop must not be consumed by the loop body unless the loop form's desugaring proves exactly one consumption across every possible zero-iteration, one-iteration, many-iteration, `break`, `continue`, and `return` path. Ordinary loops do not provide that proof for outside owners.
 
 > Trace: D32/D249, D43, D195
 > Covers: Repeated control flow cannot consume an outside linear owner an unknown number of times.
@@ -189,21 +191,21 @@ A linear value may be created inside a loop body. It must be discharged before e
 > Trace: D2, D32/D249, D43, D195, D246
 > Covers: Loop-local linear obligations are per-iteration obligations with explicit cleanup or movement.
 
-## `defer` And `errdefer` States
+## `defer` And `errdefer` Reservations
 
-A `defer` that consumes a linear value transitions that value to `Deferred` at the registration point. The value is not consumed by ordinary execution at that moment, but it is reserved for the registered cleanup action. The checker treats duplicate consumption before scope exit as an error.
+A `defer` that consumes a linear value records an ordinary-cleanup reservation at the registration point. The reservation is layered over the value's D348 ownership state. The value is not consumed by ordinary execution at that moment, but it is reserved for the registered cleanup action. The checker treats duplicate consumption before scope exit as an error.
 
-> Trace: D2, D2a, D246
+> Trace: D2, D2a, D246, D348
 > Covers: Ordinary deferred cleanup reserves ownership immediately and runs later in visible LIFO order.
 
-A `Deferred` value may be immutably borrowed, and may be mutably borrowed only if the borrow ends before the deferred action can run and the deferred action still receives the value in a valid state. A deferred value may not be moved, returned, sent, reassigned, destroyed by another action, or registered again for consuming cleanup.
+A value with an ordinary-cleanup reservation may be immutably borrowed, and may be mutably borrowed only if the borrow ends before the deferred action can run and the deferred action still receives the value in a valid state. A deferred value must not be moved, returned, sent, reassigned, destroyed by another action, or registered again for consuming cleanup.
 
 > Trace: D14, D187, D246
-> Covers: Deferred ownership is still borrow-checkable, but cannot be stolen from the registered cleanup path.
+> Covers: Reserved deferred ownership is still borrow-checkable, but cannot be stolen from the registered cleanup path.
 
-An `errdefer` that consumes a linear value transitions that value to `ErrDeferred` for structured error exits from the scope. On success paths, the value remains an obligation: it must be moved, returned, destroyed, deferred, or otherwise discharged before the scope completes normally.
+An `errdefer` that consumes a linear value records an error-exit cleanup reservation layered over the value's D348 ownership state. On success paths, the value remains an obligation: it must be moved, returned, destroyed, deferred, or otherwise discharged before the scope completes normally.
 
-> Trace: D2b, D227, D246
+> Trace: D2b, D227, D246, D348
 > Covers: Error-only cleanup does not silently clean success paths.
 
 If a scope exits through `or return` or `return Err(value)`, eligible `errdefer` and ordinary `defer` actions run in reverse registration order for that scope. If a scope exits through `break`, `continue`, `or break`, `or continue`, or `panic`, only ordinary `defer` actions run. If execution reaches TPOE, no user `defer` or `errdefer` action runs.
@@ -221,7 +223,7 @@ Pattern matching over a linear scrutinee consumes that scrutinee exactly once an
 Record destructuring must be total for the record form being destructured. If the record contains linear fields, each linear field must be bound and discharged. Partial record moves and hidden field drops are not part of Kyokai's pattern semantics.
 
 > Trace: D35, D98, D206
-> Covers: Record destructuring cannot leave linear fields behind in an unspecified state.
+> Covers: Record destructuring cannot leave linear fields behind in an unclassified state.
 
 A `case` over a union must be exhaustive. Exhaustiveness is checked structurally, including nested patterns. A catch-all shape cannot hide possible linear payloads; linear alternatives must expose the payload names needed for ownership checking.
 
@@ -235,12 +237,12 @@ A closure literal captures only what its explicit capture list names. Capturing 
 > Trace: D118/D126/D197
 > Covers: Closure environment ownership is explicit and determines the callable family statically.
 
-A closure may not capture an anonymous-region borrow if the closure can outlive that region. A closure that stores, returns, or transfers a borrow must use a named region relationship admitted by the signature and still obey the owner-state rules.
+A closure must not capture an anonymous-region borrow if the closure can outlive that region. A closure that stores, returns, or transfers a borrow must use a named region relationship admitted by the signature and still obey the owner-state rules.
 
 > Trace: D6, D72, D118/D197
 > Covers: Closure capture cannot extend borrow lifetimes by hiding them in an environment.
 
-A generator is a named linear iterator type. Its suspended state owns whatever linear values remain live across `yield`, and its destroy operation must consume that suspended state exactly once. A generator may not suspend with live borrows that outlive their region.
+A generator is a named linear iterator type. Its suspended state owns whatever linear values remain live across `yield`, and its destroy operation must consume that suspended state exactly once. A generator must not suspend with live borrows that outlive their region.
 
 > Trace: D198, D249
 > Covers: Generator suspension is linear state, not a hidden coroutine runtime with erased ownership.
@@ -262,7 +264,7 @@ Each yielded item follows ordinary pattern and linearity rules. A yielded linear
 > Trace: D38/D205/D206, D195, D249
 > Covers: Iteration does not relax item ownership or borrow escape rules.
 
-Safe collection APIs should return element borrows or iterator values whose regions are tied to the container borrow. While such a borrow or iterator is live, mutating operations that could reallocate, remove, reorder, or otherwise invalidate the selected storage are rejected unless the container API specifies a stronger stable-address contract.
+Safe collection APIs return element borrows or iterator values whose regions are tied to the container borrow. While such a borrow or iterator is live, mutating operations that could reallocate, remove, reorder, or otherwise invalidate the selected storage are rejected unless the container API specifies a stronger stable-address contract.
 
 > Trace: D77, D85, D187
 > Covers: Container invalidation is mostly statically prevented and otherwise must be specified per container contract.
@@ -274,7 +276,7 @@ Raw addresses, pointer-like values, and unsafe container internals do not weaken
 
 ## Pinning And Self-Reference
 
-Ordinary safe Kyokai values are movable unless their type declares otherwise. Because ordinary moves are relocation, safe code may not construct self-referential values that depend on an internal address staying stable after movement.
+Ordinary safe Kyokai values are movable unless their type declares otherwise. Because ordinary moves are relocation, safe code must not construct self-referential values that depend on an internal address staying stable after movement.
 
 > Trace: D89, D89a
 > Covers: Safe self-reference is rejected under ordinary movable value semantics.
@@ -284,7 +286,7 @@ Ordinary safe Kyokai values are movable unless their type declares otherwise. Be
 > Trace: D89a/D89b
 > Covers: Heap indirection and first-class pinning are separate contracts.
 
-A `pinned` type declaration and `PinBox[T]` provide the admitted stable-address boundary. Once initialized behind the pinning owner, a pinned value may not be moved by safe code. Generic containers, algorithms, and returns that relocate elements must require a `Movable` capability, bound, or contract and must reject pinned values unless they provide a pin-preserving representation.
+A `pinned` type declaration and `PinBox[T]` provide the admitted stable-address boundary. Once initialized behind the pinning owner, a pinned value must not be moved by safe code. Generic containers, algorithms, and returns that relocate elements must require a `Movable` capability, bound, or contract and must reject pinned values unless they provide a pin-preserving representation.
 
 > Trace: D89b, D82/D82a/D82b
 > Covers: Non-movability is declaration-site visible and generic relocation must be explicit.
@@ -305,3 +307,49 @@ The conformance suite must include positive and negative tests for move-after-mo
 
 > Trace: D6, D7b, D14, D72, D87, D187, D197, D205-D206, D238-D240, D246, D249
 > Covers: These rules require explicit conformance coverage across ownership, borrow, cleanup, and escape boundaries.
+
+## Read-Only Access And Explicit Bundles
+
+Observation of a linear owner uses `&[T]`; mutation uses `&![T]`. Observation returns computed results and does not consume and return the owner merely to permit reading. Allocator, logger, clock, random, filesystem, network, terminal, process, audit, and cancellation surfaces are passed as explicit values or explicit nominal bundles. A bundle is ordinary source-visible data. It creates no ambient lookup, injected parameter, hidden capability minting, or hidden allocation. Public APIs take the narrowest authority surface that satisfies the operation.
+
+> Trace: D398, D492
+> Covers: Immutable observation avoids ownership tuple-juggling, and nominal bundles improve ergonomics without hidden context passing or overbroad authority.
+
+## Reborrow Suspension Across Joins
+
+A mutable reborrow suspends its source mutable borrow until the reborrow ends. Across a control-flow join, the checker resumes the source only when every non-diverging arm ends the reborrow with compatible state. A rejected join reports the suspension source, each branch state, and the incompatible live path. Tooling can suggest explicit scope narrowing or pass-through records, but it cannot insert a hidden state transition.
+
+> Trace: D459, D495
+> Covers: Reborrow resumption is checker-visible at control-flow joins and diagnostics expose the exact mismatching path.
+
+## Task Transfer Is Field-Visible Movement
+
+Task transfer rejects isolate-style object-graph packaging. Moving a value into a task follows its declared transfer classification field by field. No deep copy, hidden serialization, hidden allocator, implicit ownership island, or alternate package artifact is created. A borrow captured by a task remains live until the structured join proves the task ended.
+
+> Trace: D168, D248, D468
+> Covers: Task movement preserves ordinary linearity and borrowing instead of creating a second isolation mechanism.
+
+## Graph Owners And Hole-Free Collections
+
+Safe graph structures use linear owners plus nominal handles, generation-checked keys, region-bound borrows, or audited pinned intrusive internals. A safe handle is not a raw integer. Lookup returns a declared failure for missing, stale, wrong-owner, removed, or wrong-generation handles.
+
+Safe collection indexing never moves a linear element out by value. Named extraction operations preserve initialized storage invariants: `pop`, `removeAt`, `swapRemoveAt`, `replaceAt`, `takeOnly`, `drain`, `intoIter`, or an admitted domain-specific equivalent. A drain or consuming iterator that retains linear elements is linear and must be exhausted or finalized explicitly.
+
+| Situation | Legal source shape | Rejected shape |
+| --- | --- | --- |
+| Observe linear owner | Pass `&[T]`. | Consume and return ownership solely to read. |
+| Mutate owner | Pass `&![T]` under exclusive borrow scope. | Hidden shared mutation. |
+| Reborrow across branch | End with compatible state in every non-diverging arm. | Resume source while a path retains reborrow. |
+| Move collection element | Use invariant-preserving named extraction. | Safe indexing that leaves a hole. |
+| Graph reference | Use owner-checked nominal handle or borrow. | Raw integer key presented as safe handle. |
+| Task transfer | Move transfer-admitted fields explicitly. | Hidden isolation package or deep copy. |
+
+> Trace: D374, D384, D463, D490, D496-D497
+> Covers: Safe graphs, slot maps, hole-free collection extraction, drain obligations, and generic universe rules preserve exactly-once ownership.
+
+## Early Release And Tooling
+
+A resource type exposes a named consuming release operation or an accepted `defer` cleanup path. Code shortens resource lifetimes with lexical scopes, explicit release, ownership transfer, or `defer` inside the smallest owning scope. Compiler-integrated diagnostics report resources acquired long before cleanup registration, `defer` inside long-running loops, guards held across blocking or concurrency boundaries, nested locks without declared order, and large storage retained across unrelated blocking work. These reports do not claim deadlock freedom.
+
+> Trace: D498
+> Covers: Resource-release tooling points at visible ownership lifetimes and never changes legality or inserts hidden cleanup.

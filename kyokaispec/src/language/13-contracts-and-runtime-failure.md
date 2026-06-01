@@ -15,7 +15,7 @@ This chapter defines function contracts, contract expression semantics, `panic`,
 
 ## Failure Categories
 
-Every observable failure in Kyokai belongs to exactly one of these categories unless a later chapter defines a narrower standard-library result type for an operation.
+Every observable failure in Kyokai belongs to exactly one of these categories. A standard-library API refines ordinary recoverable or absence data through a named domain `Result` or `Optional` contract; it does not add an unclassified failure category.
 
 > Trace: D84, D211, D253
 > Covers: Failure taxonomy is closed enough that each surface can state its result category directly.
@@ -28,10 +28,10 @@ Every observable failure in Kyokai belongs to exactly one of these categories un
 | `Result` | Recoverable failure is expected. | Caller must inspect `Ok` or `Err`. | No special cleanup unless control exits. | `or return` triggers `errdefer`. | Yes, as ordinary data. | D15/D15a/D24 |
 | TPOE | A contract or checked runtime rule was violated. | Process terminates through the TPOE runtime path. | No. | No. | No. | D53/D75/D84 |
 | `panic` | Source explicitly requests abnormal termination. | Process terminates through the panic runtime path. | Yes, ordinary `defer` only. | No, unless already on a structured error exit. | No. | D84/D208 |
-| Runtime-fatal | Runtime or host condition invalidates safe continuation. | Process terminates through the runtime-fatal path. | No, unless the specific runtime hook says otherwise. | No. | No. | D84/D95/D262 |
+| Runtime-fatal | Runtime or host condition invalidates safe continuation. | Process terminates through the runtime-fatal path. | No. | No. | No. | D84/D95/D262/D285 |
 | Ordinary process exit | Entrypoint returns an exit code or the host entry path completes normally. | Process exits with that code/status. | Ordinary structured scope exits run. | Only on structured error exits before final return. | Not an error. | D84 |
 
-A standard-library API must name its failure mode as `Optional`, `Result`, TPOE, `panic`, runtime-fatal, or ordinary value. It may not say only "fails" or "throws".
+A standard-library API must name its failure mode as `Optional`, `Result`, TPOE, `panic`, runtime-fatal, or ordinary value. It must not say only "fails" or "throws".
 
 > Trace: D85, D211, D229
 > Covers: Public API contracts name failure modes instead of relying on vague prose.
@@ -75,7 +75,7 @@ Contract clauses are part of the public interface when they appear in `.kyo` int
 
 ## Contract Expression Purity
 
-A `require` or `ensure` expression must be observation-only. It may read immutable data, call admitted pure observation functions, compare values, perform ordinary arithmetic, and inspect `Free` data or immutable borrows. It may not mutate, allocate, block, consume linear values, acquire capabilities, perform I/O, spawn tasks, register cleanup, or call functions whose contract admits any of those effects.
+A `require` or `ensure` expression must be observation-only. It may read immutable data, call admitted pure observation functions, compare values, perform ordinary arithmetic, and inspect `Free` data or immutable borrows. It must not mutate, allocate, block, consume linear values, acquire capabilities, perform I/O, spawn tasks, register cleanup, or call functions whose contract admits any of those effects.
 
 > Trace: D53, D124-D125, D129, D211
 > Covers: Contract expressions observe program state without changing ownership, authority, allocation, blocking, or control flow.
@@ -97,7 +97,7 @@ Inside an `ensure` clause, `result` is a contextual name for a read-only view of
 > Trace: D53, D125, D142
 > Covers: `result` is contextual to postconditions only.
 
-When the return type is `Free`, `result` may be observed as a `Free` value according to the ordinary read rules. When the return type is `Linear`, `result` is an immutable borrow of the produced return value. The postcondition may observe it but may not move it, consume it, mutably borrow it, store the borrow beyond the postcondition, or return another borrow tied to it.
+When the return type is `Free`, `result` may be observed as a `Free` value according to the ordinary read rules. When the return type is `Linear`, `result` is an immutable borrow of the produced return value. The postcondition may observe it but must not move it, consume it, mutably borrow it, store the borrow beyond the postcondition, or return another borrow tied to it.
 
 > Trace: D14, D53, D142
 > Covers: Linear `result` is a read-only postcondition borrow, not a duplicate owner.
@@ -119,7 +119,7 @@ The expression inside `old` must be pure, must depend only on values available a
 > Trace: D129, D195
 > Covers: `old` cannot copy linear state or smuggle ownership into postconditions.
 
-`old` may apply to a qualified pure expression, not only to a bare parameter name. It may not allocate, call authority-bearing APIs, block, mutate, consume, or observe values that are introduced after function entry.
+`old` may apply to a qualified pure expression, not only to a bare parameter name. It must not allocate, call authority-bearing APIs, block, mutate, consume, or observe values that are introduced after function entry.
 
 > Trace: D53, D129, D211
 > Covers: Entry snapshots are pure and entry-bounded.
@@ -163,10 +163,10 @@ Kyokai has no in-process `catch panic`, panic recovery block, task-level panic r
 > Trace: D121, D84
 > Covers: Runtime `todo` is explicit panic-class termination.
 
-`unreachable(message);` states that control cannot reach that point. Reaching it at runtime is TPOE, not backend undefined behavior. The compiler may use proven unreachability for diagnostics and optimization only when doing so preserves Kyokai's defined TPOE contract.
+`unreachable;` states that control cannot reach that point. It has type `Never`. Reaching it at runtime triggers TPOE with diagnostic kind `UnreachableReached` and the source span. Safe `unreachable;` is not `panic`, backend undefined behavior, LLVM poison, a bare `__builtin_unreachable`, or an optimizer assumption. The compiler can remove its branch only after accepted static analysis proves that the branch cannot execute under Kyokai semantics.
 
-> Trace: D73, D84, D121, D228
-> Covers: Reached `unreachable` is checked termination, not LLVM/C undefined behavior.
+> Trace: D73, D84, D121, D228, D355
+> Covers: Reached safe `unreachable;` is a source-located TPOE path and never lowers directly to backend undefined behavior.
 
 ## Runtime-Fatal Termination
 
@@ -209,20 +209,24 @@ If allocation failure occurs inside a construct whose contract does not admit al
 
 ## Hosted And Freestanding Diagnostics
 
-On hosted targets, panic, TPOE, and runtime-fatal support should emit a diagnostic that identifies the category, source location when available, failed contract or check when available, and a backtrace when the selected build/target contract supports it.
+On hosted targets, panic, TPOE, and runtime-fatal support emits a structured fatal payload. The payload records terminal category, diagnostic code, message, source span when available, failed contract or check when available, `Optional[Backtrace]`, target triple, selected profile, backend, runtime phase, and hosted exit mapping. `ExitCode` return remains ordinary process exit and does not enter this payload path.
 
-> Trace: D27, D29, D84
-> Covers: Hosted fatal diagnostics identify category and source context where possible.
+Backtrace policy resolves in this order: explicit CLI `--backtrace=<off|short|full>`, profile key `panic_backtrace = "off"|"short"|"full"`, hosted `KYOKAI_BACKTRACE=0|1|short|full` only when the selected profile permits environment override, then target default. A reproducible profile disables environment override by default. Backtrace capture failure omits the trace and does not change the terminal category.
 
-On freestanding targets, the implementation must provide a target fatal handler contract. That handler must at least stop safe execution. It may blink hardware, write to a debug port, halt, reset, or call a user-supplied target hook if the hook itself is outside ordinary safe Kyokai control flow.
+On freestanding targets, every fatal route uses the selected target contract's non-returning action: trap, halt, reset, non-returning hook, or another named target-specific action. A freestanding hook receives terminal category, diagnostic code, static message or bounded payload pointer and length, `Optional[Backtrace]` when supported, and target/runtime context admitted by the target contract. It cannot allocate or perform capability-requiring I/O unless those capabilities are passed explicitly or the target contract declares a fixed runtime sink. Returning from the hook escalates to the target's trap, halt, or reset action.
 
-> Trace: D80, D84, D86
-> Covers: Freestanding fatal behavior is target-contracted and still stops safe execution.
+| Fatal surface fact | Required target/profile record |
+| --- | --- |
+| Stack overflow detection | Guard page, stack probe, explicit bound check, OS signal/trap mediation, or unavailable diagnostic limitation. |
+| Stack sizing | Main stack default, task stack default, minimum stack, maximum configured stack, guard size, overflow action. |
+| Spawn stack request | Availability flag and typed spawn/config error for an unsupported or invalid request; no silent rounding. |
+| Fatal hook ABI | Parameter layout, non-returning rule, allowed fixed sinks, allocation rule, and return-escalation action. |
+| Inspection | `kyokai doctor --target` and profile inspection print every configured fatal, backtrace, and stack field. |
 
 Backtraces are diagnostic output, not language control flow. Absence of a backtrace does not change the failure category. Presence of a backtrace does not permit recovery.
 
-> Trace: D27, D84, D253
-> Covers: Diagnostics never alter panic/TPOE/fatal semantics.
+> Trace: D27, D29, D80, D84, D86, D253, D343
+> Covers: Hosted and freestanding fatal paths publish payload, backtrace precedence, stack policy, fatal-hook ABI, and inspection rules without changing termination semantics.
 
 ## FFI Boundaries
 
@@ -254,3 +258,57 @@ Foreign error conventions such as `errno`, null pointers, sentinel values, statu
 | Synchronous host fault signal | Runtime-fatal | No caller value. | No user cleanup. | D95/D256 |
 | Compiler/runtime internal invariant failure | Compile-fatal or runtime-fatal | No ordinary user branch. | Not user cleanup. | D29/D84 |
 | Entrypoint returns `ExitCode` | Ordinary process exit | Host observes exit status. | Structured scope cleanup already ran. | D84 |
+
+## Recoverable Mutation Classes
+
+A fallible mutating API declares exactly one error-state class.
+
+| Class | Required contract after `Err` |
+| --- | --- |
+| `NoMutationOnErr` | Observable state is unchanged. |
+| `PartialProgressOnErr` | The contract lists every cursor, offset, buffer, handle, protocol state, or resource field that can advance. |
+| `ConsumesOnErr` | The contract lists consumed linear resources and returns every remaining owned recovery value. |
+| `PoisonedOnErr` | The value remains owned, but only named inspect, repair, and destroy operations remain legal. |
+
+A caller cannot infer rollback from `Err`. Public `.kyo` docs and `.koi` metadata record the class. Non-transactional I/O and protocol APIs also state success, error, timeout, cancellation, EOF, close, and protocol-rejection state transitions.
+
+> Trace: D454, D473
+> Covers: Recoverable mutation exposes exact post-error state instead of treating every `Err` as rollback.
+
+## Named Recovery Payloads And Transactional Builders
+
+When failure leaves owned linear values alive across an API boundary, the error variant carries a named `must_use` recovery payload record. Every field remains a live ownership obligation. Anonymous tuple recovery is illegal.
+
+Transactional builders expose `begin`, step operations, `commit`, and `abort`. `commit` consumes the builder and returns the completed value or a named recovery payload. `abort` consumes the builder and performs the documented recovery behavior. `errdefer` remains the local cleanup tool; a recovery payload is the cross-function ownership handoff.
+
+`kyokai explain failure-flow` renders the owned-resource state before the failing operation, the recovery payload shape, and the caller obligations.
+
+> Trace: D491
+> Covers: Partial linear failure remains usable because ownership crosses the error boundary through nominal visible payloads.
+
+## Panic During Cleanup
+
+During panic cleanup, a `defer` action that completes normally allows cleanup to continue. A `defer` action that invokes `panic`, reaches TPOE, triggers runtime-fatal termination, violates an unsafe contract, or hits a cleanup failure classified as nonrecoverable escalates immediately to runtime-fatal. No further user `defer` actions run after escalation.
+
+Compiler-integrated diagnostic `defer_may_fail` reports a `defer` action that calls an API whose contract admits recoverable failure or panic/TPOE without an explicit cleanup-failure policy. Project policy can raise this advisory severity. It does not change runtime semantics.
+
+> Trace: D472
+> Covers: Nested abnormal cleanup has one escalation path and cannot recursively pretend cleanup succeeded.
+
+## Fatal Diagnostics And Redaction
+
+Hosted fatal diagnostics are local by default. Accepted Kyokai defines no crash-upload service. A program or tool selects `none`, local-file reporting, or a custom-handler policy only through an API that admits that policy.
+
+Redaction happens before a custom failure hook receives its payload. Fatal reports do not print `Secret[T]` values, redacted environment values, arguments marked secret, raw tokens, arbitrary memory, capability internals, or private source excerpts beyond the configured limit. A failure hook receives read-only structured failure data, source location, bounded diagnostic payload, and a policy-bounded backtrace. It cannot resume, mark handled, run skipped cleanup, acquire authority, or allocate unless allocator authority is passed explicitly.
+
+> Trace: D404
+> Covers: Fatal reporting is local, bounded, authority-limited, and redacted before extension hooks run.
+
+## Freestanding Fatal Consequences
+
+Freestanding and embedded targets use the existing terminal categories: normal exit, explicit `panic`, TPOE, and runtime-fatal. A target record selects trap, halt, reset, existing fatal hook, or another named target-specific fatal handler. TPOE remains non-catchable, does not unwind, does not resume, and does not run user cleanup.
+
+Driver and MMIO/DMA API records state which external hardware resources can remain active or externally observable after TPOE or runtime-fatal termination. This is hardware-consequence documentation, not a new cleanup mechanism. Recoverable conditions such as timeout, busy peripheral, missing clock, denied register access, allocation failure, and unsupported target feature use `Result` or `Optional` where their API contracts admit recovery.
+
+> Trace: D358, D464
+> Covers: Embedded targets state fatal hardware consequences without turning TPOE into an exaggerated replacement for recoverable device errors.

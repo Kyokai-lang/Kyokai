@@ -22,7 +22,7 @@ The Austral specification text used as source material is by Fernando Borretti. 
 
 ## Code License Boundary
 
-This appendix is about specification documentation. Kyokai-owned compiler/toolchain code and target-linked runtime/stdlib/helper code follow the separate code license boundary recorded in the accepted shape: compiler and toolchain code use GPL-3.0-or-later, while target-linked runtime, stdlib, startup, support, and emitted helper code use GPL-3.0-or-later WITH GCC-exception-3.1 unless a file states an explicit compatible notice.
+This appendix is about specification documentation. Kyokai-owned compiler/toolchain code and target-linked runtime/stdlib/helper code follow the separate code license boundary recorded in the accepted shape: compiler and toolchain code use GPL-3.0-or-later, while target-linked runtime, stdlib, startup, support, and emitted helper code use GPL-3.0-or-later WITH GCC Runtime Library Exception 3.1 unless a file states an explicit compatible notice.
 
 > Trace: D263
 > Covers: Documentation licensing is separate from the compiler/runtime/stdlib code license boundary.

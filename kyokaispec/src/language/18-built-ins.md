@@ -3,7 +3,7 @@
 [Rikona Kurasaki / Mjoyufull]
 Built-ins are the pieces of Kyokai that are so close to the checker that pretending they came from a hidden module would be lying. They are the floorboards: `Bool`, `Unit`, `Never`, fixed integers, `Result`, `Optional`, target facts, borrow forms, raw pointer forms, and the small set of compiler-known protocols that syntax lowers through.
 
-This chapter names that floor. Nothing here creates a prelude. Nothing here grants ambient authority. A programmer should not have to wonder whether a name appeared because a secret import drifted in through the back door.
+This chapter names that floor. Nothing here creates a prelude. Nothing here grants ambient authority. A programmer does not need to wonder whether a name appeared because a secret import drifted in through the back door.
 
 > Trace: D24, D87, D147, D155, D214
 > Covers: Kyokai built-ins are language-level names, protected constructor words, and compiler-known protocols rather than hidden prelude imports.
@@ -20,7 +20,7 @@ A language built-in name is available in every source file without an import. It
 > Trace: D24, D60, D179, D214
 > Covers: Protected built-in names do not participate in ordinary shadowing or import-collision repair.
 
-The protected constructor words `Ok`, `Err`, `Some`, and `None` are not ordinary user constructors. They are reserved by the language for the built-in `Result` and `Optional` families. `true`, `false`, and `nil` are likewise reserved for `Bool` and `Unit`. A user union may not declare variants with these names, and a user declaration may not bind them.
+The protected constructor words `Ok`, `Err`, `Some`, and `None` are not ordinary user constructors. They are reserved by the language for the built-in `Result` and `Optional` families. `true`, `false`, and `nil` are likewise reserved for `Bool` and `Unit`. A user union must not declare variants with these names, and a user declaration must not bind them.
 
 > Trace: D24, D58, D194, D214
 > Covers: Built-in value constructors and literal values are protected syntax words, not names borrowed from a prelude module.
@@ -42,8 +42,8 @@ Compiler-known protocol names are not all language built-ins. A typeclass such a
 | `Unit` | Language type | `Free` | Single value `nil`. |
 | `Bool` | Language type | `Free` | Values `true` and `false`. |
 | `Never` | Language type | `Free` | No values; statically diverging expressions have this type. |
-| `StaticString` | Language type | `Free` | Produced by `static "..."` and eligible compile-time text operations. |
-| `String` | Standard owning text type recognized by language rules | `Linear` | Produced by ordinary string literals and explicit allocator-taking conversions. |
+| `StaticString` | Language type | `Free` | Produced by plain, raw multiline, and explicit `static "..."` text literals; eligible for compile-time text operations. |
+| `String` | Standard owning text type recognized by language rules | `Linear` | Produced only by explicit allocator-taking copy and conversion APIs. |
 
 > Trace: D24, D30/D30a, D54, D58/D191, D120, D194
 > Covers: Core built-in value types are closed, denotable, and classified by explicit universe rules.
@@ -87,12 +87,14 @@ Default numeric conversions use named APIs such as `toInt32`, `toNat64`, `toInde
 
 ## Text, Bytes, And Foreign Strings
 
-Ordinary string literals produce `String`, a nominal linear UTF-8 text owner. `String` stores pointer, length, capacity, and allocator identity according to the string and allocator contracts. It has no small-string optimization and does not become `StaticString` merely because a context asks for one.
+Plain and raw multiline string literals produce `StaticString`, a non-owning immutable UTF-8 view into artifact storage. `String` is the nominal linear UTF-8 owner with pointer, length, capacity, and allocator identity according to the string and allocator contracts. No contextual typing rule turns literal storage into owning `String` storage.
 
 > Trace: D30, D30a, D44, D120, D194
 > Covers: Runtime text is owning, linear, allocator-aware UTF-8 data with no contextual static retargeting.
 
-`StaticString` is the compile-time text type produced by `static "..."`. It is `Free`, compiler-managed or embedded read-only text. Converting it into a runtime `String` is an explicit allocator-taking operation that can fail with allocation failure.
+`StaticString` is the compile-time text type produced by plain, raw multiline, and explicit `static "..."` literals. It is `Free`, compiler-managed or embedded read-only text. `literal.toStringIn(allocator)` converts it into runtime `String` storage and returns `Result[String, AllocError]`.
+
+`TextView[R]` is the standard-library nominal borrowed UTF-8 view tied to region `R`. It is not a literal type and does not own storage. Read-only runtime text APIs use it when they need a region-bound view of static text, owning `String`, or validated UTF-8 bytes.
 
 > Trace: D120, D40, D44, D74
 > Covers: Compile-time text and runtime owned text meet only through explicit conversion.
@@ -200,14 +202,14 @@ Parsing uses `Parsable[T]` where the relevant standard API admits it. Parsing re
 > Trace: D69, D75/D76, D85
 > Covers: String-to-value conversion is explicit recoverable parsing data.
 
-`StandardError` is an optional diagnostic protocol for error values. It does not inherit from `Displayable`, does not force every error to have a source chain, and does not make all errors printable by default. APIs that surface diagnostics must say whether they require `Displayable`, `StandardError`, both, or neither.
+`StandardError` is a non-required diagnostic protocol for error values. It does not inherit from `Displayable`, does not force every error to have a source chain, and does not make all errors printable by default. APIs that surface diagnostics must say whether they require `Displayable`, `StandardError`, both, or neither.
 
 > Trace: D259, D40
 > Covers: Error diagnostics are a separate protocol from ordinary display formatting.
 
 ## Compile-time Built-ins
 
-`comptime expr` is the language's call-site compile-time evaluation form. It may evaluate only deterministic, host-independent, eligible `Free` computations. It may not observe filesystem state, environment variables, wall-clock time, locale, randomness, network state, process state, task scheduling, runtime capabilities, or FFI.
+`comptime expr` is the language's call-site compile-time evaluation form. It may evaluate only deterministic, host-independent, eligible `Free` computations. It must not observe filesystem state, environment variables, wall-clock time, locale, randomness, network state, process state, task scheduling, runtime capabilities, or FFI.
 
 > Trace: D18/D18a, D202/D203
 > Covers: Compile-time execution is deterministic and cannot smuggle host state into source semantics.
@@ -258,10 +260,19 @@ Volatile access, inline assembly, raw FFI calls, raw dynamic loading, and raw po
 
 ## Standard Built-ins That Are Not Language Names
 
-`ExitCode` is a standard-library built-in startup union, not a raw integer and not a language primitive. Hosted `main` returns it, and the runtime maps it to the host process status. The ordinary language does not treat every integer as an exit code.
+`ExitCode` is a standard-library startup union, not a raw integer and not a language primitive. It has a portable success value, a portable failure value, and a target-specific status representation whose integer mapping is recorded in the selected target contract. Hosted `main` returns `ExitCode`. The runtime maps it to host process status only after ordinary structured cleanup has completed. The ordinary language does not treat every integer as an exit code, and a fatal path does not return an `ExitCode`.
 
-> Trace: D48/D162, D84
-> Covers: Program exit is a standard startup contract with explicit result data.
+`Backtrace` is diagnostic data carried through `Optional[Backtrace]` in hosted fatal payloads and in freestanding fatal hooks only when the selected target contract admits capture. It is not control flow, not a recovery token, and not proof that capture succeeded. The selected policy is `off`, `short`, or `full`; policy precedence and environment-override rules are defined by the runtime-failure and profile chapters.
+
+| Terminal route | Source-visible result | Backtrace payload | Host or target action |
+| --- | --- | --- | --- |
+| Ordinary hosted exit | `ExitCode` | None. | Target contract maps the returned value to host status. |
+| Explicit `panic` | No return. | `Optional[Backtrace]` under selected policy. | Panic fatal path after eligible ordinary `defer`. |
+| TPOE | No return. | `Optional[Backtrace]` under selected policy. | TPOE fatal path with no user cleanup. |
+| Runtime-fatal | No return. | `Optional[Backtrace]` when capture remains valid. | Hosted fatal exit or selected freestanding non-returning action. |
+
+> Trace: D48/D162, D84, D253, D343
+> Covers: Ordinary `ExitCode`, fatal termination, optional diagnostic backtraces, and target mapping remain separate startup/runtime contracts.
 
 `Span[T]`, `Buffer[T]`, allocator handles, `Box[T]`, `PinBox[T]`, file handles, sockets, paths, OS strings, pollers, streams, locks, channels, and ordinary containers are named standard-library or special-form types with explicit imports and contracts unless a preceding section says their spelling is language-level. They do not arrive through a prelude.
 
@@ -275,7 +286,28 @@ Kyokai has no hidden prelude, no wildcard built-in module import, no tuple type,
 > Trace: D47/D131, D67, D84/D253, D101, D147, D156, D177, D250-D251
 > Covers: Rejected conveniences remain absent instead of half-specified.
 
-A future feature may add a built-in only by updating the public language spec, its traceability entry, and its implementation tests. It cannot arrive by standard-library naming convention, backend convenience, or compiler-source drift.
+Adding a built-in requires an accepted D-point, an update to the public language spec and traceability entry, and implementation tests. It cannot arrive by standard-library naming convention, backend convenience, or compiler-source drift.
 
 > Trace: D155, D229
 > Covers: Built-in status is governed, public, and testable.
+
+## Configuration Rejection Built-In
+
+`compile_error(message);` creates a compile-time diagnostic when selected configuration evaluation reaches it. The message expression has type `StaticString`. The diagnostic includes source span, selected target, profile, edition, features, and message. Inactive target-selection branches are absent and do not emit the diagnostic.
+
+> Trace: D467
+> Covers: Configuration rejection is an explicit compile-time built-in with selected-branch behavior.
+
+## Checked Arithmetic Families
+
+Default safe integer arithmetic is checked in every profile. Overflow, division by zero, remainder by zero, invalid shifts, and negation of the minimum signed value are TPOE. Wrapping, saturating, checked-result, widening, carry and borrow, multiply-high, rotate, byte-swap, leading-zero, trailing-zero, and population-count operations use explicit named APIs. An optimizer removes a check only after proving its failure impossible under Kyokai semantics.
+
+> Trace: D355, D365, D370-D371
+> Covers: Integer arithmetic keeps one profile-invariant default while alternate arithmetic behavior stays named.
+
+## CPU Feature Facts
+
+CPU feature facts are exposed through target and profile tooling plus admitted comptime facts. Portable compilation cannot probe ambient host CPU state. Runtime dispatch uses an admitted stdlib and toolchain surface whose target contract records feature set, generated variants, dispatch policy, and unsupported-target behavior.
+
+> Trace: D400, D418
+> Covers: CPU feature use is explicit target policy rather than implicit host dependence.

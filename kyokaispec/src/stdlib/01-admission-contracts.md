@@ -19,6 +19,21 @@ A Kyokai standard-library API is not admitted because it is useful. Useful is on
 > Trace: D85, D157, D223, D229-D230, D243
 > Covers: Admission status encodes stability and evidence requirements.
 
+Admission state and stdlib placement tier are separate axes. Every admitted module records exactly one admission state from the table above and exactly one placement tier from the D305 table below.
+
+| Placement Tier | Meaning | Public compatibility obligation |
+| --- | --- | --- |
+| `Core` | Language-adjacent essentials required for ordinary checked programs. | Stable modules satisfy the complete admission record. |
+| `Systems` | Stable systems APIs: files, paths, environment, process, time, entropy, networking, concurrency, atomics, platform contracts, and FFI wrappers. | Stable modules satisfy the complete admission record and target contracts. |
+| `Extended` | Stable batteries not required by every minimal toolchain profile. | Stable modules satisfy the complete admission record and package compatibility policy. |
+| `Experimental` | Incubating public APIs with explicit instability markers. | No silent promotion; promotion requires admission review and compatibility classification. |
+| `Internal` | Compiler, runtime, package-manager, generated-helper, test, and stdlib implementation support. | No public import path and no public compatibility promise. |
+
+`stable`, `compatibility`, and `transitional` are release/admission states. `Core`, `Systems`, `Extended`, `Experimental`, and `Internal` are placement tiers. A stable API occupies `Core`, `Systems`, or `Extended`. An experimental API occupies `Experimental`. An internal API occupies `Internal`. Compatibility and transitional APIs record the stable-family or implementation boundary they serve; they do not silently become default stable APIs.
+
+> Trace: D305
+> Covers: Placement tier and admission state remain distinct searchable facts rather than competing maturity taxonomies.
+
 A public API cannot be marked stable until all common contract fields are present in its `.kyo` documentation and any mechanically checkable fields are available to `kyokai doc` and `kyokai audit`.
 
 > Trace: D85, D150, D218, D229
@@ -26,7 +41,7 @@ A public API cannot be marked stable until all common contract fields are presen
 
 ## Admission Record
 
-Each admitted module has an admission record. The record names the module, status, owner, public modules exported, implementation policy, unsafe/FFI status, capability surfaces, allocation policy, failure policy, platform support, conformance tests, oracle/reference source where applicable, fuzz/property tests where applicable, and compatibility boundary.
+Each admitted module has an admission record. The record names the module, admission state, placement tier, owner, public modules exported, implementation policy, unsafe/FFI status, capability surfaces, allocation policy, failure policy, platform support, conformance tests, oracle/reference source or `N/A`, fuzz/property tests or `N/A`, and compatibility boundary.
 
 > Trace: D85, D150, D220, D229-D232
 > Covers: Module admission records carry the evidence needed for docs, audit, and tests.
@@ -38,7 +53,7 @@ An admission record for a pure algorithm must name why the implementation is saf
 
 ## Edge Cases
 
-Every API family must list its edge cases before stable admission. Required edge-case families include empty input, maximum sizes, zero sizes, invalid encodings, invalid paths, closed handles, exhausted iterators, allocation failure, integer overflow, floating NaN/infinity/signed zero where relevant, target unsupportedness, cancellation/deadline behavior, and capability denial.
+Every API family must list its edge cases before stable admission. Required edge-case families include empty input, maximum sizes, zero sizes, invalid encodings, invalid paths, closed handles, exhausted iterators, allocation failure, integer overflow, floating NaN/infinity/signed zero when the API family has that edge, target unsupportedness, cancellation/deadline behavior, and capability denial.
 
 > Trace: D74, D75-D76, D77, D80, D85, D229-D232
 > Covers: Stable APIs list edge cases instead of inheriting folklore behavior.
@@ -91,3 +106,22 @@ RIIK is powerful only if the rewrite is disciplined. A naive rewrite is just a f
 
 > Trace: D229-D230
 > Covers: Admission criteria keep native Kyokai implementations trustworthy instead of merely ideological.
+
+## Recovery, Fixtures, And Numeric Evidence
+
+Every fallible mutating API records exactly one error-state class: `NoMutationOnErr`, `PartialProgressOnErr`, `ConsumesOnErr`, or `PoisonedOnErr`. A recovery payload is a nominal record. It carries every owned linear value that remains live after failure, and callers consume, retry, return, repair, transfer, or destroy those fields explicitly. Anonymous tuples and undocumented rollback assumptions are rejected.
+
+OS-facing error records preserve the domain category, target error domain, raw target code when available, mapping-table version, retry/interruption facts, and partial-progress facts. Updating an OS error mapping table changes the mapping-table version and the generated docs; it does not silently reinterpret an existing serialized error record.
+
+`Kyokai.Test` admission includes linear fixture handles, source-visible LIFO cleanup registration, isolated capability bundles for parallel tests, deterministic PRNG replay records, allocator-failure injection, terminal-fact injection, and explicit TPOE probes. Stable numeric admission adds algorithm provenance, license, special-case tables, rounding or error bounds, target/FPU dependencies, independent oracle, vector source, fuzz/property strategy, and audit status.
+
+| Admission Concern | Required Record | Required Evidence |
+| --- | --- | --- |
+| Partial mutation | Error-state class, changed fields, retained owners, retry and repair operations. | Failure injection and recovery-path tests. |
+| OS error mapping | Domain, raw code, mapping-table version, target family, interruption and retry rules. | Target-specific positive and negative fixtures. |
+| Linear fixtures | Acquired owner, cleanup action, cleanup authority bundle, LIFO scope. | Assertion-panic teardown and parallel isolation tests. |
+| Numeric API | Algorithm source, edge table, bound, oracle, vectors, target facts. | Oracle comparisons, fuzz/property checks, regression vectors. |
+| Wrapper API | Foreign range, target set, unsafe contract, provenance, audit owner, graduation rule. | ABI, layout, failure, callback, and capability tests. |
+
+> Trace: D402, D413, D421, D454, D491, D494, D499, D501, D517
+> Covers: Stable admission records name recovery, OS mapping versions, test fixtures, numeric evidence, and wrapper graduation without deferring behavior to unnamed work.

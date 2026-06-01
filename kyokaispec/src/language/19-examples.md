@@ -54,6 +54,7 @@ module Math.Small is
     function factorial(n: Nat64): Nat64
         require n <= 20n64;
         ensure result >= 1n64;
+    ;
 seal;
 ```
 
@@ -427,3 +428,16 @@ Kyokai uses `.kyo` and `.kai` files, `module ... is ... seal;`, `module body ...
 
 > Trace: D5, D9, D52, D65
 > Covers: Kyokai examples use current Kyokai syntax rather than inherited Austral terminators and file forms.
+
+## Example Status And CI Metadata
+
+Repository examples carry one implementation status: `accepted`, `experimental`, `implementation-pending`, or `archived`. An accepted repository example states edition, target, profile, backend, package requirements, capability requirements, external-tool requirements, expected command, and expected result. It enters compile/check CI when its required implementation exists. A runnable accepted repository example enters execution CI when its declared target and capability fixture exist.
+
+A documentation example carries a separate documentation role: `conformance`, `illustrative`, `historical`, `aspirational`, or `negative`. `conformance` examples are expected to check or run under their declared toolchain contract. `negative` examples are expected to produce their declared diagnostic. `illustrative`, `historical`, and `aspirational` examples are never treated as current compiler-conformance evidence. `kyokai doc --check-examples` validates syntax, imports, feature labels, target and capability requirements, maturity labels, and the admitted execution lane for every documentation example.
+
+`examples/demo/` contains the tour-style runnable example set. `examples/all/` contains aggregate compile/check coverage across basics, ownership, borrowing, capabilities, allocators, text, formatting, files, paths, networking, brokers, poller loops, FFI wrappers, packages, workspaces, tests, diagnostics, generated C, and real tools.
+
+An example is illustrative evidence. The normative chapter remains the authority. Every example that demonstrates a rule links the owning spec section and carries the declared status rather than pretending implementation support exists.
+
+> Trace: D406-D407, D511
+> Covers: Example taxonomy, metadata, CI classification, and the distinction between illustration and normative authority are explicit.

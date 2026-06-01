@@ -73,3 +73,13 @@ The error model is strict because it is trying to keep the ground from moving. U
 
 > Trace: D24, D53, D74, D84, D119, D253, D259
 > Covers: Kyokai's error model preserves explicit control flow and exact failure categories.
+
+## Partial Progress And Recovery Payloads
+
+[Rikona Kurasaki / Mjoyufull]
+An error is not a rewind button. A write can leave a prefix on disk. A socket can consume bytes before the peer closes. A builder can own three resources when its fourth step fails. Pretending that every `Err` returns the room to its old shape is how cleanup obligations disappear into assumptions.
+
+Kyokai makes the error state part of the API. A mutating operation says whether it preserves state, advances specific fields, consumes resources, or poisons a value into repair-only operations. When live linear ownership crosses the failure boundary, a named recovery record crosses with it. `errdefer` still handles local cleanup; recovery payloads handle obligations the caller now owns.
+
+> Trace: D454, D491
+> Covers: Partial mutation classes and named recovery payloads prevent `Err` from implying undocumented rollback.

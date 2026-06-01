@@ -6,10 +6,10 @@ Kyokai keeps Austral's strongest module idea: a module has an interface and a bo
 > Trace: D5, D17, D52, D78, D86
 > Covers: Kyokai preserves Austral's interface/body module split while specifying `.kyo` interfaces, `.kai` bodies, package-visible `internal`, and deterministic package-rooted module resolution in the Kyokai spec itself.
 
-A Kyokai module is the language-level unit named by a dotted module path such as `Kyokai.Core.Result` or `App.Main`. A source module is represented by one interface file and one body file for the same module name: `Name.kyo` contains the importable interface surface, and `Name.kai` contains the implementation body selected for the current build. A dependency may also provide a checked `.koi` interface artifact instead of source text, as specified by the toolchain chapter.
+A Kyokai module is the language-level unit named by a dotted module path such as `Kyokai.Core.Result` or `App.Main`. A public or importable source module is represented by an interface file and, when implementation is needed, a body file for the same module name: `Name.kyo` contains the importable interface surface, and `Name.kai` contains the implementation body selected for the current build. A package-private executable-internal, test-only, or manifest-admitted generated implementation-internal module can exist as a body-only `.kai` file. Such a body-only module publishes no public interface and cannot be imported from another module. A dependency may also provide a checked `.koi` interface artifact instead of source text, as specified by the toolchain chapter.
 
-> Trace: D52, D78, D79
-> Covers: Modules are named language units, `.kyo` files provide source interfaces, `.kai` files provide source bodies, and `.koi` artifacts provide checked package interface contracts for downstream compilation.
+> Trace: D52, D78, D79, D313
+> Covers: Modules are named language units, `.kyo` files provide importable source interfaces, `.kai` files provide implementation bodies or restricted non-importable body-only internals, and `.koi` artifacts provide checked package interface contracts for downstream compilation.
 
 The module declaration inside a source file must match the logical module path assigned by package module resolution. If `Foo.Bar` maps to `src/Foo/Bar.kyo` and `src/Foo/Bar.kai`, those files must declare `module Foo.Bar is ... seal;` and `module body Foo.Bar is ... seal;`. A mismatch is a compile-time error before name resolution inside the module proceeds.
 
@@ -28,7 +28,7 @@ A `.kai` body file contains the implementation for the same module. It may defin
 > Trace: D17, D20, D52, D78, D245
 > Covers: `.kai` files own implementation and private declarations, and body-only declarations do not cross the module boundary.
 
-An interface may be checked before the body is checked. A module that imports another module typechecks against the imported module's interface surface, not against its body. This is the old Austral modularity rule carried forward: clients depend on contracts, not implementation rooms they should not enter.
+An interface may be checked before the body is checked. A module that imports another module typechecks against the imported module's interface surface, not against its body. This is the old Austral modularity rule carried forward: clients depend on contracts, not implementation rooms they cannot enter.
 
 > Trace: D5, D78, D79
 > Covers: Kyokai preserves interface-first checking: clients typecheck against `.kyo` or `.koi` interface contracts rather than private body source.
@@ -56,7 +56,7 @@ Kyokai has exactly three source visibility levels.
 > Trace: D17, D20, D245
 > Covers: `internal` is an interface-only package visibility marker and does not alter opacity, layout, coherence, or unsafe authority.
 
-Workspace membership does not widen visibility. Two packages in the same workspace are still separate packages for `internal`. A package may not import another package's internal declaration merely because both packages are listed in the same `[workspace].members` array.
+Workspace membership does not widen visibility. Two packages in the same workspace are still separate packages for `internal`. A package must not import another package's internal declaration merely because both packages are listed in the same `[workspace].members` array.
 
 > Trace: D17, D78
 > Covers: `internal` is package-visible, never workspace-visible.
@@ -120,8 +120,10 @@ Qualified access through `Foo.Bar.name` may name only declarations visible to th
 
 UFCS receiver-module lookup is not a fourth import form. It is a narrow fallback used only after ordinary imported-name lookup fails, and it searches only the receiver type's defining module or the explicit owner of a compiler-known receiver surface. It does not search the dependency graph, repair import collisions, or act like C++ argument-dependent lookup.
 
-> Trace: D110, D179, D214, D254
-> Covers: UFCS receiver-module lookup is a constrained fallback, not global method search or collision repair.
+Only an exported `receiver function` declaration participates in that fallback. Its first parameter must be an owned value, immutable borrow, or exclusive mutable borrow of the defining module's nominal receiver type, unless the compiler-known built-in receiver family names a different explicit owner module. The marker changes dot-call eligibility only. It does not change calling convention, visibility, ownership, capability requirements, typeclass selection, or ordinary call syntax. Receiver-callable identity, receiver type, first-parameter access mode, visibility, generic constraints, and owner module are recorded in `.koi`.
+
+> Trace: D110, D179, D214, D254, D337, D386
+> Covers: UFCS receiver-module lookup is a constrained fallback over explicit `receiver function` exports, not global method search or collision repair.
 
 ## Instances And Coherence Across Modules
 
@@ -147,7 +149,7 @@ Internal instances are visible only inside the package. `.koi` artifacts may rec
 > Trace: D20, D245, D255
 > Covers: `pragma Unsafe_Module;` marks a raw unsafe implementation boundary but does not alter visibility or grant authority by itself.
 
-A safe module may import safe wrapper declarations from an unsafe module when those declarations are public or same-package internal according to the normal visibility rules. A safe module may not call raw foreign declarations or unsafe primitives merely because it can import the module name. Raw unsafe access requires the unsafe chapter's explicit contracts and capabilities.
+A safe module may import safe wrapper declarations from an unsafe module when those declarations are public or same-package internal according to the normal visibility rules. A safe module must not call raw foreign declarations or unsafe primitives merely because it can import the module name. Raw unsafe access requires the unsafe chapter's explicit contracts and capabilities.
 
 > Trace: D20, D245, D255
 > Covers: Safe code may import safe wrappers exposed by unsafe modules, but raw unsafe operations remain gated by unsafe contracts and explicit capabilities.
@@ -163,3 +165,16 @@ The language chapter defines what a module, import, visible declaration, and nam
 
 > Trace: D19a, D52, D78, D79, D105
 > Covers: The toolchain selects package roots, source files, target-specific bodies, editions, and artifacts before language name resolution consumes a single resolved module graph.
+
+## File Roles And Acyclic Graphs
+
+`.kyo` files are source interfaces. `.kai` files are source bodies. `.koi` files are generated KBI artifacts and are never parsed as handwritten source. Public and importable modules have `.kyo` interfaces. A body exists in `.kai` when implementation is needed. Body-only `.kai` modules are restricted to package-private executable internals, tests, and generated implementation internals admitted by the manifest.
+
+The module import graph is acyclic. A module cannot import itself directly or transitively. Interface-only edges do not exempt a cycle. A cycle diagnostic prints one complete cycle path, identifies each import span on that path, and states that Kyokai has no recursive-module cycle protocol. The compiler does not promise that the printed cycle is the shortest possible cycle.
+
+The workspace package dependency graph is also acyclic. Package interfaces, `.koi` artifacts, and edition boundaries do not create a package-cycle escape hatch.
+
+Whole-file build constraints remove excluded files before declarations, bodies, `.koi` facts, generated code, or semantic diagnostics contribute to compilation. Declaration-level `when` guards remain the only source-level platform guard inside an included file. Body-level target branching is illegal.
+
+> Trace: D382, D390, D433-D434, D518
+> Covers: `.kyo`, `.kai`, and `.koi` roles, body-only restrictions, module-cycle rejection, package-cycle rejection, whole-file exclusion, and declaration-only platform guards are explicit.

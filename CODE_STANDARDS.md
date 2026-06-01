@@ -190,7 +190,8 @@ Use local sources first for project reality.
 | Path | Use |
 | --- | --- |
 | `PROJECT_STANDARDS.md` | Workflow, PR, D-point, branch, release, and review process. |
-| `Kyokaishape.md` | Public live D-points and proposal shape. |
+| public D-point PRs/MRs | Normal home for live public D-point proposals, final wording, acks, spec edits, and tests. |
+| `Kyokaishape.md` | Public index/archive or temporary holding area for D-points that do not live directly in PRs/MRs. |
 | `kyokaidecided.md` | Public accepted shape while the full spec is being written. |
 | `kyokaispec/` | Normative spec as it is extracted and written. |
 | `phase.md` | Implementation order, proof gates, and done-when checks. |
@@ -362,7 +363,7 @@ kyokailang/kyokai/
   examples/            public examples
   docs/                compiler and project docs
   kyokaispec/          normative spec work
-  Kyokaishape.md       public D-point tracker
+  Kyokaishape.md       public D-point index/archive
   kyokaidecided.md     public accepted-shape extraction
   phase.md             roadmap and implementation gates
   PROJECT_STANDARDS.md workflow standards
@@ -370,6 +371,11 @@ kyokailang/kyokai/
 ```
 
 Do not create a parallel compiler, runtime, or stdlib tree without a migration plan.
+
+Kyokai compiler architecture uses explicit ownership areas for source text, lexer/parser/CST, surface AST, name resolution/imports, package/workspace loading, type/universe checking, linearity/borrow checking, capability checking, contract checking, elaboration/lowering, typed core IR, `.koi`/KBI, diagnostics, formatter, Analysis Server facts, backend-independent IR, C backend, LLVM backend migration, runtime support, stdlib admission tools, and CLI/toolchain commands. Each area states its input invariants, output invariants, diagnostic/span obligations, and tests. A PR/MR crossing several areas states the required boundary crossing and the connecting invariants.
+
+> Trace: D512
+> Covers: Compiler directory separation is a review, ownership, invariant, and test boundary without claiming that the inherited implementation has already completed the migration.
 
 ### 5.2 File Ownership
 

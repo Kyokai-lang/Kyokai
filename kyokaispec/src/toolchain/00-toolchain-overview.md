@@ -47,7 +47,7 @@ No tool command may make a program legal by skipping a language check. A fast co
 
 ## Normative Words
 
-The words `must`, `must not`, `required`, `illegal`, `error`, and `reject` describe conformance requirements. The words `may`, `allowed`, and `permitted` describe admitted behavior. The word `should` describes the recommended behavior for quality or ecosystem consistency, but if user-visible behavior depends on it, a later chapter must turn it into a `must` rule.
+The words `must`, `must not`, `required`, `illegal`, `error`, and `reject` describe conformance requirements. The words `may`, `allowed`, and `permitted` appear only for a locally stated source permission, non-observable optimization, target-contract variation, policy selection, specified nondeterminism, tooling-only assistance, or experimental/absent boundary. The word `should` has no normative force and is not used to state a toolchain requirement.
 
 > Trace: D86, D155
 > Covers: Toolchain conformance language is explicit and cannot hide required behavior behind recommendation wording.
@@ -100,3 +100,21 @@ A language that says ownership is explicit cannot let the build system live off 
 
 > Trace: D26, D83, D86, D155
 > Covers: Kyokai keeps the toolchain explicit for the same reason it keeps language authority, ownership, and failure explicit.
+
+## Full-Conformance And Network Boundary
+
+A stable Kyokai toolchain implementation satisfies every stable command and artifact rule in its declared support tier. A target-gated command surface names the target-contract field that controls availability. A non-default experiment is labeled experimental in help, JSON, `.koi`, docs, and compatibility output. Proposal labels and implementation plans never masquerade as shipped tool behavior.
+
+Official commands perform no ambient telemetry, background update check, hidden package-index refresh, hidden docs fetch, hidden advisory fetch, or hidden network contact. A command that contacts a network states the network action in its contract, prints the action in human output, records it in machine output, respects offline mode, and receives the required tool authority.
+
+| Contract kind | Required local statement |
+| --- | --- |
+| Stable command | Inputs, outputs, schema, policy keys, artifacts, authority, prompts, exit classes, examples. |
+| Target-gated command | Stable command fields plus controlling target-contract field and unavailable-target diagnostic. |
+| Policy choice | Key, precedence, recorded value, reproducibility effect, human lane, JSON field. |
+| Specified nondeterminism | Allowed outcomes, replay boundary, recorded facts, fairness boundary. |
+| Tooling-only help | Compiler facts consumed, source edits emitted, safety class, semantic non-effect. |
+| Experiment | Opt-in key, rejection outside opt-in, compatibility exclusion, `.koi` marking. |
+
+> Trace: D396, D479-D487, D503, D508
+> Covers: Full conformance, target gates, policy keys, specified nondeterminism, experiments, and the absence of ambient network activity are explicit toolchain contracts.

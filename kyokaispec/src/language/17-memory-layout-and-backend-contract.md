@@ -187,7 +187,7 @@ The language contract is the as-if rule, not a requirement that the backend emit
 > Trace: D89, D228
 > Covers: Optimizing moves is legal only under the Kyokai move contract.
 
-Safe movable values may not depend on their own storage address. Self-referential ordinary movable values are banned in safe code. Unsafe code that constructs address-sensitive values must expose them through stable-address indirection or pinned-type rules before safe code can observe them.
+Safe movable values must not depend on their own storage address. Self-referential ordinary movable values are banned in safe code. Unsafe code that constructs address-sensitive values must expose them through stable-address indirection or pinned-type rules before safe code can observe them.
 
 > Trace: D89, D89a/D89b
 > Covers: Address-sensitive values cannot cross into safe code as ordinary movable values.
@@ -248,7 +248,7 @@ Lowering from elaborated Kyokai into C, LLVM IR, or any later backend must prese
 > Trace: D228
 > Covers: Backend lowering is preservation of Kyokai semantics.
 
-Backend undefined behavior, LLVM `poison` or `undef`, C signed overflow, invalid aliasing assumptions, unchecked trap-producing operations, target-specific unreachable assumptions, or speculative removal of checked failure paths may not be used as the mechanism for implementing safe Kyokai semantics.
+Backend undefined behavior, LLVM `poison` or `undef`, C signed overflow, invalid aliasing assumptions, unchecked trap-producing operations, target-specific unreachable assumptions, or speculative removal of checked failure paths must not be used as the mechanism for implementing safe Kyokai semantics.
 
 > Trace: D73, D139, D228
 > Covers: Safe Kyokai semantics cannot be implemented by backend UB.
@@ -257,6 +257,11 @@ TPOE and runtime-fatal paths lower to explicit no-return termination operations 
 
 > Trace: D84, D139, D228
 > Covers: Fatal checks remain real backend control flow until proven unreachable by Kyokai semantics.
+
+Safe `unreachable;` lowers to `emit_tpoe_unreachable(span/payload); noreturn`. The backend can emit its own unreachable marker only after that non-returning operation as a dead-code marker. It must not lower safe `unreachable;` directly to C undefined behavior, LLVM poison, a bare `__builtin_unreachable`, or an optimizer assumption. Coverage and diagnostics distinguish a source `unreachable;` TPOE site from statically unreachable code and backend-only dead-code markers. Conformance inspects generated C and LLVM lowering for this rule.
+
+> Trace: D121, D228, D355
+> Covers: Safe source `unreachable;` has one explicit TPOE lowering contract before any backend dead-code marker.
 
 The compiler may attach aliasing, lifetime, `noalias`, alignment, initialization, non-null, range, or dereferenceability metadata only when justified by the elaborated borrow, linearity, type, and contract model.
 
@@ -273,7 +278,7 @@ Surface constructs with specified desugarings lower through the elaboration pipe
 > Trace: D238-D240, D228
 > Covers: Backends see checked elaborated core, not raw sugar.
 
-Backend optimizations may remove redundant checks only after proving the removed failure path is unreachable under Kyokai semantics. They may not remove checks merely because the backend would treat the failing case as undefined.
+Backend optimizations may remove redundant checks only after proving the removed failure path is unreachable under Kyokai semantics. They must not remove checks merely because the backend would treat the failing case as undefined.
 
 > Trace: D73, D84, D228
 > Covers: Check removal is proof-driven, not UB-driven.
@@ -290,7 +295,7 @@ The selected C compiler family, version floor, required flags, sysroot, target t
 > Trace: D31, D80, D139
 > Covers: C backend behavior is not host-compiler guessing.
 
-The C backend must preserve Kyokai's left-to-right evaluation order. It may not rely on unspecified C expression evaluation order. When needed, it introduces temporaries and statement sequencing in generated C.
+The C backend must preserve Kyokai's left-to-right evaluation order. It must not rely on C's unconstrained expression evaluation order. When needed, it introduces temporaries and statement sequencing in generated C.
 
 > Trace: D71, D139
 > Covers: C expression-order holes cannot change Kyokai evaluation.
@@ -315,7 +320,7 @@ For the GCC and Clang support contract, required defensive flags include at leas
 > Trace: D31, D139
 > Covers: Toolchain flags reinforce but do not define language behavior.
 
-The C backend may use standard intrinsics, implementation-defined extensions, generated helper functions, C11 atomics, compiler builtins, or inline assembly facilities only when the selected target/toolchain contract admits them by name.
+The C backend may use standard intrinsics, target-contract-listed compiler extensions, generated helper functions, C11 atomics, compiler builtins, or inline assembly facilities only when the selected target/toolchain contract admits them by name.
 
 > Trace: D4, D22, D31, D80, D139, D141
 > Covers: C extensions are explicit backend contracts.
@@ -323,7 +328,7 @@ The C backend may use standard intrinsics, implementation-defined extensions, ge
 The toolchain may provide an extra-assurance C backend profile using CompCert where target support and emitted-C subset compatibility exist. That profile is additional assurance, not the baseline requirement for every Kyokai target.
 
 > Trace: D139
-> Covers: CompCert is optional higher assurance, not required everywhere.
+> Covers: CompCert is a target-gated extra-assurance profile, not the baseline backend contract.
 
 ## LLVM Backend Contract
 
@@ -332,7 +337,7 @@ The LLVM backend must obey the same defined-lowering contract. LLVM IR `poison`,
 > Trace: D4, D73, D228
 > Covers: LLVM does not get a wider semantic escape hatch than C.
 
-LLVM traps, UB-triggering operations, speculative assumptions, or optimizer-only unreachable states may not implement safe Kyokai checked failures. TPOE and runtime-fatal paths remain explicit until removed by proof under Kyokai semantics.
+LLVM traps, UB-triggering operations, speculative assumptions, or optimizer-only unreachable states must not implement safe Kyokai checked failures. TPOE and runtime-fatal paths remain explicit until removed by proof under Kyokai semantics.
 
 > Trace: D84, D228
 > Covers: LLVM lowering preserves checked failure semantics.
@@ -378,7 +383,7 @@ The C backend emits `#line N "path/to/File.kai"` directives in generated C where
 > Trace: D27, D31
 > Covers: Current source-level debugging flows through generated C line mapping.
 
-When the programmer debugs a compiled program, breakpoints, stack traces, and single-stepping should report Kyokai source locations where the backend can faithfully preserve them. Complex lowered expressions may map to multiple generated locations, but the mapping must not point to unrelated user source.
+When the programmer debugs a compiled program, breakpoints, stack traces, and single-stepping report Kyokai source locations when the selected debug profile requires source mapping and the backend can faithfully preserve them. Complex lowered expressions may map to multiple generated locations, but the mapping must not point to unrelated user source.
 
 > Trace: D27, D29
 > Covers: Debug mapping is useful and honest rather than decorative.
@@ -388,7 +393,7 @@ The LLVM backend emits DWARF or the selected target's equivalent source-level de
 > Trace: D27, D31, D86
 > Covers: LLVM debug info is native, but still source-oriented.
 
-Variable names in debug output should preserve Kyokai names where possible after hygiene, monomorphization, and lowering. Generated temporaries and helper variables must be distinguishable from source variables.
+Variable names in debug output preserve Kyokai names when the selected debug profile requires name mapping and lowering retains a source binding. Generated temporaries and helper variables must be distinguishable from source variables.
 
 > Trace: D27, D29
 > Covers: Debugger-visible state does not confuse generated scaffolding with user bindings.
@@ -434,7 +439,7 @@ A backend may reject a program because the target lacks conforming atomics, an e
 > Trace: D22, D31, D80, D104, D139, D141, D228
 > Covers: Unsupported backend features are build errors with named reasons.
 
-A backend may not accept the program and then silently change Kyokai semantics, drop checked failure paths, lower atomics as volatile, treat raw pointers as safe references, discard required cleanup, discard source mapping in a profile that requires it, or depend on UB-sensitive host behavior.
+A backend must not accept the program and then silently change Kyokai semantics, drop checked failure paths, lower atomics as volatile, treat raw pointers as safe references, discard required cleanup, discard source mapping in a profile that requires it, or depend on UB-sensitive host behavior.
 
 > Trace: D73, D84, D139, D141, D228
 > Covers: Backend acceptance commits to the language contract.
@@ -457,4 +462,39 @@ A conforming backend test suite must include generated-code or runtime tests for
 | Reproducibility | Same declared inputs produce bit-identical normative artifacts. |
 
 > Trace: D27, D31, D42, D73, D75, D83, D139, D141, D228
-> Covers: Backend conformance tests target the places where backend folklore usually leaks in.
+> Covers: Backend conformance tests target the places where backend folklore commonly leaks in.
+
+## Floating-Point Backend Policy
+
+Safe floating operations follow the selected profile's declared float policy. Strict mode records rounding behavior, NaN handling, signed-zero behavior, FMA contraction policy, denormal policy, exception-flag policy, and target caveats. A backend cannot silently use a faster float interpretation under an existing profile.
+
+> Trace: D298-D300, D400
+> Covers: Floating-point lowering is profile-declared and cannot drift through backend flags.
+
+## CPU Feature Dispatch
+
+CPU feature dispatch is explicit target, profile, and toolchain policy. Portable SIMD preserves its declared semantics. Target multiversioning records selected feature sets, generated variants, dispatch mechanism, reproducibility inputs, and unsupported-target behavior. Runtime dispatch never changes safe source meaning.
+
+> Trace: D393, D418, D483
+> Covers: CPU dispatch is reproducible target policy, not ambient host probing or silent scalarization.
+
+## Semantics-Preserving Code Sharing
+
+Backend optimization, cache sharing, monomorphization deduplication, identical-code folding, and code-size controls are legal only when observable semantics remain identical: values, failure category, side effects, authority, allocation, blocking, volatile behavior, atomic behavior, layout promises, debug and source-map policy, and provenance classification.
+
+> Trace: D200, D480, D497
+> Covers: Size and cache optimizations cannot silently merge observably different Kyokai programs.
+
+## Requested Generated C
+
+Requested generated C is a documented artifact lane. It carries generated-file schema, source-map link, package or workspace identity, toolchain, target, profile, backend, KBI version, provenance, and whether the file participates in target compilation or is inspection-only. The toolchain writes requested C under the documented `c_output/` lane; disposable internal C remains cache state.
+
+> Trace: D264, D509
+> Covers: User-requested generated C is a stable provenance-bearing artifact distinct from disposable backend scratch.
+
+## Freestanding Backend Record
+
+A freestanding target record states fatal action, stack policy, allocator availability, runtime shim requirements, interrupt boundary, volatile and MMIO domain, and absent hosted capabilities. The record is part of target admission. The backend does not infer these facts from a C compiler default.
+
+> Trace: D451, D464
+> Covers: Freestanding lowering has an explicit target record for the runtime facts hosted systems otherwise supply.

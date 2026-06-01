@@ -51,7 +51,7 @@ Math functions must state behavior for NaN, infinities, signed zero, subnormal v
 
 ## Implementation And Oracles
 
-Pure numeric computation is written in safe native Kyokai by default. FFI to host `libm` is not the stable default for ordinary `Kyokai.Math` because host libraries vary by target, version, flags, and platform policy. Transitional FFI may exist while native implementations are admitted, but it is tracked under the FFI replacement policy.
+Pure numeric computation is written in safe native Kyokai by default. FFI to host `libm` is not the stable default for ordinary `Kyokai.Math` because host libraries vary by target, version, flags, and platform policy. Transitional FFI is permitted while native implementations are admitted, but it is tracked under the FFI replacement policy.
 
 > Trace: D64, D229-D230, D232
 > Covers: `Kyokai.Math` follows RIIK while allowing tracked transitional bridges.
@@ -65,15 +65,40 @@ Numerical admission tests use appropriate independent oracles: official vectors 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Pure scalar math | Value inputs and outputs. | None. | Domain/range behavior specified per function; no ambient errno. | Deterministic for supported target contract. | One of the admitted accuracy forms. | special values, random vectors, oracle comparison. | D75-D76, D232 |
 | Parsing/formatting numerics | Borrows text/bytes; output owned only by allocator-taking helpers. | Allocator explicit for owned text. | `ParseError`, `AllocError`, sink error. | Locale-independent unless locale parameter exists. | Round-trip guarantee stated per formatter. | accepted syntax, overflow, round trip, invalid input. | D40-D40a, D69, D232 |
-| Vector/math intrinsics | Value/vector inputs. | None. | Target unsupported diagnostic or explicit fallback contract. | No silent scalarization unless contract says so. | Contract per lane/function. | target gating, lane semantics, oracle vectors. | D104, D232 |
+| Vector/math intrinsics | Value/vector inputs. | None. | Target unsupported diagnostic or an explicitly selected named scalar-fallback API. | The intrinsic lane never scalarizes silently. A separate named fallback API states its scalar behavior. | Contract per lane/function. | target gating, lane semantics, oracle vectors. | D104, D232 |
 
 > Trace: D40-D40a, D69, D75-D76, D104, D220, D229, D232
 > Covers: Math API families publish allocation, failure, determinism, accuracy, and tests.
+
+## Stable Numeric Admission Record
+
+Every stable numeric API has an admission record before stable release.
+
+| Record field | Required content |
+| --- | --- |
+| Algorithm | Source, license, provenance, and local modifications. |
+| Special cases | Each API writes exact NaN, infinity, signed-zero, subnormal, domain, range, overflow, and underflow behavior, or writes `N/A` for a category outside its domain. |
+| Accuracy | Exactness, rounding rule, or accepted error bound such as `MaxUlp(n)`, `AbsError(bound)`, or `RelError(bound)`. |
+| Target facts | FPU assumptions, target caveats, CPU feature gates, dispatch variants, and unsupported-target behavior. |
+| Evidence | Independent oracle implementation, vector sources, exhaustive domains where feasible, fuzz strategy, property strategy, and proof or audit status. |
+| Documentation | Generated special-case and error-bound tables. |
+
+> Trace: D232, D412, D517
+> Covers: Stable numerical APIs publish the evidence needed to evaluate the result contract.
+
+## Dispatch And Transitional Wrappers
+
+Strict floating behavior is the portable default. A target caveat is legal only when the target record names it and generated API docs state its consequence. CPU dispatch is selected through target, profile, and toolchain policy and recorded in provenance. Every dispatched implementation satisfies the same public numeric result contract.
+
+A transitional foreign math wrapper carries the same record plus the reason native Kyokai is not admitted yet and the evidence condition that retires or permanently admits the wrapper.
+
+> Trace: D400, D412, D501, D517
+> Covers: Target dispatch and transitional foreign math never weaken or hide the numeric contract.
 
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
 The point is not to sound brave about writing math in Kyokai. The point is to prove the promise in public. If `sin` says `MaxUlp(1)`, the tests must hunt that number. If a byte helper says big-endian, no boundary gets to swap behind your back.
 
-> Trace: D117, D229-D232, D260
+> Trace: D117, D229-D232, D260, D517
 > Covers: Numeric APIs are trusted through contracts and tests, not borrowed confidence.

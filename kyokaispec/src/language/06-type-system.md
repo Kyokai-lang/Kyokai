@@ -18,12 +18,12 @@ A type is a compile-time classification of values. Every value expression has ex
 > Trace: D195, D206
 > Covers: `Free` values have ordinary copy/discard behavior and may be discarded by `ignore` in pattern positions.
 
-`Linear` types are exact-use types. A value of a `Linear` type must be consumed exactly once along every reachable control-flow path, unless it is moved into another owner whose later consumption is checked. A linear value may not be copied, silently discarded, hidden behind `ignore`, thrown away by a catch-all pattern, or lost through an early exit.
+`Linear` types are exact-use types. A value of a `Linear` type must be consumed exactly once along every reachable control-flow path, unless it is moved into another owner whose later consumption is checked. A linear value must not be copied, silently discarded, hidden behind `ignore`, thrown away by a catch-all pattern, or lost through an early exit.
 
 > Trace: D2, D98, D195, D206, D246
 > Covers: `Linear` values require exact consumption and cannot be hidden by discard syntax or cleanup folklore.
 
-`Type` in a generic parameter means the parameter accepts either `Free` or `Linear` type arguments. Inside generic code, a value of such a parameter is treated conservatively: it may be moved, borrowed, stored, returned, or passed to APIs that accept it, but it may not be implicitly copied or silently discarded.
+`Type` in a generic parameter means the parameter accepts either `Free` or `Linear` type arguments. Inside generic code, a value of such a parameter is treated conservatively: it may be moved, borrowed, stored, returned, or passed to APIs that accept it, but it must not be implicitly copied or silently discarded.
 
 > Trace: D195
 > Covers: `T: Type` admits both universes and gives generic code only operations sound for both.
@@ -35,15 +35,17 @@ A type is a compile-time classification of values. Every value expression has ex
 
 ## Constructor Classification
 
-Universe membership comes from the type constructor's declaration or special-form rule. A non-generic type declared `Free` is always `Free`. A non-generic type declared `Linear` is always `Linear`. A generic type declared `Free` is always `Free`. A generic type declared `Linear` is always `Linear`. A generic type declared `Auto` is `Linear` iff at least one type argument is `Linear`; otherwise it is `Free`.
+Universe membership comes from the type constructor's declaration or special-form rule. A non-generic type declared `Free` is always `Free`. A non-generic type declared `Linear` is always `Linear`. A generic type declared `Free` is always `Free`. A generic type declared `Linear` is always `Linear`. For a user-defined type declared `Auto`, classification runs structurally after generic substitution. The classifier examines stored record fields, stored union payloads, captured closure-environment fields, and accepted built-in classification rules. The instantiated type is `Linear` when any stored component is `Linear`; otherwise it is `Free`.
 
-> Trace: D194, D195
-> Covers: User and standard nominal type constructors use an explicit declaration classifier; generic `Auto` propagates linearity exactly when a type argument is linear.
+> Trace: D194, D195, D338
+> Covers: User and standard nominal type constructors use explicit declaration classifiers; user-defined `Auto` classification follows instantiated stored components rather than naming folklore or arbitrary type-level execution.
 
-Phantom parameters do not weaken classification. A phantom type argument participates in identity and instance resolution even when it has no runtime field, but a generic `Auto` type with only phantom linear arguments still follows the type constructor's declared classification rule. If a declaration wants phantom parameters not to affect runtime layout, it must still account for the identity and coherence effect.
+Phantom parameters do not weaken identity or coherence. A phantom type argument participates in type identity, generic instantiation, and instance resolution even when it has no runtime field. A phantom argument does not by itself force a user-defined `Auto` type into `Linear`; it affects universe classification only when an accepted built-in rule says so or when it selects, sizes, or otherwise determines a stored component whose classification is known. Const and value generic arguments follow the same stored-component rule. The compiler does not run user code, comptime reflection, a solver, or an arbitrary type-level predicate during classification.
 
-> Trace: D181, D190, D194, D214
-> Covers: Phantom parameters affect type identity and coherence; layout absence does not make the parameter semantically absent.
+Recursive user-defined `Auto` types are classified by a monotone fixed point over the substituted declaration strongly connected component. A stored `Linear` component makes its containing type `Linear`, and that result propagates through dependent stored fields. A cycle whose classification depends on an invalid, unbounded, or unaccepted predicate is a compile-time classifier error.
+
+> Trace: D181, D190, D194, D214, D338
+> Covers: Phantom and const arguments retain identity and coherence meaning without fabricating stored ownership; recursive `Auto` classification is structural, finite, and compiler-defined.
 
 Language-defined and special forms have closed classification rules:
 
@@ -79,7 +81,7 @@ Floating-point types are `Float32` and `Float64`. They are `Free`. Their operati
 > Trace: D75, D139, D194, D228
 > Covers: Floating-point types are built-in `Free` types whose semantics are specified by Kyokai and target contracts.
 
-`StaticString` is a `Free` compile-time text type produced by `static "..."`. Ordinary runtime `String` is a linear owning type and is not produced by ordinary string literals through contextual retargeting.
+`StaticString` is a `Free` compile-time text type produced by plain, raw multiline, and explicit `static "..."` literals. Runtime `String` is a linear owning type produced only by explicit allocator-taking copy or conversion operations.
 
 > Trace: D120, D194, D195
 > Covers: Static text and runtime owning strings are distinct; `StaticString` is `Free`, while owning `String` is linear.
@@ -111,7 +113,7 @@ The common borrow spelling omits a named region. `&[T]` means an anonymous scope
 > Trace: D20, D20a, D73, D77, D194, D245
 > Covers: Raw pointer-like forms are non-owning `Free` values and require unsafe contracts for validity-sensitive operations.
 
-`FnPtr(...) : Ret` is the bare function pointer type family. It is always `Free`. It represents a callable address without an environment. Closure and callable-family types are separate higher-level facilities and do not cross raw FFI directly unless a later chapter specifies an explicit wrapper.
+`FnPtr(...) : Ret` is the bare function pointer type family. It is always `Free`. It represents a callable address without an environment. Closure and callable-family types are separate higher-level facilities and do not cross raw FFI directly. FFI callback wrappers use the explicit invocation-class, ABI, lifetime, userdata, cleanup, thread-affinity, reentrancy, and capability contracts from the unsafe chapter.
 
 > Trace: D20a, D21, D82, D118, D126, D194
 > Covers: Bare function pointers are free, environmentless, and distinct from closure/callable values.
@@ -152,7 +154,7 @@ Kyokai has no general subtyping relation. A value has its static type, and type 
 
 Kyokai has a closed `Never` lifting table for built-in `Optional` and `Result`: `Optional[Never]` may lift to `Optional[T]`, `Result[Never, E]` may lift to `Result[T, E]`, and `Result[T, Never]` may lift to `Result[T, E]`. No other generic constructor gains lifting from this rule.
 
-> Trace: D15, D186, D191
+> Trace: D15, D186, D191, D339
 > Covers: Generic `Never` lifting is closed to the built-in optional/result cases and does not imply variance.
 
 Borrow/reference conversions are separate explicit rules. For example, mutable-to-immutable read reborrow belongs to the borrow elaboration rules, not to general variance or subtyping.
@@ -193,3 +195,18 @@ A type whose layout or ownership behavior depends on unsafe or target-specific f
 
 > Trace: D20, D42, D73, D139, D228, D245
 > Covers: Target and unsafe-dependent type behavior must be specified explicitly and cannot rely on UB.
+
+## Ownership-Indexed Types And Synchronized Sharing
+
+Projecting a `Free` field from a linear record through a legal immutable borrow copies or borrows only that field according to its field type. Projecting a `Free` field never consumes the linear owner. A `Free` field is independently projectable only when the record declaration marks that field independently projectable or the compiler proves that projection cannot violate a cross-field invariant. Handle-and-payload records, capability-bearing records, and unsafe-backed records default to non-independent fields unless their admission record states otherwise.
+
+During an active mutable borrow of another field, projecting an independently projectable `Free` field is legal only when the projected field and mutably borrowed field occupy disjoint field regions and no declared invariant ties their states together. Projecting a linear field by value consumes through an explicit movement path and is rejected while an incompatible borrow is live.
+
+Generational handles are nominal `Free` keys containing an owner identity component plus an index and generation discriminator, or an equivalent checked identity representation. They do not own storage and do not grant authority. Lookup occurs through the owning linear container and returns its declared recoverable failure type for stale, removed, wrong-owner, and wrong-generation keys.
+
+Generic containers declare universe behavior. An `Auto` container is `Free` exactly when every stored field and element is `Free`; otherwise it is `Linear`. A container operation states its constraints. Copy lookup requires `T: Free`. Borrow lookup works for every admitted stored universe. Moving extraction exists only through named invariant-preserving operations.
+
+Synchronized immutable sharing is closed. A type participates only through a compiler-known or audited stdlib admission record such as atomics, mutexes, read-write locks, and admitted synchronization cells. Ordinary records do not gain shared mutation by implementing a broad user typeclass.
+
+> Trace: D374-D375, D448, D458, D463, D497
+> Covers: Free-field projection, nominal generational handles, universe-aware containers, and the closed synchronized-sharing boundary are explicit.

@@ -111,7 +111,7 @@ Unlabeled `break;` exits the innermost enclosing loop. Unlabeled `continue;` sta
 > Trace: D43, D122
 > Covers: Plain loop control targets the innermost loop and carries no value.
 
-A loop may be prefixed by a lexical label. `break label;` and `continue label;` target the named enclosing loop. The target must be an enclosing loop label in the current function body. Two loop labels whose scopes overlap may not reuse the same label name.
+A loop may be prefixed by a lexical label. `break label;` and `continue label;` target the named enclosing loop. The target must be an enclosing loop label in the current function body. Two loop labels whose scopes overlap must not reuse the same label name.
 
 > Trace: D122
 > Covers: Labeled break/continue targets are explicit lexical loop names and cannot target non-enclosing or non-loop constructs.
@@ -177,15 +177,15 @@ For `errdefer`, `or return` counts as a structured error exit because it desugar
 
 ## Defer And Errdefer
 
-`defer statement;` registers a cleanup action immediately in the current lexical scope. If the deferred action consumes a linear value, that value enters the `Deferred` checker state at the `defer` statement. A deferred value may be borrowed under ordinary rules but may not be moved, consumed again, reassigned, returned, sent, or registered in another consuming cleanup action.
+`defer statement;` registers a cleanup action immediately in the current lexical scope. If the deferred action consumes a linear value, the checker records an ordinary-cleanup reservation layered over that value's D348 ownership state at the `defer` statement. A reserved value may be borrowed under ordinary rules but must not be moved, consumed again, reassigned, returned, sent, or registered in another consuming cleanup action.
 
-> Trace: D2, D2a, D246
-> Covers: `defer` is explicit cleanup registration with a visible checker state, not hidden scope-exit destruction.
+> Trace: D2, D2a, D246, D348
+> Covers: `defer` is explicit cleanup registration with a visible reservation fact layered over ownership state, not hidden scope-exit destruction.
 
-`errdefer statement;` registers a cleanup action for structured error exits from the current lexical scope. A value consumed by that action enters the `ErrDeferred` checker state. On success paths, the program must explicitly move, return, destroy, or otherwise discharge that value before scope exit.
+`errdefer statement;` registers a cleanup action for structured error exits from the current lexical scope. A value consumed by that action gains an error-exit cleanup reservation layered over its D348 ownership state. On success paths, the program must explicitly move, return, destroy, or otherwise discharge that value before scope exit.
 
-> Trace: D2, D2b, D246
-> Covers: `errdefer` handles structured error exits only and leaves success-path ownership explicit.
+> Trace: D2, D2b, D246, D348
+> Covers: `errdefer` records an error-exit reservation only and leaves success-path ownership explicit.
 
 Each lexical scope has its own deferred-action stack. Exiting a scope walks that scope's eligible deferred actions in reverse registration order. Inner-scope deferred actions run before outer-scope deferred actions.
 
@@ -197,7 +197,7 @@ Ordinary `defer` runs on normal fallthrough, `return`, `break`, `continue`, `or 
 > Trace: D2b, D15a, D84
 > Covers: Cleanup triggering is explicit by exit category; TPOE is immediate hard termination without user cleanup.
 
-A deferred body may use local control flow inside itself, but it may not perform nonlocal `return`, `or return`, `break`, `or break`, `continue`, or `or continue` that exits the surrounding non-deferred scope. `panic` remains legal inside a deferred body.
+A deferred body may use local control flow inside itself, but it must not perform nonlocal `return`, `or return`, `break`, `or break`, `continue`, or `or continue` that exits the surrounding non-deferred scope. `panic` remains legal inside a deferred body.
 
 > Trace: D207
 > Covers: Cleanup code cannot replace or redirect the control-flow path that caused cleanup to run.
@@ -221,7 +221,7 @@ The borrow chapter defines the full checker states. This chapter fixes control-f
 > Trace: D2b, D84
 > Covers: `panic` is explicit hard process termination with ordinary cleanup, not an exception or recoverable result.
 
-`todo;` and `todo "message";` are built-in diverging developer-stub statements. Executing `todo` enters the `panic` category with source-location diagnostic information. The compiler should warn on `todo` in non-test code, but runtime behavior remains explicit panic.
+`todo;` and `todo "message";` are built-in diverging developer-stub statements. Executing `todo` enters the `panic` category with source-location diagnostic information. The compiler emits a warning for `todo` in non-test code unless project policy raises that diagnostic to an error. Runtime behavior remains explicit panic.
 
 > Trace: D121
 > Covers: `todo` is a deliberate panic-category stub and has type `Never`.
@@ -248,7 +248,7 @@ The borrow chapter defines the full checker states. This chapter fixes control-f
 > Trace: D45, D211, D233
 > Covers: Debug output is outside the capability model by design, while production I/O remains capability-gated.
 
-The operand of `debug` is a debug-observation expression. It may observe existing values through local names, constants, literals, immutable field projection, immutable index/slice projection, and parenthesized composition. It may not contain ordinary function calls, UFCS calls, allocating constructors, arithmetic or comparisons that may TPOE, assignment, `comptime`, `panic`, `return`, `break`, `continue`, `or ...`, `defer`, or capability-using operations.
+The operand of `debug` is a debug-observation expression. It may observe existing values through local names, constants, literals, immutable field projection, immutable index/slice projection, and parenthesized composition. It must not contain ordinary function calls, UFCS calls, allocating constructors, arithmetic or comparisons that may TPOE, assignment, `comptime`, `panic`, `return`, `break`, `continue`, `or ...`, `defer`, or capability-using operations.
 
 > Trace: D45, D233
 > Covers: Debug stripping cannot change ownership, side effects, control flow, or possible contract-failure behavior.
@@ -263,4 +263,15 @@ The operand of `debug` is a debug-observation expression. It may observe existin
 Kyokai has no `skip` keyword, no expression-level assignment, no pre/post increment, no exceptions, no `try/catch`, no in-process `catch panic`, no in-process `catch TPOE`, no loop expressions, no break-with-value, no statement-local imports, and no hidden destructor call at block exit.
 
 > Trace: D43, D59, D84, D147, D253
-> Covers: Rejected statement/control mechanisms remain absent rather than unspecified.
+> Covers: Rejected statement/control mechanisms remain absent rather than delegated to private implementation choice.
+
+## Branch Joins, Abnormal Exit, And Early Release
+
+For each pre-branch linear binding, a normal branch join reconciles the D348 checker states: `Live`, `SharedBorrowed(n)`, `MutBorrowed`, `PartiallyMoved(field-set)`, `Moved`, `Consumed`, and `PendingLoopConsumption`, plus deferred-cleanup reservation facts. Every arm that can complete normally must agree on the resulting usable ownership state and cleanup reservations. A diverging arm is checked at its own exit and contributes no fake join state. A mismatch is a compile-time error. Its diagnostic identifies the binding, each arm, the state-changing statement, the expected state, the actual state, and the nearest legal repair when one exists.
+
+A panic raised while ordinary panic cleanup is executing replaces the active panic payload with a nested-abnormal-exit runtime-fatal report that retains both payloads when the target diagnostic contract can represent them. A TPOE path does not run user cleanup. A runtime-fatal path follows its target contract. Cleanup code cannot resume execution or mark an abnormal exit handled.
+
+Resources are released early through the smallest lexical owning scope, a named consuming release operation, explicit ownership transfer, or `defer` registered inside that smallest scope. Compiler-integrated `defer-distance` reports a linear resource whose cleanup is not registered before unrelated side-effecting work. Compiler-integrated `propagate-up` reports repeated `or return` propagation that adds no context, mapping, local handling, or documented pass-through contract. TPOE diagnostics state that user defers are skipped. Lock-lifetime diagnostics report guards crossing blocking operations, `spawn`, `join`, `select`, or `wait`, and large buffers or arenas retained across unrelated blocking work. These diagnostics are tooling assistance; policy can raise their severity, but they never insert cleanup or change runtime behavior.
+
+> Trace: D378-D380, D472, D495, D498
+> Covers: Linear branch-state equality, nested abnormal-exit behavior, TPOE cleanup skipping, and source-visible early release are explicit.

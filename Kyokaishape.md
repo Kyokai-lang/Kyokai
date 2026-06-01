@@ -1,12 +1,13 @@
 # Kyokai Shape And Public D-Points
 
-This file tracks public Kyokai design shape while the full spec is being written in `kyokaispec/`.
+This file indexes public Kyokai design shape while the full spec is being written in `kyokaispec/`. Live D-point bodies normally live in PRs/MRs; this file is the archive/index path when a point does not live directly in a PR/MR.
 
 Use this file for:
 
-- new public D-points
-- links to GitHub Discussions, issues, or PRs that contain design proposals
-- accepted shape that has not yet been moved into `kyokaispec/`
+- index rows for public D-point PRs/MRs
+- temporary proposals that do not yet have a PR/MR
+- historical D-point material kept for traceability
+- accepted shape that has not yet been moved into `kyokaispec/` when no better public artifact owns it
 - short notes about public design direction that are too live for `kyokaidecided.md`
 
 Keep this file public, concise, and traceable.
@@ -15,20 +16,32 @@ Keep this file public, concise, and traceable.
 
 1. `kyokaispec/` once a rule is written there.
 2. `kyokaidecided.md` for public accepted shape not yet fully spec-extracted.
-3. `Kyokaishape.md` for live public D-points and pending shape.
-4. Public GitHub Discussions/issues/PRs linked from this file.
-5. `phase.md` for implementation order only.
+3. Public PRs/MRs that carry live D-point proposals and final wording.
+4. `Kyokaishape.md` for index/archive tracking when a D-point does not live directly in a PR/MR.
+5. Issues and discussions as motivation or pre-proposal material.
+6. `phase.md` for implementation order only.
 
 ## Public D-Point Flow
 
-1. Open a proposal in `Kyokaishape.md`, GitHub Discussions, an issue, or a PR labeled as a D-point.
+1. Open a proposal PR/MR labeled `dpoint-needed` or `dpoint`; use `Kyokaishape.md` only as temporary/index storage when no PR/MR exists yet.
 2. Debate the shape publicly.
 3. Write the final proposed rule text.
-4. Gather at least 3 community acks on the final shape.
+4. Gather community acks on the final shape, or record `Lead YES` from the lead maintainer.
 5. Maintainer marks the point decided or sends it back for wording.
 6. Move the decided shape into `kyokaidecided.md` and then `kyokaispec/` when the spec section exists.
+7. Update traceability, phase/status rows, conformance plans, and implementation links when affected.
 
 The acks happen after final wording, not before. Early approval of the general direction is useful, but it does not close the point.
+
+`Lead YES` can close final wording without the normal ack count, but it does not remove the requirement for exact final text, accepted-shape extraction, traceability, and status updates.
+
+## External D-Point Tracker Row
+
+Use this compact row when a D-point lives in a PR/MR or external public thread instead of being fully written in this file.
+
+| D-point | Source | State | Owner | Final wording | Spec target | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| DNNN | link | `PROPOSED` | name | no | path or pending | one-line scope |
 
 ## Maturity State Tracker
 
@@ -36,14 +49,16 @@ This tracker records how far accepted Kyokai shape has moved toward normative sp
 
 Use the highest honest state that is currently true:
 
+The maturity axes are separate. `SHAPE_DECIDED` does not imply spec extraction, parser support, checker support, runtime support, stdlib admission, conformance coverage, release readiness, or proof. Any row that claims one of those stronger states must name the concrete evidence path for that exact axis.
+
 | State | Meaning | Evidence To Record Here |
 | --- | --- | --- |
 | `SHAPE_DECIDED` | The design point is decided in public accepted-shape docs. | D-point IDs, accepted-shape section, and any public thread/PR link if applicable. |
-| `SPEC_EXTRACTED` | The rule has a normative home outside the planning document. | `kyokaispec/` path and short note on the covered rule scope. |
+| `SPEC_EXTRACTED` | The rule has a normative home in the specification. | `kyokaispec/` path and short note on the covered rule scope. |
 | `CALCULUS_DRAFTED` | The behavior is represented in `lambda_K` scope or explicitly excluded from it. | Calculus document path and whether the feature is included or explicitly out of scope. |
 | `CALCULUS_PROVEN_PAPER` | The sequential core proof obligation is discharged at paper level. | Proof document path and theorem/scope name. |
 | `PARSER_ACCEPTED` | Surface syntax is parsed into AST nodes with source spans. | Parser implementation path and positive/negative parser test path. |
-| `ELABORATED_CORE` | Surface constructs lower through the D238 ordered pipeline. | Elaboration/lowering pass path and tests showing implicit completions/sugar exposure. |
+| `ELABORATED_CORE` | Surface constructs lower through the D238 ordered pipeline: name resolution, type-directed completion insertion, explicit elaboration nodes, tautology checking, and later semantic checks run in the specified order. | Elaboration/lowering pass path and tests showing implicit completions/sugar exposure. |
 | `CHECKED` | Name, type, borrow, linearity, capability, contract, and unsafe checks enforce the spec. | Checker implementation path and negative diagnostic/conformance test path. |
 | `LOWERED_SAFE` | Backend output implements the checked semantics without backend UB. | Backend/runtime path plus UB-sensitive generated-code/runtime tests. |
 | `CONFORMANCE_BACKED` | Behavior has executable tests and diagnostic goldens. | Conformance test path and diagnostic golden path if relevant. |
@@ -51,6 +66,22 @@ Use the highest honest state that is currently true:
 | `BOOTSTRAP_RELEASED` | The OCaml/Austral-derived compiler can compile practical Kyokai programs. | Release/build artifact path and workload/test path. |
 | `SELF_HOSTING` | Important compiler components are written in Kyokai and built by Kyokai. | Self-hosting component path and bootstrap build instructions/test path. |
 | `MECHANIZED_PROVEN` | The relevant core theorem is machine-checked. | Proof assistant artifact path and CI/build command. |
+
+## Public Status Words
+
+Use these status words for live D-point flow:
+
+- `PROPOSED`: opened but not shaped enough to decide.
+- `SHAPE_DEBATING`: the proposed shape is being debated.
+- `FINAL_TEXT_PROPOSED`: final wording exists and can be acked.
+- `ACKED`: final wording reached the public ack threshold.
+- `LEAD_YES`: lead maintainer accepted final wording directly.
+- `DECIDED`: maintainer accepted the final shape.
+- `SPEC_EXTRACTED`: normative text exists in `kyokaispec/`.
+- `CONFORMANCE_BACKED`: executable conformance tests exist.
+- `IMPLEMENTED`: compiler/toolchain/stdlib implementation exists.
+
+`LEAD_YES` is a public decision-flow status, not an implementation maturity state.
 
 ## D-Point Template
 
@@ -72,14 +103,7 @@ Use the highest honest state that is currently true:
 | Zig | ... | ... |
 | C | ... | ... |
 
-**Options**:
-
-| Option | Shape | Pros | Cons |
-| --- | --- | --- | --- |
-| A | ... | ... | ... |
-| B | ... | ... | ... |
-
-**Recommendation**: Which option should Kyokai use, and why?
+**Rationale**: Why does this exact rule fit Kyokai?
 
 **Proposed shape**:
 
@@ -93,11 +117,13 @@ Write the actual rule here. It should be close enough to become spec text.
 - What this makes harder.
 - Which existing decisions/spec sections it touches.
 
+**Rejected alternatives**: Record only alternatives whose rejection matters for future readers. Omit this field when no rejected alternative needs a public record.
+
 **Ack state**:
 
 - Final wording posted: no
-- Acks: maintainer accepted final wording
-- Decided: yes
+- Acks: 0/3 or Lead YES
+- Decided: no
 ````
 
 ## Decided Entry Template
@@ -135,17 +161,7 @@ Write the actual rule here. It should be close enough to become spec text.
 | CMake | Builds are normally configured around a separate build tree (`cmake -S <src> -B <build>`), with generated files kept out of the source tree; official docs recommend a separate build tree for a pristine source tree. | Good prior art for keeping generated/build files out of source, but CMake leaves too much directory shape to project convention for Kyokai's standard toolchain. Source: <https://cmake.org/cmake/help/latest/manual/cmake.1.html>. |
 | Bazel-like systems | Tool-owned output trees and caches are deliberately separated from source and often symlinked or opaque. | Good evidence for hermeticity and cache control, but too opaque for Kyokai's goal that users can find final artifacts without learning a separate build-system filesystem. |
 
-**Options**:
-
-| Option | Shape | Pros | Cons |
-| --- | --- | --- | --- |
-| A | Cargo-like single `target/` tree under workspace/package root containing final artifacts and internal build state. | Familiar to Rust users; simple one-directory cleanup; target/profile partitioning is proven. | `target` conflicts with Kyokai target-triple language; mixes user-facing products and compiler guts unless further split; less clear for generated source and `.koi`. |
-| B | Zig-like split: visible output prefix plus separate cache directory. | Clean mental model: artifacts people inspect are separate from disposable acceleration state; works well with reproducibility, `clean`, and release packaging. | Slightly more directories; needs exact rules for what belongs in output vs cache. |
-| C | CMake-like user-chosen build directory required before build. | Very explicit; supports multiple build trees naturally. | Too much setup friction for `kyokai build`; conflicts with Kyokai's desire for a single direct CLI and manifest-driven defaults. |
-| D | Go-like no project output tree by default; final executable in current/package directory and compiler cache elsewhere. | Very simple for tiny programs. | Fails Kyokai's package/workspace, `.koi`, generated-code, cross-target, docs, and release artifact needs. |
-| E | Hidden global cache/output store only, with final artifacts copied out by explicit install/publish commands. | Could maximize cache sharing. | Too opaque; bad for local inspection, debugging generated C, CI artifact collection, and Kyokai's explicitness rule. |
-
-**Recommendation**: Use Option B with Kyokai names: a project-local `kyokai-out/` for user-visible artifacts and `.kyokai-cache/` for disposable toolchain state. Within `kyokai-out/`, partition first by target triple, then profile, then backend when backend affects artifact kind or identity, then package name for workspace builds. Keep final products in predictable `bin/`, `lib/`, `koi/`, `doc/`, `reports/`, and `gen/` directories. Keep internal compiler state, incremental query caches, downloaded build scratch, temporary object directories, and tool-private fingerprints in `.kyokai-cache/`.
+**Rationale**: Kyokai uses a project-local `kyokai-out/` for user-visible artifacts and `.kyokai-cache/` for disposable toolchain state. Within `kyokai-out/`, partition first by target triple, then profile, then backend when backend affects artifact kind or identity, then package name for workspace builds. Keep final products in predictable `bin/`, `lib/`, `koi/`, `doc/`, `reports/`, and `gen/` directories. Keep internal compiler state, incremental query caches, downloaded build scratch, temporary object directories, and tool-private fingerprints in `.kyokai-cache/`.
 
 This keeps the parts a user may inspect separate from the parts the tool owns. It also prevents `target` from meaning both "the build output directory" and "the selected target triple." The shape follows Cargo's target/profile partitioning, Zig's cache/output split, and CMake's source-tree cleanliness, while rejecting Go's too-flat output model for Kyokai's larger artifact surface.
 
@@ -215,7 +231,7 @@ This keeps the parts a user may inspect separate from the parts the tool owns. I
 
 6. Clean behavior
 
-   kyokai clean removes cache state by default and may remove output artifacts when passed
+   kyokai clean removes cache state by default and removes output artifacts when passed
    --outputs. kyokai clean --all removes both <out-root> and <cache-root> for the selected
    package/workspace scope, but must not remove source files, kyokai.toml, kyokai.lock,
    package index metadata outside the selected cache root, or user-selected paths outside
@@ -280,17 +296,7 @@ This keeps the parts a user may inspect separate from the parts the tool owns. I
 | Swift | `.swiftmodule` is a binary compiler module; `.swiftinterface` is a textual stable module interface used for module stability and distribution when enabled. | Useful split: fast binary representation vs stable textual inspectable interface. Kyokai can learn from this by making `.koi` a stable canonical artifact and optionally deriving human views, instead of distributing fragile compiler memory images. Source: <https://forums.swift.org/t/update-on-module-stability-and-module-interface-files/23337>. |
 | C/C++ headers and modules | Textual headers expose declarations but also execute preprocessing/import behavior; binary/precompiled module formats are usually toolchain-specific. | Good warning: textual declaration surfaces are inspectable, but unrestricted preprocessing/include search creates exactly the ambient behavior Kyokai rejects. |
 
-**Options**:
-
-| Option | Shape | Pros | Cons |
-| --- | --- | --- | --- |
-| A | Opaque compiler-private binary blob. | Fast to load; easiest first implementation. | Violates the spirit of D79; hard for docs/audit/SemVer/LSP/release tooling; hard to debug; risks becoming a cache by another name. |
-| B | Canonical JSON/TOML/YAML text artifact. | Easy to inspect and diff; simple tooling. | Large, slow, awkward for typed graphs, hashes, generic bodies, and canonical binary identity; JSON/TOML ambiguity around ordering/number/string details must be aggressively controlled. |
-| C | Dual format: `.koi` binary plus `.koi.txt` or `.koi.json` sidecar. | Fast compiler path plus human inspection. | Two public formats can drift; sidecar can become stale; more release burden. |
-| D | Canonical structured binary container with a required lossless inspection command that emits stable JSON/text views. | Fast enough, deterministic, versioned, toolable, and still inspectable; one source of truth. | More format design up front; requires a `kyokai koi` inspection/validation command. |
-| E | Make `.koi` literally a normalized Kyokai-like textual interface. | Very readable and close to source. | Cannot naturally encode all checked metadata, generic body materialization data, fingerprints, target contracts, and compatibility fields without inventing a second source language. |
-
-**Recommendation**: Use Option D. `.koi` should be a canonical structured binary container with a small fixed header, a canonical section table, deterministic section encodings, cryptographic hashes over normalized section bytes, and an official inspection/validation command. The binary file is the normative artifact. Human-readable JSON/text is derived from it and must not become a second artifact authority.
+**Rationale**: `.koi` is a canonical structured binary container with a small fixed header, a canonical section table, deterministic section encodings, cryptographic hashes over normalized section bytes, and an official inspection/validation command. The binary file is the normative artifact. Human-readable JSON/text is derived from it and must not become a second artifact authority.
 
 This fits Kyokai because `.koi` is too important to be an opaque cache, but also too rich to pretend it is just a pretty source file. Kyokai needs the OCaml/GHC idea of an interface file, the Rust idea that downstream compilers need rich metadata, and the Swift lesson that a stable interface surface must not be a fragile compiler memory dump. The compromise is not mushy: one canonical artifact, one exact compatibility algorithm, one official way to inspect it.
 
@@ -483,3 +489,13 @@ This fits Kyokai because `.koi` is too important to be an opaque cache, but also
 ## Decided But Not Yet Spec-Extracted
 
 The initial decided shape is being cleaned into `kyokaidecided.md` first. As the public spec gets written, decisions will move from there into `kyokaispec/` and be linked here only when useful.
+
+### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index **[DECIDED | SPEC_EXTRACTED | NAV: kyokaispec/src/toolchain/01-manifest-package-workspace.md, kyokaispec/src/toolchain/03-cli.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md, kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md]**
+
+**Naved to spec**: `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, and `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`.
+
+**The question**: Where do published package docs live, what does the official package index store, and how do the toolchain and website retrieve docs without requiring Kyokai to operate package-doc artifact storage?
+
+**Use case**: A package owner should publish one reviewable metadata patch while keeping generated docs beside the exact Git-hosted package source. Kyokai needs central search and retrieval without copying every package's generated HTML and structured docs into a Kyokai-owned repository.
+
+**Justification**: Each published package commits a generated `kdocs/` directory at its package root. The official package index stores the exact Git revision, package-root path, docs manifest digest, schema, retrieval-adapter class, status, and compact search projection. The website and `kyokai docs --pull` retrieve verified files from that exact indexed revision. A workspace monorepo stores one `kdocs/` directory under each published member package root. `kyokai-package-docs` is not a required bootstrap repository; any future mirror is cache-aside infrastructure and requires a separate service decision.
