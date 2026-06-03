@@ -7,5 +7,6 @@
   KyokaiSourceFileTest
   KyokaiSourceTextTest
   KyokaiLexicalTokenTest
+  KyokaiSurfaceParserTest
   CRendererTest)
  (libraries austral_core ounit2))
