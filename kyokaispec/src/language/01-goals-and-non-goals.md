@@ -1,6 +1,9 @@
 # Goals And Non-Goals
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-01-GOALS-AND-NON-GOALS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai inherits more than a compiler skeleton from Austral. It inherits pressure: the belief that linear types, explicit modules, capability security, strictness, and restraint can make systems code easier to reason about. Kyokai changes a lot around that core. It grows a real toolchain, a larger standard library contract, a stronger no-language-UB promise, explicit runtime failure categories, and a broader production surface. But when an Austral goal still belongs to Kyokai, this specification carries it forward here instead of making the reader go dig through another spec.
 
 > Trace: D5, D86, D145, D155
@@ -75,7 +78,7 @@ The twelfth goal is implementation honesty. The C backend remains important for 
 The thirteenth goal is formal honesty. Kyokai may state intended invariants in prose while the proof work is still being built, but it must not pretend that prose has already discharged the proof burden. Before `v1.0`, Kyokai must produce a paper proof for the sequential ownership-and-borrowing core, with later mechanized proof work after self-hosting.
 
 > Trace: D143/D241
-> Covers: Kyokai requires a pre-`v1.0` paper proof for the sequential `lambda_K` core, treats `lambda_k_research.md` as a research note rather than a normative proof, and plans later mechanization after self-hosting.
+> Covers: Kyokai requires a pre-`v1.0` paper proof for the sequential `lambda_K` core, keeps draft calculus artifacts at the explicit `intended-by-spec` evidence tier until review discharges their named theorems, and plans later mechanization after self-hosting.
 
 Kyokai has the following normative non-goals:
 

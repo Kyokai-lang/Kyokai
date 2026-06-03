@@ -1,6 +1,9 @@
 # Concurrency Primitives
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-09-CONCURRENCY-PRIMITIVES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Concurrency is where invisible behavior becomes expensive. A hidden share, a forgotten close, a lock nobody knows can block, a task boundary that moved authority without saying so: Kyokai gives these things names before they can become habits.
 
 > Trace: D3-D3b, D90-D101, D146, D164, D183-D184, D212

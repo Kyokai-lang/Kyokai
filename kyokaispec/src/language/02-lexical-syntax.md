@@ -1,6 +1,9 @@
 # Lexical Syntax
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-02-LEXICAL-SYNTAX
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai source is written as UTF-8 text and is specified here with the same clean EBNF discipline inherited from Austral: `=` defines a production, `;` ends it, concatenation is written with `,`, alternation with `|`, optional syntax with `[...]`, and zero-or-more repetition with `{...}`. That inherited shape is still useful. The city changed, the street signs changed, but the map-reading tool still works.
 
 > Trace: D5, D52, D78, D86
@@ -81,17 +84,19 @@ No still-live binding may be shadowed by another local binding, parameter, patte
 The following words are reserved as language keywords and cannot be used as ordinary identifiers:
 
 ```text
-Ok Err Some None and as audit band bnot body borrow bor break build bxor capability
-case comptime constant continue debug defer do else ensure errdefer esac extern
-false fi for foreign function generator if import in instance internal is join
-let mon module nil not od of or packed panic pick pragma record require return
-receiver rotl rotr seal select shl shr spawn spec static static_assert taskgroup then
-todo true type alias typeclass union unreachable unsafe var when where while
-with yield
+additional_invariant alias and as assumes audit band below bit bitrecord bits bnot body bor
+borrow borrows break build bxor capability case cleanup compile_error comptime constant
+continue contract covers debug default defer do drop else ensure Err errdefer esac evidence
+exports extern false fi field fn for forbids foreign from function generator if import in
+instance internal is join layout let lifetime maps_failure method module module_invariant mon
+nil None not od of Ok or owns packed panic pick pragma preserves produce qed receiver record
+reentrancy require requires reserved return rotl rotr seal select shl shr Some spawn spec
+static static_assert target taskgroup then threading timeout to todo transfers true type
+typeclass union unreachable unsafe var wait wake when where while with yield
 ```
 
-> Trace: D8-D21, D24, D41, D52, D54, D63, D78, D111, D118, D120, D127, D179, D198, D214, D235, D252
-> Covers: Kyokai reserves the accepted syntax surface for declarations, control flow, contracts, FFI, unsafe contracts, tasks, generators, compile-time forms, and semantic terminators.
+> Trace: D8-D21, D24, D41, D52, D54, D63, D78, D111, D118-D120, D127, D179, D198, D214, D235, D252, D322-D323, D339-D341
+> Covers: Kyokai reserves the accepted syntax surface for declarations, control flow, contracts, FFI, unsafe contracts, tasks, generators, compile-time forms, bitrecords, waits, and semantic terminators. Contextual words remain separate.
 
 Some words are contextual. `result` is recognized as the postcondition result view only inside `ensure` clauses. `old` is recognized only inside `ensure` clauses. `ignore` is recognized as the discard pattern only in pattern position. Outside those contexts, they are ordinary identifiers unless another chapter gives a narrower rule.
 

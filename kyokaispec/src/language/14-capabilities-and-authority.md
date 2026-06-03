@@ -1,6 +1,9 @@
 # Capabilities And Authority
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-14-CAPABILITIES-AND-AUTHORITY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Authority in Kyokai is not a smell in the air. It is not something a function wakes up owning because it happens to run inside the same process. It is a value with a boundary around it. If code wants the filesystem, the clock, the network, a process handle, an unsafe operation, or a raw device edge, the authority has to cross the line in source.
 
 That is the point. The reader can look at a signature and see which doors the code can open. A dependency that never receives the key cannot quietly walk through the building at night.

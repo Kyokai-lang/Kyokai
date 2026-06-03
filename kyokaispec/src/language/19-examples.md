@@ -1,6 +1,9 @@
 # Examples
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-19-EXAMPLES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Examples are not decoration. They are the street-level view of the rules. A spec can name a thousand doors, but an example shows which key is in whose hand when the program walks through one.
 
 The examples here use `.kyo` interfaces, `.kai` bodies, `seal;`, `qed;`, `build;`, `fi;`, `od;`, `esac;`, `Result`, `Optional`, explicit capabilities, explicit allocators, and contracts. They are small on purpose: each one shows the rule it is standing on instead of trying to be a whole application.

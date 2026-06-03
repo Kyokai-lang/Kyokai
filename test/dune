@@ -4,5 +4,8 @@
   UtilTest
   CliUtilTest
   CliParserTest
+  KyokaiSourceFileTest
+  KyokaiSourceTextTest
+  KyokaiLexicalTokenTest
   CRendererTest)
  (libraries austral_core ounit2))

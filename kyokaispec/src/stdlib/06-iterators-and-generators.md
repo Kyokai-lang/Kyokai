@@ -1,6 +1,9 @@
 # Iterators And Generators
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-06-ITERATORS-AND-GENERATORS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Iteration is control flow wearing a library face. It can borrow, move, allocate, suspend, and clean up. Kyokai treats it with the same suspicion and care as a loop written by hand.
 
 > Trace: D32, D77, D146, D198, D249

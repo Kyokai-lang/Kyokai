@@ -1,0 +1,376 @@
+schema_version = 1
+
+[policy]
+closed_nonproof_reasons = [
+  "tooling-service-behavior",
+  "workflow-only",
+  "documentation-only",
+  "infrastructure-only",
+  "bootstrap-harness",
+  "generated-artifact-plumbing",
+]
+required_code_paths = [
+  "lib/Compiler.ml",
+  "lib/KyokaiSourceFile.ml",
+  "lib/LinearityCheck.ml",
+  "lib/DesugarBorrows.ml",
+  "lib/CodeGen.ml",
+  "test-programs/runner.py",
+  "kyokaicalculus/model_tests.py",
+  "kyokaicalculus/machine_runner.py",
+  "kyokaicalculus/lean/KyokaiCalculusSpot.lean",
+  "tools/check_prooftrace.py",
+  "lib/prelude.c",
+  "lib/prelude.h",
+  "lib/builtin/Memory.aui",
+  "lib/builtin/Memory.aum",
+  "lib/builtin/Pervasive.aui",
+  "lib/builtin/Pervasive.aum",
+  "standard/src/Bounded.aui",
+  "standard/src/Bounded.aum",
+  "standard/src/Box.aui",
+  "standard/src/Box.aum",
+  "standard/src/Buffer.aui",
+  "standard/src/Buffer.aum",
+  "standard/src/Equality.aui",
+  "standard/src/Equality.aum",
+  "standard/src/IO/IO.aui",
+  "standard/src/IO/IO.aum",
+  "standard/src/IO/Terminal.aui",
+  "standard/src/IO/Terminal.aum",
+  "standard/src/Order.aui",
+  "standard/src/Order.aum",
+  "standard/src/String.aui",
+  "standard/src/String.aum",
+  "standard/src/StringBuilder.aui",
+  "standard/src/StringBuilder.aum",
+  "standard/src/Tuples.aui",
+  "standard/src/Tuples.aum",
+]
+
+[defaults.spec_chapter]
+owner = "spec-maintainers"
+spec_status = "specified"
+implementation_status = "planned"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+
+[spec_chapters]
+"kyokaispec/src/appendices/a-license.md" = "SPEC-APPENDICES-A-LICENSE"
+"kyokaispec/src/appendices/c-austral-differences.md" = "SPEC-APPENDICES-C-AUSTRAL-DIFFERENCES"
+"kyokaispec/src/appendices/d-formalization-roadmap.md" = "SPEC-APPENDICES-D-FORMALIZATION-ROADMAP"
+"kyokaispec/src/language/00-introduction.md" = "SPEC-LANGUAGE-00-INTRODUCTION"
+"kyokaispec/src/language/01-goals-and-non-goals.md" = "SPEC-LANGUAGE-01-GOALS-AND-NON-GOALS"
+"kyokaispec/src/language/02-lexical-syntax.md" = "SPEC-LANGUAGE-02-LEXICAL-SYNTAX"
+"kyokaispec/src/language/03-grammar.md" = "SPEC-LANGUAGE-03-GRAMMAR"
+"kyokaispec/src/language/04-modules-and-visibility.md" = "SPEC-LANGUAGE-04-MODULES-AND-VISIBILITY"
+"kyokaispec/src/language/05-declarations.md" = "SPEC-LANGUAGE-05-DECLARATIONS"
+"kyokaispec/src/language/06-type-system.md" = "SPEC-LANGUAGE-06-TYPE-SYSTEM"
+"kyokaispec/src/language/07-generics-and-typeclasses.md" = "SPEC-LANGUAGE-07-GENERICS-AND-TYPECLASSES"
+"kyokaispec/src/language/08-patterns.md" = "SPEC-LANGUAGE-08-PATTERNS"
+"kyokaispec/src/language/09-expressions-and-evaluation.md" = "SPEC-LANGUAGE-09-EXPRESSIONS-AND-EVALUATION"
+"kyokaispec/src/language/10-statements-and-control-flow.md" = "SPEC-LANGUAGE-10-STATEMENTS-AND-CONTROL-FLOW"
+"kyokaispec/src/language/11-linearity-borrowing-and-regions.md" = "SPEC-LANGUAGE-11-LINEARITY-BORROWING-AND-REGIONS"
+"kyokaispec/src/language/12-implicit-completions-and-elaboration.md" = "SPEC-LANGUAGE-12-IMPLICIT-COMPLETIONS-AND-ELABORATION"
+"kyokaispec/src/language/13-contracts-and-runtime-failure.md" = "SPEC-LANGUAGE-13-CONTRACTS-AND-RUNTIME-FAILURE"
+"kyokaispec/src/language/14-capabilities-and-authority.md" = "SPEC-LANGUAGE-14-CAPABILITIES-AND-AUTHORITY"
+"kyokaispec/src/language/15-concurrency.md" = "SPEC-LANGUAGE-15-CONCURRENCY"
+"kyokaispec/src/language/16-unsafe-ffi-and-abi.md" = "SPEC-LANGUAGE-16-UNSAFE-FFI-AND-ABI"
+"kyokaispec/src/language/17-memory-layout-and-backend-contract.md" = "SPEC-LANGUAGE-17-MEMORY-LAYOUT-AND-BACKEND-CONTRACT"
+"kyokaispec/src/language/18-built-ins.md" = "SPEC-LANGUAGE-18-BUILT-INS"
+"kyokaispec/src/language/19-examples.md" = "SPEC-LANGUAGE-19-EXAMPLES"
+"kyokaispec/src/rationale/00-rationale-index.md" = "SPEC-RATIONALE-00-RATIONALE-INDEX"
+"kyokaispec/src/rationale/01-language-design.md" = "SPEC-RATIONALE-01-LANGUAGE-DESIGN"
+"kyokaispec/src/rationale/02-syntax.md" = "SPEC-RATIONALE-02-SYNTAX"
+"kyokaispec/src/rationale/03-error-handling-and-tpoe.md" = "SPEC-RATIONALE-03-ERROR-HANDLING-AND-TPOE"
+"kyokaispec/src/rationale/04-linear-resources.md" = "SPEC-RATIONALE-04-LINEAR-RESOURCES"
+"kyokaispec/src/rationale/05-capabilities.md" = "SPEC-RATIONALE-05-CAPABILITIES"
+"kyokaispec/src/rationale/06-concurrency.md" = "SPEC-RATIONALE-06-CONCURRENCY"
+"kyokaispec/src/rationale/07-stdlib-philosophy.md" = "SPEC-RATIONALE-07-STDLIB-PHILOSOPHY"
+"kyokaispec/src/rationale/08-toolchain-philosophy.md" = "SPEC-RATIONALE-08-TOOLCHAIN-PHILOSOPHY"
+"kyokaispec/src/stdlib/00-stdlib-overview.md" = "SPEC-STDLIB-00-STDLIB-OVERVIEW"
+"kyokaispec/src/stdlib/01-admission-contracts.md" = "SPEC-STDLIB-01-ADMISSION-CONTRACTS"
+"kyokaispec/src/stdlib/02-core-result-optional-display-error.md" = "SPEC-STDLIB-02-CORE-RESULT-OPTIONAL-DISPLAY-ERROR"
+"kyokaispec/src/stdlib/03-allocators-and-memory-containers.md" = "SPEC-STDLIB-03-ALLOCATORS-AND-MEMORY-CONTAINERS"
+"kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md" = "SPEC-STDLIB-04-TEXT-BYTES-PATHS-AND-STRINGS"
+"kyokaispec/src/stdlib/05-collections.md" = "SPEC-STDLIB-05-COLLECTIONS"
+"kyokaispec/src/stdlib/06-iterators-and-generators.md" = "SPEC-STDLIB-06-ITERATORS-AND-GENERATORS"
+"kyokaispec/src/stdlib/07-math-and-numerics.md" = "SPEC-STDLIB-07-MATH-AND-NUMERICS"
+"kyokaispec/src/stdlib/08-io-files-env-process-time-random.md" = "SPEC-STDLIB-08-IO-FILES-ENV-PROCESS-TIME-RANDOM"
+"kyokaispec/src/stdlib/09-concurrency-primitives.md" = "SPEC-STDLIB-09-CONCURRENCY-PRIMITIVES"
+"kyokaispec/src/stdlib/10-crypto-policy.md" = "SPEC-STDLIB-10-CRYPTO-POLICY"
+"kyokaispec/src/stdlib/11-transitional-ffi-tracking.md" = "SPEC-STDLIB-11-TRANSITIONAL-FFI-TRACKING"
+"kyokaispec/src/toolchain/00-toolchain-overview.md" = "SPEC-TOOLCHAIN-00-TOOLCHAIN-OVERVIEW"
+"kyokaispec/src/toolchain/01-manifest-package-workspace.md" = "SPEC-TOOLCHAIN-01-MANIFEST-PACKAGE-WORKSPACE"
+"kyokaispec/src/toolchain/02-module-resolution-and-koi.md" = "SPEC-TOOLCHAIN-02-MODULE-RESOLUTION-AND-KOI"
+"kyokaispec/src/toolchain/03-cli.md" = "SPEC-TOOLCHAIN-03-CLI"
+"kyokaispec/src/toolchain/04-build-profiles-targets-linking.md" = "SPEC-TOOLCHAIN-04-BUILD-PROFILES-TARGETS-LINKING"
+"kyokaispec/src/toolchain/05-diagnostics.md" = "SPEC-TOOLCHAIN-05-DIAGNOSTICS"
+"kyokaispec/src/toolchain/06-formatter.md" = "SPEC-TOOLCHAIN-06-FORMATTER"
+"kyokaispec/src/toolchain/07-testing-coverage-bench.md" = "SPEC-TOOLCHAIN-07-TESTING-COVERAGE-BENCH"
+"kyokaispec/src/toolchain/08-docs-lsp-audit.md" = "SPEC-TOOLCHAIN-08-DOCS-LSP-AUDIT"
+"kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md" = "SPEC-TOOLCHAIN-09-REPRODUCIBILITY-INCREMENTAL-BUILDS"
+"kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md" = "SPEC-TOOLCHAIN-10-PACKAGE-INDEX-SEMVER-RELEASES-CI"
+"kyokaispec/src/toolchain/11-build-generation-and-playground.md" = "SPEC-TOOLCHAIN-11-BUILD-GENERATION-AND-PLAYGROUND"
+
+[spec_chapter_no_proof]
+"kyokaispec/src/appendices/a-license.md" = "documentation-only"
+"kyokaispec/src/appendices/c-austral-differences.md" = "documentation-only"
+"kyokaispec/src/appendices/d-formalization-roadmap.md" = "workflow-only"
+"kyokaispec/src/language/00-introduction.md" = "documentation-only"
+"kyokaispec/src/language/19-examples.md" = "documentation-only"
+"kyokaispec/src/rationale/00-rationale-index.md" = "documentation-only"
+"kyokaispec/src/rationale/01-language-design.md" = "documentation-only"
+"kyokaispec/src/rationale/02-syntax.md" = "documentation-only"
+"kyokaispec/src/rationale/03-error-handling-and-tpoe.md" = "documentation-only"
+"kyokaispec/src/rationale/04-linear-resources.md" = "documentation-only"
+"kyokaispec/src/rationale/05-capabilities.md" = "documentation-only"
+"kyokaispec/src/rationale/06-concurrency.md" = "documentation-only"
+"kyokaispec/src/rationale/07-stdlib-philosophy.md" = "documentation-only"
+"kyokaispec/src/rationale/08-toolchain-philosophy.md" = "documentation-only"
+"kyokaispec/src/toolchain/00-toolchain-overview.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/01-manifest-package-workspace.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/02-module-resolution-and-koi.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/03-cli.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/04-build-profiles-targets-linking.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/05-diagnostics.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/06-formatter.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/07-testing-coverage-bench.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/08-docs-lsp-audit.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/11-build-generation-and-playground.md" = "tooling-service-behavior"
+
+[[records]]
+id = "CALC-LAMBDA-K-SEQ"
+kind = "proof-boundary"
+scope = "lambda_K-seq paper theorem target"
+owner = "lambda_K-seq"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "none"
+proof_status = "paper-proven"
+proof_required = true
+spec_artifacts = ["kyokaicalculus/scope.md", "kyokaicalculus/syntax-and-statics.md", "kyokaicalculus/dynamics.md", "kyokaicalculus/lemmas.md"]
+implementation_artifacts = ["kyokaicalculus/model_tests.py", "kyokaicalculus/machine_runner.py"]
+test_artifacts = ["kyokaicalculus/model_tests.py", "kyokaicalculus/machine_runner.py"]
+proof_artifacts = ["kyokaicalculus/paper-proof.md", "kyokaicalculus/close-and-witness-proof.md", "kyokaicalculus/call-entry-proof.md", "kyokaicalculus/primitive-admission-proof.md", "kyokaicalculus/frame-typing-proof.md", "kyokaicalculus/source-expression-proof.md", "kyokaicalculus/equivariance-proof.md", "kyokaicalculus/theorem-assembly.md"]
+exclusions = ["The paper proof is narrow to the sequential lambda_K-seq theorem assembled in kyokaicalculus/theorem-assembly.md. Concurrency, unsafe/FFI, backend lowering, stdlib admission, compiler conformance, toolchain behavior, package management, hosted services, and whole-core Lean mechanization remain excluded from this theorem. The twenty-five executable whole-machine traces and twenty-five Lean spot theorems support the proof but do not replace or mechanically prove Theorem P or Theorem Q."]
+
+[[records]]
+id = "CALC-LEAN-OWNER-SLOT-SPOT"
+kind = "proof-artifact"
+scope = "Twenty-five named owner-slot, layered-witness, lease-close, call-transfer, path-certificate, and intrinsic-TPOE representation spot theorems"
+owner = "lambda_K-mech"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "none"
+proof_status = "mechanically-proven"
+proof_required = true
+spec_artifacts = ["kyokaicalculus/claim-tiers.md"]
+implementation_artifacts = ["kyokaicalculus/lean/KyokaiCalculusSpot.lean"]
+test_artifacts = ["kyokaicalculus/lean/KyokaiCalculusSpot.lean"]
+proof_artifacts = ["kyokaicalculus/lean/KyokaiCalculusSpot.lean", "kyokaicalculus/lean/lean-toolchain", "kyokaicalculus/lean/lakefile.toml"]
+exclusions = ["This narrow Lean artifact does not mechanically establish L1-L40, Theorem P, Theorem Q, compiler correctness, backend correctness, or whole-language soundness."]
+
+[[records]]
+id = "FRONTEND-KYOKAI-SOURCE-TEXT"
+kind = "frontend-scaffold-boundary"
+scope = "Isolated Kyokai source-byte contract scaffold for UTF-8 validation, BOM rejection, newline validation, scalar-column diagnostics, and role-gated shebang handling"
+owner = "frontend-source-loading"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+implementation_artifacts = ["lib/KyokaiSourceText.ml", "lib/KyokaiSourceText.mli"]
+test_artifacts = ["test/KyokaiSourceTextTest.ml"]
+proof_artifacts = []
+exclusions = ["This prototype validates source bytes, receives role-gated shebang policy from the source-role scaffold, and can feed the isolated Kyokai lexical scanner. It is not wired into the inherited lexer, manifest loader, executable-target discovery, parser, formatter, or conformance runner. Display-width columns remain a later toolchain presentation layer."]
+
+[[records]]
+id = "FRONTEND-KYOKAI-LEXICAL-TOKENS"
+kind = "frontend-scaffold-boundary"
+scope = "Isolated Kyokai lexical token scaffold for source-byte diagnostics, comments, ASCII identifiers, reserved keywords, punctuation, numeric boundaries, literal families, comptime embed builtins, and targeted inherited-form rejection"
+owner = "frontend-lexing"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+implementation_artifacts = ["lib/KyokaiLexicalToken.ml", "lib/KyokaiLexicalToken.mli"]
+test_artifacts = ["test/KyokaiLexicalTokenTest.ml"]
+proof_artifacts = []
+exclusions = ["This prototype is isolated from the inherited lexer and parser. It validates ordinary source input, consumes role-prepared source when requested, and tokenizes the accepted string, raw-string, code-point, and byte literal families. Documentation attachment, parser integration, diagnostic-schema integration, formatter integration, exhaustive conformance fixtures, and Kyokai lexical conformance remain open."]
+
+[[records]]
+id = "FRONTEND-KYOKAI-SOURCE-ROLES"
+kind = "frontend-scaffold-boundary"
+scope = "Kyokai frontend source-role classifier for .kyo interfaces, .kai bodies, rejected .koi artifacts, and role-gated source-byte preparation"
+owner = "frontend-source-loading"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "generated-artifact-plumbing"
+spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/language/04-modules-and-visibility.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
+implementation_artifacts = ["lib/KyokaiSourceFile.ml", "lib/KyokaiSourceFile.mli"]
+test_artifacts = ["test/KyokaiSourceFileTest.ml"]
+proof_artifacts = []
+exclusions = ["This prototype classifies individual source paths and selects source-byte shebang policy for a caller-provided executable-entry fact. It deliberately defines no public CLI encoding for source sets. It is not wired into manifest discovery, module loading, executable-target discovery, parsing, .koi generation, or package conformance, and it does not change lambda_K-seq."]
+
+[[records]]
+id = "BOOTSTRAP-COMPILER-PIPELINE"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral compiler orchestration boundary"
+owner = "compiler-pipeline"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/toolchain/00-toolchain-overview.md"]
+implementation_artifacts = ["lib/Compiler.ml"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["The inherited pass pipeline is bootstrap code. This marker does not claim Kyokai conformance or proof coverage."]
+
+[[records]]
+id = "BOOTSTRAP-LINEARITY-CHECK"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral linearity-check boundary"
+owner = "linearity-checker"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/11-linearity-borrowing-and-regions.md"]
+implementation_artifacts = ["lib/LinearityCheck.ml"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["The inherited checker is not evidence that accepted Kyokai linearity, borrowing, and cleanup rules are implemented."]
+
+[[records]]
+id = "BOOTSTRAP-BORROW-DESUGAR"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral borrow-desugaring boundary"
+owner = "borrow-lowering"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/11-linearity-borrowing-and-regions.md", "kyokaispec/src/language/12-implicit-completions-and-elaboration.md"]
+implementation_artifacts = ["lib/DesugarBorrows.ml"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["The inherited desugaring pass is bootstrap code and is not a Kyokai conformance claim."]
+
+[[records]]
+id = "BOOTSTRAP-C-BACKEND"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral C-backend generation boundary"
+owner = "backend-c"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+implementation_artifacts = ["lib/CodeGen.ml"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["The inherited generator is bootstrap code. Backend UB closure and preservation evidence remain open."]
+
+[[records]]
+id = "BOOTSTRAP-E2E-RUNNER"
+kind = "harness-boundary"
+scope = "Inherited end-to-end compiler test runner"
+owner = "test-harness"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "bootstrap-harness"
+spec_artifacts = ["kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+implementation_artifacts = ["test-programs/runner.py"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["Running inherited fixtures does not upgrade a Kyokai rule to conformance-backed."]
+
+[[records]]
+id = "TOOL-PROOFTRACE-CHECKER"
+kind = "infrastructure-boundary"
+scope = "ProofTrace registry validation and generated public status board"
+owner = "prooftrace-tooling"
+spec_status = "specified"
+implementation_status = "implemented"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "generated-artifact-plumbing"
+spec_artifacts = ["kyokaispec/src/appendices/d-formalization-roadmap.md"]
+implementation_artifacts = ["tools/check_prooftrace.py", "kyokaiproofstatus.toml", "kyokaiproofstatus.md", "Makefile", ".github/workflows/build-and-test.yml"]
+test_artifacts = ["tools/check_prooftrace.py"]
+proof_artifacts = []
+exclusions = ["Registry validation checks evidence metadata consistency. It does not prove the referenced language rules or implementations."]
+
+
+[[records]]
+id = "BOOTSTRAP-RUNTIME-PRELUDE"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral runtime prelude and compiler built-ins"
+owner = "runtime-bootstrap"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/16-unsafe-ffi-and-abi.md", "kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+implementation_artifacts = ["lib/prelude.c", "lib/prelude.h", "lib/builtin/Memory.aui", "lib/builtin/Memory.aum", "lib/builtin/Pervasive.aui", "lib/builtin/Pervasive.aum"]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["These inherited runtime and built-in files are bootstrap code. Their existence does not establish Kyokai runtime, unsafe-wrapper, ABI, or backend conformance."]
+
+[[records]]
+id = "BOOTSTRAP-STDLIB"
+kind = "inherited-bootstrap-boundary"
+scope = "Inherited Austral standard-library source tree"
+owner = "stdlib-bootstrap"
+spec_status = "planned"
+implementation_status = "inherited-bootstrap"
+conformance_status = "none"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/stdlib/00-stdlib-overview.md", "kyokaispec/src/stdlib/01-admission-contracts.md"]
+implementation_artifacts = [
+  "standard/src/Bounded.aui",
+  "standard/src/Bounded.aum",
+  "standard/src/Box.aui",
+  "standard/src/Box.aum",
+  "standard/src/Buffer.aui",
+  "standard/src/Buffer.aum",
+  "standard/src/Equality.aui",
+  "standard/src/Equality.aum",
+  "standard/src/IO/IO.aui",
+  "standard/src/IO/IO.aum",
+  "standard/src/IO/Terminal.aui",
+  "standard/src/IO/Terminal.aum",
+  "standard/src/Order.aui",
+  "standard/src/Order.aum",
+  "standard/src/String.aui",
+  "standard/src/String.aum",
+  "standard/src/StringBuilder.aui",
+  "standard/src/StringBuilder.aum",
+  "standard/src/Tuples.aui",
+  "standard/src/Tuples.aum",
+]
+test_artifacts = []
+proof_artifacts = []
+exclusions = ["The inherited Austral standard-library modules are bootstrap inputs. They are not admitted Kyokai stdlib APIs and do not satisfy Kyokai stdlib conformance or proof requirements."]

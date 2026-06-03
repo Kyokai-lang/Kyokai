@@ -1430,7 +1430,40 @@ Bad:
 (* TODO fix later *)
 ```
 
-### 15.4 Public Docs Near Code
+### 15.4 ProofTrace Boundary Comments
+
+D526 requires stable ProofTrace records at maintained spec-relevant semantic, toolchain, stdlib, backend, unsafe, conformance, harness, and proof boundaries. Add a language-appropriate source comment at each registered boundary:
+
+```ocaml
+(* kyokai:prooftrace id=BOOTSTRAP-LINEARITY-CHECK *)
+```
+
+```python
+# kyokai:prooftrace id=TOOL-PROOFTRACE-CHECKER
+```
+
+Rules:
+
+- The ID must exist in `kyokaiproofstatus.toml`.
+- Place the marker at the owning boundary, not on every subordinate helper.
+- Create a narrower record when a helper becomes an independently maintained spec-relevant boundary.
+- Mark inherited bootstrap files honestly. A marker does not turn inherited Austral code into Kyokai conformance evidence.
+- Update the registry, run `make proofstatus`, and run `make check-prooftrace` when a registered boundary changes.
+- Do not use marker metadata to change source legality, type checking, lowering, runtime behavior, or proof conclusions.
+
+Before committing a change that creates, removes, or changes a registered or newly spec-relevant boundary:
+
+1. Reuse the stable owning record in `kyokaiproofstatus.toml`, or create one when the boundary is new or independently maintained.
+2. Add or update the single owning-boundary marker. Do not mark subordinate helpers unless they have become independently maintained boundaries.
+3. Regenerate the public status board. Do not edit `kyokaiproofstatus.md` manually.
+4. Run:
+
+```bash
+make proofstatus
+make check-prooftrace
+```
+
+### 15.5 Public Docs Near Code
 
 Rules:
 
@@ -1617,6 +1650,7 @@ A code PR should state:
 - tests run
 - diagnostics changed
 - runtime/FFI/backend safety impact if relevant
+- ProofTrace impact: new record, updated record, or no registered-boundary change
 - remaining gaps
 
 ### 19.4 Review Checklist
@@ -1634,6 +1668,7 @@ Before code is ready:
 - [ ] Tests cover success, failure, and diagnostics where relevant.
 - [ ] Generated output is deterministic.
 - [ ] Public docs/spec/shape are updated when behavior changed.
+- [ ] ProofTrace registry records and required boundary comments are updated when a registered or new spec-relevant boundary changed.
 
 ---
 

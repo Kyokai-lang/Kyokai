@@ -1,6 +1,9 @@
 # Statements And Control Flow
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-10-STATEMENTS-AND-CONTROL-FLOW
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Statements are where control moves through the room. A value can be bound, a branch can split, a loop can turn back on itself, a cleanup can be promised for later, or the whole process can be told to stop. Kyokai keeps each of those motions named in source.
 
 > Trace: D2, D8, D9, D16, D43, D71

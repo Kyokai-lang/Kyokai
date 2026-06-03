@@ -1,6 +1,9 @@
 # Manifest, Packages, And Workspaces
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-01-MANIFEST-PACKAGE-WORKSPACE
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A Kyokai project does not become a package because a tool guessed right while walking through folders. The package boundary is written down. The workspace boundary is written down. The module root is written down. That is the whole point: the build does not become a hallway full of unmarked doors where the compiler is the only one who knows which one opens.
 
 > Trace: D78, D83, D155

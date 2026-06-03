@@ -35,6 +35,12 @@ jobs:
       - name: make test
         run: nix-shell --command 'make test'
 
+      - name: check ProofTrace metadata
+        run: nix-shell --command 'make check-prooftrace'
+
+      - name: run Gate-B executable model checks
+        run: nix-shell --command 'make gate-b-model'
+
       - name: end-to-end tests
         run: nix-shell --command 'python test-programs/runner.py'
 

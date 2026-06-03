@@ -27,3 +27,16 @@ uninstall:
 .PHONY: clean
 clean:
 	rm -f $(BIN); rm -rf _build; rm -f lib/BuiltInModules.ml
+
+.PHONY: gate-b-model
+gate-b-model:
+	python3 kyokaicalculus/model_tests.py
+	python3 kyokaicalculus/machine_runner.py
+
+.PHONY: proofstatus
+proofstatus:
+	python3 tools/check_prooftrace.py --write
+
+.PHONY: check-prooftrace
+check-prooftrace:
+	python3 tools/check_prooftrace.py --check

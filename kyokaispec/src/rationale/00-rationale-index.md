@@ -1,6 +1,9 @@
 # Rationale Index
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-00-RATIONALE-INDEX
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Rationale is not the law. It is the light left on beside the law, so a reader can see why the rule has this shape and why another tempting shape was refused. Kyokai keeps this separation on purpose: normative chapters say what programs mean; rationale chapters explain why the design was worth choosing.
 
 > Trace: D86, D155

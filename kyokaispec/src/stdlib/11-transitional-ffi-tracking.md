@@ -1,6 +1,9 @@
 # Transitional FFI Tracking
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-11-TRANSITIONAL-FFI-TRACKING
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Transitional code is not shameful. Untracked transitional code is. Kyokai can borrow a bridge while the road is being built, but the map has to mark that bridge and say whether it stays.
 
 > Trace: D20, D64, D229-D230, D245

@@ -1,6 +1,9 @@
 # Reproducibility And Incremental Builds
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-09-REPRODUCIBILITY-INCREMENTAL-BUILDS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Reproducibility is the build system telling the truth twice. Incremental compilation is the toolchain moving faster without changing that truth. Kyokai needs both: trust for releases, and speed for daily work.
 
 > Trace: D83, D144

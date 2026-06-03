@@ -1,0 +1,6 @@
+name = "kyokai_calculus_spot"
+version = "0.1.0"
+defaultTargets = ["KyokaiCalculusSpot"]
+
+[[lean_lib]]
+name = "KyokaiCalculusSpot"

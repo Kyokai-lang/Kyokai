@@ -1,6 +1,9 @@
 # Toolchain Overview
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-00-TOOLCHAIN-OVERVIEW
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai's toolchain is not a pile of side quests around the language. It is part of the language's public shape because the compiler, package manager, project scaffolder, formatter, docs generator, LSP, test runner, audit report, diagnostic explainer, fix engine, and release artifacts decide what programmers can trust before code ever reaches production.
 
 > Trace: D26, D83, D86, D155

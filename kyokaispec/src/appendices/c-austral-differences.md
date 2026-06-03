@@ -1,6 +1,9 @@
 # Austral Difference Index
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-APPENDICES-C-AUSTRAL-DIFFERENCES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai is a fork, not a denial. Austral remains the source of many good bones: linear types, capability direction, explicit modules, strictness, and a readable spec tradition. This appendix maps where Kyokai carries Austral ideas forward, where it changes them, and where Borretti's Austral wording is credited as source material instead of being presented as Kyokai authorship.
 
 > Trace: D5, D86, Attribution policy

@@ -1,6 +1,9 @@
 # Grammar
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-03-GRAMMAR
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai keeps Austral's central grammatical idea: a module has an importable interface and an implementation body. The split still matters because the boundary still matters. A `.kyo` file is the public contract surface. A `.kai` file is where the work is done, where private helpers live, and where platform-specific bodies can be selected without changing the interface people import.
 
 > Trace: D5, D17, D52, D78, D86

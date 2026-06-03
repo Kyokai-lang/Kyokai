@@ -1,6 +1,9 @@
 # Text, Bytes, Paths, And Strings
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-04-TEXT-BYTES-PATHS-AND-STRINGS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Text looks gentle until it crosses a boundary. Then the old lies appear: bytes pretending to be words, paths pretending to be strings, C strings hiding a zero byte like a knife under the table. Kyokai keeps those shapes separate.
 
 > Trace: D30-D30a, D54, D68-D69, D120, D201

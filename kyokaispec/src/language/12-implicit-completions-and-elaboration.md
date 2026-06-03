@@ -1,6 +1,9 @@
 # Implicit Completions And Elaboration
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-12-IMPLICIT-COMPLETIONS-AND-ELABORATION
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai is not allergic to every omitted token. It is allergic to lies. If the compiler fills something in, there must be only one thing it could have filled, every other reading must be ill-typed, and the insertion must not smuggle in allocation, authority, blocking, cleanup, or control flow that the source did not already demand.
 
 > Trace: D87, D238, D239, D240

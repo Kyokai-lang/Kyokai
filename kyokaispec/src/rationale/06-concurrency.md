@@ -1,6 +1,9 @@
 # Concurrency Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-06-CONCURRENCY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Concurrency does not need poetry from the runtime. It needs rules. Which task owns this value? Which operation synchronizes? Can this call block forever? What happens to a buffered linear value if a receiver closes? Kyokai asks those questions at the surface instead of letting a scheduler answer them in secret.
 
 > Trace: D3-D3b, D90-D101, D146, D183-D184

@@ -1,6 +1,9 @@
 # Package Index, SemVer, Releases, And CI
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-10-PACKAGE-INDEX-SEMVER-RELEASES-CI
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 An ecosystem needs discoverability, but Kyokai does not need a central altar where source truth goes to be renamed. Packages are discovered through an index, resolved through pinned source, checked through interfaces, and released with provenance people can actually inspect.
 
 > Trace: D51, D221, D223-D225, D244
@@ -164,3 +167,12 @@ Official releases publish source archive, toolchain binaries, checksums, provena
 
 > Trace: D225, D461
 > Covers: Release artifacts and CI setup verify exact identity independently of cache state.
+
+## ProofTrace CI Contract
+
+> Trace: D526
+> Covers: CI checks the public evidence graph and generated status board while preserving the difference between metadata validation, executable tests, conformance evidence, and proofs.
+
+CI runs `make check-prooftrace`. The check validates `kyokaiproofstatus.toml`, chapter-level ProofTrace registrations, mandatory code-boundary `kyokai:prooftrace id=...` comments, closed status and no-proof vocabularies, referenced artifact paths, and generated `kyokaiproofstatus.md` freshness. A stale board is an error; contributors regenerate it with `make proofstatus`.
+
+Passing this lane proves only that public evidence metadata is internally consistent. It does not prove that a registered implementation is correct, turn inherited bootstrap code into Kyokai conformance evidence, or upgrade an `intended-by-spec` theorem target to `paper-proven` or `mechanically-proven`.

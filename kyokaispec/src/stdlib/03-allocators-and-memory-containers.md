@@ -1,6 +1,9 @@
 # Allocators, Memory, And Containers
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-03-ALLOCATORS-AND-MEMORY-CONTAINERS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Memory APIs are where a systems standard library either earns trust or starts lying. Kyokai makes the allocator visible, the failure visible, and the lifetime of stored values visible.
 
 > Trace: D44, D74, D77, D201, D250-D251

@@ -1,6 +1,9 @@
 # Diagnostics
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-05-DIAGNOSTICS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Diagnostics are part of the language experience, but they are also part of the toolchain contract. A compiler that knows the rule but cannot say what went wrong has left the programmer outside in the rain with a locked door and a key that almost fits.
 
 > Trace: D29

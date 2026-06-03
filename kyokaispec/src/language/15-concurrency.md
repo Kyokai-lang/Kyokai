@@ -1,6 +1,9 @@
 # Concurrency And Memory Model
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-15-CONCURRENCY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Concurrency is where a program stops being a hallway and becomes a city at night. Doors open in different buildings. Lights change before anyone on the next street sees them. A message leaves one room and arrives in another with work still warm on it. If the language does not say what crossed, what waited, and what became visible, the rest is weather.
 
 Kyokai does not hide a scheduler under the floor. It gives the program tasks, channels, synchronization objects, cancellation tokens, atomics, and pollers, then makes each boundary visible.

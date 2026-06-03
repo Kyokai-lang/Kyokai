@@ -1,6 +1,9 @@
 # Memory Layout And Backend Contract
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-17-MEMORY-LAYOUT-AND-BACKEND-CONTRACT
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A program has a shape before the machine ever touches it. Fields sit in order. Values move. A result lands somewhere. A check either guards the edge or it does not. If the backend is allowed to redraw that shape in secret, the language becomes a rumor told by generated C.
 
 Kyokai does not let that happen. C can carry the program for a while. LLVM can carry it later. Neither one gets to decide what the program means.

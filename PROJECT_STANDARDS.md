@@ -172,6 +172,7 @@ Every PR should include:
 - why it changed
 - testing performed or why tests were not run
 - docs/spec impact
+- ProofTrace impact: new record, updated record, or no registered-boundary change
 - linked issue, D-point, or rationale when relevant
 
 Use squash merge by default unless the commit series is intentionally meaningful.
@@ -185,6 +186,7 @@ Use squash merge by default unless the commit series is intentionally meaningful
 - [ ] Updates diagnostics/goldens if user-facing errors changed.
 - [ ] Updates docs/spec if user-visible behavior changed.
 - [ ] States runtime/FFI/backend safety impact when applicable.
+- [ ] Updates `kyokaiproofstatus.toml` and required `kyokai:prooftrace` boundary comments when the change affects a registered or newly spec-relevant boundary.
 
 ### 5.3 Shape / D-Point PR Checklist
 
@@ -195,6 +197,7 @@ Use squash merge by default unless the commit series is intentionally meaningful
 - [ ] Marks whether the proposed wording is final and ready for acks.
 - [ ] Tracks ack state when final wording exists.
 - [ ] Does not claim implementation/spec status before it exists.
+- [ ] Names the ProofTrace impact: new record, updated record, or no registered-boundary change.
 
 ### 5.4 Spec PR Checklist
 
@@ -204,6 +207,7 @@ Use squash merge by default unless the commit series is intentionally meaningful
 - [ ] Updates `kyokaidecided.md` or `Kyokaishape.md` if public shape status changed.
 - [ ] Adds conformance tests if the implementation already exists.
 - [ ] Avoids vague implementation-defined behavior.
+- [ ] Registers or updates the chapter-level ProofTrace record and runs `make check-prooftrace`.
 
 ### 5.5 Docs PR Checklist
 
@@ -315,6 +319,34 @@ Use these status words for public shape tracking:
 A point can be `DECIDED` before it is `SPEC_EXTRACTED`, `CONFORMANCE_BACKED`, or `IMPLEMENTED`. Those statuses track maturity, not whether the design question is closed.
 
 Decision state, spec state, implementation state, conformance state, and proof state are separate axes. Do not collapse them in PR text, docs, status boards, or release notes. A D-point marked `DECIDED` means the shape is accepted. It does not mean the parser accepts it, the checker enforces it, the runtime implements it, the stdlib admits it, conformance tests cover it, or a proof includes it. Claims of implementation, testing, proof, conformance, or release readiness must name the concrete path or artifact that proves that claim.
+
+### 6.6a ProofTrace Evidence Records
+
+D526 requires a public ProofTrace evidence graph for spec-relevant semantic, toolchain, stdlib, backend, unsafe, conformance, and proof boundaries. `kyokaiproofstatus.toml` is the checked source registry. `kyokaiproofstatus.md` is generated public output and must not be edited manually.
+
+Rules:
+
+- Keep `spec_status`, `implementation_status`, `conformance_status`, and `proof_status` separate.
+- Add or update a stable ProofTrace record when a change creates or changes a spec-relevant boundary.
+- Add a language-appropriate `kyokai:prooftrace id=<record-id>` comment at each maintained code, harness, conformance, or proof boundary registered as comment-required.
+- Do not mark every helper. A boundary marker covers subordinate implementation details until a narrower boundary becomes independently maintained.
+- Use `proof_required = false` only with one closed reason category defined by the registry. This exemption does not waive testing, conformance, security, or review requirements.
+- Treat ProofTrace metadata as tooling evidence only. It cannot affect language semantics, source acceptance, runtime behavior, or theorem truth.
+- Run `make proofstatus` after registry edits and `make check-prooftrace` before merge.
+
+Before committing a change that creates, removes, or changes a spec-relevant code, harness, conformance, or proof boundary:
+
+1. Determine whether an existing ProofTrace record owns the boundary. Create a stable record ID only when the boundary is new or independently maintained.
+2. Update `kyokaiproofstatus.toml` and place or update the required `kyokai:prooftrace id=<record-id>` comment at the owning boundary. Do not scatter markers across subordinate helpers.
+3. Regenerate the public status board. Do not edit `kyokaiproofstatus.md` manually.
+4. Run the checked validation lane from the repository root:
+
+```bash
+make proofstatus
+make check-prooftrace
+```
+
+PR descriptions must state the ProofTrace impact even when the correct statement is `no registered-boundary change`.
 
 ### 6.7 Header Conventions
 

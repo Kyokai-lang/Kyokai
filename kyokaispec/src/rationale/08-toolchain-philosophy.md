@@ -1,6 +1,9 @@
 # Toolchain Philosophy
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-08-TOOLCHAIN-PHILOSOPHY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A language without a toolchain spec is a city with beautiful laws and no roads. Kyokai does not leave build behavior, package resolution, diagnostics, formatting, docs, audit, and artifacts to rumor. The tools are part of the language experience, so their contracts are written down.
 
 > Trace: D26, D78, D86, D155

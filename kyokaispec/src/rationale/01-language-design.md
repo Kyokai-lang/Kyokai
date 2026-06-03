@@ -1,6 +1,9 @@
 # Language Design Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-01-LANGUAGE-DESIGN
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai starts from Austral but does not live inside Austral's shadow. It keeps the bones that still carry weight: linear resources, explicit modules, strict checking, capability security, and distrust of hidden runtime magic. Then it widens the house around those bones until the language, toolchain, stdlib, proof story, and audit story can all stand in one weather.
 
 > Trace: D5, D86, D145, D152

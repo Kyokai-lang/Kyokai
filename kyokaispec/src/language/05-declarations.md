@@ -1,6 +1,9 @@
 # Declarations
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-05-DECLARATIONS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Declarations are the names a module lets the rest of the program touch. They are not loose notes at the top of a file. A declaration says what exists, who may name it, what type it has, what contract it carries, and which body must later prove that promise true.
 
 > Trace: D5, D17, D52, D78

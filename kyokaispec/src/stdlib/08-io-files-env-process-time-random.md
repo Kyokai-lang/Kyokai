@@ -1,6 +1,9 @@
 # I/O, Files, Environment, Process, Time, Random, And Network
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-08-IO-FILES-ENV-PROCESS-TIME-RANDOM
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The outside world is not a global variable Kyokai forgot to name. Files, terminals, clocks, entropy, processes, sockets, and the environment are authority. Authority moves through values.
 
 > Trace: D48, D67, D171-D173, D211-D212, D255

@@ -1,6 +1,9 @@
 # Math And Numerics
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-07-MATH-AND-NUMERICS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Numerics are where confidence can become arrogance fast. A wrong byte order, a silent overflow, a host `libm` result changing under your feet, a signed zero nobody named: all of that becomes program behavior. Kyokai makes the number story testable.
 
 > Trace: D37, D41, D75-D76, D117, D232, D260

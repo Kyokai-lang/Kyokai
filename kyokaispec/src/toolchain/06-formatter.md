@@ -1,6 +1,9 @@
 # Formatter
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-06-FORMATTER
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The formatter is where style stops being a debate in every doorway. Kyokai has one official format, because source code is hard enough when ownership matters without also carrying a private weather map of indentation habits.
 
 > Trace: D25

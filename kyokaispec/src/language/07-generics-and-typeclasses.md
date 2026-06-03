@@ -1,6 +1,9 @@
 # Generics And Typeclasses
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-07-GENERICS-AND-TYPECLASSES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Generics are where a language can start lying kindly. It can let a type drift in from somewhere offscreen, let a method find a hidden witness, let a return type pull answers backward through the program, and the call still looks clean. Kyokai keeps the useful power and refuses the fog: parameters are written at declarations, obligations sit in one place, and dispatch is static.
 
 > Trace: D82, D158, D189, D192, D193, D195

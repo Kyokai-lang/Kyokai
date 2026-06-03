@@ -1,6 +1,9 @@
 # Standard Library Overview
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-00-STDLIB-OVERVIEW
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai's standard library is not a decorative appendix to the language. It is the place where ownership, allocation, authority, failure, platform behavior, and ordinary systems work meet. A language can be strict in the compiler and still become vague in the library; Kyokai does not get to do that.
 
 > Trace: D85, D152, D229, D243

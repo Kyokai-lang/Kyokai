@@ -1,6 +1,9 @@
 # Linear Resources Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-04-LINEAR-RESOURCES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The inherited resource argument is still the center of Kyokai. A file handle, pointer, lock guard, channel endpoint, process handle, directory handle, pinned object, generator, or capability has a life. It is created, used, transferred, split if the API permits that, and finally consumed. The bug appears when that life is only a story in the programmer's head.
 
 > Trace: D2, D6, D77, D89, D194

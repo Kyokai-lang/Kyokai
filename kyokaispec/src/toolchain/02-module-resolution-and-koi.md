@@ -1,6 +1,9 @@
 # Module Resolution And Koi Artifacts
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-02-MODULE-RESOLUTION-AND-KOI
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Module resolution is where the written package shape becomes a language graph. By the time the type checker sees imports, the toolchain must have already answered the practical questions: which package is this, which module root is in force, which source files belong to the package, which target-specific declarations exist, and which dependency interfaces are trusted inputs.
 
 > Trace: D19a, D52, D78, D79, D105

@@ -1,6 +1,9 @@
 # Unsafe, FFI, And ABI
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-16-UNSAFE-FFI-AND-ABI
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Foreign code is a gate in the wall. Austral already treated that gate as unsafe. Kyokai keeps that old warning sign, then bolts the whole frame down: the module must say it is unsafe, the call site must carry unsafe authority, the source must record the contract, and the wrapper must translate the foreign world back into Kyokai values.
 
 Unsafe code is not a room where the language stops speaking. It is a narrow bridge with posted weight limits. If the bridge cannot say what it carries, who owns it, what can fail, and what happens when the other side lies, it is not a Kyokai bridge yet.

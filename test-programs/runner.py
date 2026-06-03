@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# kyokai:prooftrace id=BOOTSTRAP-E2E-RUNNER
 # Part of the Austral project, under the Apache License v2.0 with LLVM Exceptions.
 # See LICENSE file for details.
 #

@@ -1,6 +1,9 @@
 # Expressions And Evaluation
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-09-EXPRESSIONS-AND-EVALUATION
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 An expression is where a program stops promising and starts producing a value. Kyokai makes that motion strict. The reader can walk the source from left to right and know which call runs, which borrow starts, which bounds check fires, and which value is built before the next one moves.
 
 > Trace: D71, D73, D87, D139, D228

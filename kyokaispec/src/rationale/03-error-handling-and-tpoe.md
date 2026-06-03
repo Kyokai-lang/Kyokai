@@ -1,6 +1,9 @@
 # Error Handling And TPOE Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-03-ERROR-HANDLING-AND-TPOE
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Austral's brutal lesson still belongs in Kyokai: not every bad thing is the same kind of bad thing. A missing file, an exhausted allocator, a violated precondition, a panic, and stack corruption should not wear the same mask just because a runtime could route them through one mechanism.
 
 > Trace: D24, D53, D74, D84, D253, D259, D262

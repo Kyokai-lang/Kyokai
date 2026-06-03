@@ -1,6 +1,9 @@
 # Type System
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-06-TYPE-SYSTEM
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai keeps Austral's hard center: the type system is not decoration around memory management. It is the first wall between ordinary values, resource-owning values, borrowed access, and authority. The wall has to be visible in source, because a hidden ownership rule is just another way to make the reader guess where the trapdoor is.
 
 > Trace: D5, D14, D73, D143/D241, D195

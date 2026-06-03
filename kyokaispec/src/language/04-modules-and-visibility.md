@@ -1,6 +1,9 @@
 # Modules And Visibility
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-04-MODULES-AND-VISIBILITY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai keeps Austral's strongest module idea: a module has an interface and a body, and the interface is the surface other code can trust before the private work is even visible. Kyokai makes that old boundary sharper. The source extensions are Kyokai's own, the package boundary is explicit, `internal` has a defined reach, and imports have one mechanical lookup story.
 
 > Trace: D5, D17, D52, D78, D86

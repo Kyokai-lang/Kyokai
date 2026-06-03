@@ -1,6 +1,9 @@
 # Built-ins
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-18-BUILT-INS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Built-ins are the pieces of Kyokai that are so close to the checker that pretending they came from a hidden module would be lying. They are the floorboards: `Bool`, `Unit`, `Never`, fixed integers, `Result`, `Optional`, target facts, borrow forms, raw pointer forms, and the small set of compiler-known protocols that syntax lowers through.
 
 This chapter names that floor. Nothing here creates a prelude. Nothing here grants ambient authority. A programmer does not need to wonder whether a name appeared because a secret import drifted in through the back door.

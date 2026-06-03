@@ -1,6 +1,9 @@
 # License And Provenance
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-APPENDICES-A-LICENSE
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The Kyokai specification keeps the existing documentation license carried by the inherited specification tree: GNU Free Documentation License, Version 1.3 or any later version published by the Free Software Foundation, with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 > Trace: D263

@@ -1,6 +1,9 @@
 # Testing, Coverage, And Benchmarks
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-07-TESTING-COVERAGE-BENCH
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Tests in Kyokai are ordinary code standing under ordinary rules. That matters. A test harness that sneaks in authority, hidden imports, fake ownership, or catchable panics would teach a different language than the one people ship.
 
 > Trace: D28, D137

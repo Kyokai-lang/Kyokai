@@ -1,6 +1,9 @@
 # Core Result, Optional, Display, And Error Protocols
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-02-CORE-RESULT-OPTIONAL-DISPLAY-ERROR
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The core library shapes are the language's daily grammar for absence, failure, rendering, and diagnostic identity. They have to be small enough to remember and explicit enough that they do not grow into hidden control flow.
 
 > Trace: D24, D40, D40a, D102, D259

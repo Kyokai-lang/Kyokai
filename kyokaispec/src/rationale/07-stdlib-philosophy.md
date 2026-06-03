@@ -1,6 +1,9 @@
 # Standard Library Philosophy
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-07-STDLIB-PHILOSOPHY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A language can have a beautiful core and still betray the programmer in the library. Kyokai's stdlib therefore has to speak the same language as the compiler: ownership, allocation, failure, capability needs, platform behavior, determinism, tests, and implementation boundary all written in public.
 
 > Trace: D85, D152, D229

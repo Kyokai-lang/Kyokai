@@ -1,6 +1,9 @@
 # Contracts And Runtime Failure
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-13-CONTRACTS-AND-RUNTIME-FAILURE
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Some failures are doors. A missing file, a closed channel, a refused connection, a timeout at the edge of a machine that never promised to answer. Kyokai makes those ordinary values because the program can still choose its next step.
 
 A contract violation is different. That is not a locked door. That is the floor giving way under the room. Once the program proves that its own stated rule is false, Kyokai does not ask the same broken state to negotiate recovery. It stops the process, or it follows an explicitly named fatal path. No pretending. No hidden unwind. No second story where the bug was actually a branch.

@@ -1,6 +1,9 @@
 # Linearity, Borrowing, And Regions
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-LANGUAGE-11-LINEARITY-BORROWING-AND-REGIONS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A linear value is not background scenery. It is a thing in somebody's hands. If the program moves it, the old hand is empty. If the program borrows it, the lender stands still until the borrow is done. If the program promises cleanup, that promise becomes part of the path through the room. Kyokai makes the compiler track those motions because this is where safety either becomes real or turns into a story people tell after the bug report arrives.
 
 > Trace: D2, D6, D7b, D14, D72, D87, D187, D238-D240, D246

@@ -1,6 +1,9 @@
 # Crypto Policy
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-10-CRYPTO-POLICY
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Cryptography is not where Kyokai gets to show off. It is where the language has to be humble, strict, and boring in the places boring keeps people alive.
 
 > Trace: D231

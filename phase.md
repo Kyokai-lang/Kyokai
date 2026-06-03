@@ -1,7 +1,7 @@
 # Kyokai Execution Phases
 
-**Version:** 0.2.16
-**Date:** 2026-06-01
+**Version:** 0.2.24
+**Date:** 2026-06-02
 **Status:** Active roadmap
 **Public decided shape:** `kyokaidecided.md`
 **Public D-point index/archive:** `Kyokaishape.md`
@@ -43,23 +43,26 @@ The initial language-design pass is closed enough to seed public development, an
 Current assets:
 
 - `kyokaispec/` contains the extracted language, toolchain, standard-library, rationale, and appendix chapter family. It is the normative home for written Kyokai rules.
-- `kyokaidecided.md` contains the public accepted-shape extraction for D272-D525.
+- `kyokaidecided.md` contains the public accepted-shape extraction for D272-D526.
 - `Kyokaishape.md` is the public index/archive for D-points that do not live directly in PRs/MRs; live D-points normally live in PR/MR threads.
 - `kyokaispec/src/appendices/b-decision-traceability.md` maps accepted decisions into spec sections.
 - `kyokaispec/spec.md`, `kyokaispec/spec.html`, `kyokaispec/README.md`, `kyokaispec/Makefile`, and `kyokaispec/SPEC_COMPILER_TRACE.md` describe and build the extracted spec family.
 - `lib/` is the forked Austral compiler codebase.
 - `standard/` is the current inherited standard-library tree.
 - `test/`, `test-programs/`, and `langtest/` are current compiler and comparison test assets.
+- `kyokaicalculus/lean/` pins Lean 4 through Elan and builds the first narrow
+  owner-slot repair spot artifact with Lake.
 
 Current liabilities:
 
 - The current compiler and standard library are still largely Austral-shaped.
 - The extracted spec needs implementation pressure, review, and conformance tests before it can be treated as proven by tooling.
-- D266-D525 have spec destinations or workflow homes. Their compiler commands, tool contracts, standard-library admissions, target records, concurrency rules, backend safety rules, `.koi`/KBI implementation, conformance tests, and deployed service work still need implementation evidence where their gates require it.
-- The D272-D525 extraction backlog is closed. Future accepted D-points reopen Gate A until the affected chapter-family work package, trace row, modal audit, and status update land together.
-- The D143/D241 paper-proof draft now exists. It remains `intended-by-spec`
-  until review, any required derivation expansion, and stronger executable or
-  proof-assistant checking close Gate B.
+- D266-D526 have spec destinations or workflow homes. Their compiler commands, tool contracts, standard-library admissions, target records, concurrency rules, backend safety rules, `.koi`/KBI implementation, conformance tests, and deployed service work still need implementation evidence where their gates require it.
+- The D272-D526 extraction backlog is closed. Future accepted D-points reopen Gate A until the affected chapter-family work package, trace row, modal audit, and status update land together.
+- The D143/D241 sequential `lambda_K-seq` paper proof is closed at the
+  `paper-proven` tier for Gate B. A narrow Lean spot artifact checks selected
+  owner-slot repair facts mechanically, but it does not mechanically prove
+  the main theorem.
 - The future mechanized proof is intentionally after self-hosting, not an early bootstrap blocker.
 
 ## 4. Non-Negotiable Execution Rules
@@ -83,6 +86,11 @@ These rules apply to every phase.
 ## 5. Maturity States
 
 These states track implementation maturity. They are not language editions.
+
+Completion markers in this roadmap use Markdown task boxes:
+
+- [x] done for the named scope
+- [ ] not done yet or only partially done; the row text states what remains
 
 | State | Meaning | Exit Requirement |
 | --- | --- | --- |
@@ -114,7 +122,7 @@ Every decided D-point has one of these destinations:
 - an explicit implementation-only note with no semantic authority
 - a historical-only note retained outside public spec flow
 
-Done when there is no live behavior whose only source is an old recommendation block or informal note. The accepted decisions through D525 now have normative spec destinations or explicit workflow/service homes. Gate A is closed for the accepted design set through D525. New accepted D-points reopen Gate A until they receive the same extraction or routing treatment.
+Done when there is no live behavior whose only source is an old recommendation block or informal note. The accepted decisions through D526 now have normative spec destinations or explicit workflow/service homes. Gate A is closed for the accepted design set through D526. New accepted D-points reopen Gate A until they receive the same extraction or routing treatment.
 
 ### Gate B: Sequential Core Soundness
 
@@ -166,15 +174,25 @@ Done when Kyokai compiler components are written in Kyokai, the bootstrap path i
 
 | Gate | Current State | Closed Evidence | Still Open |
 | --- | --- | --- | --- |
-| Gate A: Plan-To-Spec Closure | Closed through D525 | `kyokaispec/` carries the normative language/toolchain/stdlib extraction, `src/appendices/b-decision-traceability.md` maps accepted decisions through D525, and workflow/service-only decisions route to public standards and service records | New accepted D-points reopen Gate A until they receive normative extraction or an explicit workflow/service/historical home |
-| Gate B: Sequential Core Soundness | Open | `kyokaicalculus/scope.md` freezes the first theorem boundary; claim tiers, explicit static inference rules, separated-store small-step dynamics, a 32-lemma skeleton, an initial preservation/progress derivation draft with an explicit routine-induction convention, twenty-two executable model spot checks, an initial cross-document review, surface map, and later-layer plans exist | Independent paper review, any derivation expansion required by review, broader executable-model coverage or proof-assistant spot checks, and final paper-proof acceptance are not done |
+| Gate A: Plan-To-Spec Closure | Closed through D526 | `kyokaispec/` carries the normative language/toolchain/stdlib extraction, `src/appendices/b-decision-traceability.md` maps accepted decisions through D526, and workflow/service-only decisions route to public standards and service records | New accepted D-points reopen Gate A until they receive normative extraction or an explicit workflow/service/historical home |
+| Gate B: Sequential Core Soundness | Closed for `lambda_K-seq` paper proof | `kyokaicalculus/scope.md` freezes the first theorem boundary; claim tiers, explicit static inference rules, an environment-and-continuation machine with resource store `Sigma`, lease graph `B`, static-to-runtime witness `I`, owner slots `Xi`, environments `eta`, and continuations `K`, a 40-lemma proof index, revised preservation/progress proof overview, expanded close-and-witness, call-entry, primitive-admission, frame-typing, source-expression, and equivariance derivation packages, the closed `theorem-assembly.md` L1-L40/Theorem P/Q paper proof, forty-nine executable model spot checks, a twenty-five-trace executable whole-machine regression slice, a narrow checked Lean owner-slot artifact with twenty-five named theorems, a surface map, and later-layer plans exist | Whole-core Lean mechanization, compiler conformance, concurrency, unsafe/FFI, backend lowering, stdlib admission, toolchain behavior, package management, and hosted services remain outside Gate B and are tracked by later gates |
 | Gate C: Compiler Semantic Pipeline | Open | Spec text describes the required D238/D239/D240 shape | Parser, typed elaboration, implicit-completion registry, tautology checking, and safety checks are not implemented as a tested pipeline |
 | Gate D: Backend UB Closure | Open | Spec text states the C and LLVM backend migration target contracts | C backend UB-avoidance implementation and sanitizer/conformance evidence are not done |
 | Gate E: Practical Bootstrap Usability | Open | Required workload shape and stdlib domains are identified | Native stdlib modules and representative small POSIX CLI workload support are not implemented |
-| Gate F: Public Conformance Release | Open | Spec extraction and daily-usability command contracts exist | Paper proof, compiler conformance suite, package behavior, formatter, diagnostics, docs, and stdlib admission records do not yet agree in implementation |
-| Gate G: Self-Hosting And Mechanization | Open | Self-hosting and mechanization order is specified | Self-hosting compiler slices and proof assistant artifacts have not begun |
+| Gate F: Public Conformance Release | Open | Spec extraction, the Gate-B paper proof, and daily-usability command contracts exist | Compiler conformance suite, package behavior, formatter, diagnostics, docs, and stdlib admission records do not yet agree in implementation |
+| Gate G: Self-Hosting And Mechanization | Open | Lean 4 is selected; Elan and Lake build the narrow owner-slot repair artifact; self-hosting and whole-core mechanization order are specified | Self-hosting compiler slices, whole-core Lean encoding, mechanized soundness, and proof CI have not begun |
 
-Closed gates right now: Gate A is closed for accepted decisions through D525. No compiler, backend, stdlib implementation, package implementation, release, self-hosting, or proof gate is closed yet.
+Closed gates right now: Gate A is closed for accepted decisions through D526, and Gate B is closed for the narrow `lambda_K-seq` paper proof. No compiler, backend, stdlib implementation, package implementation, release, self-hosting, or whole-core mechanized proof gate is closed yet.
+
+Gate checklist:
+
+- [x] Gate A: Plan-To-Spec Closure through D526.
+- [x] Gate B: Sequential Core Soundness for the narrow `lambda_K-seq` paper proof.
+- [ ] Gate C: Compiler Semantic Pipeline.
+- [ ] Gate D: Backend UB Closure.
+- [ ] Gate E: Practical Bootstrap Usability.
+- [ ] Gate F: Public Conformance Release.
+- [ ] Gate G: Self-Hosting And Mechanization.
 
 ## 7. Build Order
 
@@ -220,7 +238,7 @@ The phases below are ordered by dependency, not by excitement. Some implementati
 
 **Dependencies:** Phase 0.
 
-**Status:** `SPEC_EXTRACTED` through D525 for normative language, toolchain, stdlib, rationale, and appendix rules. Workflow/service-only decisions through D525 are routed to public standards and the service board. This closes Gate A through D525 without claiming compiler implementation, conformance tests, deployed services, or proof completion. Gates B-G remain open.
+**Status:** `SPEC_EXTRACTED` through D526 for normative language, toolchain, stdlib, rationale, and appendix rules. Workflow/service-only decisions through D526 are routed to public standards and the service board. This closes Gate A through D526 without claiming compiler implementation, conformance tests, or deployed services. Gate B is separately closed for the narrow `lambda_K-seq` paper proof; Gates C-G remain open.
 
 **Subparts:**
 
@@ -258,7 +276,7 @@ The phases below are ordered by dependency, not by excitement. Some implementati
 
 1.17. Extract the strict-linearity usability closure from D488-D501. This includes resource-flow refactors, sound scratch workflows, graph/slot-map guidance, recovery payloads, explicit context bundles, callback invocation classes, linear fixtures, join diagnostics, hole-free collections, universe-aware containers, early-release warnings, FFI wrapper kits, the `build` expression, and the stdlib admission ladder.
 
-1.18. Extract the D502-D525 toolchain and public-infrastructure closure. Normative toolchain behavior lands in `kyokaispec/src/toolchain/`; numeric admission evidence lands in `kyokaispec/src/stdlib/`; workflow rules land in `PROJECT_STANDARDS.md` and `docs/contributing/spec-writing.md`; service ownership lands in `docs/infrastructure/services.md`; website, examples, organization migration, repository-owned package docs, optional package-doc mirrors, and `kyokai-showcase` receive tracked implementation issues or PRs without being presented as implemented.
+1.18. Extract the D502-D526 toolchain, public-infrastructure, and ProofTrace evidence closure. Normative toolchain behavior lands in `kyokaispec/src/toolchain/`; numeric admission evidence lands in `kyokaispec/src/stdlib/`; workflow rules land in `PROJECT_STANDARDS.md` and `docs/contributing/spec-writing.md`; service ownership lands in `docs/infrastructure/services.md`; website, examples, organization migration, repository-owned package docs, optional package-doc mirrors, and `kyokai-showcase` receive tracked implementation issues or PRs without being presented as implemented.
 
 1.19. Keep `kyokaispec/src/appendices/b-decision-traceability.md` synchronized as each work package lands. A work package is not complete when prose exists only in `kyokaidecided.md`; its trace row must point at the normative chapter, workflow home, service record, or historical-only note that owns it.
 
@@ -274,14 +292,25 @@ This board is the executable spec-writing queue. It groups accepted decisions by
 | S4: Built-ins and source examples | D316, D323, D330-D331, D335-D336, D341, D355, D359, D362, D365, D370-D372, D385 | `language/18-built-ins.md`, `language/19-examples.md`, `examples/` | Built-in contracts, accepted examples, target/capability metadata, and CI classification. |
 | S5: Toolchain CLI, diagnostics, formatter, tests, Analysis Server, artifacts, and package behavior | D302-D304, D307-D308, D311, D315, D320-D321, D328, D332-D333, D351-D352, D364, D383, D391, D396-D431, D474-D475, D479-D489, D495, D497-D499, D503-D505, D509, D516, D518 | `toolchain/00-toolchain-overview.md` through `toolchain/11-build-generation-and-playground.md` | Command matrices, machine-output schemas, diagnostic/fix IDs, artifact layouts, protocol lanes, network policy, cache identity, and replay contracts. |
 | S6: Stdlib admission, containers, text, OS, concurrency, numerics, crypto, and transitional FFI | D305, D309, D324-D327, D344, D347, D357, D362-D363, D370-D372, D374, D376, D384-D385, D392, D401, D408-D413, D417, D490-D501, D517 | `stdlib/00-stdlib-overview.md` through `stdlib/11-transitional-ffi-tracking.md` | Admission records, tier checklist, allocation/failure/capability fields, target tables, oracle/test-vector rows, and transitional FFI records. |
-| S7: Workflow, service board, website, examples, organization migration, package docs, and showcase | D306-D307, D315, D367, D383, D407, D478, D502, D506-D508, D510-D516, D519-D525 | `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, `docs/infrastructure/services.md`, `README.md`, `website/`, `examples/`, and tracked PRs/issues | Public process text, service records, repo split records, website source plan, examples taxonomy, and non-semantic implementation tracking. |
-| S8: Formalization roadmap and claim boundaries | D143/D241, D312, D319, D367, D394, D477, D479-D525 | `appendices/d-formalization-roadmap.md`, `kyokaicalculus/kyokaicalculusdirection.md`, `kyokaicalculus/lambda_k_research.md` | Claim tiers, proof exclusions, later-layer owner map, surface/core obligations, and Gate B input list. |
+| S7: Workflow, service board, website, examples, organization migration, package docs, showcase, and ProofTrace evidence graph | D306-D307, D315, D367, D383, D407, D478, D502, D506-D508, D510-D516, D519-D526 | `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, `docs/infrastructure/services.md`, `README.md`, `website/`, `examples/`, and tracked PRs/issues | Public process text, service records, repo split records, website source plan, examples taxonomy, and non-semantic implementation tracking. |
+| S8: Formalization roadmap and claim boundaries | D143/D241, D312, D319, D367, D394, D477, D479-D526 | `appendices/d-formalization-roadmap.md`, `kyokaicalculus/scope.md`, `kyokaicalculus/claim-tiers.md`, `kyokaicalculus/syntax-and-statics.md`, `kyokaicalculus/dynamics.md`, `kyokaicalculus/lemmas.md`, `kyokaicalculus/paper-proof.md`, `kyokaicalculus/deviation.md` | Claim tiers, proof exclusions, environment-machine semantics, later-layer owner map, surface/core obligations, and Gate B input list. |
 
-**Extraction board status:** S1-S6 and S8 are `SPEC_EXTRACTED` for accepted decisions through D525. S7 is `WORKFLOW_ROUTED`: public standards and the service board exist, while website, repository split, showcase, and hosted-service implementation stay as later tracked infrastructure work.
+**Extraction board status:** S1-S6 and S8 are `SPEC_EXTRACTED` for accepted decisions through D526. S7 is `WORKFLOW_ROUTED`: public standards and the service board exist, while website, repository split, showcase, and hosted-service implementation stay as later tracked infrastructure work.
+
+Extraction board checklist:
+
+- [x] S1: Lexical, grammar, declarations, and control flow.
+- [x] S2: Types, universes, generics, borrowing, and elaboration.
+- [x] S3: Failure, capabilities, concurrency, unsafe, ABI, layout, and backend.
+- [x] S4: Built-ins and source examples.
+- [x] S5: Toolchain CLI, diagnostics, formatter, tests, Analysis Server, artifacts, and package behavior.
+- [x] S6: Stdlib admission, containers, text, OS, concurrency, numerics, crypto, and transitional FFI.
+- [ ] S7: Workflow, service board, website, examples, organization migration, package docs, showcase, and ProofTrace evidence graph is publicly routed; service implementation remains later infrastructure work.
+- [x] S8: Formalization roadmap and claim boundaries.
 
 **Done when:**
 
-- Gate A is closed for accepted decisions through D525 because every accepted point has a normative spec destination or an explicit workflow/service destination before implementation depends on it.
+- Gate A is closed for accepted decisions through D526 because every accepted point has a normative spec destination or an explicit workflow/service destination before implementation depends on it.
 - The extracted Kyokai spec can be read without needing informal planning context for normative behavior.
 - Every D-point has a traceability destination.
 - The spec has no phrases like "implementation-defined" unless the implementation choice is itself explicitly bounded and observable.
@@ -297,11 +326,11 @@ This board is the executable spec-writing queue. It groups accepted decisions by
 
 **Dependencies:** Phase 1 core-language extraction should be far enough along to avoid proving the wrong language. Full toolchain spec extraction is not a blocker.
 
-**Status:** Scope freeze, claim tiers, explicit static inference rules, separated-store small-step dynamics, a 32-lemma paper-proof skeleton, an initial preservation/progress derivation draft, twenty-two executable model spot checks, surface map, and later-layer ownership plans exist under `kyokaicalculus/`. The formal core now distinguishes static store typing from runtime store state, distinguishes all borrow leases from the usable lease frontier during reborrow suspension, and records the schematic checked-function invariant needed by call substitution. Gate B remains open for independent paper review, derivation expansion requested by review, and broader executable-model coverage or proof-assistant spot checks.
+**Status:** Gate B is closed for the narrow sequential `lambda_K-seq` paper theorem. Scope freeze, claim tiers, explicit static inference rules, an environment-and-continuation machine, a 40-lemma proof index, revised preservation/progress proof overview, expanded close-and-witness, call-entry, primitive-admission, frame-typing, source-expression, and equivariance derivation packages, and the closed `theorem-assembly.md` L1-L40/Theorem P/Q proof exist under `kyokaicalculus/`. Supporting evidence includes forty-nine executable model spot checks, a twenty-five-trace executable whole-machine regression slice, and a narrow checked Lean owner-slot artifact with twenty-five named theorems. The earlier substitution runtime was retired because it duplicated owner syntax across mutually exclusive branches, was not closed over arbitrary linear sums, and left calls and lease availability under-specified. The repaired model keeps runtime owners in unique slots, distinguishes static store typing from runtime resource state, retains all leases separately from the usable lease frontier, checks suspended mutable tokens at call boundaries, connects runtime token types to referent slots, separates static region and lease atoms from runtime identities through explicit witness `I`, permits explicit caller/callee witness aliasing without conflating it with fresh identity minting, retains elaborated `call f[phi](args)` witnesses, derives invocation-local `psi`, defines formal `bind_call_args` and `result_bridge`, restricts cleanup to resolved named consuming operations without structural fallback, admits primitive relations only after totality obligations, models named borrow-token read/write access, stores witness aliases in scope-owned layers, materializes pre-argument whole-referent certificate `pi`, gives continuation frames intrinsic input/output typing, freshens callee-local atoms per invocation, separates ordinary progress from intrinsic terminal TPOE classification, and requires every retained writer's same-slot leases to remain on one suspension chain so local close cannot resume a writer beside an unrelated reader. Whole-core Lean mechanization and compiler conformance remain later gates; the checked Lean spot artifact does not mechanically establish the main theorem.
 
 **Subparts:**
 
-2.1. Freeze the first calculus scope in `kyokaicalculus/lambda_k_research.md` or a successor paper document.
+2.1. Freeze the first calculus scope in `kyokaicalculus/scope.md` and keep the theorem exclusions explicit.
 
 2.2. Define the core syntax for variables, values, first-order functions, `let`, explicit consumption, borrow creation, borrow end, checked primitive operations, explicit TPOE, and minimal closed-sum/exhaustive-case support.
 
@@ -321,11 +350,15 @@ This board is the executable spec-writing queue. It groups accepted decisions by
 
 2.10. List exclusions explicitly: modules, packages, typeclasses, generics, FFI, allocators, formatting, OS, concurrency, atomics, channels, backend lowering, and unsafe reasoning.
 
-2.11. Update `kyokaicalculus/kyokaicalculusdirection.md` and `kyokaicalculus/lambda_k_research.md` whenever accepted shape adds a proof-relevant rule or a non-proof conformance obligation. The calculus docs must classify each rule as first-core theorem, surface elaboration, later extension calculus, separate concurrency model, unsafe/FFI boundary, backend-preservation obligation, stdlib evidence model, toolchain conformance model, workflow-only rule, or infrastructure-only rule.
+2.11. Update the maintained public calculus artifacts and the formalization appendix whenever accepted shape adds a proof-relevant rule or a non-proof conformance obligation. The calculus docs must classify each rule as first-core theorem, surface elaboration, later extension calculus, separate concurrency model, unsafe/FFI boundary, backend-preservation obligation, stdlib evidence model, toolchain conformance model, workflow-only rule, or infrastructure-only rule.
 
 2.12. Record the D488-D501 strict-linearity closure in the formalization map. D495 branch joins and D500 `build` lowering are surface/core obligations; D491 recovery payloads, D492 explicit bundles, D493 invocation classes, D496 hole-free collection APIs, D497 container universes, and D498 early release are later language/stdlib contract obligations; D488, D489, D494, D499, and D501 are tooling, test-harness, FFI-admission, or stdlib-evidence obligations rather than new `lambda_K-seq` theorem claims.
 
-2.13. Record the D502-D525 closure in the formalization map as toolchain conformance, docs-process, or infrastructure obligations. These decisions do not enlarge the first sequential theorem. D502 and D508 constrain proof/spec writing discipline; D503-D505, D509, D515-D518, and D525 constrain toolchain conformance; D506-D507, D510-D514, and D519-D524 remain workflow or infrastructure boundaries.
+2.13. Record the D502-D526 closure in the formalization map as toolchain conformance, docs-process, or infrastructure obligations. These decisions do not enlarge the first sequential theorem. D502 and D508 constrain proof/spec writing discipline; D503-D505, D509, D515-D518, and D525 constrain toolchain conformance; D506-D507, D510-D514, and D519-D524 remain workflow or infrastructure boundaries. D526 adds evidence-graph validation and does not enlarge the theorem.
+
+2.14. Maintain the expanded Gate-B derivation packages: `kyokaicalculus/close-and-witness-proof.md`, `kyokaicalculus/call-entry-proof.md`, `kyokaicalculus/primitive-admission-proof.md`, `kyokaicalculus/frame-typing-proof.md`, `kyokaicalculus/source-expression-proof.md`, and `kyokaicalculus/equivariance-proof.md`. Their L1-L40 and transition-family arguments are composed by `kyokaicalculus/theorem-assembly.md`, which is the paper-proof artifact that closes Gate B for `lambda_K-seq`.
+
+2.15. Expand executable evidence from local spot checks into a whole-machine runner that exercises typed configuration construction, continuation-frame transitions, ordinary completion, and intrinsic TPOE. The first twenty-five traces now cover linear-let discharge, both branch selections, arbitrary linear-sum movement, owned-call parameter discharge and returned-owner transfer, nested contract TPOE abandoned-carrier accounting, mutable-reborrow close and resumed access, read-reborrow close, direct immutable and mutable-borrow access, checked-primitive success and TPOE, capability attenuation, selected linear-sum payload consumption, successful contract checking, zero-argument call entry, source-ordered multi-argument call entry, zero-argument checked-primitive success and TPOE, explicit injection followed by linear-payload case discharge, free-payload case binding, unrestricted variable lookup, and returned-local-borrow rejection at region close. Broaden the runner alongside the paper derivations. Keep it labeled as executable evidence; it does not replace the paper proof.
 
 **Done when:**
 
@@ -344,7 +377,7 @@ This board is the executable spec-writing queue. It groups accepted decisions by
 
 **Dependencies:** Phase 1 lexical/syntax extraction. Phase 2 may be in progress.
 
-**Status:** Not started. No phase-local parser/source gate is closed.
+**Status:** Active scaffold. `docs/compiler-pipeline-inventory.md` maps the inherited entry and pass boundaries, `lib/KyokaiSourceFile.ml` classifies individual `.kyo` / `.kai` source roles while rejecting handwritten `.koi` artifacts and inherited extensions, `lib/KyokaiSourceText.ml` validates an isolated source-byte contract, `lib/KyokaiLexicalToken.ml` scans an isolated Kyokai token scaffold including literal families, the matching host tests exercise these scaffolds, and `test/conformance/README.md` establishes the future evidence lanes. The scaffold deliberately defines no public CLI encoding for source sets. Manifest discovery, loader wiring, CLI identity, executable-target discovery, public lexer conformance fixtures, Kyokai parsing, source-span conformance, and the phase-local parser/source gate remain open.
 
 **Subparts:**
 
@@ -840,11 +873,11 @@ This board is the executable spec-writing queue. It groups accepted decisions by
 
 **Dependencies:** Phase 2 paper proof and Phase 14 self-hosting progress. The proof assistant choice should be made when the project is ready to sustain the proof.
 
-**Status:** Not started. Gate G is open.
+**Status:** Lean 4 selected and narrow spot artifact building locally. Whole-core mechanization has not started. Gate G is open.
 
 **Subparts:**
 
-15.1. Choose the proof assistant. Coq is the current likely first choice, but the final choice should be based on Linux availability, ecosystem fit, contributor ability, and maintainability.
+15.1. Use Lean 4 as the proof assistant. Pin the release through Elan and build artifacts with Lake. **Status: selected.**
 
 15.2. Mechanize the sequential `lambda_K` syntax, static semantics, dynamic semantics, and soundness theorem.
 
@@ -1009,12 +1042,31 @@ An unsafe or FFI surface is not complete until:
 
 Current status is planning/spec extraction. No implementation phase is complete just because the plan decisions are closed.
 
+Phase checklist:
+
+- [x] Phase 0: Repository Baseline And Decision Audit is complete enough for the roadmap baseline.
+- [x] Phase 1: Normative Kyokai Specification Extraction is complete through D526.
+- [x] Phase 2: Sequential `lambda_K` Core Calculus And Paper Proof is complete for the narrow `lambda_K-seq` paper theorem.
+- [ ] Phase 3: Compiler Fork Identity And Frontend Surface Bring-Up is partially done; frontend scaffolds exist, but integration and parsing remain open.
+- [ ] Phase 4: Name Resolution, Imports, Packages, And Interface Artifacts.
+- [ ] Phase 5: Type System, Elaboration Pipeline, And Core IR.
+- [ ] Phase 6: Linearity, Borrows, Capabilities, Contracts, And Unsafe Checks.
+- [ ] Phase 7: Runtime Semantics And C Backend Safety.
+- [ ] Phase 8: Toolchain Skeleton, Diagnostics, Formatter, And Test Harness.
+- [ ] Phase 9: Core Standard Library Foundation.
+- [ ] Phase 10: OS, FFI Boundary, Capabilities, And Runtime Standard Library.
+- [ ] Phase 11: Concurrency, Atomics, Channels, And Synchronization.
+- [ ] Phase 12: Package Manager, Index, Build Artifacts, And Ecosystem Tooling.
+- [ ] Phase 13: LLVM Backend, Cross Compilation, Optimization, And Debuggability.
+- [ ] Phase 14: Self-Hosting Transition.
+- [ ] Phase 15: Mechanized Proof And Long-Term Governance is partially done; Lean 4 is selected and the narrow spot artifact builds, but whole-core mechanization has not started.
+
 | Phase | Status | Gate State |
 | --- | --- | --- |
 | Phase 0: Repository Baseline And Decision Audit | Complete enough for implementation-roadmap baseline; future stale references are cleanup work, not a Phase 0 blocker | Prepares Gate A; closes no global gate by itself |
-| Phase 1: Normative Kyokai Specification Extraction | `SPEC_EXTRACTED` through D525; workflow/service-only decisions are publicly routed; implementation, proof, deployed services, and conformance are not claimed | Gate A closed through D525; all later gates open |
-| Phase 2: Sequential `lambda_K` Core Calculus And Paper Proof | Formal-core statics and dynamics, 32-lemma skeleton, initial paper-proof derivations, and executable model spot checks exist; review and proof closure remain | Gate B open |
-| Phase 3: Compiler Fork Identity And Frontend Surface Bring-Up | Not started | Parser/source gate open |
+| Phase 1: Normative Kyokai Specification Extraction | `SPEC_EXTRACTED` through D526; workflow/service-only decisions are publicly routed; implementation, deployed services, and conformance are not claimed | Gate A closed through D526; Gate B is separately closed for `lambda_K-seq`; Gates C-G remain open |
+| Phase 2: Sequential `lambda_K` Core Calculus And Paper Proof | Owner-slot environment-machine statics and dynamics, 40-lemma proof index, closed derivation packages, Theorem P/Q assembly, executable model spot checks, whole-machine traces, and narrow Lean spot artifact exist | Gate B closed for `lambda_K-seq` paper proof |
+| Phase 3: Compiler Fork Identity And Frontend Surface Bring-Up | Active scaffold: inherited pipeline inventory, isolated `.kyo` / `.kai` source-role classifier, source-byte contract validator, initial Kyokai lexical-token scanner, host tests, and conformance-lane map exist; frontend integration, loader wiring, and Kyokai parsing remain open | Parser/source gate open |
 | Phase 4: Name Resolution, Imports, Packages, And Interface Artifacts | Not started | Package/spec gate open |
 | Phase 5: Type System, Elaboration Pipeline, And Core IR | Not started | Gate C open |
 | Phase 6: Linearity, Borrows, Capabilities, Contracts, And Unsafe Checks | Not started | Gate C safety-checker work open |
@@ -1026,24 +1078,91 @@ Current status is planning/spec extraction. No implementation phase is complete 
 | Phase 12: Package Manager, Index, Build Artifacts, And Ecosystem Tooling | Not started | Ecosystem gate and Gate F open |
 | Phase 13: LLVM Backend, Cross Compilation, Optimization, And Debuggability | Not started | Blocked behind Gate D closure for C backend stability |
 | Phase 14: Self-Hosting Transition | Not started | Gate F open |
-| Phase 15: Mechanized Proof And Long-Term Governance | Not started | Gate G open |
+| Phase 15: Mechanized Proof And Long-Term Governance | Lean 4 selected; pinned Elan/Lake owner-slot spot artifact builds; whole-core mechanization has not started | Gate G open |
 
 ## 12. Near-Term Work Queue
 
 The next concrete work should happen in this order.
 
-1. Review `kyokaidecided.md` as an accepted-shape ledger: preserve exact decisions, remove duplicated discussion voice, and keep normative detail in the spec rather than expanding the ledger indefinitely.
-2. Synchronize `kyokaicalculus/kyokaicalculusdirection.md`, `kyokaicalculus/lambda_k_research.md`, and the formalization appendix before freezing `lambda_K-seq` scope.
-3. Inventory the compiler passes in `lib/` against the D238 pipeline.
-4. Create the first conformance directory shape for parser, type, linearity, backend, stdlib, diagnostics, package behavior, and property/fuzz replay tests.
-5. Start compiler frontend changes against the extracted S1-S4 sections.
-6. Prioritize `kyokai check`, `--version`, `doctor`, `init`, `new`, local `kyokai explain`, checked `kyokai fix`, and deterministic replay before broad package publishing.
-7. Prioritize allocator, buffer, string/span, result/optional, formatting, package graph inspection, vendoring, and lockfile reproducibility before large OS, concurrency, or remote publishing workflows.
-8. Prioritize C backend correctness before LLVM backend work.
-9. Create tracked infrastructure work for website source, organization migration, repository-owned package-doc indexing and rendering, optional package-doc mirrors, showcase, and hosted services without presenting planned deployments as shipped.
-10. Update `kyokaispec/src/appendices/b-decision-traceability.md` after every new accepted D-point or extraction PR/MR.
+- [ ] Review `kyokaidecided.md` as an accepted-shape ledger: preserve exact decisions, remove duplicated discussion voice, and keep normative detail in the spec rather than expanding the ledger indefinitely.
+- [x] Use the Gate-B paper proof as the compiler-facing sequential-core reference while keeping whole-core Lean mechanization, compiler conformance, and later feature proofs on their separate gates.
+- [ ] Inventory the compiler passes in `lib/` against the D238 pipeline.
+- [ ] Create the first conformance directory shape for parser, type, linearity, backend, stdlib, diagnostics, package behavior, and property/fuzz replay tests.
+- [ ] Start compiler frontend changes against the extracted S1-S4 sections.
+- [ ] Prioritize `kyokai check`, `--version`, `doctor`, `init`, `new`, local `kyokai explain`, checked `kyokai fix`, and deterministic replay before broad package publishing.
+- [ ] Prioritize allocator, buffer, string/span, result/optional, formatting, package graph inspection, vendoring, and lockfile reproducibility before large OS, concurrency, or remote publishing workflows.
+- [ ] Prioritize C backend correctness before LLVM backend work.
+- [ ] Create tracked infrastructure work for website source, organization migration, repository-owned package-doc indexing and rendering, optional package-doc mirrors, showcase, and hosted services without presenting planned deployments as shipped.
+- [ ] Update `kyokaispec/src/appendices/b-decision-traceability.md` after every new accepted D-point or extraction PR/MR.
 
 ## 13. Changelog
+
+### 0.2.24 - 2026-06-02
+
+- Closed Gate B for the narrow `lambda_K-seq` paper proof: `theorem-assembly.md` now composes L1-L40, L38 unique decomposition, L39 ordinary preservation, L40 intrinsic defined-failure preservation, Theorem P, and Theorem Q from the maintained derivation packages. ProofTrace records the theorem as `paper-proven` while keeping the Lean artifact narrow and mechanically proven only for its twenty-five named spot theorems.
+- Expanded the Gate-B close audit into `kyokaicalculus/close-and-witness-proof.md`, covering the L20, L21, L23, and close-specific L37 derivations without upgrading the theorem claim.
+- Tightened static and runtime borrow-state well-formedness with writer-chain isolation: a retained mutable lease can coexist only with leases on its own suspension chain, so closing a local child cannot resume the parent beside an unrelated frontier reader or writer.
+- Expanded executable model spot checks from forty-one to forty-five and the narrow Lean artifact from thirteen to seventeen named local theorems. That revision still required review, remaining L1-L40 cases, call-entry proof, admission derivations, whole-machine coverage, and broader Lean encoding.
+- Expanded the call-entry derivation in `kyokaicalculus/call-entry-proof.md`: `pi` is materialized before argument effects, token referents must match the certificate, `phi` realization is deterministic, owned argument carriers transfer into exactly one fresh parameter slot, and ordinary return requires exact parameter discharge and caller-state restoration.
+- Expanded executable model spot checks from forty-five to forty-nine and the narrow Lean artifact from seventeen to nineteen named local theorems. That revision still required package review, remaining L1-L40 cases, admission derivations, whole-machine coverage, and broader Lean encoding.
+- Expanded the declaration-admission derivation in `kyokaicalculus/primitive-admission-proof.md`: named consumption, checked primitives, borrow access, and attenuation now have explicit declaration-time totality premises, invariant footprints, and progress/preservation case tables. That revision still required review and composition into the complete L1-L40 proof.
+- Repaired the next Gate-B review blockers without upgrading the theorem claim: linear locals and owned call parameters now keep live pending obligations during body execution, ordinary pop readiness requires tombstones, and terminal TPOE snapshots control/frame carriers before erasing continuations.
+- Added `kyokaicalculus/frame-typing-proof.md` and `kyokaicalculus/machine_runner.py`. The derivation package expands frame-local L9-L11/L26/L31/L38-L40 cases; the runner executes five complete regression traces for linear-let discharge, branch-slot preservation, arbitrary linear-sum movement, owned-call discharge, and nested TPOE carrier accounting. CI runs the spot model and executable machine slice through `make gate-b-model`.
+- Tightened checked call evidence: `phi` has explicit certificate fields, `static_call_compatible` checks them, `alpha_freshen` has a capture-avoiding fresh-renaming contract, `realize_call` has exact-domain and alias rules, and `verify_call_paths` checks token referents against pre-argument `pi` certificates.
+- Added `kyokaicalculus/source-expression-proof.md` so the source-control half of L1-L8/L12-L19/L24-L25/L32-L36 is explicit before final L38-L40 composition and renewed review.
+- Added `kyokaicalculus/equivariance-proof.md` with sort-preserving runtime renaming and relation-local commuting cases for L36-L37, kept separate from source binder alpha-equivalence and one-step fresh-choice equivalence.
+- Added `kyokaicalculus/theorem-assembly.md` with the L1-L40 route matrix, L38 non-overlap checks, L39 ordinary-preservation routing, L40 intrinsic-TPOE partition argument, and explicit Theorem P/Q review checklist. At that revision, the tier still remained `intended-by-spec` until renewed independent review accepted the assembly.
+- Expanded `kyokaicalculus/machine_runner.py` from five to ten whole-machine regression traces. The new traces cover mutable-reborrow close and resumed parent access, read-reborrow close, checked-primitive success, checked TPOE beneath an outer owned-argument frame, and one-way capability attenuation followed by visible consumption. At that revision, Gate B still remained `intended-by-spec`; the executable slice supported review and did not replace the paper theorem.
+- Expanded `kyokaicalculus/machine_runner.py` from ten to fifteen whole-machine regression traces. The new traces cover direct immutable-borrow access and close, selected linear-sum payload consumption, successful contract checking, zero-argument call entry, and zero-argument checked-primitive success. At that revision, the theorem tier remained unchanged.
+- Expanded the narrow Lean owner-slot artifact from nineteen to twenty-two named spot theorems. The new identifiers check linear-local carrier transfer, selected-case payload carrier transfer, and explicit one-way capability-attenuation origin recording. This remains narrow `mechanically-proven` evidence only.
+- Expanded `kyokaicalculus/machine_runner.py` from fifteen to nineteen whole-machine regression traces. The new traces cover explicit injection and linear-payload case discharge, free-payload case binding, unrestricted variable lookup, and zero-argument checked-primitive TPOE. The runner now exercises the remaining first-core structural frame families selected for this review pass.
+- Expanded `kyokaicalculus/machine_runner.py` from nineteen to twenty-five whole-machine regression traces. The new traces cover false-arm selection, direct mutable-borrow read and write access, source-ordered successful multi-argument call entry, returned owned-call carriers, and returned-local-borrow rejection at region close.
+- Expanded the narrow Lean owner-slot artifact from twenty-two to twenty-five named spot theorems. The new identifiers check returned mutable-borrow region-exit rejection, direct mutable-token usability before suspension, and zero-argument TPOE with no abandoned carrier.
+
+### 0.2.23 - 2026-06-02
+
+- Added the isolated `lib/KyokaiLexicalToken.ml` frontend scaffold without wiring it into inherited parsing or ownership-sensitive lowering. The scanner covers initial Kyokai comment, ASCII-identifier, keyword, punctuation, numeric-boundary, CRLF-span, and selected inherited-form rejection cases.
+- Added focused host tests and registered the lexical-token boundary in ProofTrace as proof-relevant frontend semantics. The isolated scanner now tokenizes static-string, raw-string, code-point, and byte literal families with the closed escape grammar plus the accepted `@embedBytes` / `@embedText` comptime-builtin family. Parser integration, stable diagnostic codes, formatter integration, and exhaustive conformance fixtures remain open.
+- Added the isolated `lib/KyokaiSourceText.ml` source-byte contract scaffold for strict UTF-8 validation, BOM rejection, LF/CRLF and bare-CR handling, Unicode-scalar diagnostic columns, and executable-entry shebang gating. The validated representation now feeds the isolated scanner, and the source-role scaffold selects shebang policy from `.kyo` / `.kai` role plus a caller-provided executable-entry fact. Executable-target discovery and loader wiring remain open.
+- Synchronized the normative reserved-word table with accepted grammar-only words such as `bitrecord`, `drop`, `qed`, `wait`, `wake`, unsafe-contract fields, and range-loop words. Contextual `result`, `old`, and `ignore` remain identifiers outside their specified parser contexts.
+
+### 0.2.22 - 2026-06-02
+
+- Repaired the renewed Gate B review findings without upgrading the theorem claim: `lambda_K-seq` now has admitted-total consuming, checked, borrow-access, and attenuation primitives; explicit `read_access[op]` / `write_access[op]`; uniform runtime slot types; intrinsic configuration/frame typing; and intrinsic TPOE terminal-state rules.
+- Replaced unscoped witness aliasing with scope-owned witness layers and explicit checked alias authorization, then added pre-argument call-path certificate `pi` so callee entry does not lose caller path evidence after argument moves.
+- Added `kyokaicalculus/research.md`, recorded valid first-core deviations, corrected the accepted Lean 4 wording, expanded executable model spot checks from thirty-three to forty-one, and expanded the narrow Lean artifact from ten to thirteen named local theorems.
+- Recorded the then-open proof obligations: renewed L1-L40 assembly review, layered-witness close/equivariance review, call-entry review over `pi`, admission review, whole-machine executable coverage, and broader Lean encoding.
+
+### 0.2.21 - 2026-06-02
+
+- Started the Gate-B-independent Phase 3 frontend lane with `docs/compiler-pipeline-inventory.md`, an isolated `.kyo` / `.kai` source-role classifier, and host tests for accepted interface/body paths plus inherited-extension, empty-path, and handwritten-`.koi` rejection. The scaffold deliberately does not define a public CLI encoding for source sets.
+- Added `test/conformance/README.md` as the explicit future Kyokai conformance-lane scaffold without claiming that inherited Austral fixtures are Kyokai conformance evidence.
+- Registered the new frontend source-role boundary in ProofTrace as a prototype and kept manifest discovery, loader wiring, parser support, CLI identity migration, and Gate B ownership-sensitive lowering explicitly open.
+
+### 0.2.20 - 2026-06-01
+
+- Accepted and extracted D526: Kyokai now maintains a public ProofTrace evidence graph with separate specification, implementation, conformance, and proof axes.
+- Added chapter-level spec registrations, required code-boundary `kyokai:prooftrace` comments, closed no-proof reason categories, and honest inherited-bootstrap markers.
+- Added `kyokaiproofstatus.toml`, generated `kyokaiproofstatus.md`, `tools/check_prooftrace.py`, `make proofstatus`, `make check-prooftrace`, and the CI validation lane.
+
+### 0.2.19 - 2026-06-01
+
+- Repaired the renewed-review spec conflict by replacing universal recursive destruction with `consume[op]`, a proof-facing abstraction of one resolved named consuming operation. Linear sums now require explicit destructuring unless an independently admitted named operation exists.
+- Separated static region and lease atoms from runtime identities through explicit witness `I`, retained elaborated `call f[phi](args)` witnesses, and defined deterministic `bind_call_args` and call-witness realization obligations.
+- Added `kyokaicalculus/deviation.md`, narrowed and fully recorded the Lean spot-artifact claim, removed stale TPOE child-propagation wording, and expanded executable spot checks from twenty-seven to thirty-three.
+- Tightened call return with invocation-local `psi`, caller-visible `phi(U)`, and explicit `result_bridge`; allowed intentional static-witness aliasing without weakening fresh runtime minting; and expanded the narrow Lean artifact from eight to ten named spot theorems.
+
+### 0.2.18 - 2026-06-01
+
+- Selected Lean 4 as the Kyokai proof assistant, pinned `leanprover/lean4:v4.30.0` through Elan, and recorded Lake as the checked-artifact build command.
+- Added the first narrow `mechanically-proven` Lean artifact for selected owner-slot repair facts: linear-sum owner carriage, branch frames without owner carriers, returned-token region-exit rejection, retained-writer behavior after read reborrow, and suspended mutable call-boundary rejection.
+- Recorded that the first narrow Lean spot artifact did not discharge L1-L40, Theorem P, or Theorem Q; later entries record the paper-proof closure.
+
+### 0.2.17 - 2026-06-01
+
+- Retired the substitution runtime after its closure audit found: branch substitution duplicated owner syntax, arbitrary linear sums were not closed under movement, runtime borrow-token typing was disconnected from referent types, suspended mutable tokens could cross call boundaries, and ordinary progress conflated TPOE with ordinary machine typing.
+- Replaced that runtime description with an environment-and-continuation machine using resource store `Sigma`, lease graph `B`, owner-slot store `Xi`, environments `eta`, and continuation stack `K`; expanded the proof inventory from L1-L32 to L1-L40.
+- Added explicit source-literal rules, arbitrary-linear slot movement and named consumption, retained-writer close invariants, returned-token region-exit rejection, referent-derived token typing, exact call-return borrow-graph restoration, recursive region-binder freshening, zero-argument call entry, complete checked-primitive frame entry/advance rules, `Unit`-only sequencing, inert captured-environment mappings after source-ordered effects, separate `WT_TPOE` classification, and twenty-seven executable spot checks.
 
 ### 0.2.16 - 2026-06-01
 

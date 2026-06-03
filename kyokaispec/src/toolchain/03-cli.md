@@ -1,6 +1,9 @@
 # Command Line Interface
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-03-CLI
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 The `kyokai` command is direct, but direct does not mean loose. Every command enters through the same manifest door, resolves the same project graph, and either reports exactly what it did or fails before it invents a shape for the project.
 
 > Trace: D26, D78, D83

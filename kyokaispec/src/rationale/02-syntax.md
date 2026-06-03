@@ -1,6 +1,9 @@
 # Syntax Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-02-SYNTAX
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Syntax gets mocked because people fight over it. That does not make syntax fake. It is the shape a programmer sees at 2 a.m., the map they use to find the end of a block, the mark that says whether a value was borrowed, moved, matched, or returned. Kyokai treats syntax as ergonomics in service of semantics.
 
 > Trace: D9, D11a, D14, D35, D52

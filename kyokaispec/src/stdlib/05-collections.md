@@ -1,6 +1,9 @@
 # Collections
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-05-COLLECTIONS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A collection is not just a clever box. It owns values, borrows values, moves values, can allocate, can reorder, can invalidate, and can make performance promises people build whole systems on. Kyokai writes those promises down.
 
 > Trace: D44, D77, D85, D176-D177, D201, D229

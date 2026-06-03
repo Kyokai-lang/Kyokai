@@ -1,6 +1,9 @@
 # Build Generation, Evaluation, Repl, And Playground
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-11-BUILD-GENERATION-AND-PLAYGROUND
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Generated code and playgrounds are where hidden power likes to dress up as convenience. Kyokai allows convenience, but it makes the wire visible: what runs, what it reads, what it writes, what authority it holds, and whether the result is ordinary Kyokai.
 
 > Trace: D83, D150, D151-D151a, D226

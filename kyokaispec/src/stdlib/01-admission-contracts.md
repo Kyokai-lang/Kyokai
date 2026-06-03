@@ -1,6 +1,9 @@
 # Admission Contracts
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-STDLIB-01-ADMISSION-CONTRACTS
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A Kyokai standard-library API is not admitted because it is useful. Useful is only the beginning. It is admitted when the contract is written, the edge cases are named, the tests exist, and the implementation boundary is honest.
 
 > Trace: D85, D229

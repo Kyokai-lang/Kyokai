@@ -1,6 +1,9 @@
 # Documentation, LSP, And Audit
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-08-DOCS-LSP-AUDIT
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Docs, editor tooling, and audit reports look like separate tools from the street. Inside Kyokai they stand on the same floor: the checked interface graph, the package boundary, visibility, contracts, capabilities, and unsafe facts the compiler already knows.
 
 > Trace: D148, D150, D218
@@ -132,3 +135,12 @@ Documentation is the face of the API. The LSP is the hand on your shoulder while
 
 > Trace: D148, D150, D218
 > Covers: Docs, LSP, and audit are trustworthy only when they share the compiler's semantic facts.
+
+## ProofTrace Reports
+
+> Trace: D526
+> Covers: Tooling presents checked evidence metadata without converting reports, editor hints, or status views into language semantics or proof conclusions.
+
+The public `kyokaiproofstatus.md` board is generated from `kyokaiproofstatus.toml`. Tooling can expose the same records through documentation pages, Analysis Server navigation, and audit reports. A displayed record includes stable ID, scope, owner, specification state, implementation state, conformance state, proof state, proof requirement, artifacts, and exclusions.
+
+The Analysis Server can navigate from a registered spec chapter or maintained code-boundary comment to its ProofTrace record. `kyokai audit` can report stale, malformed, missing, or overclaimed metadata. These surfaces are tooling-only assistance. They do not accept rejected source, weaken a static rule, grant authority, or claim a theorem from tests alone.

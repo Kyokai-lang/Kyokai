@@ -1,6 +1,9 @@
 # Capabilities Rationale
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-RATIONALE-05-CAPABILITIES
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Borretti's Austral image still works: from the ground the crust looks enormous; from far away it is a thin skin over a much heavier world. Application code feels like the world when you are standing in it, but it rests on libraries, transitive dependencies, tools, plugins, generated code, and foreign calls. Kyokai's capability design starts from that change in scale.
 
 > Trace: D67, D85, D211, D255

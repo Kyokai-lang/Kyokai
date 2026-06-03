@@ -1,5 +1,8 @@
 # Introduction
 
+> ProofTrace: SPEC-LANGUAGE-00-INTRODUCTION
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 Kyokai is a systems programming language built around explicit boundaries: ownership boundaries, authority boundaries, module boundaries, failure boundaries, and toolchain boundaries. Kyokai inherits important ideas from Austral, including linear resource tracking, capability-oriented security, and rejection of hidden cleanup, but Kyokai is its own language and its own project. The `Kyokai.*` namespace marks that break. Existing Austral text is evidence and source material until it is rewritten, checked, and accepted as Kyokai text.
 
 > Trace: D1, D5, D145

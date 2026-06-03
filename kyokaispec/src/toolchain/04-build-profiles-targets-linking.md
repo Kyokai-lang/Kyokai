@@ -1,6 +1,9 @@
 # Build Profiles, Targets, And Linking
 
 [Rikona Kurasaki / Mjoyufull]
+> ProofTrace: SPEC-TOOLCHAIN-04-BUILD-PROFILES-TARGETS-LINKING
+> Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
+
 A build profile is not a mood. A target is not a wish. A backend is not a secret second language. Kyokai writes these choices down because optimization, debug info, link mode, target ABI, and backend tool contracts can change what a programmer receives from the toolchain.
 
 > Trace: D27, D31, D80, D83, D139, D149, D200
