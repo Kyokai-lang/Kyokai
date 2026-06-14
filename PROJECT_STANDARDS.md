@@ -1,7 +1,7 @@
 # Kyokai Project Standards
 
-**Document Version:** 0.3.3
-**Last Updated:** 2026-05-30
+**Document Version:** 0.3.4
+**Last Updated:** 2026-06-13
 **Scope:** Kyokai repository workflow, public design process, spec work, implementation work, documentation, reviews, releases, and project maintenance
 
 This file defines how Kyokai work moves through the repo. It covers code, public language shape, spec text, docs, reviews, releases, and maintenance expectations.
@@ -52,6 +52,10 @@ Rules:
 
 - Public docs should read like project-maintained material with stable, provenance-free wording.
 - Do not write chat-style provenance, transcript-style phrasing, or scratch-note wording.
+- Public docs describe accepted behavior, current status, or named planned target shape as project facts. They do not give contributors future instructions in prose such as "before release, do X" when the rule can be written as a release criterion, status row, checklist item, or service obligation.
+- Normative specifications, accepted-shape ledgers, rationale, and reference documents speak to the general public by stating rules, facts, examples, and rationale. They do not address the lead maintainer, contributors, or an implied reader with conversational instructions. Contributor guides, workflow documents, command documentation, checklists, and status documents can use instructional language only for the action that document exists to direct.
+- Accepted-shape history is preserved. When a later D-point changes an earlier decision, the earlier entry is marked `SUPERSEDED` or `AMENDED`, names the replacing D-point, and briefly states the replacement. The old rule remains readable as history instead of being silently rewritten.
+- `.public.txt` records public-document roots and standalone public planning files. Files under those roots do not reference internal-only documents, absolute local paths, private notes, or unpublished local provenance.
 - Keep docs direct and human.
 - If docs describe behavior, point to accepted shape or spec where practical.
 - Inherited Austral docs must be updated before they are treated as Kyokai docs.
@@ -71,6 +75,7 @@ Rules:
 - If behavior is not decided, open a D-point before treating the implementation as the language contract.
 - Runtime/FFI/backend work must state UB, ownership, ABI, and failure-mode consequences.
 - Tests are expected for parser, type checker, linearity, diagnostics, backend behavior, and stdlib contracts as applicable.
+- Source files start with the license header required by `CODE_STANDARDS.md`. New Kyokai-owned files use the Kyokai SPDX identifier for their path class; inherited files preserve inherited notices unless the file is replaced or relicensed.
 
 ### 3.2 Public Shape And D-Point Work
 
@@ -230,6 +235,15 @@ Stdlib PRs must include the admission evidence required by D85, D229-D232, and D
 - [ ] Updates generated docs or docs source.
 - [ ] Links accepted D-points and spec homes.
 
+Bridge collection PRs follow the same admission discipline plus the D529 bridge record. `Kyokai.Bridge.*` is official shipped integration code, not ordinary `kyokai vendor` output and not package-index dependency cache.
+
+- [ ] Names the Bridge entry, admission state, owner, public modules, and whether the entry is binding, wrapper, generated binding set, port, adapter, or copied support code.
+- [ ] Records upstream URL, exact revision or release, license/SPDX facts, copied-file inventory, local modifications, and generator command or `N/A`.
+- [ ] States target/platform gates, native library/header/link requirements, unsafe contracts, capability requirements, and capability-deny behavior.
+- [ ] Adds build/link smoke tests, unsafe/FFI wrapper tests, capability-deny tests, docs/audit extraction tests, and provenance drift checks appropriate to the entry.
+- [ ] Confirms the entry does not silently fetch source, binaries, headers, package-index metadata, or docs during import or checking.
+- [ ] Confirms ordinary dependency vendoring remains under `kyokai vendor` and does not copy or redefine installed Bridge modules.
+
 
 ### 5.7 Infrastructure / Website PR Checklist
 
@@ -239,6 +253,20 @@ Stdlib PRs must include the admission evidence required by D85, D229-D232, and D
 - [ ] Links accepted D-points/spec sections for behavior claims.
 - [ ] Records OSS provenance, license compatibility, and local modifications when reusing infrastructure.
 - [ ] Avoids custom auth, persistent data, hosted execution, or secrets without an accepted service record.
+
+### 5.8 C Toolchain Admission PR Checklist
+
+D530 makes generated C the one maintained backend. A compiler-family or target admission changes the supported toolchain matrix and therefore needs reviewable evidence, not only a successful smoke build.
+
+- [ ] Names compiler family/version range, target triple, C11/C17 mode, SDK/sysroot, linker, archiver, object format, and debug format.
+- [ ] Records required flags and every admitted builtin, attribute, pragma, intrinsic, and inline-assembly family.
+- [ ] Adds dialect, ABI/layout/calling, atomics, TLS, strict-float, volatile, stack, FFI, and runtime conformance tests.
+- [ ] Adds `#line`, sidecar-map, debugger breakpoint/backtrace, symbol/local, sanitizer, coverage, and profiler mapping tests for the claimed support tier.
+- [ ] Adds deterministic-output, path-remap, archive/link, raw-diagnostic capture, and external-tool build-plan tests.
+- [ ] Records clean, incremental, and no-op compile-time measurements on named hardware without weakening checks or using stale artifacts.
+- [ ] Lists unsupported surfaces and target-gated exclusions explicitly.
+- [ ] Updates the target matrix, `phase.md`, ProofTrace, CI ownership, and public support claims in the same PR.
+- [ ] Does not add a second Kyokai backend, backend selector, or backend-named output path.
 
 ## 6. Public D-Point Process
 

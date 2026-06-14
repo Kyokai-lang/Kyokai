@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-07-MATH-AND-NUMERICS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Numerics are where confidence can become arrogance fast. A wrong byte order, a silent overflow, a host `libm` result changing under your feet, a signed zero nobody named: all of that becomes program behavior. Kyokai makes the number story testable.
+Numerics are where confidence can become arrogance fast. A wrong byte order, a silent overflow, a host `libm` result changing underneath a program, a signed zero nobody named: all of that becomes program behavior. Kyokai makes the number story testable.
 
 > Trace: D37, D41, D75-D76, D117, D232, D260
 > Covers: Numeric stdlib APIs specify conversion, bit operations, overflow, endianness, floating behavior, and math accuracy contracts.
@@ -101,7 +101,7 @@ A transitional foreign math wrapper carries the same record plus the reason nati
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-The point is not to sound brave about writing math in Kyokai. The point is to prove the promise in public. If `sin` says `MaxUlp(1)`, the tests must hunt that number. If a byte helper says big-endian, no boundary gets to swap behind your back.
+The point is not to sound brave about writing math in Kyokai. The point is to prove the promise in public. If `sin` says `MaxUlp(1)`, the tests must hunt that number. If a byte helper says big-endian, no boundary may swap the order invisibly.
 
 > Trace: D117, D229-D232, D260, D517
 > Covers: Numeric APIs are trusted through contracts and tests, not borrowed confidence.

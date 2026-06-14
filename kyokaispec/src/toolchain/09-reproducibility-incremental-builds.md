@@ -11,7 +11,7 @@ Reproducibility is the build system telling the truth twice. Incremental compila
 
 ## Reproducible Build Identity
 
-Given the same build identity, a conforming toolchain must produce the same `.koi` artifacts, generated C where requested, object files when the backend/toolchain contract admits bit-identical objects, libraries, executables, documentation JSON, lockfile updates, and release provenance records. If a target external tool cannot make an output bit-identical, the target contract must state the exception and the reproducible artifact boundary that remains guaranteed.
+Given the same build identity, a conforming toolchain must produce the same `.koi` artifacts, generated C where requested, object files when the admitted C-toolchain contract guarantees bit-identical objects, libraries, executables, documentation JSON, lockfile updates, and release provenance records. If a target external tool cannot make an output bit-identical, the target contract must state the exception and the reproducible artifact boundary that remains guaranteed.
 
 > Trace: D27, D79, D83, D139, D149, D218, D225
 > Covers: Reproducibility applies to specified artifacts, with target exceptions bounded by target contracts.
@@ -21,15 +21,15 @@ Build identity includes:
 | Input | Included Facts | Trace |
 | --- | --- | --- |
 | Source | File bytes, logical module names, source origins, generated-source declarations, and doc-test extraction inputs. | D52, D78, D218 |
-| Project | Package/workspace manifests, lockfile, package identities, versions, editions, module roots, build tables, profiles, and diagnostic policy. | D51, D78, D83, D105 |
-| Dependencies | Pinned Git revisions, canonical source-artifact hashes, package-instance feature sets, dependency `.koi` identities, compatibility fields, yanked/advisory policy when fatal, and package provenance. | D51, D79, D244, D397, D423-D424, D461 |
-| Target | Triple, support tier, target-spec bytes, backend selection, external tool versions, sysroot, linker, admitted flags, CPU/features, stack defaults, task-stack defaults, guard policy, and overflow detection. | D31, D80, D149, D262, D308, D343 |
-| Compiler | Toolchain identity, version ABI string, compiler version, stdlib/runtime/resolver versions, `.koi`/KBI version, language edition, backend compatibility class, cache-format version, package-index schema version, target-metadata version, and diagnostic schema version. | D79, D83, D105, D425, D429 |
-| Command | Flags that affect accepted source, generated artifacts, diagnostics as artifacts, profile, target, backend, output mode, output root, cache root, debug/source-map policy, sanitizer policy, frame-pointer policy, LTO, and instrumentation. | D26, D27, D29, D31, D264, D308 |
+| Project | Package/workspace manifests, lockfile, package identities, versions, editions, module roots, build tables, profiles, manifest authority ceilings, resolver mode, and diagnostic policy. | D51, D78, D83, D105, D527-D528 |
+| Dependencies | Workspace dependencies, pinned Git revisions, indexed version requirements, selected index snapshot identities, canonical source-artifact hashes, package-instance feature sets, dependency `.koi` identities, compatibility fields, yanked/advisory policy when fatal, capability-deny policy when graph-affecting, and package provenance. | D51, D79, D244, D397, D423-D424, D461, D528 |
+| Target | Triple, support tier, target-spec bytes, admitted C-toolchain contract identity, external tool versions, sysroot, linker, admitted flags, CPU/features, stack defaults, task-stack defaults, guard policy, and overflow detection. | D31, D80, D149, D262, D308, D343, D530-D532 |
+| Compiler | Kyokai toolchain identity, version ABI string, compiler version, stdlib/runtime/resolver versions, `.koi`/KBI version, language edition, generated-C schema and C-toolchain compatibility classes, cache-format version, package-index schema version, target-metadata version, and diagnostic schema version. | D79, D83, D105, D425, D429, D530-D532 |
+| Command | Flags and policy values that affect accepted source, generated artifacts, diagnostics as artifacts, profile, target, admitted C-toolchain selection, output mode, output root, cache root, effective capability deny policy, debug/source-map policy, sanitizer policy, frame-pointer policy, LTO, and instrumentation. | D26, D27, D29, D31, D264, D308, D527, D530-D536 |
 | Output paths | Output/cache roots only where artifact contents record paths; path remapping controls reproducible profiles. | D27, D83, D264 |
 
-> Trace: D26, D29, D31, D51, D52, D78-D80, D83, D105, D149, D218, D244, D264, D397, D423-D425, D429, D461
-> Covers: Build identity records package instances, canonical source content, toolchain compatibility, cache schema, and provenance inputs explicitly.
+> Trace: D26, D29, D31, D51, D52, D78-D80, D83, D105, D149, D218, D244, D264, D397, D423-D425, D429, D461, D527-D528
+> Covers: Build identity records package instances, indexed version requirements, canonical source content, authority-deny policy, resolver inputs, toolchain compatibility, cache schema, and provenance inputs explicitly.
 
 Hidden host facts are excluded unless a chapter admits them. Excluded facts include current time, timezone, locale, process ID, random seed, current username, unrelated environment variables, shell aliases, host directory iteration order, and absolute build path after path-remapping policy.
 
@@ -67,6 +67,11 @@ The package-source cache stores canonical package source artifacts. For Git depe
 > Trace: D51, D83, D244, D423
 > Covers: Dependency cache reuse is pinned to canonical source content and verified provenance rather than transport bytes or mutable labels.
 
+An indexed package cache hit is valid only when the selected lockfile package instance, exact source revision, canonical source hash, index snapshot identity, package version, selected feature set, target contract, semantic profile, and relevant policy identities match. A newer package-index version or metadata correction cannot replace a locked cache entry unless the command selects a graph-changing resolver mode.
+
+> Trace: D83, D221, D244, D423-D424, D528
+> Covers: Indexed package cache reuse follows the resolved lockfile package instance and cannot drift with package-index changes.
+
 A corrupted package-source cache entry is rejected. A command with an admitted remote source action can repair it by refetching the declared immutable source and revalidating canonical identity. An offline command fails with a package-source diagnostic instead. Repairing a cache entry does not edit manifests or lockfiles unless the command explicitly selects a lockfile update mode.
 
 > Trace: D51, D83, D396, D423-D424, D429
@@ -84,10 +89,10 @@ Incremental cache keys include every build identity input that could affect the 
 > Trace: D83, D144
 > Covers: Incremental cache correctness is required.
 
-A build-result cache entry records cache-format version, toolchain identity, version ABI string, source and generated-input hashes, manifest and lockfile hashes, canonical package-source hashes, package-instance feature set, target contract, backend, profile, policy values, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, output-integrity hash, and the compatibility class needed to validate reuse. Cache state is partitioned under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<backend>/<package-instance>/` when those components apply. Cache sharing between package instances exists only after the tool proves identical public `.koi`, identical backend-independent semantic facts, and compatible generated-code inputs. Sharing never changes diagnostics, audit output, build identity, or package-graph reporting.
+A build-result cache entry records cache-format version, toolchain identity, version ABI string, source and generated-input hashes, manifest and lockfile hashes, canonical package-source hashes, package-instance feature set, target contract, profile, selected C compiler/linker contract, code-generation schema, policy values, effective capability deny policy when it affects acceptance or artifacts, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, output-integrity hash, and the compatibility class needed to validate reuse. Cache state is partitioned under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<c-toolchain-contract>/<package-instance>/` when those components apply. Cache sharing between package instances exists only after the tool proves identical public `.koi`, identical semantic facts, compatible deny-policy effect, compatible generated-code inputs, and compatible C-toolchain contracts. Sharing never changes diagnostics, audit output, build identity, or package-graph reporting.
 
-> Trace: D29, D79, D83, D144, D218, D264, D397, D425, D429, D480, D497
-> Covers: Build-result cache reuse is keyed by complete package-instance and toolchain facts and is a semantics-preserving optimization only.
+> Trace: D29, D79, D83, D144, D218, D264, D397, D425, D429, D480, D497, D527
+> Covers: Build-result cache reuse is keyed by complete package-instance, policy, and toolchain facts and is a semantics-preserving optimization only.
 
 Cache writes publish atomically after content verification. Concurrent builds use explicit cache locks or content-addressed temporary paths. Lock acquisition, stale-lock detection, unsupported locking, and timeout produce stable diagnostics. Eviction never deletes an entry held by an active build under that protocol. A partial write, unknown cache format, missing metadata record, integrity mismatch, or stale generated-source record is discarded and rebuilt from declared inputs when those inputs are available.
 
@@ -107,7 +112,7 @@ Generated sources participate in reproducibility through generator declaration, 
 
 ## Release Provenance
 
-Release provenance records include build identity, source revision, toolchain version, target, profile, backend, lockfile hash, generated-source hashes, `.koi` hashes, artifact checksums, and signing/checksum metadata when produced. Provenance itself is an artifact and must be reproducible except for explicit signature bytes and timestamp authority fields named by the release chapter.
+Release provenance records include build identity, source revision, Kyokai toolchain version, target, profile, admitted C-toolchain contract and executable identities, lockfile hash, generated-source hashes, `.koi` hashes, artifact checksums, and signing/checksum metadata when produced. Provenance itself is an artifact and must be reproducible except for explicit signature bytes and timestamp authority fields named by the release chapter.
 
 > Trace: D83, D225
 > Covers: Release provenance names its deterministic and authority-backed fields.
@@ -115,7 +120,7 @@ Release provenance records include build identity, source revision, toolchain ve
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-A build that changes because the clock ticked is not a build you can swear by. A cache that changes meaning is not a cache, it is a trap with a progress bar. Kyokai keeps the fast path, but it makes the fast path prove it is still walking on the same road.
+A build that changes because the clock ticked is not trustworthy. A cache that changes meaning is not a cache; it is a trap with a progress bar. Kyokai keeps the fast path, but it makes the fast path prove it is still walking on the same road.
 
 > Trace: D83, D144
 > Covers: Kyokai treats reproducibility as trust and incremental compilation as a checked optimization.

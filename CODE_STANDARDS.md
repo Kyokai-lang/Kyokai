@@ -6,7 +6,7 @@
 
 This is the code-quality handbook for Kyokai. It is not a short checklist. It is the standard for how code in this repository should be written, reviewed, split, tested, and maintained while Kyokai moves from an Austral-derived compiler into its own language, standard library, toolchain, and spec.
 
-the compiler is mostly OCaml inherited from Austral, the generated backend currently emits C, the runtime and standard library touch OS and ABI boundaries, and future source will be Kyokai itself. The same engineering values still apply, but the concrete rules need to fit OCaml, Austral's architecture, and Kyokai's language philosophy.
+the compiler is mostly OCaml inherited from Austral, the generated backend currently emits C, the runtime and standard library touch OS and ABI boundaries, and Kyokai source belongs in the repository as implementation migrates. The same engineering values still apply, but the concrete rules need to fit OCaml, Austral's architecture, and Kyokai's language philosophy.
 
 The short version is this: write code that makes invariants visible. If a behavior matters, put it in the type, the module boundary, the pass boundary, the API contract, the diagnostic, or the test. Do not rely on magic.
 
@@ -135,7 +135,7 @@ This file governs code quality for:
 - Kyokai runtime and backend glue
 - generated C shape and runtime contracts
 - Kyokai standard library modules
-- future `.kyo` and `.kai` source
+- future `.kyo` source and generated `.koi` interface artifacts
 - test programs and fixtures
 - small scripts that support compiler/spec/test work
 - public examples that claim to be valid Kyokai
@@ -309,6 +309,7 @@ Rules:
 - Boundary code may read ambient state, but it should translate it into typed capability-backed values.
 - Capability errors should say which authority was missing.
 - Tests should verify capability denial paths, not only successful authorized paths.
+- Toolchain code that sees authority requirements must preserve enough facts for D527 capability deny policy: exact capability name, family classification, policy source, requiring package/target/generator/test/doc/audit/publish/execution surface, and dependency or generation path when one exists.
 
 ### 4.5 Visible Allocation
 
@@ -357,11 +358,16 @@ Expected current layout:
 kyokailang/kyokai/
   bin/                 compiler entrypoints
   lib/                 OCaml compiler implementation
+  lib/compiler/        Kyokai-owned compiler subtrees during migration
+  toolchain/           Kyokai-owned toolchain support code
   standard/            inherited/current standard library sources
   test/                OCaml/unit-level tests
+  test/host/           host-language scaffold tests
+  test/conformance/    public Kyokai behavior fixture lanes
   test-programs/       end-to-end language tests
   examples/            public examples
   docs/                compiler and project docs
+  CI/                  repository CI scripts called by workflow YAML
   kyokaispec/          normative spec work
   Kyokaishape.md       public D-point index/archive
   kyokaidecided.md     public accepted-shape extraction
@@ -372,7 +378,9 @@ kyokailang/kyokai/
 
 Do not create a parallel compiler, runtime, or stdlib tree without a migration plan.
 
-Kyokai compiler architecture uses explicit ownership areas for source text, lexer/parser/CST, surface AST, name resolution/imports, package/workspace loading, type/universe checking, linearity/borrow checking, capability checking, contract checking, elaboration/lowering, typed core IR, `.koi`/KBI, diagnostics, formatter, Analysis Server facts, backend-independent IR, C backend, LLVM backend migration, runtime support, stdlib admission tools, and CLI/toolchain commands. Each area states its input invariants, output invariants, diagnostic/span obligations, and tests. A PR/MR crossing several areas states the required boundary crossing and the connecting invariants.
+The target Kyokai layout separates compiler implementation from toolchain implementation. Broad new toolchain work belongs under a `toolchain/` owner directory rather than being added to the inherited flat `lib/` compiler tree. Compiler internals split by boundary: `frontend/`, `package/`, `resolver/`, `typing/`, `elaboration/`, `checking/`, `ir/`, `backend/`, and `diagnostics/`. Toolchain internals split by user-facing service: `cli/`, `build/`, `conformance/`, `fmt/`, `lsp/`, `docs/`, `package/`, `audit/`, `prooftrace/`, and `ci/`. A migration PR/MR that moves code from `lib/` updates tests, ProofTrace records, generated status boards, and public path references in the same change.
+
+Kyokai compiler architecture uses explicit ownership areas for source text, lexer/parser/CST, surface AST, name resolution/imports, package/workspace loading, type/universe checking, linearity/borrow checking, capability checking, contract checking, elaboration/lowering, typed core IR, `.koi`/KBI, diagnostics, formatter, Analysis Server facts, backend-independent IR, the one generated-C backend, C-toolchain admission and diagnostics, runtime support, stdlib admission tools, and CLI/toolchain commands. Each area states its input invariants, output invariants, diagnostic/span obligations, and tests. A PR/MR crossing several areas states the required boundary crossing and the connecting invariants.
 
 > Trace: D512
 > Covers: Compiler directory separation is a review, ownership, invariant, and test boundary without claiming that the inherited implementation has already completed the migration.
@@ -682,7 +690,7 @@ The inherited compiler pipeline is roughly:
 11. render C code
 12. generate wrappers and entrypoints
 
-Kyokai may add or split passes, especially for syntax changes, typed sugar, implicit completions, capabilities, target checks, stdlib contracts, and richer diagnostics.
+Kyokai may add or split passes, especially for syntax changes, typed sugar, implicit completions, capabilities, target checks, stdlib contracts, and richer diagnostics. Under the single-file module model (D537), Kyokai also drops the interface/body combine pass: one `.kyo` file is parsed once, and the importable interface is derived from per-declaration visibility (D538) rather than reconciled against a separate interface CST.
 
 ### 7.2 Pass Contract Template
 
@@ -711,7 +719,7 @@ A pass should have one job.
 Good pass jobs:
 
 - parse tokens into CST
-- combine interface/body declarations
+- derive the importable interface from one module source file
 - resolve imports
 - desugar syntax-only forms
 - elaborate names and types
@@ -1047,6 +1055,7 @@ Rules:
 - Capability values should not be forged by runtime helpers.
 - Code generation should not bypass capability checks by calling raw runtime operations from ordinary code.
 - Tests should prove that capability-less programs are rejected.
+- Capability deny-policy enforcement is a toolchain check over declared or inferred requirements. It can reject more programs for an invocation, but it must not grant authority, silence a required capability, or alter source-level capability semantics.
 
 ### 10.5 Unsafe Boundaries
 
@@ -1073,6 +1082,9 @@ Rules:
 - Generated temporaries must not duplicate linear values.
 - Generated C must avoid relying on unspecified or undefined C behavior.
 - Target-specific code paths need target tests or documented target gating.
+- Do not add a direct LLVM, Cranelift, QBE, custom-native, assembly, bytecode, or alternate backend path. D530 makes generated C the one maintained backend.
+- Treat compiler, linker, archiver, debugger, sanitizer, coverage, and profiler programs as admitted external tools with versioned contracts and reproducible invocation records.
+- Generated source must remain inside the D531 C11 subset except for extensions named by the selected target/compiler record.
 
 ### 11.2 Generated C Style
 
@@ -1086,6 +1098,8 @@ Rules:
 - Avoid macros for semantic operations unless macros are the chosen runtime interface and are tested.
 - Keep generated names deterministic.
 - Include enough comments only when generated code is meant for debugging.
+- Emit deterministic package/module/materialization unit boundaries suitable for object caching and parallel compilation.
+- Emit `#line` directives and the authoritative Kyokai sidecar source map together; neither replaces the other.
 
 ### 11.3 C Hazards
 
@@ -1104,7 +1118,17 @@ Never rely on these for Kyokai behavior:
 
 If Kyokai permits the source operation, generate checked code or call a runtime helper.
 
-### 11.4 Runtime Helpers
+### 11.4 C Toolchain Admission
+
+Do not accept a compiler family or target because one smoke file builds. An admission change includes dialect, ABI/layout/calling, atomics, TLS, strict-float, intrinsic/assembly, debug/source-map, sanitizer, linker/archive, deterministic-output, diagnostics, compile-time, and runtime evidence. Unknown compiler versions fail closed until their compatibility range is updated.
+
+Major hosted lanes use GCC/Clang on Linux, Apple Clang on macOS, clang-cl on Windows, and Clang on FreeBSD. Other lanes follow the same process. TCC receives no exception for speed. CompCert is an independent evidence lane, not a profile or backend.
+
+### 11.5 External-Tool Diagnostics
+
+Generated-C compile errors after successful Kyokai checking are code-generation defects, unsupported toolchain contracts, native dependency errors, or external-tool failures. Do not rewrite them into source type errors. Preserve raw stdout/stderr, command identity, target/toolchain facts, exit status, generated location, and source-map identity. Remap a location only when the map proves it.
+
+### 11.6 Runtime Helpers
 
 Rules:
 
@@ -1115,7 +1139,7 @@ Rules:
 - Helpers that may terminate must state the TPOE condition.
 - Helpers that wrap OS calls must translate OS errors into Kyokai's chosen error shape.
 
-### 11.5 FFI Bindings
+### 11.7 FFI Bindings
 
 Every FFI binding needs this contract:
 
@@ -1140,7 +1164,7 @@ Tests or manual verification:
 
 This template can be condensed in code comments, but the information must exist.
 
-### 11.6 ABI And Layout
+### 11.8 ABI And Layout
 
 Rules:
 
@@ -1488,6 +1512,10 @@ Rules:
 - Avoid dependencies for tiny helpers.
 - Avoid dependencies that force broad toolchain changes without a plan.
 
+Official Bridge collection code under `Kyokai.Bridge.*` follows D529. It is shipped first-party integration surface, not ordinary `kyokai vendor` output and not a package cache. Bridge entries must keep their upstream URL, exact revision or release, license/SPDX facts, copied-file inventory, local modifications, generator command, target gates, native library/link requirements, unsafe contracts, capability requirements, tests, docs, owner, update policy, and audit status close enough to the code for review and tooling to find them.
+
+Do not copy third-party source into Bridge, stdlib, runtime, compiler, or tests without a reviewed license/provenance record. Do not hide copied code behind mechanical renames. Do not let generated bindings become unreviewed source: the generator command, input revision, target configuration, and local normalization are part of the maintained boundary.
+
 ### 16.2 Dune
 
 Rules:
@@ -1711,10 +1739,16 @@ Rules:
 
 Rules:
 
-- Compiler, runtime, and standard library licensing must be reflected in source headers and license files once finalized.
+- Every source file starts with its license header before ordinary code, generated markers, module imports, or ProofTrace markers. The header uses the path-class SPDX identifier from `LICENSE` and `LICENSES/README.md`.
+- New Kyokai-owned compiler and toolchain source files use `SPDX-License-Identifier: GPL-3.0-or-later`.
+- New Kyokai-owned runtime, standard library, startup, target helper, and linkable support files use `SPDX-License-Identifier: GPL-3.0-or-later WITH GCC-exception-3.1` unless a more specific accepted license record applies.
+- Inherited Austral or third-party files preserve their existing license notices unless the file is replaced or relicensed by the relevant copyright holder.
 - Runtime-library exception notices belong on runtime/stdlib files that are linked into user programs.
 - Generated user code should not accidentally inherit compiler-only licensing terms.
-- New third-party code needs license review before vendoring.
+- New third-party code needs license review before ordinary dependency vendoring, Bridge admission, generated-binding check-in, copied support-code check-in, or inclusion in release artifacts.
+- Bridge entries carry their own provenance and copied-file inventory. A Bridge entry with prebuilt binary payloads also carries platform gates, checksums, provenance, reproducibility status, license records, and verification command.
+
+Public documentation adjacent to code writes release and legal obligations as current project facts or checkable criteria, not as loose future instructions.
 
 ---
 

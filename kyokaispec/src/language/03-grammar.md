@@ -4,30 +4,29 @@
 > ProofTrace: SPEC-LANGUAGE-03-GRAMMAR
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai keeps Austral's central grammatical idea: a module has an importable interface and an implementation body. The split still matters because the boundary still matters. A `.kyo` file is the public contract surface. A `.kai` file is where the work is done, where private helpers live, and where platform-specific bodies can be selected without changing the interface people import.
+Kyokai keeps Austral's central grammatical idea: a module exposes an importable surface, and the boundary between that surface and the private work still matters. Kyokai stops spelling the boundary as a second file. A module is one `.kyo` source file. The public contract, the private helpers, and the platform-specific bodies all live in that one file, each declaration carrying its own visibility marker, and the compiler derives the importable interface from it.
 
-> Trace: D5, D17, D52, D78, D86
-> Covers: Kyokai is a fork that keeps Austral's useful interface/body split while standardizing `.kyo` interfaces, `.kai` bodies, package-visible `internal`, and deterministic module resolution.
+> Trace: D5, D17, D52, D78, D86, D537, D538
+> Covers: Kyokai is a fork that keeps Austral's interface-first modularity while replacing the handwritten interface/body pair with one `.kyo` source file, per-declaration visibility, package-visible `internal`, and deterministic module resolution.
 
 This chapter gives the source grammar shape. Later chapters define name resolution, type checking, ownership, borrowing, evaluation, layout, contracts, FFI, unsafe obligations, concurrency, and runtime failure. If this chapter admits a form, that does not make every use type-correct; it only says the parser can recognize the shape.
 
 > Trace: D86, D87, D155
 > Covers: Syntax admission is separate from semantic acceptance, and accepted Kyokai behavior is defined by the normative spec rather than by inherited implementation accidents.
 
-## Start Symbols
+## Start Symbol
 
 [Rikona Kurasaki / Mjoyufull]
-Kyokai has two source-file start symbols.
+Kyokai has one source-file start symbol.
 
 ```ebnf
-interface file = file docs, {import declaration}, module interface;
-body file = file docs, {pragma declaration}, {import declaration}, module body;
+source file = file docs, {pragma declaration}, {import declaration}, module;
 ```
 
-A `.kyo` file must match `interface file`. A `.kai` file must match `body file`. Imports are file-scope declarations. A source file must not contain more than one module declaration.
+A `.kyo` file must match `source file`. Imports are file-scope declarations and appear once per file. A source file must not contain more than one module declaration. `.kai` is not a handwritten source extension; a file presented with that extension, or with the inherited `.aui`/`.aum` extensions, is rejected with a diagnostic that names the single-file model.
 
-> Trace: D52, D78, D179
-> Covers: `.kyo` and `.kai` have distinct start symbols, imports are file-scope only, and Kyokai keeps one module per source file.
+> Trace: D52, D78, D179, D537
+> Covers: There is one `.kyo` start symbol, imports are file-scope only, Kyokai keeps one module per source file, and the `.kai` interface/body extensions are retired.
 
 `file docs` is zero or more `//!` documentation comments. Declaration documentation uses `///` immediately before the declaration it documents. Documentation comments do not change the grammar category of the item they document.
 
@@ -40,12 +39,11 @@ A `.kyo` file must match `interface file`. A `.kai` file must match `body file`.
 A module boundary is sealed. The reader can walk into a file, see its imports at the front, see the module name, and know exactly when the symbol table closes.
 
 ```ebnf
-module interface = "module", module name, "is", {interface declaration}, "seal", ";";
-module body = "module", "body", module name, "is", {body declaration}, "seal", ";";
+module = "module", module name, "is", {declaration}, "seal", ";";
 ```
 
-> Trace: D9, D52, D78
-> Covers: Kyokai modules use `module Name is ... seal;` and `module body Name is ... seal;`, with `seal;` as the module-boundary terminator.
+> Trace: D9, D52, D78, D537
+> Covers: A Kyokai module is `module Name is ... seal;` with `seal;` as the module-boundary terminator; the `module body Name is` header is retired.
 
 Kyokai import syntax has exactly three forms.
 
@@ -66,45 +64,31 @@ import item = identifier, ["as", identifier];
 ## Declarations
 
 [Rikona Kurasaki / Mjoyufull]
-Interface declarations are the surface another module can rely on. Body declarations are the module's own machinery. The grammar keeps those categories separate so visibility is not a rumor carried by convention.
+A module's declarations all live in one file, each with its visibility written on the front. The grammar puts the marker where the reader sees it, so the surface another module can rely on is never a rumor carried by convention. The compiler reads the markers and derives the importable interface; the author writes the contract once.
 
 ```ebnf
-interface declaration = declaration docs, ["internal"], interface item;
-interface item = constant declaration
-               | type alias declaration
-               | opaque type declaration
-               | extern type declaration
-               | record declaration
-               | bitrecord declaration
-               | union declaration
-               | capability declaration
-               | configuration rejection declaration
-               | function declaration
-               | typeclass declaration
-               | instance declaration
-               | generator declaration;
-
-body declaration = declaration docs, body item;
-body item = constant definition
-          | type alias declaration
-          | extern type declaration
-          | record declaration
-          | bitrecord declaration
-          | union declaration
-          | capability declaration
-          | configuration rejection declaration
-          | function definition
-          | typeclass declaration
-          | instance definition
-          | generator definition
-          | foreign block
-          | unsafe contract;
+declaration = declaration docs, [visibility], declaration item;
+visibility = "public" | "internal";
+declaration item = constant definition
+                 | type alias declaration
+                 | record declaration
+                 | bitrecord declaration
+                 | union declaration
+                 | extern type declaration
+                 | capability declaration
+                 | configuration rejection declaration
+                 | function definition
+                 | typeclass declaration
+                 | instance definition
+                 | generator definition
+                 | foreign block
+                 | unsafe contract;
 ```
 
-`internal` is legal only in `.kyo` interface files. A declaration with no `internal` marker in an interface is public. A declaration that exists only in a `.kai` body is private to that module. Module-level `var` is illegal.
+A declaration prefixed `public` is exported to importing packages. A declaration prefixed `internal` is visible only within the same package. A declaration with no visibility marker is module-private. `public` and `private` are reserved keywords; `internal` remains reserved. Writing `private` explicitly is a compile-time error that names the omit-the-marker rule. Because there is no second body file, top-level functions, constants, instances, and generators are always written as definitions; the bodyless `function declaration` shape survives only inside typeclass `method declaration` signatures and `foreign declaration` entries. Module-level `var` is illegal.
 
-> Trace: D17, D62, D78
-> Covers: Kyokai has public interface declarations, package-visible `internal` interface declarations, private body-only declarations, and no module-level mutable variables.
+> Trace: D17, D62, D78, D538
+> Covers: Kyokai writes visibility per declaration with a private default, reserves `public`/`private`/`internal`, requires top-level definitions to carry their bodies, and forbids module-level mutable variables.
 
 A declaration may carry a declaration-level `when` guard. A false guard makes the declaration semantically absent for the selected target. `when` guards are not statements and are not allowed inside function bodies.
 
@@ -118,35 +102,36 @@ guarded declaration suffix = ["when", expression];
 ## Constants, Types, Records, Unions, And Capabilities
 
 [Rikona Kurasaki / Mjoyufull]
-Top-level constants are immutable. They may be declared in an interface and defined in a body, or defined directly where the declaration category permits a definition.
+Top-level constants are immutable and defined where they are declared, since there is no separate body file to define them in later.
 
 ```ebnf
-constant declaration = "constant", identifier, ":", type, guarded declaration suffix, ";";
 constant definition = "constant", identifier, ":", type, ":=", expression, guarded declaration suffix, ";";
 type alias declaration = "type", "alias", type name, [generic parameters], ":=", type, guarded declaration suffix, ";";
-opaque type declaration = "type", type name, [generic parameters], ":", universe, guarded declaration suffix, ";";
 extern type declaration = "extern", "type", type name, guarded declaration suffix, ";";
 capability declaration = "capability", type name, guarded declaration suffix, ";";
 ```
 
-> Trace: D17, D24, D50, D61, D78, D255
-> Covers: Kyokai admits constants, aliases, opaque types, extern types, and sealed capability declarations while keeping capability constructors unforgeable.
+A type's representation is hidden with the `opaque` modifier on a `record` or `union` definition (see the record and union grammar below). `opaque` exports the type's nominal identity and universe while sealing its fields or variants outside the defining module. The standalone abstract `type Name : Universe;` interface form is retired: an exported type with a hidden representation is now written `public opaque record` or `public opaque union` in the one source file. `opaque` on a `type alias`, an `extern type`, a `bitrecord`, or a non-type declaration is a compile-time error.
+
+> Trace: D17, D24, D50, D61, D78, D255, D539
+> Covers: Kyokai admits constants defined in place, aliases, extern types, and sealed capability declarations, expresses representation hiding through the `opaque` record/union modifier, and keeps capability constructors unforgeable.
 
 Records have three layout classes: ordinary Kyokai records, C-ABI extern records, and byte-tight packed records. These are grammar choices, not backend hints.
 
 ```ebnf
 record declaration = record header, record body;
-record header = ["extern" | "packed"], "record", type name, [generic parameters], [":", universe];
+record header = [representation modifier], "record", type name, [generic parameters], [":", universe];
+representation modifier = "opaque" | "extern" | "packed";
 record body = "is", {field declaration}, "build", ";"
             | "(", single field, ")", ":", universe, ";";
 field declaration = declaration docs, identifier, ":", type, ";";
 single field = identifier, ":", type;
 ```
 
-The one-line record form is legal only for a single-field ordinary record. `extern record` and `packed record` use the block form so their layout boundary stays visible.
+The one-line record form is legal only for a single-field ordinary record. `extern record` and `packed record` use the block form so their layout boundary stays visible. The representation modifiers are mutually exclusive: `opaque` seals the representation outside the defining module, while `extern` and `packed` are ABI/layout modes whose representation is the contract, so `opaque extern record` and `opaque packed record` are rejected.
 
-> Trace: D35, D42, D109, D116, D196
-> Covers: Kyokai has `record`, `extern record`, and `packed record`; single-field records are the nominal wrapper mechanism; and record declarations close with `build;`.
+> Trace: D35, D42, D109, D116, D196, D539
+> Covers: Kyokai has `record`, `opaque record`, `extern record`, and `packed record`; the representation modifiers are mutually exclusive; single-field records are the nominal wrapper mechanism; and record declarations close with `build;`.
 
 `bitrecord` declares nominal fixed-width bit-position views over unsigned integer storage.
 
@@ -166,19 +151,21 @@ Bit numbers start at zero at the least-significant bit. Ranges are inclusive. Fi
 Unions declare named variants. A variant may carry no payload, one unnamed payload type, or named fields.
 
 ```ebnf
-union declaration = "union", type name, [generic parameters], [":", universe], "is", {union variant}, "build", ";";
+union declaration = ["opaque"], "union", type name, [generic parameters], [":", universe], "is", {union variant}, "build", ";";
 union variant = "case", constructor name, ";"
               | "case", constructor name, "(", type, ")", ";"
               | "case", constructor name, "is", {field declaration};
 ```
 
-> Trace: D47, D54, D65, D131
-> Covers: Kyokai sum types are named unions, have explicit variant payload forms, close with `build;`, and do not create tuple syntax.
+An `opaque union` exports its nominal identity and universe while sealing its variants and payloads outside the defining module, so external code cannot construct or pattern match it without an exported operation.
+
+> Trace: D47, D54, D65, D131, D539
+> Covers: Kyokai sum types are named unions, may be `opaque` to seal their variants, have explicit variant payload forms, close with `build;`, and do not create tuple syntax.
 
 ## Functions, Contracts, Typeclasses, And Instances
 
 [Rikona Kurasaki / Mjoyufull]
-A function signature is a small contract room: name, parameters, return type, generic obligations, value obligations, then the body if this file owns one.
+A function signature is a small contract room: name, parameters, return type, generic obligations, value obligations, then the body, which a top-level function always carries in its one source file.
 
 ```ebnf
 function declaration = ["receiver"], "function", identifier, [generic parameters], "(", [parameter list], ")", ":", type,
@@ -392,7 +379,7 @@ debug statement = "debug", expression, ";";
 ## Concurrency Statements
 
 [Rikona Kurasaki / Mjoyufull]
-Task syntax is built like a lit room at night: you can see where children start, what they carry, where the parent waits, and where thread creation can fail.
+Task syntax is built like a lit room at night: the source shows where children start, what they carry, where the parent waits, and where thread creation can fail.
 
 ```ebnf
 taskgroup statement = "taskgroup", "do", block, "join", ";";
@@ -569,7 +556,7 @@ generator header = "generator", type name, [generic parameters], "(", [parameter
 yield statement = "yield", expression, ";";
 ```
 
-`yield` is legal only inside a generator body. A generator declaration in an interface exposes the generator's source-level contract. The matching generator definition in a body creates the nominal linear iterator type and constructor function according to the generator chapter.
+`yield` is legal only inside a generator body. A `public` or `internal` generator definition exposes the generator's source-level contract in the derived interface, and that same definition creates the nominal linear iterator type and constructor function according to the generator chapter.
 
 > Trace: D32, D118, D193, D198, D249
 > Covers: Kyokai has named stackless pull generators with `yield`, nominal linear iterator types, explicit destruction for suspended state, and no general coroutine or async surface.

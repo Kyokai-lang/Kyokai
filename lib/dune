@@ -2,6 +2,8 @@
 (menhir
  (modules Parser))
 
+(include_subdirs unqualified)
+
 (library
  (name austral_core)
  (public_name austral.austral_core)

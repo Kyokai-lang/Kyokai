@@ -31,6 +31,8 @@ SOURCES := spec.md \
            src/toolchain/09-reproducibility-incremental-builds.md \
            src/toolchain/10-package-index-semver-releases-ci.md \
            src/toolchain/11-build-generation-and-playground.md \
+           src/toolchain/12-capability-deny-policy.md \
+           src/toolchain/13-application-integration-and-deployment.md \
            src/stdlib/00-stdlib-overview.md \
            src/stdlib/01-admission-contracts.md \
            src/stdlib/02-core-result-optional-display-error.md \
@@ -43,6 +45,7 @@ SOURCES := spec.md \
            src/stdlib/09-concurrency-primitives.md \
            src/stdlib/10-crypto-policy.md \
            src/stdlib/11-transitional-ffi-tracking.md \
+           src/stdlib/12-application-integration-contracts.md \
            src/rationale/00-rationale-index.md \
            src/rationale/01-language-design.md \
            src/rationale/02-syntax.md \
@@ -52,6 +55,7 @@ SOURCES := spec.md \
            src/rationale/06-concurrency.md \
            src/rationale/07-stdlib-philosophy.md \
            src/rationale/08-toolchain-philosophy.md \
+           src/rationale/09-backend-choice.md \
            src/appendices/a-license.md \
            src/appendices/b-decision-traceability.md \
            src/appendices/c-austral-differences.md \
@@ -63,6 +67,7 @@ PANDOC_FLAGS := --standalone --embed-resources --section-divs --table-of-content
 OUTPUT_PDF := spec.pdf
 OUTPUT_HTML := spec.html
 PDF_ENGINE ?= pdflatex
+PDF_ENGINE_NAME := $(notdir $(PDF_ENGINE))
 
 .PHONY: default all pdf html check-sources check-pdf-engine clean
 
@@ -75,16 +80,36 @@ pdf: check-pdf-engine $(OUTPUT_PDF)
 html: $(OUTPUT_HTML)
 
 check-sources:
-	@missing=0; \
+	@status=0; \
 	for source in $(SOURCES); do \
 		if [ ! -f "$$source" ]; then \
 			echo "missing source: $$source"; \
-			missing=1; \
+			status=1; \
 		fi; \
 	done; \
-	exit $$missing
+	listed=$$(mktemp); \
+	discovered=$$(mktemp); \
+	trap 'rm -f "$$listed" "$$discovered"' EXIT HUP INT TERM; \
+	printf '%s\n' $(filter src/%.md,$(SOURCES)) | LC_ALL=C sort > "$$listed"; \
+	find src -type f -name '*.md' -print | LC_ALL=C sort > "$$discovered"; \
+	duplicates=$$(uniq -d "$$listed"); \
+	if [ -n "$$duplicates" ]; then \
+		printf 'duplicate source entry: %s\n' $$duplicates; \
+		status=1; \
+	fi; \
+	unlisted=$$(comm -13 "$$listed" "$$discovered"); \
+	if [ -n "$$unlisted" ]; then \
+		printf 'unlisted source: %s\n' $$unlisted; \
+		status=1; \
+	fi; \
+	stale=$$(comm -23 "$$listed" "$$discovered"); \
+	if [ -n "$$stale" ]; then \
+		printf 'listed source outside current src tree: %s\n' $$stale; \
+		status=1; \
+	fi; \
+	exit $$status
 
-$(OUTPUT_HTML): $(SOURCES)
+$(OUTPUT_HTML): Makefile $(SOURCES) | check-sources
 	pandoc $(SOURCES) $(PANDOC_FLAGS) -t html -o $(OUTPUT_HTML)
 
 check-pdf-engine:
@@ -92,9 +117,17 @@ check-pdf-engine:
 		echo "PDF engine '$(PDF_ENGINE)' not found."; \
 		echo "Run 'make html' for the default HTML build, install $(PDF_ENGINE), or pass PDF_ENGINE=<engine> to make pdf."; \
 		exit 1; \
-	}
+	}; \
+	case "$(PDF_ENGINE_NAME)" in \
+		pdflatex|xelatex|lualatex) \
+			if command -v kpsewhich >/dev/null 2>&1 && ! kpsewhich "$(PDF_ENGINE_NAME).fmt" >/dev/null 2>&1; then \
+				echo "PDF engine '$(PDF_ENGINE)' is installed, but its TeX format/configuration is unavailable."; \
+				echo "Repair the TeX installation, run 'make html', or pass a working PDF_ENGINE=<engine>."; \
+				exit 1; \
+			fi ;; \
+	esac
 
-$(OUTPUT_PDF): $(SOURCES)
+$(OUTPUT_PDF): Makefile $(SOURCES) | check-sources
 	pandoc $(SOURCES) $(PANDOC_FLAGS) -t latex --pdf-engine=$(PDF_ENGINE) -o $(OUTPUT_PDF)
 
 clean:

@@ -6,6 +6,8 @@ The Kyokai specification has now been extracted through Phase 15. The current no
 
 The inherited compiler evidence below is still useful, but it must not be read as proof that the current compiler implements Kyokai. Rows marked `Legacy Verified` describe inherited Austral behavior that was checked against inherited Austral source or tests. A Kyokai row becomes `Verified` only after the extracted Kyokai rule is checked against current Kyokai compiler/source paths and tests.
 
+The active Phase 3 scaffold now implements the D537-D539 source prefix: one `.kyo` source role, one module parser start symbol, retired `.kai` rejection, `public`/`internal`/private-by-default declaration markers, `opaque` record/union markers, single-source package discovery, and derived public/`internal` interface facts. These are implementation-scaffold facts, not full frontend or conformance claims. The inherited rows below remain migration evidence for the code path that still needs replacement.
+
 ## Legend
 
 | Status | Meaning |
@@ -19,6 +21,17 @@ The inherited compiler evidence below is still useful, but it must not be read a
 | **N/A** | No compiler evidence is applicable for the row. |
 | **Defect** | Source evidence contains an apparent bug or internally inconsistent implementation. |
 | **Gap** | Open item: spec, compiler, trace, or tests are incomplete. |
+
+## Current Phase 3 Kyokai frontend evidence
+
+| Spec | Claim | Compiler evidence | Tests | Status |
+|------|-------|-------------------|-------|--------|
+| D537 / language modules | One handwritten `.kyo` file owns a module; `.kai` and `module body` are retired. | `KyokaiSourceFile`, `KyokaiSurfaceParser`, `KyokaiPackageSource` | source-role, parser, package-source host tests; implementation-gated fixtures | Reviewed |
+| D538 / visibility | `public` and `internal` are explicit; an unmarked declaration is private; explicit `private` is rejected. | `KyokaiSurfaceParser.declaration_visibility` | surface-parser host tests and accepted source fixture | Reviewed |
+| D539 / opacity | `opaque` is accepted only on ordinary record and union definitions in the current parser slice. | `KyokaiSurfaceParser.declaration_opaque` | surface-parser host tests | Reviewed |
+| D79 / derived interface prefix | Package loading derives public and `internal` declarations and excludes private declarations from the future `.koi` input surface. | `KyokaiPackageSource.derived_interface_declarations` | package-source host tests and package discovery fixture | Reviewed |
+
+`Reviewed` here means the isolated scaffold and supporting tests match the cited slice. Final AST construction, semantic export/opacity checks, `.koi` serialization, inherited-loader replacement, full diagnostic identity, and conformance-backed execution remain gaps.
 
 Columns: **Spec** | **Claim (summary)** | **Compiler evidence** | **Tests** | **Status**
 
@@ -59,54 +72,59 @@ Columns: **Spec** | **Claim (summary)** | **Compiler evidence** | **Tests** | **
 31. [src/toolchain/09-reproducibility-incremental-builds.md](src/toolchain/09-reproducibility-incremental-builds.md)
 32. [src/toolchain/10-package-index-semver-releases-ci.md](src/toolchain/10-package-index-semver-releases-ci.md)
 33. [src/toolchain/11-build-generation-and-playground.md](src/toolchain/11-build-generation-and-playground.md)
-34. [src/stdlib/00-stdlib-overview.md](src/stdlib/00-stdlib-overview.md)
-35. [src/stdlib/01-admission-contracts.md](src/stdlib/01-admission-contracts.md)
-36. [src/stdlib/02-core-result-optional-display-error.md](src/stdlib/02-core-result-optional-display-error.md)
-37. [src/stdlib/03-allocators-and-memory-containers.md](src/stdlib/03-allocators-and-memory-containers.md)
-38. [src/stdlib/04-text-bytes-paths-and-strings.md](src/stdlib/04-text-bytes-paths-and-strings.md)
-39. [src/stdlib/05-collections.md](src/stdlib/05-collections.md)
-40. [src/stdlib/06-iterators-and-generators.md](src/stdlib/06-iterators-and-generators.md)
-41. [src/stdlib/07-math-and-numerics.md](src/stdlib/07-math-and-numerics.md)
-42. [src/stdlib/08-io-files-env-process-time-random.md](src/stdlib/08-io-files-env-process-time-random.md)
-43. [src/stdlib/09-concurrency-primitives.md](src/stdlib/09-concurrency-primitives.md)
-44. [src/stdlib/10-crypto-policy.md](src/stdlib/10-crypto-policy.md)
-45. [src/stdlib/11-transitional-ffi-tracking.md](src/stdlib/11-transitional-ffi-tracking.md)
-46. [src/rationale/00-rationale-index.md](src/rationale/00-rationale-index.md)
-47. [src/rationale/01-language-design.md](src/rationale/01-language-design.md)
-48. [src/rationale/02-syntax.md](src/rationale/02-syntax.md)
-49. [src/rationale/03-error-handling-and-tpoe.md](src/rationale/03-error-handling-and-tpoe.md)
-50. [src/rationale/04-linear-resources.md](src/rationale/04-linear-resources.md)
-51. [src/rationale/05-capabilities.md](src/rationale/05-capabilities.md)
-52. [src/rationale/06-concurrency.md](src/rationale/06-concurrency.md)
-53. [src/rationale/07-stdlib-philosophy.md](src/rationale/07-stdlib-philosophy.md)
-54. [src/rationale/08-toolchain-philosophy.md](src/rationale/08-toolchain-philosophy.md)
-55. [src/appendices/a-license.md](src/appendices/a-license.md)
-56. [src/appendices/b-decision-traceability.md](src/appendices/b-decision-traceability.md)
-57. [src/appendices/c-austral-differences.md](src/appendices/c-austral-differences.md)
-58. [src/appendices/d-formalization-roadmap.md](src/appendices/d-formalization-roadmap.md)
-59. [src/appendix-a.md](src/appendix-a.md)
+34. [src/toolchain/12-capability-deny-policy.md](src/toolchain/12-capability-deny-policy.md)
+35. [src/toolchain/13-application-integration-and-deployment.md](src/toolchain/13-application-integration-and-deployment.md)
+36. [src/stdlib/00-stdlib-overview.md](src/stdlib/00-stdlib-overview.md)
+37. [src/stdlib/01-admission-contracts.md](src/stdlib/01-admission-contracts.md)
+38. [src/stdlib/02-core-result-optional-display-error.md](src/stdlib/02-core-result-optional-display-error.md)
+39. [src/stdlib/03-allocators-and-memory-containers.md](src/stdlib/03-allocators-and-memory-containers.md)
+40. [src/stdlib/04-text-bytes-paths-and-strings.md](src/stdlib/04-text-bytes-paths-and-strings.md)
+41. [src/stdlib/05-collections.md](src/stdlib/05-collections.md)
+42. [src/stdlib/06-iterators-and-generators.md](src/stdlib/06-iterators-and-generators.md)
+43. [src/stdlib/07-math-and-numerics.md](src/stdlib/07-math-and-numerics.md)
+44. [src/stdlib/08-io-files-env-process-time-random.md](src/stdlib/08-io-files-env-process-time-random.md)
+45. [src/stdlib/09-concurrency-primitives.md](src/stdlib/09-concurrency-primitives.md)
+46. [src/stdlib/10-crypto-policy.md](src/stdlib/10-crypto-policy.md)
+47. [src/stdlib/11-transitional-ffi-tracking.md](src/stdlib/11-transitional-ffi-tracking.md)
+48. [src/stdlib/12-application-integration-contracts.md](src/stdlib/12-application-integration-contracts.md)
+49. [src/rationale/00-rationale-index.md](src/rationale/00-rationale-index.md)
+50. [src/rationale/01-language-design.md](src/rationale/01-language-design.md)
+51. [src/rationale/02-syntax.md](src/rationale/02-syntax.md)
+52. [src/rationale/03-error-handling-and-tpoe.md](src/rationale/03-error-handling-and-tpoe.md)
+53. [src/rationale/04-linear-resources.md](src/rationale/04-linear-resources.md)
+54. [src/rationale/05-capabilities.md](src/rationale/05-capabilities.md)
+55. [src/rationale/06-concurrency.md](src/rationale/06-concurrency.md)
+56. [src/rationale/07-stdlib-philosophy.md](src/rationale/07-stdlib-philosophy.md)
+57. [src/rationale/08-toolchain-philosophy.md](src/rationale/08-toolchain-philosophy.md)
+58. [src/rationale/09-backend-choice.md](src/rationale/09-backend-choice.md)
+59. [src/appendices/a-license.md](src/appendices/a-license.md)
+60. [src/appendices/b-decision-traceability.md](src/appendices/b-decision-traceability.md)
+61. [src/appendices/c-austral-differences.md](src/appendices/c-austral-differences.md)
+62. [src/appendices/d-formalization-roadmap.md](src/appendices/d-formalization-roadmap.md)
+63. [src/appendix-a.md](src/appendix-a.md)
 
 ## Current Kyokai extraction summary
 
 | Spec Family | Current Spec Locations | Compiler Evidence | Tests | Status |
 | --- | --- | --- | --- | --- |
 | Language specification | `src/language/00-introduction.md` through `src/language/19-examples.md` | Inherited Austral compiler still needs rule-by-rule Kyokai audit. | Planned conformance suites. | Spec Extracted |
-| Toolchain specification | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/11-build-generation-and-playground.md` | Current inherited CLI/build behavior is not yet a Kyokai toolchain implementation claim. | Planned command, manifest, artifact, diagnostic, formatter, docs, LSP, audit, reproducibility, and release tests. | Spec Extracted |
-| Standard-library contract specification | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/11-transitional-ffi-tracking.md` | Inherited Austral stdlib is reference evidence only; Kyokai `Kyokai.*` APIs still need admission and implementation. | Planned stdlib admission, edge-case, property/fuzz, oracle/vector, and platform tests. | Spec Extracted |
-| Rationale | `src/rationale/00-rationale-index.md` through `src/rationale/08-toolchain-philosophy.md` | Compiler evidence not applicable except where rationale points to normative chapters. | N/A. | Reviewed |
+| Toolchain specification | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/13-application-integration-and-deployment.md` | Current inherited CLI/build behavior is not yet a Kyokai toolchain implementation claim. | Planned command, manifest, artifact, diagnostic, formatter, docs, LSP, audit, reproducibility, generation, migration, adapter, packaging, browser/mobile, deployment, capability deny-policy, and release tests. | Spec Extracted |
+| Standard-library contract specification | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/12-application-integration-contracts.md` | Inherited Austral stdlib is reference evidence only; Kyokai `Kyokai.*` APIs still need admission and implementation. | Planned stdlib admission, edge-case, property/fuzz, oracle/vector, platform, framework, server, terminal, mobile, embedded, GPU, and data integration tests. | Spec Extracted |
+| Rationale | `src/rationale/00-rationale-index.md` through `src/rationale/09-backend-choice.md` | Compiler evidence not applicable except where rationale points to normative chapters. | N/A. | Reviewed |
 | Appendices | `src/appendices/a-license.md` through `src/appendices/d-formalization-roadmap.md` | Traceability and roadmap documents, not compiler implementation. | N/A except future proof artifact checks. | Reviewed |
 | Austral source material and GFDL text | Old inherited chapter files were replaced by Kyokai chapters; `src/appendix-a.md` carries the full GFDL text. | Source provenance is recorded in `src/appendices/a-license.md` and `src/appendices/c-austral-differences.md`. | Informative |
 
-## Post-D525 normative integration map
+## Post-D557 normative integration map
 
-The accepted D396-D525 surface is integrated into normative chapters by behavior family. This table records the rewritten homes so later implementation and conformance work can cite the actual contract instead of an appended decision cluster.
+The accepted D396-D557 surface is integrated into normative chapters by behavior family. This table records the rewritten homes so later implementation and conformance work can cite the actual contract instead of an appended decision cluster.
 
 | Behavior family | Integrated spec homes | Extracted mechanics |
 | --- | --- | --- |
 | CLI, reporting, cache, and cleanup | `src/toolchain/03-cli.md`, `src/toolchain/09-reproducibility-incremental-builds.md` | Versioned human/JSON lanes, prompt and network rules, cache identities, repair, corruption handling, `kyokai clean`, `--outputs`, `--all`, `clean docs`, and separately scoped `--global` cleanup. |
+| Capability deny policy | `src/toolchain/12-capability-deny-policy.md`, `src/toolchain/03-cli.md`, `src/toolchain/01-manifest-package-workspace.md`, `src/toolchain/08-docs-lsp-audit.md`, `src/toolchain/09-reproducibility-incremental-builds.md`, `src/language/14-capabilities-and-authority.md` | Deny-only authority policy from toolchain defaults, user/global config, manifests, and `--deny-capability`; strictest policy wins, denied package/target/generator/test/docs/audit/publish/execution requirements fail with diagnostics, and no policy grants or changes source-level capabilities. |
 | Packages, lockfiles, and KBI | `src/toolchain/01-manifest-package-workspace.md`, `src/toolchain/02-module-resolution-and-koi.md` | Feature-set package instances, source hashes, lockfile modes, offline resolution, runnable targets, KBI schema, edition boundaries, compressed transport, and shared KBI reader rules. |
 | Analysis Server, docs, and audit | `src/toolchain/05-diagnostics.md`, `src/toolchain/08-docs-lsp-audit.md`, `src/toolchain/10-package-index-semver-releases-ci.md` | Stable diagnostic lifecycle, fix safety classes, no separate lint command, Analysis Server lanes, editor bundles, package-root committed `kdocs/`, compact docs-index projections, verified raw-file retrieval, docs cache, audit categories, SemVer domains, advisories, and release verification. |
-| Build generation and artifact emission | `src/toolchain/04-build-profiles-targets-linking.md`, `src/toolchain/11-build-generation-and-playground.md`, `src/language/17-memory-layout-and-backend-contract.md` | Native tool discovery, target records, strict float policy, CPU dispatch, requested `c_output/`, generator sandbox records, generation drift checks, bindgen wrapper kits, standalone compiler inputs, and development-service boundaries. |
+| Build generation and artifact emission | `src/toolchain/04-build-profiles-targets-linking.md`, `src/toolchain/11-build-generation-and-playground.md`, `src/language/17-memory-layout-and-backend-contract.md`, `src/rationale/09-backend-choice.md` | One generated-C emission path, admitted C-toolchain discovery, target records, strict float policy, CPU dispatch, requested `c_output/`, source maps, generator sandbox records, generation drift checks, bindgen wrapper kits, standalone compiler inputs, and development-service boundaries. |
 | Linear ownership ergonomics | `src/language/05-declarations.md`, `src/language/11-linearity-borrowing-and-regions.md`, `src/stdlib/03-allocators-and-memory-containers.md`, `src/stdlib/05-collections.md`, `src/stdlib/06-iterators-and-generators.md` | Validated wrappers, parameter roles, `build` expressions, the closed D348 ownership-state set, cleanup reservations layered over ownership state, read-only access, reborrow joins, graph owners, generational handles, hole-free extraction, drain finalization, early release diagnostics, and named recovery payloads. |
 | Implicit completions and elaboration | `src/language/12-implicit-completions-and-elaboration.md` | Closed per-entry registry IDs, local static contexts, inserted nodes, evidence obligations, stable diagnostic labels, `.koi` recording rules, spec homes, forbidden effects, and checker-visible lowering. |
 | Conditional instances and materialization | `src/language/07-generics-and-typeclasses.md` | Explicit conditional instances, selected-graph coherence, overlap witnesses, unsafe-origin instance audit, and semantics-preserving code-size controls. |
@@ -115,6 +133,9 @@ The accepted D396-D525 surface is integrated into normative chapters by behavior
 | Text, bytes, paths, and static literals | `src/language/02-lexical-syntax.md`, `src/language/18-built-ins.md`, `src/stdlib/04-text-bytes-paths-and-strings.md`, `src/stdlib/05-collections.md` | Plain escaped, raw multiline, and explicit `static "..."` literals produce non-allocating `StaticString`; `literal.toStringIn(allocator)` creates owned strings; `TextView[R]` is the region-bound immutable borrowed UTF-8 view; bytes, C strings, OS strings, paths, Unicode-versioned algorithms, and borrowed text-key lifetimes remain explicit. |
 | Structured codecs | `src/stdlib/04-text-bytes-paths-and-strings.md`, `src/stdlib/01-admission-contracts.md`, `src/toolchain/11-build-generation-and-playground.md` | Named strict/permissive/streaming/canonical profiles, explicit allocators and `CodecBudget`, duplicate-key and numeric policy, streaming recovery state, unknown-field behavior, canonical output, schema metadata, generator provenance, and corpus/fuzz/limit tests. |
 | Numeric admission | `src/stdlib/07-math-and-numerics.md`, `src/language/18-built-ins.md` | Checked arithmetic families, CPU feature facts, stable numeric admission records, independent oracles, vectors, target caveats, and transitional-wrapper evidence. |
+| Application/framework contracts | `src/stdlib/12-application-integration-contracts.md`, `src/language/16-unsafe-ffi-and-abi.md`, `src/toolchain/08-docs-lsp-audit.md` | Owner-qualified handles, scoped views, heterogeneous unions/registries/opaque boundaries, existing callback classes, deterministic fakes, and integration admission rules. |
+| Runtime datasets and application domains | `src/stdlib/12-application-integration-contracts.md`, `src/stdlib/04-text-bytes-paths-and-strings.md`, `src/stdlib/08-io-files-env-process-time-random.md`, `src/stdlib/10-crypto-policy.md` | Dataset provider identity and update authority plus browser, server, CLI/TUI, native, mobile, embedded, GPU/ML, numerical, and data ownership contracts. |
+| Migration, adapters, packaging, and deployment | `src/toolchain/13-application-integration-and-deployment.md`, `src/toolchain/03-cli.md`, `src/toolchain/05-diagnostics.md`, `src/toolchain/10-package-index-semver-releases-ci.md`, `src/toolchain/11-build-generation-and-playground.md`, `src/toolchain/12-capability-deny-policy.md` | Generated-API projection, preview-first edition migration, least-authority explanation, typed foreign adapters, packaging/signing plans, browser/mobile build lanes, explicit dataset updates, OCI/Kubernetes/serverless/Nix deployment plans, and plan/apply authority separation. |
 
 The workflow and infrastructure-only D-points remain tracked in `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, and `docs/infrastructure/services.md`. They do not invent language semantics.
 
@@ -137,19 +158,19 @@ flowchart LR
   parseCombine --> return0 --> desugar --> extract --> augment --> linear --> bodies --> mono --> codegen --> render
 ```
 
-(`parse_and_combine` in [`Compiler.ml`](../lib/Compiler.ml) parses interface/body, appends pervasive imports, and runs `CombiningPass.combine`.)
+(`parse_and_combine` in [`Compiler.ml`](../lib/Compiler.ml) is the inherited path: it parses an interface/body pair, appends pervasive imports, and runs `CombiningPass.combine`. D537 requires this path to be replaced for Kyokai source.)
 
 ## Phase 1 - Lexer / parser / CST
 
 | Spec | Claim | Compiler evidence | Tests | Status |
 |------|--------|---------------------|-------|--------|
-| 2.syntax section modules | Module interface ends `end module.`; body ends `end module body.` | `Parser.mly`: `module_int` / `module_body` (`END MODULE PERIOD`, `END MODULE BODY PERIOD`) | Parser tests | Legacy Verified |
+| inherited 2.syntax section modules | Inherited module interface ends `end module.`; inherited body ends `end module body.` | `Parser.mly`: `module_int` / `module_body` (`END MODULE PERIOD`, `END MODULE BODY PERIOD`) | Parser tests | Legacy Verified |
 | 2.syntax section comments | Line comments `--` ... newline or EOF | `Lexer.mll`: `comment` rule | - | Legacy Verified |
 | 2.syntax section literals | Decimal / hex `#x` / bin `#b` / oct `#o`; `'` digit separators; float `E`/`e` | `Lexer.mll`: `dec_constant`, `hex_constant`, ...; `Parser.mly`: `int_constant` / `float_constant` | `ExpressionParserTest.ml` | Legacy Verified |
 | 2.syntax section literals | String / triple-string; char escapes limited | `Lexer.mll`: `read_string`, `read_triple_string`, `char_constant` | - | Legacy Verified |
 | 2.syntax section imports | Empty import lists parse | `Parser.mly`: `separated_list(COMMA, imported_symbol)` in `import_stmt` | - | Legacy Verified |
 | 2.syntax section functions | Empty function body parses as empty block | `Parser.mly`: `function_def` uses `body=block?` | FFI examples | Legacy Verified |
-| 2.syntax section module body | Module-level pragmas appear before imports and `module body` | `Parser.mly`: `docstringopt pragmas=pragma* imports=import_stmt* MODULE BODY` | `test-programs/*` unsafe modules | Legacy Verified |
+| inherited 2.syntax section module body | Inherited module-level pragmas appear before imports and `module body` | `Parser.mly`: `docstringopt pragmas=pragma* imports=import_stmt* MODULE BODY` | `test-programs/*` unsafe modules | Legacy Verified |
 | 2.syntax EBNF | Not every production maps 1:1 to Menhir | Informative abstraction | - | Informative |
 
 ### Phase 1 detail: docstrings
@@ -264,7 +285,7 @@ Optional sibling site: replay the same **Phase 1-5** rows against `_spec/*.md`. 
 ## Open implementation and conformance gaps after extraction
 
 1. **Kyokai compiler audit**: inherited Austral compiler evidence must be replayed against the extracted Kyokai language chapters before any row becomes `Verified`.
-2. **Kyokai conformance suites**: parser, checker, linearity, capability, unsafe/FFI, backend, toolchain, and stdlib tests still need paths and status rows.
+2. **Kyokai conformance suites**: parser, checker, linearity, capability, unsafe/FFI, generated-C/C-toolchain, toolchain, and stdlib tests still need paths and status rows.
 3. **Stdlib admission records**: `Kyokai.*` modules need implementation paths, admission records, edge-case tests, oracle/vector tests where relevant, and transitional FFI records.
 4. **Toolchain behavior**: `kyokai` CLI, package manager, `.koi`, formatter, docs, LSP, audit, build output/cache layout, and release commands need implementation evidence and tests.
 5. **Formal proof**: `src/appendices/d-formalization-roadmap.md` records the proof obligation; the `lambda_K-seq` paper proof is still a future artifact.

@@ -1,5 +1,5 @@
 BIN := austral
-SRC := lib/*.ml lib/*.mli lib/*.mll lib/*.mly lib/dune bin/dune bin/austral.ml lib/BuiltInModules.ml
+SRC := $(shell find lib bin toolchain -type f \( -name '*.ml' -o -name '*.mli' -o -name '*.mll' -o -name '*.mly' -o -name 'dune' -o -name '*.py' \)) lib/BuiltInModules.ml
 PREFIX ?= /usr/local
 
 .PHONY: all
@@ -35,8 +35,16 @@ gate-b-model:
 
 .PHONY: proofstatus
 proofstatus:
-	python3 tools/check_prooftrace.py --write
+	python3 toolchain/prooftrace/check_prooftrace.py --write
 
 .PHONY: check-prooftrace
 check-prooftrace:
-	python3 tools/check_prooftrace.py --check
+	python3 toolchain/prooftrace/check_prooftrace.py --check
+
+.PHONY: check-conformance-fixtures
+check-conformance-fixtures:
+	python3 toolchain/conformance/check_fixtures.py --check
+
+.PHONY: run-conformance-fixtures
+run-conformance-fixtures: check-conformance-fixtures
+	dune exec --display=quiet ./toolchain/conformance/stage_runner/KyokaiConformanceStage.exe -- --check

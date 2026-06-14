@@ -39,4 +39,4 @@ Kyokai-owned replacement files should use the SPDX identifiers above. See `LICEN
 - Full GPLv3 text: `COPYING` and `LICENSES/GPL-3.0-or-later.txt`
 - GCC Runtime Library Exception 3.1 text: `COPYING.RUNTIME` and `LICENSES/GCC-exception-3.1.txt`
 
-Before a public legal release, verify source headers, generated manifests, packaged artifacts, and any Kyokai-specific runtime exception wording with legal review.
+Public legal releases include legal review of source headers, generated manifests, packaged artifacts, and Kyokai-specific runtime exception wording.

@@ -157,7 +157,7 @@ Compiler-integrated diagnostics report a lock guard that crosses a blocking call
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-Kyokai wants concurrency you can audit from the signature and the cleanup path. The task transfer is named. The channel drain is named. The lock guard is linear. The atomic order is written where the operation happens.
+Kyokai requires concurrency that can be audited from the signature and the cleanup path. The task transfer is named. The channel drain is named. The lock guard is linear. The atomic order is written where the operation happens.
 
 > Trace: D90-D101, D146, D183-D184, D212, D436, D447-D448, D493, D498
 > Covers: Concurrency primitives expose transfer, cleanup, blocking, ordering, fairness, and authority-sharing behavior.

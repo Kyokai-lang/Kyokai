@@ -129,7 +129,7 @@ Kyokai preserves the core invariants that make Austral what it is. These are not
 - **No variable shadowing**. No uninitialized variables. No global mutable state.
 - **Second-class references**. References (`&[T]` and `&![T]`) are parameterized by a region that exists only in the lexical scope of the borrow. The type of an escaped reference literally cannot be written — references are unforgeable and unexportable by construction.
 - **Explicit function signatures and one-direction typing**. Function signatures remain fully annotated; types flow in one direction with **no Hindley–Milner** inference. Locals may use **`let name := expr`** only when the RHS already fixes exactly one type (**D46**, tautology rule **D87**) — not general local type inference.
-- **Module system with interface/body split**. Public API is declared in the interface file; implementation is in the body file.
+- **Interface-first modularity**. A module's public surface is a checked contract other code can trust before the private work is visible. Kyokai keeps this idea but derives the contract from one `.kyo` source file instead of a handwritten interface/body pair (**D537**).
 
 Austral's 11 linearity checking rules are preserved exactly. The borrow checker works the same way. The capability system works the same way. The fundamental safety story is unchanged.
 
@@ -141,7 +141,7 @@ Beyond what Austral provides, Kyokai makes explicit commitments that shape the e
 
 **RIIK (Rewrite-It-In-Kyokai) and pure Kyokai stdlib (D64)**: Per **D64**, pure Kyokai covers computation (math, strings, collections, algorithms); OS interaction stays behind thin syscall FFI and capability wrappers (**D20**), not a hidden libc layer for those domains. No C stdlib dependency for core algorithms. This keeps the stdlib auditable, portable, and subject to linear type enforcement.
 
-**1:1 OS thread model (D164)**: Kyokai uses a 1:1 model — one Kyokai task maps to one OS thread. No green threads, no goroutine-style scheduling. High-concurrency programs spawn real OS threads and use the concurrency primitives for synchronization. This keeps the mental model simple: when you call a blocking operation, a real OS thread blocks.
+**1:1 OS thread model (D164)**: Kyokai uses a 1:1 model — one Kyokai task maps to one OS thread. No green threads, no goroutine-style scheduling. High-concurrency programs spawn real OS threads and use the concurrency primitives for synchronization. This keeps the mental model simple: a blocking operation blocks a real OS thread.
 
 **Explicit allocator model (D44)**: Memory allocation requires an explicit allocator parameter. The global heap is not implicit. Functions that allocate take `allocator: Allocator` as a parameter. This makes allocation visible, auditable, and controllable.
 
@@ -187,7 +187,7 @@ d9 — `fi` / `qed` terminators vs Austral `end if` / `end` in the paired exampl
 
 **Austral**: Every block ends with `end` plus the construct name: `end if;`, `end for;`, `end while;`, `end case;`, `end;` (for functions), `end module body.`
 
-**Kyokai**: Two categories of terminators that tell you what ended:
+**Kyokai**: Two categories of terminators that identify what ended:
 
 **Category 1 — Reversed keywords** (Algol 68 style, for pure control flow):
 
@@ -207,7 +207,7 @@ d9 — `fi` / `qed` terminators vs Austral `end if` / `end` in the paired exampl
 | Type defs   | `record/union ... is`  | `build;`    | Type definition constructed          |
 | Typeclasses | `typeclass ... is`     | `spec;`     | Contract/specification declared      |
 | Borrows     | `borrow ... do`        | `drop;`     | Reference is dropped                 |
-| Modules     | `module body ... is`   | `seal;`     | Module symbol table sealed           |
+| Modules     | `module ... is`        | `seal;`     | Module symbol table sealed           |
 | FFI blocks  | `foreign "C" is`       | `mon;`      | Foreign gateway (門) closed          |
 | `select`    | `select … when … do`   | `pick;`     | Multi-channel wait boundary (not `esac`) |
 | Task groups | `taskgroup … do`       | `join;`     | Structured join / borrow capture to `join` |
@@ -287,7 +287,7 @@ d56 — limited explicit precedence; bit/shift/rotate mixes with arithmetic stil
 
 #### Operator Precedence
 
-**Austral**: Flat expression grammar. ALL binary expressions deeper than one level must be parenthesized. `a + b * c` is a parse error — you must write `a + (b * c)`.
+**Austral**: Flat expression grammar. ALL binary expressions deeper than one level must be parenthesized. `a + b * c` is a parse error; the accepted spelling is `a + (b * c)`.
 
 **Kyokai**: Small explicit precedence table. Standard mathematical precedence applies. Bit operations and logical operations still require parentheses when mixed with arithmetic.
 
@@ -297,9 +297,9 @@ d56 — limited explicit precedence; bit/shift/rotate mixes with arithmetic stil
 
 **Austral**: `.aui` (interface) and `.aum` (body/module).
 
-**Kyokai**: `.kyo` (interface) and `.kai` (body/implementation), per **D52** (normative extension pair under **D78**'s deterministic module-root mapping).
+**Kyokai**: one `.kyo` source file per module, per **D52** as amended by **D537** (deterministic module-root mapping under **D78**). The compiler derives the importable interface into a generated `.koi` artifact.
 
-The interface declares public API. The body provides implementations plus private declarations. This split is preserved exactly — only the file extensions change.
+Austral's two handwritten files collapse into one. A single `.kyo` file holds the public API and the private implementation together; `public` and `internal` markers state what leaves the module, and the compiler emits the trustable interface as `.koi` rather than requiring a second handwritten copy.
 
 ### 2.5 Semicolons
 
@@ -812,7 +812,7 @@ d6 — anonymous-by-default `&[T]` / `&![T]` signatures vs explicit `generic [R:
 
 ### 4.2 Auto-Reborrow
 
-**Austral**: When passing a mutable borrow to another function, you must manually dereference and re-borrow with `&~`:
+**Austral**: Passing a mutable borrow to another function requires manual dereference and reborrow with `&~`:
 
 ```austral
 -- Austral: repeated mutable-borrow forwarding requires explicit &~ at every call
@@ -1164,24 +1164,20 @@ Tier 1 selection happens before module graph construction. A false `when`-guarde
 
 **Austral**: `.aui` (interface) + `.aum` (body). Module declaration: `module Foo is ... end module.` / `module body Foo is ... end module body.`
 
-**Kyokai**: `.kyo` (interface) + `.kai` (body). Module declaration: `module Foo is ... seal;` / `module body Foo is ... seal;`
+**Kyokai**: one `.kyo` source file per module. Module declaration: `module Foo is ... seal;`. There is no `module body` header and no second file — visibility markers carry the boundary, and the compiler derives the interface into `.koi`.
 
 ```kyokai
-// Foo.kyo (interface)
+// Foo.kyo — the whole module
 module Foo is
-    function bar(x: Int32): Int32;
-seal;
-
-// Foo.kai (body)
-module body Foo is
-    function bar(x: Int32): Int32 is
+    public function bar(x: Int32): Int32 is
         return x + 1;
     qed;
 seal;
 ```
 **D-index**
 d9 — `seal` / `qed` terminators vs `end module.` / `end module body`.
-d52 — official `.kyo` / `.kai` extensions paired with **D78**'s deterministic module-root mapping.
+d52 — module-root mapping under **D78**, amended by **D537** to one `.kyo` source file.
+d537 — single-file module model: `module body` and the `.kai` extension are retired; the interface is derived into `.koi`.
 
 ### 6.2 Package System
 
@@ -1213,17 +1209,18 @@ d224 — `[generate]`-style build steps where shown in §11.13 examples.
 
 **Austral**: Module-level public/private only. Types can be opaque, public, or private.
 
-**Kyokai**: Three-level visibility — `public`, `internal`, and `private`:
+**Kyokai**: per-declaration visibility with three levels — `public`, `internal`, and private-by-default:
 
 ```kyokai
-public function apiCall(...);        // visible to all importers
-internal function sharedHelper(...); // visible within this package only
-// private is default for items in .kai files
+public function apiCall(...) is ... qed;        // visible to all importers
+internal function sharedHelper(...) is ... qed; // visible within this package only
+function localHelper(...) is ... qed;           // unmarked: module-private
 ```
 **D-index**
-d17 — `public` / `internal` / `private` visibility lattice.
+d17 — `public` / `internal` / private visibility lattice (amended by **D538**).
+d538 — visibility is marked per declaration; the unmarked default is module-private, and writing `private` explicitly is a compile-time error.
 
-`internal` enables shared helpers between sibling modules without exposing them as public API. The workspace boundary does not affect visibility — `internal` is package-visible, never workspace-visible.
+A `public` declaration leaves the package; an `internal` declaration is package-visible and lets sibling modules share helpers without exposing public API; an unmarked declaration is module-private and is the in-file replacement for Austral's body-only helper. `private` is a reserved keyword precisely so the compiler can reject it and point at the omit-the-marker rule. The workspace boundary does not affect visibility — `internal` is package-visible, never workspace-visible. Representation hiding is a separate axis: an `opaque record`/`opaque union` exports its name while keeping its fields private (**D539**).
 
 ---
 
@@ -1254,7 +1251,7 @@ d129 — `old(expr)` only for pure entry-state `Free` snapshots in `ensure`.
 - Always checked — no build profile strips them.
 - Failed contracts are TPOE (program terminates).
 - No type invariants.
-- Contracts appear in `.kyo` interface files — they are part of the public API contract.
+- Contracts on a `public` declaration are recorded in the derived `.koi` interface — they are part of the public API contract.
 
 ### 7.2 Result Type
 
@@ -1272,7 +1269,7 @@ build;
 d24 — `Result` / `Optional` / `target` as language built-ins (not prelude modules).
 d195 — `Auto` universe on parameterized `Result` when parameters vary.
 
-Because `Result[File, Error]` is `Linear` when `File` is `Linear`, the type system forces exhaustive handling of both cases — you cannot silently ignore an error.
+Because `Result[File, Error]` is `Linear` when `File` is `Linear`, the type system forces exhaustive handling of both cases; an error cannot be ignored silently.
 
 ---
 
@@ -1696,7 +1693,7 @@ Official Language Server Protocol implementation. Surfaces the same lint set as 
 
 **Austral**: C backend only.
 
-**Kyokai**: C retained as bootstrap/reference/portability backend. LLVM becomes the long-term primary optimizing backend after self-hosting. Backend constraints do not define the language.
+**Kyokai**: One maintained generated-C backend serves bootstrap, development, release, inspectability, and portability. GCC, Clang, Apple Clang, clang-cl, and later admitted compilers are external target toolchains, not additional backends. Backend constraints do not define the language.
 
 ### 11.7 Diagnostics
 
@@ -1740,7 +1737,7 @@ Official read-only package index (Go model). Crawls git repos containing `kyokai
 
 ### 11.12 SemVer Checking
 
-`kyokai semver-check` compares two public API surfaces using `.kyo` interface files. Classifies changes as breaking (MAJOR), additive (MINOR), or patch-compatible. Advisory only — not enforced. The source of truth for compatibility is the declared public interface surface, not implementation details.
+`kyokai semver-check` compares two public API surfaces using the derived `.koi` interface artifacts. Classifies changes as breaking (MAJOR), additive (MINOR), or patch-compatible. Advisory only — not enforced. The source of truth for compatibility is the declared public interface surface, not implementation details.
 
 ### 11.13 Code Generation
 
@@ -1749,7 +1746,7 @@ Build-time code generation is declared in `kyokai.toml`:
 ```toml
 [generate]
 steps = [
-    { inputs = ["proto/*.proto"], outputs = ["gen/proto.kyo", "gen/proto.kai"], command = "protoc-kyokai" }
+    { inputs = ["proto/*.proto"], outputs = ["gen/proto.kyo"], command = "protoc-kyokai" }
 ]
 ```
 **D-index**
@@ -1761,11 +1758,11 @@ d224 — `[generate]`-style build steps where shown in §11.13 examples.
 - Generated outputs are ordinary files in the source tree.
 - Reproducibility rules apply to generation inputs and outputs.
 - `@embedFile("path")` handles asset embedding.
-- No `build.kai`, no auto-running package code during dependency resolution.
+- No `build.kyo`, no auto-running package code during dependency resolution.
 
 ### 11.14 Debugging
 
-Generated code includes source mapping for debuggers. LLVM backend enables standard DWARF debug info. The goal is that GDB/LLDB show Kyokai source, not generated C.
+Generated code includes `#line` records and an authoritative Kyokai sidecar map. Admitted C toolchains emit DWARF, CodeView/PDB, dSYM, or equivalent object debug data, while Kyokai debugger adapters, symbolization, coverage, and profiling report Kyokai source rather than generated C.
 
 ### 11.15 REPL
 
@@ -1915,7 +1912,7 @@ Const generics determine the SIMD lane count. Standard widths (128, 256, 512 bit
 | `to*In` | Borrowed conversion with explicit allocator | `&[T], &![Alloc] -> U` |
 | `into*In` | Consuming conversion with explicit allocator | `T, &![Alloc] -> U` |
 
-**Why**: **D11b** standardizes `as*` / `into*` / `to*` so skim-reading a call tells you whether storage is borrowed, consumed/reused, or freshly allocated — aligned with the language's "boundary" theme without inventing ad-hoc verb names per module.
+**Why**: **D11b** standardizes `as*` / `into*` / `to*` so a skim-read call states whether storage is borrowed, consumed/reused, or freshly allocated — aligned with the language's "boundary" theme without inventing ad-hoc verb names per module.
 
 The compiler knows whether a function consumes (`T`), borrows (`&[T]`), or mutably borrows (`&![T]`) its first argument. It can verify that names match behavior and emit warnings when they don't.
 
@@ -1944,13 +1941,9 @@ end module body.
 baseline — Austral surface shown for contrast; Kyokai deltas are in the paired block and cite the listed `D` points.
 
 ```kyokai
-// Kyokai
+// Kyokai — one file, interface derived by the compiler
 module Example is
-    function greet(name: &[String]): Unit;
-seal;
-
-module body Example is
-    function greet(name: &[String]): Unit is
+    public function greet(name: &[String]): Unit is
         // implementation
     qed;
 seal;
@@ -2218,7 +2211,8 @@ baseline — Austral surface shown for contrast; Kyokai deltas are in the paired
 
 ```kyokai
 // Kyokai: explicit foreign block with mon; terminator
-module body Posix is
+pragma Unsafe_Module;
+module Posix is
     foreign "C" is
         function read(fd: Int32, buf: Address[Nat8], count: Index): Int32;
         function write(fd: Int32, buf: Address[Nat8], count: Index): Int32;
@@ -2268,7 +2262,7 @@ The table below is an explanatory crosswalk, not a second spec. Each row states 
 | Terminators | `end if;`, `end for;`, `end;` | `fi;`, `od;`, `esac;`, `qed;`, `build;`, `spec;`, `drop;`, `seal;`, `mon;`, `pick;`, `join;`, `audit;` |
 | Not-equal | `/=` | `!=` |
 | Bitwise ops | `&`, `\|` | `band`, `bor`, `bxor`, `bnot`, `shl`, `shr` |
-| File extensions | `.aui`, `.aum` | `.kyo`, `.kai` |
+| File extensions | `.aui`, `.aum` | `.kyo` source, `.koi` derived interface |
 | Regions | Explicit `generic [R: Region]` | Inferred |
 | Re-borrow | Manual `&~x` | Auto-reborrow |
 | Function calls | VSO: `f(x, args)` | SVO: `x.f(args)` via UFCS |
@@ -2284,7 +2278,7 @@ The table below is an explanatory crosswalk, not a second spec. Each row states 
 | Formatter | None | `kyokai fmt` |
 | LSP | None | Official implementation |
 | Comptime | None | `comptime` keyword, `@embedFile` |
-| Debugger | C-level only | Source-level DWARF via LLVM |
+| Debugger | C-level only | Kyokai-source debugging through sidecar maps plus admitted DWARF/CodeView/PDB/dSYM toolchains |
 | Stdlib | 10 basic modules | Batteries-included systems library |
 
 ---

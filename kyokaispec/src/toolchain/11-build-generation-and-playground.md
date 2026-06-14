@@ -11,7 +11,7 @@ Generated code and playgrounds are where hidden power likes to dress up as conve
 
 ## Build-Time Generation
 
-Build-time generation is manifest-declared. A package may declare generators that produce `.kyo`, `.kai`, documentation assets, embedded data outputs, or backend inputs only through a `[generate.<name>]` table admitted by this chapter. A source file is not a build script merely because it exists in the repository.
+Build-time generation is manifest-declared. A package may declare generators that produce `.kyo` source files, documentation assets, embedded data outputs, or declared native/generated-C inputs only through a `[generate.<name>]` table admitted by this chapter. A source file is not a build script merely because it exists in the repository.
 
 > Trace: D78, D83, D150
 > Covers: Generation is explicit manifest configuration, not hidden source execution.
@@ -45,7 +45,7 @@ Embedding a file grants no runtime filesystem authority. It copies bytes into an
 
 ## Evaluation
 
-`kyokai eval` compiles and runs a one-shot expression, statement block, or file fragment through the real parser, resolver, type checker, borrow checker, capability checker, and backend/runtime path. It is not a separate scripting language.
+`kyokai eval` compiles and runs a one-shot expression, statement block, or file fragment through the real parser, resolver, type checker, borrow checker, capability checker, generated-C path, admitted external toolchain, and runtime path. It is not a separate scripting language.
 
 > Trace: D151
 > Covers: Evaluation mode uses ordinary Kyokai semantics.
@@ -67,17 +67,17 @@ Embedding a file grants no runtime filesystem authority. It copies bytes into an
 > Trace: D2, D151a
 > Covers: REPL reset and quit obey cleanup and linearity rules.
 
-REPL commands beginning with `:` are tool commands, not Kyokai source. Required commands are `:quit`, `:reset`, `:type <expr>`, `:browse <module>`, `:load <file>`, and `:help`. Tool commands must not be accepted inside ordinary `.kyo` or `.kai` files.
+REPL commands beginning with `:` are tool commands, not Kyokai source. Required commands are `:quit`, `:reset`, `:type <expr>`, `:browse <module>`, `:load <file>`, and `:help`. Tool commands must not be accepted inside ordinary `.kyo` source files.
 
 > Trace: D151-D151a
 > Covers: REPL commands are separate from source syntax.
 
 ## Compiler Explorer
 
-Kyokai supports Compiler Explorer style operation by exposing a mode that compiles a single package or source snippet and returns generated C, LLVM IR where supported, assembly where supported, diagnostics, selected target/profile/backend facts, and source maps. This mode must use the same compiler engine and backend contracts as ordinary builds.
+Kyokai supports Compiler Explorer style operation by exposing a mode that compiles a single package or source snippet and returns generated C, external-tool assembly where requested and admitted, diagnostics, selected target/profile/C-toolchain facts, and source maps. This mode uses the same compiler engine, C emitter, and toolchain contracts as ordinary builds.
 
 > Trace: D27, D31, D80, D139, D149, D226
-> Covers: Compiler Explorer output is an official view of real backend behavior.
+> Covers: Compiler Explorer output is an official view of the real generated-C and admitted external-toolchain behavior.
 
 Compiler Explorer mode must not run arbitrary compiled programs unless paired with the sandbox runner contract. It may compile and show artifacts without granting runtime authority.
 
@@ -117,6 +117,17 @@ The build rejects undeclared reads and writes when the host sandbox can enforce 
 > Trace: D406, D465
 > Covers: CI can detect stale checked-in generation without mutating the workspace.
 
+## Generated-API Projection
+
+A generator that claims compiler, Analysis Server, documentation, audit, or generated-API integration implements the versioned projection protocol in the application-integration toolchain chapter. Its ordinary `[generate.<name>]` declaration remains the execution, input, output, sandbox, and authority contract.
+
+Projection runs use a fresh output root and canonical request/result manifests. The toolchain validates the complete output tree, stable generated-symbol identities, source/projection maps, API facts, and digests before atomically replacing the previous tree. Failure or malformed output leaves the previous tree active. `kyokai generate --check` compares the validated projection without replacing it.
+
+Generators without integrated projection remain legal ordinary generators and emit no compiler/editor API projection. The protocol is not an in-process compiler plugin, macro system, parsing hook, or permission to execute outside the declared generation lane.
+
+> Trace: D224, D351, D406, D465, D541
+> Covers: Integrated generated APIs add validated metadata and atomic projection while preserving the existing explicit generator authority boundary.
+
 ## Bindgen Wrapper Kit
 
 `kyokai bindgen` is a generation frontend for foreign interfaces. It records preprocessor identity, headers, include paths, macro-modeling policy, target headers, sysroot, defines, probes, generated raw declarations, generated wrapper skeletons, provenance digest, and audit destination. Generated declarations remain unsafe-only until wrapper admission establishes a safe API and records foreign error translation, callback rules, TLS error snapshots, target ABI facts, and replacement or permanent-boundary status.
@@ -126,7 +137,7 @@ The build rejects undeclared reads and writes when the host sandbox can enforce 
 
 ## Standalone Compiler Mode
 
-Direct compiler mode accepts explicit source roots, dependency KBI artifacts, target record, profile, backend, output root, and entrypoint or library artifact class. It uses the same parser, resolver, checker, lowering, backend, diagnostics, artifact layout, generated-C lanes, and provenance rules as package builds. Bypassing manifest discovery does not define alternate language semantics.
+Direct compiler mode accepts explicit source roots, dependency KBI artifacts, target record, profile, admitted C-toolchain contract, output root, and entrypoint or library artifact class. It uses the same parser, resolver, checker, lowering, generated-C emitter, external-tool invocation, diagnostics, artifact layout, source-map, and provenance rules as package builds. Bypassing manifest discovery does not define alternate language semantics.
 
 > Trace: D426, D509
 > Covers: Standalone compilation is an explicit-input lane through the ordinary compiler engine.

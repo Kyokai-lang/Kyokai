@@ -4,10 +4,10 @@
 > ProofTrace: SPEC-LANGUAGE-05-DECLARATIONS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Declarations are the names a module lets the rest of the program touch. They are not loose notes at the top of a file. A declaration says what exists, who may name it, what type it has, what contract it carries, and which body must later prove that promise true.
+Declarations are the names a module lets the rest of the program touch. They are not loose notes at the top of a file. A declaration says what exists, who may name it, what type it has, what contract it carries, and the body that proves the promise true, all in one source file.
 
-> Trace: D5, D17, D52, D78
-> Covers: Kyokai declaration rules are part of the self-contained Kyokai spec and are checked across the `.kyo` interface and `.kai` body split.
+> Trace: D5, D17, D52, D78, D537, D538
+> Covers: Kyokai declaration rules are part of the self-contained Kyokai spec and are checked within one `.kyo` module source file with per-declaration visibility.
 
 A declaration is checked in three layers: syntax, visibility, and semantic well-formedness. Syntax decides whether the source form is a declaration at all. Visibility decides which modules may name it. Semantic well-formedness decides whether the declaration is legal after type checking, layout checking, contract checking, unsafe checking, and target selection.
 
@@ -16,15 +16,15 @@ A declaration is checked in three layers: syntax, visibility, and semantic well-
 
 ## Declaration Categories
 
-A `.kyo` interface contains the importable declaration surface of the module. A `.kai` body contains implementations and private declarations for the same module. Interface declarations may be public or `internal`. Body-only declarations are private.
+One `.kyo` file holds all of a module's declarations. Each declaration carries a visibility marker: `public` exports it to importing packages, `internal` restricts it to the same package, and no marker makes it module-private. The compiler derives the importable interface surface (the `public` and `internal` declarations, at the representation level each promises) into `.koi`; private declarations never cross the boundary.
 
-> Trace: D17, D52, D78, D79
-> Covers: `.kyo` declarations form public or package-internal API, while `.kai` body-only declarations are private and cannot be imported or recorded as external API in `.koi` artifacts.
+> Trace: D17, D52, D78, D79, D537, D538
+> Covers: A module's declarations live in one file with per-declaration visibility, and only `public`/`internal` declarations enter the derived interface and `.koi` artifact.
 
-The legal interface declaration categories are constants, type aliases, opaque types, extern types, records, unions, capabilities, functions, typeclasses, instances, and generators. The legal body declaration categories are constant definitions, type aliases, extern types, records, unions, capabilities, function definitions, typeclasses, instance definitions, generator definitions, foreign blocks, and unsafe contracts. A body may also contain private helper declarations in these body-admitted categories.
+The legal declaration categories are constant definitions, type aliases, records, unions, bitrecords, extern types, capabilities, function definitions, typeclasses, instances, generators, foreign blocks, and unsafe contracts. Every category may carry a visibility marker; a private (unmarked) declaration is the in-file replacement for the old body-only helper. Top-level functions, constants, instances, and generators are always written as definitions, because there is no separate body file to define them in later.
 
-> Trace: D17, D20, D20a, D20b, D52, D78, D198, D242, D242a, D245
-> Covers: Interface files expose declarations; body files define implementations, private helpers, foreign blocks, and unsafe contracts.
+> Trace: D17, D20, D20a, D20b, D52, D78, D198, D242, D242a, D245, D537
+> Covers: One file holds all declaration categories with per-declaration visibility; private declarations are the in-file replacement for body-only helpers, and top-level definitions carry their bodies.
 
 `var` is not a module-level declaration. Kyokai has no user-defined mutable global variables, no safe `thread_local var`, and no hidden singleton state surface. Shared state must be represented by ordinary values, references, borrows, containers, capabilities, or unsafe contracts where a raw platform boundary is truly being used.
 
@@ -38,16 +38,14 @@ A declaration may be guarded by `when expression`. A false declaration guard mak
 
 ## Constants
 
-A constant declaration in a `.kyo` file gives a name and type without an initializer. The matching `.kai` body must provide exactly one compatible constant definition unless the declaration is eliminated by target selection. A constant definition gives the name, type, and initializer expression.
+A constant definition gives a name, a type, and an initializer expression in one place. There is no separate declaration-without-initializer form, because there is no body file to supply the value later. A `public` constant exports its name and type to importing packages; an unmarked constant is module-private.
 
 ```kyokai
-constant maxPathBytes: Index;
-
-constant maxPathBytes: Index := 4096;
+public constant maxPathBytes: Index := 4096;
 ```
 
-> Trace: D17, D52, D61, D78
-> Covers: Interface constants declare importable names; body constants define values; foreign integer domains and bitflags may be modeled with aliases plus named constants.
+> Trace: D17, D52, D61, D78, D537
+> Covers: Constants are defined in place with a visibility marker; foreign integer domains and bitflags may be modeled with aliases plus named constants.
 
 A module-level constant is immutable. Its initializer must be pure enough for the constant-evaluation chapter to evaluate it without observing mutable ambient state, hidden I/O, allocation identity, task scheduling, foreign state, or time. If an initializer uses `comptime`, `static_assert`, other constants, or target descriptors, those forms are evaluated by the compile-time rules rather than by runtime module initialization order.
 
@@ -80,17 +78,23 @@ When a foreign C API exposes a fixed-representation integer domain or bitflag se
 
 ## Opaque And Extern Types
 
-An opaque type declaration names a nominal type whose representation is not exposed at the declaration site.
+The `opaque` modifier on a `record` or `union` definition exports the type's nominal identity and universe while sealing its representation. The representation lives in the same source file as the modifier; outside the defining module only the name and universe are visible. The retired abstract `type Name: Universe;` interface form is replaced by writing the definition with `opaque`.
 
 ```kyokai
-type FileHandle: Linear;
-type Token[T: Type]: Auto;
+public opaque record FileHandle: Linear is
+    fd: Int32;
+build;
+
+public opaque union Token[T: Type]: Auto is
+    case Issued(T);
+    case Revoked;
+build;
 ```
 
-The declared universe marker is part of the type's public contract. A body may provide a concrete representation only in a way that satisfies the interface's opacity, universe classification, layout, and visibility rules. Client modules may name the opaque type, pass it, borrow it, store it where its universe allows, and call visible functions over it; they must not construct, deconstruct, inspect, or assume its representation unless another public declaration exposes that operation.
+The universe marker stays part of the type's public contract. Client modules may name an `opaque` type, pass it, borrow it, store it where its universe allows, and call visible functions over it; they must not construct, deconstruct, inspect, pattern match, or assume its representation unless another public declaration exposes that operation. Inside the defining module the representation is fully visible. `opaque` is a representation modifier orthogonal to the `public`/`internal` visibility marker, and it is illegal on a `type alias`, an `extern type`, a `bitrecord`, or a non-type declaration.
 
-> Trace: D17, D52, D78, D190, D194, D195
-> Covers: Opaque types are nominal public or internal names whose representation is hidden from clients while their universe contract remains visible.
+> Trace: D17, D52, D78, D190, D194, D195, D539
+> Covers: Opaque types are `public`/`internal` record or union definitions marked `opaque`, hiding their representation from clients while keeping the universe contract visible; the abstract declaration-only form is retired.
 
 An `extern type` names an opaque foreign type with unknown Kyokai size and layout. It may appear only behind FFI-admitted pointer/address forms or other specifically allowed ABI wrappers. It must not be passed by value, stored by value as an ordinary Kyokai object, destructured, measured with ordinary layout introspection, or pattern matched.
 
@@ -224,15 +228,10 @@ Capabilities are ordinary values with respect to type checking, borrowing, passi
 
 ## Functions And Contracts
 
-A function declaration gives a signature without a body. A function definition gives the same signature and a body. A body must satisfy its interface declaration exactly where the signature is fixed, and must not weaken the interface contracts visible to callers.
+A top-level function is written as a definition: a signature plus a body in one place. The bodyless signature form survives only as a typeclass `method` declaration and a `foreign` declaration. A `public` function's signature and contracts are part of the derived interface clients check against, and the definition must not weaken the contracts visible to callers.
 
 ```kyokai
-function divide(a: Int32, b: Int32): Int32
-    require b != 0;
-    ensure result * b = a;
-;
-
-function divide(a: Int32, b: Int32): Int32
+public function divide(a: Int32, b: Int32): Int32
     require b != 0;
     ensure result * b = a;
 is
@@ -240,8 +239,8 @@ is
 qed;
 ```
 
-> Trace: D17, D52, D53, D78, D140, D142
-> Covers: Function declarations live in interfaces, definitions live in bodies, and interface-visible contracts are part of the signature clients check against.
+> Trace: D17, D52, D53, D78, D140, D142, D537
+> Covers: Top-level functions are definitions carrying their bodies; a `public` function's signature and contracts form the part of the derived interface clients check against.
 
 Parameters are immutable bindings unless the parameter type itself is a mutable reference such as `&![T]`. A parameter name is in scope for later parameter default-free type checking only where the grammar and contract chapters allow it; parameter names must not shadow any still-live binding.
 
@@ -275,10 +274,10 @@ A typeclass declaration defines a static contract over type parameters. It may c
 > Trace: D33, D82, D182, D195
 > Covers: Typeclasses are static contracts with methods, default methods, and associated types; they do not imply runtime dictionaries.
 
-An instance declaration in an interface exposes that an instance exists. An instance definition in a body supplies associated types and method bodies. Every required method and every associated type must be supplied exactly once unless a method has a default body. Associated types do not have defaults.
+An instance is written as a definition that supplies associated types and method bodies in one place. A `public` or `internal` instance exposes that the instance exists in the derived interface. Every required method and every associated type must be supplied exactly once unless a method has a default body. Associated types do not have defaults.
 
-> Trace: D33, D82, D182, D214
-> Covers: Instances provide static witnesses, must fill associated types, and may rely on or override default method bodies.
+> Trace: D33, D82, D182, D214, D537
+> Covers: Instances are definitions providing static witnesses, must fill associated types, may rely on or override default method bodies, and expose their existence through the derived interface.
 
 Generators are declarations that create named stackless pull iterators. A generator definition may use `yield` inside its body. The generated iterator type is nominal and linear when it owns suspended state; destruction of suspended state is explicit and checked by the generator and ownership chapters.
 
@@ -287,10 +286,10 @@ Generators are declarations that create named stackless pull iterators. A genera
 
 ## Foreign Blocks And Unsafe Contracts
 
-A `foreign "C" is ... mon;` block declares raw foreign functions and constants for the selected target C ABI. Such blocks are legal only in a module body marked with `pragma Unsafe_Module;`. Raw foreign declarations are private unsafe machinery unless the module exposes safe wrappers through ordinary interface declarations.
+A `foreign "C" is ... mon;` block declares raw foreign functions and constants for the selected target C ABI. Such blocks are legal only in a module marked with `pragma Unsafe_Module;`. Raw foreign declarations are private unsafe machinery unless the module exposes safe wrappers through ordinary `public` or `internal` declarations.
 
 > Trace: D20, D20a, D20b, D127, D242, D242a
-> Covers: Raw C FFI declarations live in visible foreign blocks inside unsafe module bodies and do not bypass normal visibility.
+> Covers: Raw C FFI declarations live in visible foreign blocks inside unsafe modules and do not bypass normal visibility.
 
 Every raw foreign call in Kyokai source is treated as if it has an additional leading `&![UnsafeCapability]` parameter. This authority argument is erased from the actual C ABI lowering but remains part of Kyokai's source-level audit and call contract. Raw foreign declarations must not take or return Kyokai linear values or sum types by value.
 
@@ -316,7 +315,7 @@ A declaration that depends on a `comptime` result must receive a self-contained 
 
 ## Validated Wrapper Types
 
-A validated wrapper is an ordinary nominal record or opaque type whose defining module keeps the raw representation private. Code outside that module constructs the wrapper only through named constructors recorded in `.koi`. A constructor validates its inputs and returns `Result[Wrapper, WrapperValidationError]` or a domain-specific equivalent. Validation failure is recoverable data. It is not TPOE, `panic`, or runtime-fatal.
+A validated wrapper is an `opaque` record or union (D539) whose defining module keeps the raw representation sealed. Code outside that module constructs the wrapper only through named constructors recorded in `.koi`. A constructor validates its inputs and returns `Result[Wrapper, WrapperValidationError]` or a domain-specific equivalent. Validation failure is recoverable data. It is not TPOE, `panic`, or runtime-fatal.
 
 A validated wrapper does not implicitly convert to or from its representation. Observation uses a named borrowing accessor. Owned extraction uses a named consuming API such as `intoRaw`. Deserialization and foreign wrappers call the same validator or enter through an audited unsafe contract that names the invariant they establish.
 
@@ -332,8 +331,8 @@ A validated wrapper does not implicitly convert to or from its representation. O
 
 Kyokai does not define a magic `Constrained[T, Predicate]` proof type. A library can define helper patterns, but arbitrary predicate types do not become compiler proofs.
 
-> Trace: D466
-> Covers: Validated wrappers use private nominal representation, named recoverable validation, explicit accessors, and recorded boundary rules.
+> Trace: D466, D539
+> Covers: Validated wrappers are `opaque` types with sealed representation, named recoverable validation, explicit accessors, and recorded boundary rules.
 
 ## Configuration Rejection
 

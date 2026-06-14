@@ -73,9 +73,9 @@ area has an explicit owner.
 | Rich records, unions, arrays, const generics, closures, generators, iterators, typeclasses, instances, monomorphization, layout, pinning, and direct result placement | Extends the core. | `extension-roadmap.md` |
 | Tasks, channels, atomics, locks, pollers, signals, cancellation, and happens-before | Separate formal model. | `concurrency-model.md`, layer `lambda_K-conc` |
 | Unsafe contracts, raw pointers, FFI, ABI, dynamic loading, volatile/MMIO, inline assembly, and foreign callbacks | Contract boundary and later model. | `unsafe-ffi-boundary.md`, layer `lambda_K-unsafe` |
-| C lowering, LLVM lowering, target objects, link steps, stack guards, and debug mapping | Preservation boundary. | `backend-preservation.md`, layer `lambda_K-backend` |
+| Generated-C lowering, admitted C compiler behavior, target objects, link steps, stack guards, and debug mapping | Preservation boundary. | `backend-preservation.md`, layer `lambda_K-backend` |
 | Allocators, concrete heap storage, standard-library algorithms, formatting, text, I/O, math, crypto, and OS handles | Admission and evidence boundary. | `stdlib-contract-model.md`, layer `lambda_K-stdlib` |
-| Modules, packages, imports, visibility, `.kyo`, `.kai`, `.koi`, manifests, lockfiles, build graphs, diagnostics, formatter, docs, Analysis Server, package index, and release behavior | Conformance model. | `toolchain-and-artifact-contracts.md`, layer `lambda_K-toolchain` |
+| Modules, packages, imports, visibility, `.kyo` source, `.koi` artifacts, manifests, lockfiles, build graphs, diagnostics, formatter, docs, Analysis Server, package index, and release behavior | Conformance model. | `toolchain-and-artifact-contracts.md`, layer `lambda_K-toolchain` |
 | Website, service deployment, repository topology, showcase, and community surfaces | Operational records outside metatheory. | public workflow and service records |
 
 ## 5. Failure Boundary

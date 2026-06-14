@@ -189,10 +189,10 @@ A type expression is well-formed only when every named type, type parameter, ass
 > Trace: D33, D158, D188, D189, D190, D195
 > Covers: Type well-formedness checks names, constraints, const arguments, and associated-type projections before values are checked.
 
-A public type signature may mention only declarations visible to the consumer. Public API cannot leak private body-only names. Public API cannot leak same-package `internal` names to outside packages unless an explicit opaque exposure rule allows that exact shape.
+A public type signature may mention only declarations visible to the consumer. Public API cannot leak private module-local names. Public API cannot leak same-package `internal` names to outside packages unless the type is exported through the `opaque` representation-hiding modifier (D539), which exposes only the nominal identity and universe.
 
-> Trace: D17, D78, D79, D229
-> Covers: Type visibility is enforced through signatures and artifacts; hidden names cannot leak as accidental public API.
+> Trace: D17, D78, D79, D229, D539
+> Covers: Type visibility is enforced through signatures and artifacts; private and `internal` names cannot leak as accidental public API except through an admitted `opaque` exposure.
 
 A type whose layout or ownership behavior depends on unsafe or target-specific facts must make that dependency explicit through `extern record`, `extern type`, target guards, unsafe contracts, or a standard-library semantic contract. Safe accepted Kyokai programs do not depend on language-level undefined behavior.
 

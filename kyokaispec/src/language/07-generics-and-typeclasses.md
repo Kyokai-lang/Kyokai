@@ -279,3 +279,14 @@ Every compiler-known or standard typeclass admission record states purpose, laws
 
 > Trace: D360, D376
 > Covers: Compiler-known protocols remain individually admitted rather than growing by convention.
+
+## Heterogeneous Runtime Composition Boundary
+
+Closed known alternatives use nominal unions and exhaustive dispatch. A manifest-declared component set can generate such a union and dispatch registry through the generated-API projection protocol without changing the static-dispatch rules in this chapter.
+
+Separately compiled plugins and foreign framework boundaries use nominal opaque `Linear` handles plus explicit operation tables. Their type identity, operation-table or ABI identity, owner/destructor, capability requirements, compatibility version, allocation, transfer, downcast, serialization, reload, and failure contracts are explicit boundary data. A compatibility hash rejects known mismatches but does not prove memory safety.
+
+This boundary adds no existential types, trait objects, universal erased container, hidden dictionary, implicit allocation, or runtime typeclass fallback. A reusable erased container requires its own standard-library or Bridge admission record and remains unsafe internally until layout, lifetime, aliasing, destruction, callback, debugger, and audit obligations are proved.
+
+> Trace: D82, D139, D541-D542
+> Covers: Heterogeneous composition uses closed unions or explicit opaque foreign/plugin boundaries without weakening Kyokai's static generic and typeclass model.

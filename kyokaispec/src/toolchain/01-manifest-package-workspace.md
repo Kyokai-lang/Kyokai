@@ -43,7 +43,12 @@ The public package index also rejects names reserved for the standard library, o
 > Trace: D78, D419
 > Covers: Kyokai package names have one canonical ASCII grammar, reserved official names are protected, and ordinary third-party similarity remains advisory metadata rather than source semantics.
 
-The `edition` field selects the source-semantics mode for every `.kyo` and `.kai` file in the package. For the first edition, the value is `"2026"`. A workspace can contain packages with different declared editions, but `.koi` compatibility is exact by edition. Cross-edition use requires a separate migration witness that records every semantic mapping; the witness is an audit artifact, not a normal `.koi` replacement, and cannot silently change ownership, capabilities, unsafe contracts, layout, failure behavior, or ABI.
+Package names and module names reserved for `Kyokai.Bridge.*`, the collection root `bridge/`, official bridge metadata, and bridge admission records cannot be claimed by ordinary packages. A package may wrap or depend on the same upstream project as a Bridge entry, but it cannot present itself as official Bridge surface or rely on Bridge admission status unless it is part of the shipped collection.
+
+> Trace: D419, D529
+> Covers: Official bridge names are reserved, and ordinary packages do not inherit bridge trust or support status.
+
+The `edition` field selects the source-semantics mode for every `.kyo` source file in the package. For the first edition, the value is `"2026"`. A workspace can contain packages with different declared editions, but `.koi` compatibility is exact by edition. Cross-edition use requires a separate migration witness that records every semantic mapping; the witness is an audit artifact, not a normal `.koi` replacement, and cannot silently change ownership, capabilities, unsafe contracts, layout, failure behavior, or ABI.
 
 > Trace: D79, D105, D243
 > Covers: Language editions are manifest-selected source-semantics modes, mixed-edition workspaces are structurally legal, and `.koi` consumption requires exact edition compatibility under the current design.
@@ -57,6 +62,11 @@ A package published to the official package index contains a tracked `kdocs/` di
 
 > Trace: D515-D516, D525
 > Covers: Published documentation has one fixed package-root location without changing module discovery or confusing repository roots with package roots.
+
+The official Bridge collection is not declared in `[dependencies]`. It is installed first-party toolchain/library surface under `Kyokai.Bridge.*` and the collection root `bridge/`. A package that imports a Bridge module records that imported interface through the ordinary module graph and `.koi` compatibility records, but the package resolver does not select, fetch, update, vendor, or lock Bridge modules as package dependencies.
+
+> Trace: D51, D78-D79, D529
+> Covers: Bridge modules are installed first-party modules, not package dependencies or resolver-selected graph nodes.
 
 ## Workspace Manifests
 
@@ -108,32 +118,71 @@ A package manifest nested under another package's module root is illegal unless 
 
 ## Dependencies
 
-A package's `[dependencies]` table admits exactly two dependency source kinds: a package in the same workspace or an external Git repository pinned by commit.
+A package's `[dependencies]` table admits exactly three dependency source kinds: a package in the same workspace, an external Git repository pinned by commit, or an indexed package requirement resolved through configured package-index metadata.
 
 ```toml
 [dependencies]
 core = { workspace = "core" }
 pcre = { git = "https://github.com/kyokai/pcre", rev = "a1b2c3d4..." }
 pcre-release = { git = "https://github.com/kyokai/pcre", tag = "v1.2.3", rev = "a1b2c3d4..." }
+json = { index = "@kyokai/json", version = "^1.4" }
 ```
 
-> Trace: D51, D78
-> Covers: Dependencies are either workspace package references or pinned Git dependencies.
+> Trace: D51, D78, D528
+> Covers: Dependencies are workspace package references, pinned Git dependencies, or indexed package version requirements.
 
-A dependency entry must contain exactly one of `workspace` or `git`. If `git` appears, `rev` is mandatory. `tag` is permitted metadata, and if present the package manager must verify that the tag resolves to the declared `rev` when adding or updating the dependency. `branch` is illegal in `kyokai.toml`.
+A dependency entry must contain exactly one of `workspace`, `git`, or `index`. If `git` appears, `rev` is mandatory. `tag` is permitted metadata, and if present the package manager must verify that the tag resolves to the declared `rev` when adding or updating the dependency. `branch` is illegal in `kyokai.toml`. If `index` appears, `version` is mandatory and names a version requirement, not an exact source revision.
 
-> Trace: D51
-> Covers: Git dependencies are pinned by commit, tags are checked labels, and moving branch references are rejected.
+> Trace: D51, D528
+> Covers: Git dependencies are pinned by commit, tags are checked labels, moving branch references are rejected, and indexed dependencies separate version intent from locked source identity.
 
-The dependency key is the local package dependency name used by the manifest and lockfile. For workspace dependencies, the `workspace` value names the package identity declared by the target package. For Git dependencies, the fetched package's manifest still defines the package identity used in artifacts and diagnostics.
+The dependency key is the local package dependency name used by the manifest and lockfile. For workspace dependencies, the `workspace` value names the package identity declared by the target package. For Git dependencies, the fetched package's manifest still defines the package identity used in artifacts and diagnostics. For indexed dependencies, the `index` value names the package-index identity, and the resolved source revision's manifest must declare the package identity recorded by that index record.
 
-> Trace: D51, D78, D79
-> Covers: Dependency manifests separate local dependency entries from package identity, and artifacts record package identity from the package manifest.
+> Trace: D51, D78, D79, D528
+> Covers: Dependency manifests separate local dependency entries, package-index identity, package manifest identity, and artifact identity.
+
+Version requirements for indexed dependencies use the closed first-edition requirement grammar below. Whitespace around operators is ignored. Build metadata in a version is ignored for ordering and requirement matching. A prerelease version is matched only when the requirement explicitly contains a prerelease for the same release line or the selected package-index policy names a prerelease lane.
+
+| Form | Meaning |
+| --- | --- |
+| `1.2`, `1.2.3`, `^1.2`, or `^1.2.3` | At least the named release line, with omitted patch interpreted as `.0`, and below the next SemVer-incompatible release. |
+| `~1.2.3` | At least `1.2.3` and below `1.3.0`. |
+| `=1.2.3` | Exactly `1.2.3`. |
+| `>=1.2.0`, `>1.2.0`, `<=2.0.0`, `<2.0.0` | One comparison bound. |
+| `>=1.2.0, <2.0.0` | Conjunction of comma-separated comparison bounds. |
+
+Bare wildcard requirements such as `*`, moving branch requirements, tag-only requirements, and requirements whose upper or lower bound cannot be represented by the closed grammar are illegal in stable `kyokai.toml`. A package-index policy may reject broad requirements for publication quality, but that policy is package-index admission, not source parsing.
+
+> Trace: D223, D528
+> Covers: Indexed package requirements have a closed version-requirement grammar and reject moving or unbounded dependency intent.
 
 Package dependency graphs are acyclic at package identity level. A package cannot depend on itself directly or indirectly through normal dependencies, dev dependencies, generated packages, tool packages, target-specific dependencies, or re-exported package surfaces. The resolver rejects a cycle before build planning and prints the complete package cycle path. Cycle-breaking artifacts are not admitted.
 
-> Trace: D78, D79, D155
-> Covers: Package dependency graphs must be acyclic under the current separate-compilation model.
+> Trace: D78, D79, D155, D528
+> Covers: Package dependency graphs must be acyclic under the current separate-compilation model and cycles remain resolver diagnostics.
+
+## Resolver Model
+
+The Kyokai resolver is a deterministic incompatibility-learning package solver in the PubGrub family, or a SAT-equivalent implementation that preserves the same public solution and conflict-explanation contract. The internal solver library is not normative. The normative contract is the accepted input set, resolved graph, lockfile schema, and diagnostics.
+
+Resolver input includes package and workspace manifests, selected roots, selected target, selected profile, selected feature roots, index snapshot identities, existing lockfile when one is present, lockfile mode, offline/network policy, yanks, advisories, security holds when policy selects them, manifest authority ceilings, effective capability deny policy, package-index policy, and explicit command flags that affect acceptance or graph identity.
+
+Resolver output is exactly one of these results:
+
+- a resolved graph;
+- an unsupported-input diagnostic for a source kind, policy, target, feature lane, or index lane not implemented by the current toolchain slice;
+- a conflict diagnostic containing the smallest incompatibility chain the solver can justify from the selected inputs.
+
+An implementation slice may initially support only workspace packages or pinned Git packages. Such a slice is valid only when it uses the final resolver data model, final lockfile schema, final mode semantics, and final diagnostic classes. It must reject unsupported indexed/version cases explicitly. It must not write a smaller incompatible lockfile, reinterpret indexed requirements as Git pins, ignore selected policy inputs, or treat current implementation limits as future semantic freedom.
+
+The resolved graph uses package instances, not only package names. A package instance is identified by package identity, package version, edition, source kind, exact source revision or workspace path, canonical source hash when external, selected feature set, target contract, semantic profile inputs, and relevant policy identities. Two instances of the same package revision with different feature sets, target contracts, or semantic profile inputs are distinct graph nodes and produce distinct `.koi` identities.
+
+Each dependency edge records the depender instance, local dependency name, resolved dependee instance, dependency class, requested features, target condition, capability requirement summary, and the manifest requirement or exact pin that introduced the edge. `kyokai tree`, `kyokai why`, `kyokai outdated`, `kyokai audit`, docs pulls, `.koi` compatibility checks, package graph reports, and conformance fixtures all consume this same resolved graph model.
+
+Conflict diagnostics name the participating package identities, version requirements, exact revision pins, feature constraints, target constraints, yanks, advisories, capability-deny policies, and dependency paths. A diagnostic may summarize the chain for human output, but machine output retains stable package instance IDs and edge IDs.
+
+> Trace: D51, D78-D79, D83, D223-D224, D244, D397, D424, D527-D528
+> Covers: Dependency resolution has one final PubGrub/SAT-shaped graph model, deterministic inputs, explicit partial-implementation diagnostics, package-instance identity, and conflict explanations.
 
 ## Lockfiles
 
@@ -142,10 +191,64 @@ A standalone package owns `package-root/kyokai.lock`. A workspace owns exactly o
 > Trace: D51, D78, D83
 > Covers: Lockfile ownership follows package or workspace scope, with one lockfile for a workspace and one for a standalone package.
 
-The lockfile records the fully resolved dependency graph, including exact Git revisions, checked tag metadata where present, canonical package-source hashes, package identities, versions, editions, selected feature sets, target-contract inputs, semantic profile inputs, `.koi` identities, resolver and feature-resolution versions, package artifact hashes, source provenance, and index metadata version. A manifest never relies on a moving external reference after resolution.
+The lockfile records the fully resolved dependency graph, including exact Git revisions, checked tag metadata where present, indexed package version requirements that selected each indexed source, canonical package-source hashes, package identities, versions, editions, selected feature sets, target-contract inputs, semantic profile inputs, `.koi` identities, resolver and feature-resolution versions, package artifact hashes, source provenance, and index metadata version. A manifest never relies on a moving external reference after resolution.
 
-> Trace: D51, D79, D83, D397, D423-D424
-> Covers: Lockfiles make dependency resolution reproducible and record exact source, package-instance, target, resolver, and provenance inputs.
+> Trace: D51, D79, D83, D397, D423-D424, D528
+> Covers: Lockfiles make dependency resolution reproducible and record exact source, package-instance, target, resolver, version-requirement, and provenance inputs.
+
+`kyokai.lock` is a deterministic TOML artifact with these top-level record families:
+
+```toml
+[lock]
+version = 1
+resolver = "kyokai-resolver-1"
+feature_resolver = "kyokai-feature-resolver-1"
+owner = { kind = "workspace", path = "." }
+index_snapshots = ["official:2026-06-04:sha256:..."]
+policy_identity = "sha256:..."
+
+[[root]]
+package = "app"
+instance = "workspace:app@0.1.0#2026"
+
+[[package]]
+instance = "workspace:app@0.1.0#2026"
+name = "app"
+version = "0.1.0"
+edition = "2026"
+source = { kind = "workspace", path = "packages/app" }
+features = []
+target_contract = "host-default"
+semantic_profile = "dev"
+
+[[package]]
+instance = "index:@kyokai/json@1.4.3#2026:9e4..."
+name = "json"
+version = "1.4.3"
+edition = "2026"
+source = { kind = "index-git", index = "official", package = "@kyokai/json", rev = "9e4...", canonical_hash = "kyokai-sha256:..." }
+features = []
+target_contract = "host-default"
+semantic_profile = "dev"
+requirement = "^1.4"
+
+[[edge]]
+from = "workspace:app@0.1.0#2026"
+name = "json"
+to = "index:@kyokai/json@1.4.3#2026:9e4..."
+class = "normal"
+features = []
+target = "all"
+requirement = "^1.4"
+capabilities = []
+```
+
+The `[lock]` table records schema version, resolver version, feature-resolution version, owner kind, owner path, index snapshot identities, selected policy identities, and the lockfile mode that produced the graph when that mode writes a graph. Each `[[root]]` record names a selected root package and resolved package instance. Each `[[package]]` record names one package instance with package name, version, edition, source kind, workspace path or exact external source revision, canonical source hash when external, selected features, target contract, semantic profile, `.koi` digest where produced, docs metadata digest where relevant, yanked/advisory observation where policy records it, and source provenance. Each `[[edge]]` record names one dependency edge with depender instance, local dependency name, resolved dependee instance, dependency class, requested features, target condition, capability requirement summary, and the requirement or exact pin that introduced the edge.
+
+`instance` strings are stable lockfile-local identifiers. They are not source syntax and are not parsed by Kyokai programs. Tools may expose them in machine output and may present friendlier human names.
+
+> Trace: D51, D79, D83, D223-D224, D397, D423-D424, D528
+> Covers: Lockfiles have explicit deterministic record families for roots, package instances, and dependency edges instead of opaque dependency strings.
 
 Existing lockfiles continue to resolve yanked package revisions unless a separate security policy explicitly blocks the build. Yanking affects new dependency resolution, not the meaning of an existing lockfile.
 
@@ -204,9 +307,25 @@ Lockfile formatting is deterministic and ordered by canonical package identity p
 
 ## Runnable Targets And Authority Ceilings
 
-A package declares build, test, scratch, playground, and linked-runtime authority ceilings. Resolution and link planning reject a graph whose declared requirements exceed the selected ceiling. A ceiling restricts packages and generators; it does not mint runtime capabilities.
+A package declares build, test, scratch, playground, and linked-runtime authority ceilings. Resolution and link planning reject a graph whose declared requirements exceed the selected ceiling. A ceiling restricts packages, targets, generated source, tests, docs examples, and generators; it does not mint runtime capabilities.
+
+The capability deny policy from the toolchain chapter composes with manifest ceilings. A manifest `capability_ceiling` states the authority that a package, target, or audit surface is allowed to require. A user/global config or command-line `--deny-capability <name>` can make the effective policy stricter for one machine or one invocation. No manifest field can remove denial inherited from toolchain defaults, user/global config, or command-line flags.
 
 Packages declare runnable targets explicitly. Each executable target names package entry module, entry declaration, required target class, profile restrictions, capability/startup shape, and produced artifact name. A package with several runnable targets requires `kyokai run --bin <name>` unless exactly one runnable target exists.
 
-> Trace: D437, D462
-> Covers: Packages expose explicit runnable targets and authority ceilings without granting runtime authority through manifests.
+Runnable targets live in named `[targets.<name>]` tables. The table name is the target selector used by `--bin <name>`. The first standardized target kind is `"executable"`.
+
+```toml
+[targets.app]
+kind = "executable"
+module = "App.Main"
+entry = "main"
+output = "app"
+default = true
+capability_ceiling = ["Filesystem.Read"]
+```
+
+For an executable target, `module` is the dotted Kyokai module path containing the entry declaration, `entry` is the function or admitted entry declaration name inside that module, `output` is the produced executable artifact stem, and `default = true` marks the package's default run target. A package has at most one default executable target. If `output` is omitted, the target name is the output stem. A target table with `kind = "executable"` must not rely on `output_type = "executable"` alone; the target table is the source of executable entrypoint identity.
+
+> Trace: D437, D462, D527
+> Covers: Packages expose explicit runnable targets and authority ceilings without granting runtime authority through manifests, and the effective capability deny policy can only make those ceilings stricter.

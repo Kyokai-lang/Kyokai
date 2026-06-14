@@ -146,7 +146,7 @@ The initial target vocabulary is closed by the target contract, not by wishful c
 > Trace: D19, D80, D105, D117
 > Covers: Target enum existence and target support are separate contracts.
 
-`target` may be used in constant evaluation and declaration-level `when` guards. Kyokai does not have body-level target branching. Platform differences belong in selected body files, declaration guards, or ordinary typeclass abstraction.
+`target` may be used in constant evaluation and declaration-level `when` guards. Kyokai does not have body-level target branching. Platform differences belong in selected whole-file source variants, declaration guards, or ordinary typeclass abstraction.
 
 > Trace: D19/D19a, D123
 > Covers: Target selection stays at module, declaration, and abstraction boundaries.

@@ -86,7 +86,7 @@ mechanization.
 > Trace: D143/D241, D312, D394, D477
 > Covers: Gate K-A, Gate K-H, and Gate B are closed by public artifacts for their named scopes; later mechanization and broader language layers remain separate gates.
 
-## Accepted D488-D526 Routing
+## Accepted D488-D527 Routing
 
 The strict-linearity usability and public-infrastructure closure does not enlarge `lambda_K-seq` indiscriminately. Every accepted point is assigned to one treatment class before proof work begins.
 
@@ -97,12 +97,12 @@ The strict-linearity usability and public-infrastructure closure does not enlarg
 | D491-D493 and D496-D498 | Later language and stdlib contract obligations. | `extension-roadmap.md`, `stdlib-contract-model.md` |
 | D488-D489, D494, D499, and D501 | Toolchain, fixture, FFI-admission, and stdlib-evidence obligations. | `toolchain-and-artifact-contracts.md`, `unsafe-ffi-boundary.md`, `stdlib-contract-model.md` |
 | D502 and D508 | Spec-writing, claim-table, traceability, and modal-audit obligations that apply to calculus documents too. | `claim-tiers.md`, workflow docs, every touched normative chapter |
-| D503-D505, D509, D515-D518, and D525 | Toolchain conformance obligations. | `toolchain-and-artifact-contracts.md` |
+| D503-D505, D509, D515-D518, D525, and D527 | Toolchain conformance obligations. D527 is a deny-only command/package/tool policy obligation and does not add a source-level capability rule to `lambda_K-seq`. | `toolchain-and-artifact-contracts.md` |
 | D506-D507, D510-D514, and D519-D524 | Workflow or infrastructure obligations, not type-soundness claims. | public workflow docs, service board, website source, tracked operations work |
-| D526 | Evidence-graph and CI-metadata obligation. ProofTrace records expose state honestly but do not enlarge the first theorem. | `kyokaiproofstatus.toml`, `kyokaiproofstatus.md`, `tools/check_prooftrace.py` |
+| D526 | Evidence-graph and CI-metadata obligation. ProofTrace records expose state honestly but do not enlarge the first theorem. | `kyokaiproofstatus.toml`, `kyokaiproofstatus.md`, `toolchain/prooftrace/check_prooftrace.py` |
 
-> Trace: D488-D526
-> Covers: The accepted strict-linearity DX, toolchain, docs, website, infrastructure, and ProofTrace evidence closure has explicit formalization routing without overstating the first theorem.
+> Trace: D488-D527
+> Covers: The accepted strict-linearity DX, toolchain, docs, website, infrastructure, ProofTrace evidence, and capability deny-policy closure has explicit formalization routing without overstating the first theorem.
 
 ## Later Extensions
 
@@ -153,4 +153,4 @@ The marker belongs at the boundary responsible for the registered contract. It i
 
 ProofTrace metadata is tooling evidence only. It cannot change parsing, type checking, ownership, borrowing, capability checks, lowering, generated code, runtime behavior, package resolution, or theorem truth. An inherited compiler pass is marked `inherited-bootstrap`; it is not described as Kyokai implementation evidence merely because the file exists.
 
-`tools/check_prooftrace.py` validates the registry schema, status vocabulary, chapter registrations, required code-boundary comments, closed no-proof reasons, artifact paths, and generated status board. `make proofstatus` regenerates `kyokaiproofstatus.md`. `make check-prooftrace` and CI reject stale or malformed evidence metadata.
+`toolchain/prooftrace/check_prooftrace.py` validates the registry schema, status vocabulary, chapter registrations, required code-boundary comments, closed no-proof reasons, artifact paths, and generated status board. `make proofstatus` regenerates `kyokaiproofstatus.md`. `make check-prooftrace` and CI reject stale or malformed evidence metadata.

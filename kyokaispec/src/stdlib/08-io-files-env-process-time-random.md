@@ -154,3 +154,12 @@ The operating system is too powerful to be treated like background weather. Kyok
 
 > Trace: D398-D404, D408-D411, D417, D421-D422, D452, D457, D473, D492
 > Covers: External-world APIs expose authority, blocking, cancellation, partial progress, target support, raw error detail, and cleanup behavior by family.
+
+## Time, Locale, Trust, And Protocol Datasets
+
+Civil-time, locale, public-suffix, MIME, certificate-root, revocation, and other externally maintained behavioral data use named dataset providers. A provider record contains dataset class, version, digest, source/provenance, license, target scope, compatibility effect, freshness/expiry policy, offline behavior, cache identity, and update authority.
+
+Host-observed datasets are reported as target facts and do not silently impersonate toolchain-shipped data. Network-updated providers verify their declared signature or provenance rule before activation. Failure preserves the previous verified dataset and returns a typed update result. Runtime lookup never performs a hidden background refresh.
+
+> Trace: D404, D421, D549
+> Covers: Time, locale, trust, suffix, and MIME behavior remains versioned, auditable, offline-defined, and explicit about network updates.

@@ -107,7 +107,7 @@ A module-level constant expression forces the constant if its value is needed. F
 > Trace: D18, D18a, D215
 > Covers: Constant expression use participates in lazy cached cycle-checked constant forcing.
 
-Qualified paths may name only declarations visible to the current package. A path cannot reach private body-only declarations or another package's internal declarations.
+Qualified paths may name only declarations visible to the current package. A path cannot reach private module-local declarations or another package's internal declarations.
 
 > Trace: D17, D78/D179/D214
 > Covers: Qualified expression paths respect public, internal, and private visibility boundaries.
@@ -205,10 +205,10 @@ Integer division truncates toward zero. Integer remainder is the truncating rema
 > Trace: D75
 > Covers: Default integer division and remainder semantics are fixed, and alternate arithmetic policies are not implicit.
 
-Floating-point arithmetic uses IEEE 754 binary32 and binary64 for `Float32` and `Float64`. The default rounding mode is round-to-nearest, ties-to-even. Subnormals, signed zero, infinities, and NaNs follow the strict floating contract. Backend fast-math, reassociation, excess precision, and implicit FMA contraction must not change language-visible results.
+Floating-point arithmetic uses IEEE 754 binary32 and binary64 for `Float32` and `Float64`. The default rounding mode is round-to-nearest, ties-to-even. Subnormals, signed zero, infinities, and NaNs follow the strict floating contract. External-compiler fast-math, reassociation, excess precision, and implicit FMA contraction must not change language-visible results.
 
 > Trace: D76, D139, D228
-> Covers: Float operations have a strict portable IEEE 754 contract and cannot be weakened by backend flags or profiles.
+> Covers: Float operations have a strict portable IEEE 754 contract and cannot be weakened by external compiler flags or profiles.
 
 Floating division by zero does not trigger TPOE merely because the divisor is zero; it yields the IEEE 754 result. Ordered comparisons involving NaN are false. `!=` involving NaN is true. NaN payload propagation is not a portable language guarantee.
 
@@ -298,10 +298,10 @@ Large return values use guaranteed direct result placement when the return type 
 > Trace: D89, D199, D228
 > Covers: Large return values avoid mandatory full-width return copies while preserving ordinary move semantics.
 
-Backend lowering must preserve Kyokai evaluation order, checks, fatal paths, aliasing assumptions, and failure behavior. If a backend cannot implement a construct without relying on backend undefined behavior or weakening Kyokai semantics, the build fails.
+Generated-C lowering and the admitted external C toolchain must preserve Kyokai evaluation order, checks, fatal paths, aliasing assumptions, and failure behavior. If that pipeline cannot implement a construct without relying on C undefined behavior, invalid optimizer assumptions, or weakened Kyokai semantics, the build fails.
 
 > Trace: D73, D139, D228
-> Covers: Expression lowering cannot use C or LLVM undefined behavior as the implementation of safe Kyokai semantics.
+> Covers: Expression lowering cannot use C undefined behavior or unsupported compiler assumptions as the implementation of safe Kyokai semantics.
 
 ## Static Text And Build Evaluation
 
@@ -309,7 +309,7 @@ Evaluating a plain string literal returns a `StaticString` view into immutable a
 
 A `build T do ... build;` expression executes statements in source order. `produce expr;` evaluates `expr`, checks that the result has type `T`, checks that every live linear obligation is accounted for, and exits the nearest build expression. Diverging paths do not produce values. `return` exits the enclosing function under ordinary cleanup and recovery rules. `break`, `continue`, and `yield` do not target a build expression.
 
-The elaborator lowers the build expression into explicit initialization-state control flow before type, borrow, linearity, capability, contract, and backend-readiness checks. Nested build expressions have independent nearest-enclosing `produce` targets.
+The elaborator lowers the build expression into explicit initialization-state control flow before type, borrow, linearity, capability, contract, and generated-C-readiness checks. Nested build expressions have independent nearest-enclosing `produce` targets.
 
 > Trace: D372, D476, D500
 > Covers: Static literals are non-allocating views and build expressions have ordered evaluation, nearest-target `produce`, definite initialization, and checker-visible lowering.

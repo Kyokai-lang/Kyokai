@@ -148,3 +148,12 @@ Path operations follow the selected target contract. `Path` and `PathBuf` preser
 
 > Trace: D399, D408, D420, D476, D483
 > Covers: Static literal storage, Unicode algorithm versions, and target-native paths are explicit and allocator-aware.
+
+## Behavioral Dataset Identity
+
+Unicode scalar properties, normalization, case mapping, grapheme segmentation, line breaking, identifier data, and terminal display-width tables are versioned behavioral datasets. Each API contract states its dataset provider, version, digest/provenance identity, target scope, update class, and whether the operation participates in package, cache, replay, documentation, or artifact identity.
+
+A target-observed provider and a toolchain-shipped provider are distinct provider classes even when they currently expose equal data. Network updates are explicit toolchain operations and require network authority; they never run during import, parsing, or ordinary checking. An update failure leaves the previous verified dataset active.
+
+> Trace: D404, D421, D549
+> Covers: Unicode and display behavior names the exact dataset identity and update authority instead of drifting with ambient host data.

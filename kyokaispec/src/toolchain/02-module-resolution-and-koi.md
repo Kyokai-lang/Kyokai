@@ -16,10 +16,10 @@ This chapter specifies the toolchain side of the module boundary. The language c
 
 ## Logical Module Mapping
 
-Within a package, a logical module name maps to fixed candidate paths under `[layout].module_root`. A dot in a module name is always a directory separator. If `module_root = "src"`, then `Foo` maps to interface candidate `src/Foo.kyo` and body candidate `src/Foo.kai`, while `Foo.Bar` maps to interface candidate `src/Foo/Bar.kyo` and body candidate `src/Foo/Bar.kai`.
+Within a package, a logical module name maps to one fixed candidate path under `[layout].module_root`. A dot in a module name is always a directory separator. If `module_root = "src"`, then `Foo` maps to `src/Foo.kyo` and `Foo.Bar` maps to `src/Foo/Bar.kyo`. Each logical module is one source file; whole-file target variants of a logical module are selected before module-graph construction as described under target selection.
 
-> Trace: D52, D78
-> Covers: Kyokai maps dotted module names to fixed `.kyo` interface and `.kai` body candidate paths under the explicit package module root.
+> Trace: D52, D78, D537
+> Covers: Kyokai maps each dotted module name to one `.kyo` source file under the explicit package module root.
 
 There is no alternate dotted filename form such as `src/Foo.Bar.kyo`. There is no `mod.kyo` convention. There is no include path search. There is no fallback from one package's module root into another directory. One logical module path has one source spelling inside its package.
 
@@ -43,15 +43,15 @@ For each package, the toolchain discovers source modules only under the declared
 > Trace: D78, D83
 > Covers: Source module discovery is confined to the package's explicit module root.
 
-A discovered `.kyo` file is an interface source. A discovered `.kai` file is a body source. A source file with a Kyokai extension that does not match the required module declaration for its resolved logical path is rejected. A file with an old Austral extension such as `.aui` or `.aum` is not a Kyokai source file.
+A discovered `.kyo` file is a module source file. A source file whose module declaration does not match the required module identity for its resolved logical path is rejected. A file with the retired `.kai` extension, or an old Austral extension such as `.aui` or `.aum`, is not a Kyokai source file and is rejected with a diagnostic that names the single-file model.
 
-> Trace: D52, D78
-> Covers: `.kyo` and `.kai` are the only Kyokai source extensions, and source declarations must match resolved module identity.
+> Trace: D52, D78, D537
+> Covers: `.kyo` is the only Kyokai source extension, the `.kai`/`.aui`/`.aum` extensions are retired, and source declarations must match resolved module identity.
 
-A public or importable source module has one selected interface and one selected body when its declarations require implementation. A package-private executable-internal, test-only, or manifest-admitted generated implementation-internal module can consist of one selected body without a paired interface. The toolchain rejects any attempt to import a body-only module or publish declarations from it into external `.koi` API surface. If a package depends on a module from another package, the downstream checker consumes that dependency through the dependency package's `.koi` interface artifact rather than reading the dependency's private bodies. Within the same package, body source is available for implementation checking but does not become importable interface surface.
+A logical module has one selected `.kyo` source file. The compiler derives the importable interface from that file: a module that marks declarations `public` publishes them, and a module whose declarations are all private or `internal` is non-importable and is the in-file replacement for the old body-only module. The toolchain rejects any attempt to import a non-importable module or publish its private declarations into external `.koi` API surface. If a package depends on a module from another package, the downstream checker consumes that dependency through the dependency package's `.koi` interface artifact rather than reading the dependency's private source. Within the same package, a module's full source is available for implementation checking, but only its derived public/`internal` surface becomes importable.
 
-> Trace: D17, D52, D78, D79, D313
-> Covers: Importable source modules expose interfaces, restricted body-only internals remain non-importable, dependency checking consumes `.koi` interfaces, and same-package bodies remain implementation inputs rather than import surfaces.
+> Trace: D17, D52, D78, D79, D313, D537
+> Covers: Each logical module is one source file whose interface is derived by the compiler, non-importable private-only modules replace body-only modules, dependency checking consumes `.koi` interfaces, and same-package source stays an implementation input outside its derived surface.
 
 ## Target And Edition Selection
 
@@ -60,10 +60,10 @@ The package edition is read from `[package].edition` before parsing source files
 > Trace: D105, D243
 > Covers: Source parsing and source-facing tools are edition-aware and use the package manifest edition.
 
-Whole-file target selection happens before module-graph construction. If a package supplies platform-specific bodies for a module, the build target selects exactly one body for the logical module before imports are resolved. The selected body must still declare the same module name as the interface.
+Whole-file target selection happens before module-graph construction. If a package supplies platform-specific variants of a module's source file, the build target selects exactly one `.kyo` variant for the logical module before imports are resolved. The selected variant must declare the resolved module name, and every variant must expose a compatible derived interface.
 
-> Trace: D19, D19a, D78
-> Covers: Target-specific body selection happens before module graph construction and must still preserve module identity.
+> Trace: D19, D19a, D78, D390, D537
+> Covers: Target-specific whole-file variant selection happens before module graph construction, preserves module identity, and requires a compatible derived interface across variants.
 
 Declaration-level `when` guards are evaluated during source checking for the selected target. A false guard makes the declaration semantically absent from the current build. In a shared selected module, overlapping active definitions for the same declaration and zero active definitions where one is required are compile-time errors.
 
@@ -82,20 +82,30 @@ The toolchain parses interface imports to construct the package module graph. Im
 > Trace: D78, D79, D179, D214
 > Covers: Import graph construction uses file-scope imports and requires each imported module to resolve to one visible interface.
 
-Same-package imports may see public and internal declarations from the imported module's interface. Cross-package imports may see only public declarations recorded in the dependency interface artifact. Private body declarations are never candidates for import graph construction.
+Imports may also target installed first-party standard-library modules and installed first-party Bridge modules. Standard-library modules live under `Kyokai.*`; official Bridge entries live under `Kyokai.Bridge.*`. The installed toolchain supplies their checked interface artifacts and admission metadata. They do not come from the current package's module root, from `[dependencies]`, from the package resolver, or from a vendored dependency directory.
+
+> Trace: D1, D78-D79, D152, D529
+> Covers: Standard-library and Bridge imports resolve through installed first-party interface roots rather than package-source discovery or dependency vendoring.
+
+Same-package imports may see public and internal declarations from the imported module's interface. Cross-package imports may see only public declarations recorded in the dependency interface artifact. Private (unmarked) declarations are never candidates for import graph construction.
 
 > Trace: D17, D78, D79
 > Covers: Import graph visibility follows package boundaries, and private declarations never enter the import graph.
+
+Bridge entry admission status is part of the imported artifact facts. Experimental, compatibility, transitional, and internal Bridge entries cannot masquerade as stable public modules. If a selected toolchain lacks a requested Bridge entry, target contract, native library, or compatibility class, module resolution or build planning reports that missing bridge fact directly instead of falling back to a package of the same name.
+
+> Trace: D80, D149, D157, D229, D529
+> Covers: Bridge imports preserve admission status and fail explicitly when installed support or target/native prerequisites are absent.
 
 The import graph must be deterministic. The same manifest, lockfile, target, edition, source content, generated-source inputs, and compiler compatibility class must produce the same resolved module graph or the same diagnostics. Host directory iteration order, filesystem case behavior, and import declaration order must not change the selected graph.
 
 > Trace: D78, D83, D214
 > Covers: Module graph construction is deterministic and reproducible, independent of host iteration order and import order.
 
-Module import graphs are acyclic. A module cannot import itself directly or indirectly through `.kyo`, `.kai`, generated interface artifacts, or re-export chains. The compiler rejects a cycle before type checking and prints the complete cycle path. A body can call functions from another body only through declarations visible in interfaces or same-module private declarations; direct private-body cycles across modules are illegal.
+Module import graphs are acyclic. A module cannot import itself directly or indirectly through `.kyo` source, generated `.koi` interface artifacts, or re-export chains. The compiler rejects a cycle before type checking and prints the complete cycle path. A module calls another module only through its derived interface; a module's private declarations are never an import target from another module.
 
 > Trace: D78, D79, D155
-> Covers: Interface import cycles are rejected under the current module model, and cross-module private body coupling is not a supported import mechanism.
+> Covers: Import cycles are rejected under the single-file module model, and another module's private declarations are not an import mechanism.
 
 ## Koi Artifact Role
 
@@ -104,20 +114,20 @@ A `.koi` artifact is the checked interface product of a package. It is not an in
 > Trace: D79, D83, D86
 > Covers: `.koi` is a versioned package interface contract artifact, not an opaque cache.
 
-A `.koi` artifact records at least the producing compiler version, language edition, `.koi` format version, target contract, package identity, package version, package module set, hashes or fingerprints of interface inputs, visibility-marked declarations, type definitions at their visible opacity level, typeclass definitions, legal instances, generic metadata needed for downstream checking and materialization, and any compatibility fields required by the backend and generics chapters.
+A `.koi` artifact records at least the producing compiler version, language edition, `.koi` format version, target contract, package identity, package version, package module set, hashes or fingerprints of interface inputs, visibility-marked declarations, type definitions at their visible opacity level, typeclass definitions, legal instances, generic metadata needed for downstream checking and materialization, and any compatibility fields required by generated-code materialization and the generics chapter.
 
 > Trace: D79, D82a, D82b, D83, D105
 > Covers: `.koi` artifacts record identity, compatibility, interface declarations, visible type/typeclass/instance data, hashes, and generic metadata needed by downstream compilation.
 
-A `.koi` artifact may record internal declarations and internal instances because same-package incremental checking and documentation may need them. A downstream package outside the producing package must treat internal entries as nonexistent. Private `.kai` declarations that are not part of the package interface never appear in `.koi`.
+A `.koi` artifact may record internal declarations and internal instances because same-package incremental checking and documentation may need them. A downstream package outside the producing package must treat internal entries as nonexistent. Private unmarked declarations that are not part of the package interface never appear in `.koi`.
 
 > Trace: D17, D79
-> Covers: `.koi` preserves internal metadata for same-package use while excluding private body declarations and hiding internals from external consumers.
+> Covers: `.koi` preserves internal metadata for same-package use while excluding private declarations and hiding internals from external consumers.
 
 A `.koi` artifact records enough information for dependency consumers to typecheck against public declarations without reading dependency source bodies. It does not grant access to private implementation, unsafe internals, or hidden source files.
 
 > Trace: D17, D79, D245
-> Covers: Dependency consumers typecheck against interface artifacts, not private body source or unsafe implementation details.
+> Covers: Dependency consumers typecheck against interface artifacts, not private source or unsafe implementation details.
 
 ## Koi Binary Interface
 
@@ -142,8 +152,8 @@ The section table is sorted by numeric section id. Duplicate section ids are ill
 | ---: | --- | --- | --- |
 | 1 | `manifest` | Package identity, package version, edition, module root, workspace/package owner facts. | D78, D105, D265 |
 | 2 | `producer` | Compiler version, compiler compatibility classes, KBI version, diagnostic schema version when the artifact records diagnostic metadata. | D79, D265 |
-| 3 | `target` | Target triple, target contract hash, backend contract class, CPU-feature baseline if it affects interface shape. | D80, D149, D265 |
-| 4 | `sources` | Module set, source-origin records, interface hashes, selected body hashes where interface-affecting. | D52, D78, D83, D265 |
+| 3 | `target` | Target triple, target contract hash, C-toolchain compatibility class when it affects materialization, and CPU-feature baseline if it affects interface shape. | D80, D149, D265, D530-D532 |
+| 4 | `sources` | Module set, source-origin records, source-file hashes, selected whole-file variant hashes where interface-affecting. | D52, D78, D83, D265 |
 | 5 | `imports` | Dependency package identities, dependency `.koi` hashes, lockfile dependency ids. | D51, D79, D83, D265 |
 | 6 | `declarations` | Visibility-marked public/internal declaration graph. | D17, D79, D265 |
 | 7 | `types` | Nominal type ids, universes, visible opacity, visible layout facts. | D42, D79, D265 |
@@ -165,7 +175,7 @@ A `.koi` artifact represents the checked interface graph after parsing, name res
 > Trace: D19, D29, D53, D79, D105, D150, D245, D265
 > Covers: `.koi` stores checked interface semantics, not unchecked source text.
 
-A `.koi` artifact does not preserve unchecked source syntax, comments except through documentation metadata, private body declarations, private statement bodies, or compiler memory layouts. It stores generic body materialization metadata only where the generics contract requires downstream packages to materialize checked generic code without reading upstream source.
+A `.koi` artifact does not preserve unchecked source syntax, comments except through documentation metadata, private declarations, private statement bodies, or compiler memory layouts. It stores generic body materialization metadata only where the generics contract requires downstream packages to materialize checked generic code without reading upstream source.
 
 > Trace: D17, D79, D82b, D218, D265
 > Covers: `.koi` excludes private source and unchecked syntax while allowing explicitly versioned generic materialization metadata.
@@ -256,7 +266,7 @@ Compiled code artifacts for a package are separate from `.koi` interface artifac
 > Trace: D79, D83, D139
 > Covers: Code artifacts and interface artifacts share reproducible identity inputs, and linking must not pair incompatible code with a different checked interface.
 
-Generic and typeclass materialization metadata stored in `.koi` is governed by the generics and backend chapters. The artifact must not hide runtime dictionaries or erased trait-object machinery that the language rejects. If downstream compilation needs generic bodies or materialization descriptions, the `.koi` compatibility contract must state exactly what is available.
+Generic and typeclass materialization metadata stored in `.koi` is governed by the generics and generated-C lowering chapters. The artifact must not hide runtime dictionaries or erased trait-object machinery that the language rejects. If downstream compilation needs generic bodies or materialization descriptions, the `.koi` compatibility contract must state exactly what is available.
 
 > Trace: D79, D82, D82a, D82b, D193
 > Covers: `.koi` generic metadata must respect Kyokai's static-dispatch and no-hidden-runtime-dictionary model.
@@ -273,7 +283,7 @@ Audit tooling must be able to list, per package, modules marked `Unsafe_Module`,
 > Trace: D20, D79, D245, D255
 > Covers: Audit tooling exposes unsafe module and artifact provenance while preserving ordinary visibility and capability rules.
 
-Documentation generation must follow visibility. Public docs for external consumers show public declarations. Same-package/internal docs may include internal declarations when explicitly requested. Private body declarations are excluded from public docs by default.
+Documentation generation must follow visibility. Public docs for external consumers show public declarations. Same-package/internal docs may include internal declarations when explicitly requested. Private (unmarked) declarations are excluded from public docs by default.
 
 > Trace: D17, D29, D79
 > Covers: Documentation output respects public/internal/private visibility and uses `.koi` metadata where appropriate.
@@ -301,7 +311,7 @@ Unknown required sections cause consumer rejection. Unknown extension sections a
 
 Cross-edition `.koi` consumption is rejected unless a KBI normalization table explicitly admits the producing edition, consuming edition, normalized sections, erased differences, preserved differences, and compatibility result. No cross-edition normalization table is admitted for the initial edition. A mixed-edition workspace can exist as repository structure without implying cross-edition dependency compatibility.
 
-> Trace: D382, D438
+> Trace: D438, D537
 > Covers: `.koi` remains edition-specific until a reviewed normalization table defines an exact cross-edition mapping.
 
 ## Compressed KBI Transport
@@ -313,7 +323,7 @@ A compressed `.koi` wrapper is transport only. The wrapper records algorithm, ve
 
 ## Shared KBI Reader And File Roles
 
-The compiler, package manager, docs generator, audit tool, Analysis Server, SemVer checker, and cache use the same `.koi` parser. `.kyo`, `.kai`, and `.koi` role diagnostics reject handwritten `.koi`, body/source extension swaps, attempts to compile `.koi` as source, and stale generated artifacts. A `.koi` file is generated checked interface data, not a source file.
+The compiler, package manager, docs generator, audit tool, Analysis Server, SemVer checker, and cache use the same `.koi` parser. `.kyo` and `.koi` role diagnostics reject handwritten `.koi`, the retired `.kai` extension, attempts to compile `.koi` as source, and stale generated artifacts. A `.kyo` file is the handwritten module source; a `.koi` file is generated checked interface data, not a source file.
 
-> Trace: D79, D265, D518
-> Covers: Every tool consumes one `.koi` parser and reports file-role mistakes without pretending generated artifacts are editable source.
+> Trace: D79, D265, D518, D537
+> Covers: Every tool consumes one `.koi` parser and reports file-role mistakes, including the retired `.kai` extension, without pretending generated artifacts are editable source.

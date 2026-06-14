@@ -30,7 +30,7 @@ Borretti's Austral argument still works: words are easier to search and remember
 > Trace: D9, D13, D15, D41, D63
 > Covers: Kyokai uses keyword operators and named control forms while keeping formal grammar boundaries.
 
-Kyokai does use symbols where the symbol is already a strong visual contract: `&`, `&!`, and `&~` for borrowing, `!=` for inequality, `[T]` for generic arguments, and file extensions for interface/body separation. The point is not words over symbols as a superstition. The point is that the mark should teach the boundary faster than it decorates the page.
+Kyokai does use symbols where the symbol is already a strong visual contract: `&`, `&!`, and `&~` for borrowing, `!=` for inequality, `[T]` for generic arguments, and the `.kyo` source versus `.koi` artifact extension split that separates handwritten source from the generated interface. The point is not words over symbols as a superstition. The point is that the mark should teach the boundary faster than it decorates the page.
 
 > Trace: D7b, D10, D14, D52, D158/D189
 > Covers: Symbol use is admitted when it carries a clear, stable semantic boundary.
@@ -38,7 +38,7 @@ Kyokai does use symbols where the symbol is already a strong visual contract: `&
 ## Boundary Terminators
 
 [Rikona Kurasaki / Mjoyufull]
-Kyokai's reversed and semantic terminators are not a costume. `fi;`, `od;`, `esac;`, `qed;`, `drop;`, `spec;`, and `mon;` tell the reader what boundary just closed. Braces tell you something ended. Kyokai terminators tell you what ended.
+Kyokai's reversed and semantic terminators are not a costume. `fi;`, `od;`, `esac;`, `qed;`, `drop;`, `spec;`, and `mon;` tell the reader what boundary just closed. Braces show only that something ended. Kyokai terminators identify what ended.
 
 > Trace: D9, D13, D111/D127, D182
 > Covers: Kyokai terminators encode construct boundaries and keep nested code readable.

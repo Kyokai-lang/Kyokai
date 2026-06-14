@@ -54,7 +54,7 @@ The eighth goal is maintainability. Borretti's Austral point is still right: cod
 > Covers: Kyokai treats stable interfaces, explicit artifacts, editions, package/workspace boundaries, stdlib contracts, and public decision governance as maintainability requirements.
 
 [Rikona Kurasaki / Mjoyufull]
-The ninth goal is modularity. Kyokai keeps the inherited interface/body split because it is still one of Austral's strongest bones: a module can publish a checked surface before its body exists, and another module can typecheck against that surface without seeing the private implementation. Kyokai then tightens the world around it with `.kyo`/`.kai` source files, package-visible `internal`, deterministic module resolution, and `.koi` interface artifacts.
+The ninth goal is modularity. Kyokai keeps Austral's strongest bone, interface-first checking, where another module typechecks against a published surface without seeing the private implementation, but it stops paying for that surface twice. A module is one `.kyo` source file, and the compiler derives the checked interface from it rather than asking the author to hand-maintain a second file. Kyokai then tightens the world around it with per-declaration `public`/`internal` visibility, deterministic module resolution, and `.koi` interface artifacts.
 
 > Trace: D17, D52, D78, D79, D179, D214
 > Covers: Kyokai preserves Austral's module-interface/module-body separation while specifying file extensions, import forms, visibility, module resolution, and interface artifacts as Kyokai rules.
@@ -73,7 +73,7 @@ The eleventh goal is production completeness. Kyokai is not only a core calculus
 The twelfth goal is implementation honesty. The C backend remains important for bootstrap, reference behavior, inspection, and target bring-up, but C does not define Kyokai. Backend and target limitations must be written as backend or target contracts. They must not silently weaken the language or turn accepted safe Kyokai into C undefined behavior.
 
 > Trace: D4, D31, D80, D139, D141, D149, D228
-> Covers: Kyokai keeps C as a first-class backend, plans LLVM as the long-term optimizing backend after self-hosting, and requires backend contracts and generated-code behavior to preserve Kyokai semantics explicitly.
+> Covers: Kyokai maintains one generated-C backend, treats optimizing C compilers as admitted external toolchains, and requires generated code and toolchain behavior to preserve Kyokai semantics explicitly.
 
 The thirteenth goal is formal honesty. Kyokai may state intended invariants in prose while the proof work is still being built, but it must not pretend that prose has already discharged the proof burden. Before `v1.0`, Kyokai must produce a paper proof for the sequential ownership-and-borrowing core, with later mechanized proof work after self-hosting.
 

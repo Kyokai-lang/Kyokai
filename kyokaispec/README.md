@@ -7,8 +7,8 @@ The current extracted Kyokai chapters live under:
 | Directory | Role |
 | --- | --- |
 | `src/language/` | Normative language rules: syntax, types, ownership, evaluation, contracts, capabilities, concurrency, unsafe/FFI, layout, built-ins, and examples. |
-| `src/toolchain/` | Normative toolchain rules: manifests, packages, `.koi`, CLI, profiles, diagnostics, formatting, tests, docs, LSP, audit, reproducibility, package index, releases, generation, and playground behavior. |
-| `src/stdlib/` | Normative standard-library contract rules: admission, API contract fields, allocators, containers, text/paths, collections, iterators, math, I/O, concurrency, crypto, and transitional FFI tracking. |
+| `src/toolchain/` | Normative toolchain rules: manifests, packages, `.koi`, CLI, profiles, diagnostics, formatting, tests, docs, LSP, audit, reproducibility, package index, releases, generation, capability deny policy, migration, foreign adapters, packaging, browser/mobile tooling, and deployment plans. |
+| `src/stdlib/` | Normative standard-library contract rules: admission, API contract fields, allocators, containers, text/paths, collections, iterators, math, I/O, concurrency, crypto, transitional FFI tracking, and application/platform integration contracts. |
 | `src/rationale/` | Non-normative rationale with attribution. These chapters explain why rules exist; they do not replace the normative chapters. |
 | `src/appendices/` | License/provenance, decision traceability, Austral difference index, source-material replacement map, and formalization roadmap. |
 
@@ -28,9 +28,9 @@ The old inherited Austral chapter files have been removed from the active build 
 | --- | --- | --- |
 | Kyokai spec structure | Extracted through Phase 15 | The chapter families listed above are present and included by the build. |
 | Kyokai language spec text | Extracted | `src/language/00-introduction.md` through `src/language/19-examples.md`. |
-| Kyokai toolchain spec text | Extracted | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/11-build-generation-and-playground.md`. |
-| Kyokai stdlib contract spec | Extracted | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/11-transitional-ffi-tracking.md`. |
-| Rationale rewrite | Extracted | `src/rationale/00-rationale-index.md` through `src/rationale/08-toolchain-philosophy.md`. |
+| Kyokai toolchain spec text | Extracted | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/13-application-integration-and-deployment.md`. |
+| Kyokai stdlib contract spec | Extracted | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/12-application-integration-contracts.md`. |
+| Rationale rewrite | Extracted | `src/rationale/00-rationale-index.md` through `src/rationale/09-backend-choice.md`. |
 | Appendices and traceability | Extracted | `src/appendices/a-license.md` through `src/appendices/d-formalization-roadmap.md`. |
 | Austral source material | Replaced in active spec tree | Replacements are indexed in `src/appendices/c-austral-differences.md`; Borretti's Austral wording is credited when directly used. |
 | Compiler/source conformance | Not yet verified as Kyokai implementation | `SPEC_COMPILER_TRACE.md` separates extracted spec text from inherited Austral compiler evidence and implementation gaps. |

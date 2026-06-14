@@ -11,7 +11,7 @@ The formatter is where style stops being a debate in every doorway. Kyokai has o
 
 ## Contract
 
-`kyokai fmt` formats `.kyo` and `.kai` source files. It is deterministic, idempotent, zero-configuration, and parse-preserving. Running it twice on the same source must produce byte-identical output the second time. Formatting must not change program semantics, module identity, comments' attachment to declarations, documentation comments' meaning, or diagnostic suppression scope.
+`kyokai fmt` formats `.kyo` source files. It is deterministic, idempotent, zero-configuration, and parse-preserving. Running it twice on the same source must produce byte-identical output the second time. Formatting must not change program semantics, module identity, comments' attachment to declarations, documentation comments' meaning, or diagnostic suppression scope.
 
 > Trace: D25, D29, D52, D83, D442-D443
 > Covers: Formatting is stable, semantic-preserving, and safe to automate.
@@ -69,7 +69,7 @@ The formatter preserves import order unless workspace or package policy sets `fm
 
 ## File Selection
 
-In package scope, `kyokai fmt` selects all `.kyo` and `.kai` files under the package module root and any explicitly declared generated-source outputs currently present when the generation chapter marks them formatter-owned. In workspace scope, it selects member packages in deterministic package-name order.
+In package scope, `kyokai fmt` selects all `.kyo` files under the package module root and any explicitly declared generated-source outputs currently present when the generation chapter marks them formatter-owned. In workspace scope, it selects member packages in deterministic package-name order.
 
 > Trace: D25, D78, D83
 > Covers: Formatter file selection follows package/workspace/module roots deterministically.

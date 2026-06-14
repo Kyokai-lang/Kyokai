@@ -11,6 +11,12 @@ The overall pipeline looks like this:
 
 # Parsing
 
+> Note: this document describes the inherited Austral bootstrapping compiler.
+> Kyokai's accepted module model is single-file (D537): one `.kyo` source file
+> per module with a compiler-derived `.koi` interface and per-declaration
+> visibility (D538). The two-file parsing and combining passes below are
+> migration material, not Kyokai's target frontend.
+
 Every Austral module is divided into two files: the module interface file and
 the module body file.
 

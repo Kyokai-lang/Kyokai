@@ -204,6 +204,15 @@ Dynamic loading, when supported by the toolchain and target contract, requires e
 > Trace: D20, D85, D211, D245
 > Covers: Dynamic code receives authority only by explicit value passing.
 
+## Toolchain Capability Deny Policy
+
+The toolchain capability deny policy is a rejection policy over declared and inferred authority requirements. It is not a language effect, not a capability constructor, and not a way to relax source checking. If a user, manifest, CI lane, or command denies `Network`, `Process`, `DynamicLoader`, `Filesystem`, or another canonical capability name or family, the toolchain rejects package graphs, targets, tests, generators, docs examples, audit/publish payloads, and execution lanes whose required capability set intersects that denial.
+
+The denial happens in the toolchain before success. It does not change the source meaning of a capability declaration, ownership movement, borrow, unsafe contract, FFI wrapper, startup bundle, or runtime value. A source program that is legal without the deny policy remains the same source program; the selected command simply refuses to accept it under the stricter authority ceiling.
+
+> Trace: D527
+> Covers: Capability deny policy fails toolchain operations that exceed selected authority ceilings without granting, forging, or changing source-level capabilities.
+
 ## Standard Capability Families
 
 Filesystem, environment, process, clock, randomness, terminal, network, signal, dynamic-loader, and unsafe authority are separate capability families. A broad capability may derive narrower capabilities, but no narrower capability can derive a broader one unless its contract explicitly says it carries that broader authority.

@@ -9,7 +9,7 @@ Kyokai's toolchain is not a pile of side quests around the language. It is part 
 > Trace: D26, D83, D86, D155
 > Covers: The Kyokai toolchain spec is normative, user-visible tooling behavior is specified, and build behavior cannot drift through convention.
 
-This toolchain spec is the companion to the language spec. The language spec owns syntax, typing, evaluation, ownership, contracts, capabilities, unsafe boundaries, concurrency, and backend semantic obligations. This toolchain spec owns how projects are shaped, how commands run, how artifacts are named, how diagnostics are emitted, how packages are resolved, how builds stay reproducible, and how public tooling exposes the same compiler truth.
+This toolchain spec is the companion to the language spec. The language spec owns syntax, typing, evaluation, ownership, contracts, capabilities, unsafe boundaries, concurrency, and generated-code semantic obligations. This toolchain spec owns how projects are shaped, how commands run, how artifacts are named, how diagnostics are emitted, how packages are resolved, how builds stay reproducible, and how public tooling exposes the same compiler truth.
 
 > Trace: D26, D78, D79, D86
 > Covers: Language behavior and toolchain behavior are separate normative surfaces with a shared package, module, artifact, and compiler-engine boundary.
@@ -34,19 +34,22 @@ No tool command may make a program legal by skipping a language check. A fast co
 | Area | Required Contract | Trace |
 | --- | --- | --- |
 | Project shape | `kyokai.toml`, package roots, workspace roots, lockfiles, and module roots are explicit. | D51, D78, D83 |
-| Source graph | `.kyo` interfaces, `.kai` bodies, whole-file target selection, declaration guards, imports, and `.koi` artifacts produce one deterministic module graph. | D52, D78-D79, D105, D123 |
+| Source graph | One `.kyo` source file per module, whole-file target selection, declaration guards, imports, and `.koi` artifacts produce one deterministic module graph. | D52, D78-D79, D105, D123, D537 |
 | CLI | One `kyokai` binary exposes project creation, health, check, build, run, test, fmt, doc, lsp, audit, explain, fix, bench, repl, eval, package, `.koi`, and release-support commands with stable exit behavior. | D26, D28, D151-D151a, D218, D225, D266-D270 |
-| Build policy | Profiles, targets, backends, link mode, debug info, LTO, identical-code folding, and runner choice are written configuration. | D27, D31, D80, D149, D200 |
+| Build policy | Profiles, targets, admitted C compiler/linker contracts, link mode, debug info, LTO, identical-code folding, and runner choice are written configuration over the generated-C pipeline. | D27, D31, D80, D149, D200, D530-D536 |
 | Diagnostics | Human and JSON diagnostics carry stable codes, spans, notes, suggestions, explanation catalog entries, automatic-fix applicability, categories, and suppression rules. | D29, D267 |
 | Formatting | `kyokai fmt` is deterministic, idempotent, zero-config, and source-semantics preserving. | D25 |
 | Testing | Inline tests, doc tests, capability tests, property tests, fuzzing, coverage, and benches use ordinary language semantics with explicit capability authority and replayable reports. | D28, D137, D218, D220, D270 |
 | Docs, LSP, audit | Documentation, editor services, and audit reports read the same compiler graph and expose visibility, contracts, unsafe, capability, and dependency facts. | D148, D150, D218 |
+| Capability deny policy | Toolchain defaults, user/global config, manifests, and command flags can deny named capability families; the strictest selected policy rejects matching package, target, generator, test, docs, audit, publish, or execution requirements without granting authority. | D527 |
+| Bridge collection | Installed first-party `Kyokai.Bridge.*` modules provide curated shipped third-party integrations with admission, provenance, license, unsafe, capability, target, docs, and audit records; they are not ordinary vendored dependencies. | D529 |
+| Generated-C and toolchains | One C11-subset emission path, compiler-family admission, source maps/debugging, external-tool evidence, incremental C units, build-time gates, and standard profiles define compilation across major targets. | D530-D536 |
 | Reproducibility | Artifacts are deterministic over the written build identity; hidden host inputs are excluded. | D83, D144 |
 | Ecosystem | Discovery index, package inspection, vendoring, yanks, SemVer checks, CI installation, release artifacts, toolchain health, and provenance are specified. | D157, D221, D223-D225, D244, D268-D269 |
 | Generation and exploration | Build generation, `@embedFile`, `eval`, REPL, Compiler Explorer, and sandbox runners are explicit and do not gain hidden authority. | D151-D151a, D226 |
 
-> Trace: D25-D29, D31, D51, D78-D80, D83, D105, D137, D144, D148-D151a, D157, D200, D218, D220-D226, D244, D266-D270
-> Covers: The toolchain spec surface includes every accepted toolchain decision family needed for a self-contained Kyokai project.
+> Trace: D25-D29, D31, D51, D78-D80, D83, D105, D137, D144, D148-D151a, D157, D200, D218, D220-D226, D244, D266-D270, D527, D529-D536
+> Covers: The toolchain spec surface includes every accepted toolchain decision family needed for a self-contained Kyokai project, including deny-only authority policy, the official Bridge collection boundary, and one generated-C/toolchain architecture.
 
 ## Normative Words
 
@@ -62,10 +65,10 @@ If this spec says an implementation may choose a value, the allowed domain, wher
 
 ## Shared Inputs
 
-The common build identity includes package and workspace manifests, lockfiles, source contents, generated source declarations and declared inputs, selected profile, selected target, selected backend, language edition, compiler compatibility class, `.koi` compatibility class, target-spec files, explicit environment variables admitted by this spec, and command-line flags that affect output or acceptance.
+The common build identity includes package and workspace manifests, lockfiles, source contents, generated source declarations and declared inputs, selected profile, selected target, admitted C-toolchain contract identity, language edition, compiler compatibility class, `.koi` compatibility class, target-spec files, effective policy values such as capability deny policy when they affect acceptance or artifacts, explicit environment variables admitted by this spec, and command-line flags that affect output or acceptance.
 
-> Trace: D79, D83, D105, D144, D149
-> Covers: Build identity is explicit and shared across artifacts, dependency checking, incremental caches, and reproducible outputs.
+> Trace: D79, D83, D105, D144, D149, D527
+> Covers: Build identity is explicit and shared across artifacts, dependency checking, incremental caches, authority-deny policy, and reproducible outputs.
 
 Hidden inputs are forbidden. Host locale, timezone, current time, process ID, random seed, directory iteration order, unrelated environment variables, absolute build path, and user shell configuration must not affect accepted source, diagnostics meaning, `.koi` contents, generated C, object code, libraries, or executables unless a chapter defines an explicit opt-in mode.
 

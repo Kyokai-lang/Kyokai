@@ -11,15 +11,23 @@ closed_nonproof_reasons = [
 ]
 required_code_paths = [
   "lib/Compiler.ml",
-  "lib/KyokaiSourceFile.ml",
+  "lib/compiler/package/manifest/KyokaiPackageSource.ml",
+  "lib/compiler/frontend/semantic/KyokaiInterfaceValidation.ml",
+  "lib/compiler/frontend/source/KyokaiSourceFile.ml",
+  "lib/compiler/frontend/parser/KyokaiSurfaceParser.ml",
   "lib/LinearityCheck.ml",
   "lib/DesugarBorrows.ml",
   "lib/CodeGen.ml",
+  "bin/kyokai.ml",
   "test-programs/runner.py",
   "kyokaicalculus/model_tests.py",
   "kyokaicalculus/machine_runner.py",
   "kyokaicalculus/lean/KyokaiCalculusSpot.lean",
-  "tools/check_prooftrace.py",
+  "toolchain/conformance/check_fixtures.py",
+  "toolchain/conformance/stage_runner/KyokaiConformanceStage.ml",
+  "toolchain/conformance/stage_runner/KyokaiConformanceStageLib.ml",
+  "toolchain/conformance/run_fixtures.py",
+  "toolchain/prooftrace/check_prooftrace.py",
   "lib/prelude.c",
   "lib/prelude.h",
   "lib/builtin/Memory.aui",
@@ -89,6 +97,7 @@ proof_required = true
 "kyokaispec/src/rationale/06-concurrency.md" = "SPEC-RATIONALE-06-CONCURRENCY"
 "kyokaispec/src/rationale/07-stdlib-philosophy.md" = "SPEC-RATIONALE-07-STDLIB-PHILOSOPHY"
 "kyokaispec/src/rationale/08-toolchain-philosophy.md" = "SPEC-RATIONALE-08-TOOLCHAIN-PHILOSOPHY"
+"kyokaispec/src/rationale/09-backend-choice.md" = "SPEC-RATIONALE-09-BACKEND-CHOICE"
 "kyokaispec/src/stdlib/00-stdlib-overview.md" = "SPEC-STDLIB-00-STDLIB-OVERVIEW"
 "kyokaispec/src/stdlib/01-admission-contracts.md" = "SPEC-STDLIB-01-ADMISSION-CONTRACTS"
 "kyokaispec/src/stdlib/02-core-result-optional-display-error.md" = "SPEC-STDLIB-02-CORE-RESULT-OPTIONAL-DISPLAY-ERROR"
@@ -101,6 +110,7 @@ proof_required = true
 "kyokaispec/src/stdlib/09-concurrency-primitives.md" = "SPEC-STDLIB-09-CONCURRENCY-PRIMITIVES"
 "kyokaispec/src/stdlib/10-crypto-policy.md" = "SPEC-STDLIB-10-CRYPTO-POLICY"
 "kyokaispec/src/stdlib/11-transitional-ffi-tracking.md" = "SPEC-STDLIB-11-TRANSITIONAL-FFI-TRACKING"
+"kyokaispec/src/stdlib/12-application-integration-contracts.md" = "SPEC-STDLIB-12-APPLICATION-INTEGRATION-CONTRACTS"
 "kyokaispec/src/toolchain/00-toolchain-overview.md" = "SPEC-TOOLCHAIN-00-TOOLCHAIN-OVERVIEW"
 "kyokaispec/src/toolchain/01-manifest-package-workspace.md" = "SPEC-TOOLCHAIN-01-MANIFEST-PACKAGE-WORKSPACE"
 "kyokaispec/src/toolchain/02-module-resolution-and-koi.md" = "SPEC-TOOLCHAIN-02-MODULE-RESOLUTION-AND-KOI"
@@ -113,6 +123,8 @@ proof_required = true
 "kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md" = "SPEC-TOOLCHAIN-09-REPRODUCIBILITY-INCREMENTAL-BUILDS"
 "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md" = "SPEC-TOOLCHAIN-10-PACKAGE-INDEX-SEMVER-RELEASES-CI"
 "kyokaispec/src/toolchain/11-build-generation-and-playground.md" = "SPEC-TOOLCHAIN-11-BUILD-GENERATION-AND-PLAYGROUND"
+"kyokaispec/src/toolchain/12-capability-deny-policy.md" = "SPEC-TOOLCHAIN-12-CAPABILITY-DENY-POLICY"
+"kyokaispec/src/toolchain/13-application-integration-and-deployment.md" = "SPEC-TOOLCHAIN-13-APPLICATION-INTEGRATION-AND-DEPLOYMENT"
 
 [spec_chapter_no_proof]
 "kyokaispec/src/appendices/a-license.md" = "documentation-only"
@@ -129,6 +141,7 @@ proof_required = true
 "kyokaispec/src/rationale/06-concurrency.md" = "documentation-only"
 "kyokaispec/src/rationale/07-stdlib-philosophy.md" = "documentation-only"
 "kyokaispec/src/rationale/08-toolchain-philosophy.md" = "documentation-only"
+"kyokaispec/src/rationale/09-backend-choice.md" = "documentation-only"
 "kyokaispec/src/toolchain/00-toolchain-overview.md" = "tooling-service-behavior"
 "kyokaispec/src/toolchain/01-manifest-package-workspace.md" = "tooling-service-behavior"
 "kyokaispec/src/toolchain/02-module-resolution-and-koi.md" = "tooling-service-behavior"
@@ -141,6 +154,8 @@ proof_required = true
 "kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md" = "tooling-service-behavior"
 "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md" = "tooling-service-behavior"
 "kyokaispec/src/toolchain/11-build-generation-and-playground.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/12-capability-deny-policy.md" = "tooling-service-behavior"
+"kyokaispec/src/toolchain/13-application-integration-and-deployment.md" = "tooling-service-behavior"
 
 [[records]]
 id = "CALC-LAMBDA-K-SEQ"
@@ -175,9 +190,93 @@ proof_artifacts = ["kyokaicalculus/lean/KyokaiCalculusSpot.lean", "kyokaicalculu
 exclusions = ["This narrow Lean artifact does not mechanically establish L1-L40, Theorem P, Theorem Q, compiler correctness, backend correctness, or whole-language soundness."]
 
 [[records]]
+id = "FRONTEND-KYOKAI-INTERFACE-VALIDATION"
+kind = "frontend-scaffold-boundary"
+scope = "Phase 3 semantic validation of compiler-derived module interfaces for public/internal visibility leaks, opaque representation hiding, and rejection of private opaque declarations"
+owner = "frontend-semantics"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/04-modules-and-visibility.md", "kyokaispec/src/language/05-declarations.md", "kyokaispec/src/language/06-type-system.md"]
+implementation_artifacts = ["lib/compiler/frontend/semantic/KyokaiInterfaceValidation.ml", "lib/compiler/package/manifest/KyokaiPackageSource.ml"]
+test_artifacts = ["test/host/frontend/KyokaiInterfaceValidationTest.ml", "test/conformance/modules/rejected-private-type-leak/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This prototype validates local declaration visibility through parsed function, record, and union type summaries. Imported-name resolution, type aliases, typeclasses, instances, contracts, final AST checking, .koi serialization, and whole-program semantic checking remain excluded."]
+
+[[records]]
+id = "TOOL-KYOKAI-CLI-SCAFFOLD"
+kind = "toolchain-cli-boundary"
+scope = "Bootstrap Kyokai public command scaffold for `kyokai --version`, `kyokai check --conformance-fixture <id>`, and `kyokai check <package-or-workspace-root>` over implementation-gated fixture metadata and the current source/package loading scaffold"
+owner = "toolchain-cli"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "bootstrap-harness"
+spec_artifacts = ["kyokaispec/src/toolchain/03-cli.md", "test/conformance/SCHEMA.md"]
+implementation_artifacts = ["bin/kyokai.ml", "bin/dune", "toolchain/conformance/stage_runner/KyokaiConformanceStageLib.ml"]
+test_artifacts = ["test/conformance/parser/accepted-source-skeleton/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This scaffold exposes a narrow Kyokai command identity for version output, conformance-fixture execution, and source/package loading only. It does not implement semantic kyokai check/build/run behavior, full diagnostic-code matching, package graph commands, type checking, linearity checking, backend execution, active conformance status, release reporting, or installed-toolchain behavior."]
+
+[[records]]
+id = "TOOL-CONFORMANCE-FIXTURE-CHECKER"
+kind = "conformance-scaffold-boundary"
+scope = "Conformance fixture metadata checker for required fixture fields, lane placement, input paths, status labels, and ProofTrace references"
+owner = "conformance-infrastructure"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "bootstrap-harness"
+spec_artifacts = ["test/conformance/SCHEMA.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+implementation_artifacts = ["toolchain/conformance/check_fixtures.py", "Makefile"]
+test_artifacts = ["test/conformance/parser/accepted-source-skeleton/fixture.toml", "test/conformance/modules/package-source-discovery/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This checker validates fixture metadata and paths only. It does not execute Kyokai compiler commands, does not validate expected diagnostics, and does not make implementation-gated fixtures count as conformance evidence."]
+
+[[records]]
+id = "TOOL-CONFORMANCE-FIXTURE-RUNNER"
+kind = "conformance-scaffold-boundary"
+scope = "Prototype conformance fixture runner for executing implementation-gated parser, module, and package fixture scaffolds through an explicit Dune-built compiler-stage frontend/package probe"
+owner = "conformance-infrastructure"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "bootstrap-harness"
+spec_artifacts = ["test/conformance/SCHEMA.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+implementation_artifacts = ["toolchain/conformance/stage_runner/KyokaiConformanceStage.ml", "toolchain/conformance/stage_runner/KyokaiConformanceStageLib.ml", "toolchain/conformance/stage_runner/dune", "Makefile", "toolchain/conformance/run_fixtures.py"]
+test_artifacts = ["test/conformance/parser/accepted-source-skeleton/fixture.toml", "test/conformance/parser/rejected-inherited-comment/fixture.toml", "test/conformance/parser/source-span-skeleton/fixture.toml", "test/conformance/parser/function-signature-summary/fixture.toml", "test/conformance/parser/record-summary/fixture.toml", "test/conformance/parser/union-summary/fixture.toml", "test/conformance/modules/package-source-discovery/fixture.toml", "test/conformance/modules/rejected-executable-entry-missing/fixture.toml", "test/conformance/modules/rejected-generated-koi/fixture.toml", "test/conformance/modules/rejected-retired-kai/fixture.toml", "test/conformance/modules/rejected-module-name-mismatch/fixture.toml", "test/conformance/packages/workspace-lockfile-graph/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This runner executes the current implementation-gated parser, module, and package fixture scaffolds through a Dune-built compiler-stage OCaml probe and compares machine-readable expected-result fields for supported fixtures. It reports implementation-gated passes as supporting evidence only. It does not implement the public kyokai check command, active conformance status, full diagnostic-code matching, Git or indexed dependency execution, type checking, linearity checking, runtime execution, backend execution, property testing, fuzzing, or release conformance reporting."]
+
+[[records]]
+id = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"
+kind = "frontend-scaffold-boundary"
+scope = "Phase 3 Kyokai package-source discovery, workspace member expansion, dependency manifest parsing, and isolated source-set loading scaffold for package manifest validation, explicit module roots, canonical containment rejection, executable target selection, one-.kyo-per-module discovery, public/internal derived-interface extraction, selected executable-entry shebang policy, retired-.kai rejection, generated-artifact rejection, inherited-extension rejection, module-declaration checks, package source skeleton parsing, explicit workspace member loading, and duplicate workspace package-name rejection"
+owner = "frontend-source-loading"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "tooling-service-behavior"
+spec_artifacts = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md", "kyokaispec/src/language/04-modules-and-visibility.md"]
+implementation_artifacts = ["lib/compiler/package/manifest/KyokaiPackageSource.ml", "lib/compiler/package/manifest/KyokaiPackageSource.mli"]
+test_artifacts = ["test/host/frontend/KyokaiPackageSourceTest.ml"]
+proof_artifacts = []
+exclusions = ["This prototype handles one package manifest, one explicit module root, canonical containment rejection, dependency syntax parsing, target selection, one-.kyo-per-module discovery, selected-target entry definition checks, selected executable-entry shebang policy, public/internal declaration extraction for later .koi production, retired-.kai rejection, and explicit workspace-member loading. It does not implement Git/index solving, all graph-changing lockfile modes, workspace profile inheritance, profile/target-triple filtering, generated-source admission, inherited-loader wiring, full final AST construction, expression/type parsing, semantic export validation, .koi serialization, package-index behavior, full public command semantics, or conformance-backed status."]
+
+[[records]]
 id = "FRONTEND-KYOKAI-SOURCE-TEXT"
 kind = "frontend-scaffold-boundary"
-scope = "Isolated Kyokai source-byte contract scaffold for UTF-8 validation, BOM rejection, newline validation, scalar-column diagnostics, and role-gated shebang handling"
+scope = "Isolated Kyokai source-byte contract scaffold for UTF-8 validation, BOM rejection, newline validation, scalar-column diagnostics, and manifest-selected executable-entry shebang handling"
 owner = "frontend-source-loading"
 spec_status = "specified"
 implementation_status = "prototype"
@@ -185,10 +284,44 @@ conformance_status = "planned"
 proof_status = "intended-by-spec"
 proof_required = true
 spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
-implementation_artifacts = ["lib/KyokaiSourceText.ml", "lib/KyokaiSourceText.mli"]
-test_artifacts = ["test/KyokaiSourceTextTest.ml"]
+implementation_artifacts = ["lib/compiler/frontend/source/KyokaiSourceText.ml", "lib/compiler/frontend/source/KyokaiSourceText.mli"]
+test_artifacts = ["test/host/frontend/KyokaiSourceTextTest.ml"]
 proof_artifacts = []
 exclusions = ["This prototype validates source bytes, receives role-gated shebang policy from the source-role scaffold, and can feed the isolated Kyokai lexical scanner. It is not wired into the inherited lexer, manifest loader, executable-target discovery, parser, formatter, or conformance runner. Display-width columns remain a later toolchain presentation layer."]
+
+[[records]]
+id = "PACKAGE-RESOLVER-GRAPH-SCAFFOLD"
+kind = "package-manager-scaffold-boundary"
+scope = "Final-model package resolver graph scaffold for workspace package instances, workspace dependency edges, deterministic instance and edge IDs, duplicate workspace package rejection, unknown workspace dependency rejection, cycle rejection, and explicit unsupported-lane diagnostics for Git and indexed package dependencies"
+owner = "package-resolution"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "tooling-service-behavior"
+spec_artifacts = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+implementation_artifacts = ["lib/compiler/package/resolver/KyokaiPackageResolution.ml", "lib/compiler/package/resolver/KyokaiPackageResolution.mli"]
+test_artifacts = ["test/host/frontend/KyokaiPackageResolutionTest.ml"]
+proof_artifacts = []
+exclusions = ["This prototype constructs final-model package instances and dependency edges for explicitly loaded workspace packages only. It rejects Git and indexed dependencies as unsupported resolver lanes instead of resolving them. It does not fetch packages, read package indexes, solve version constraints, apply yanks/advisories/capability-deny policies, select features, read or write lockfiles, produce .koi artifacts, run package graph commands, execute a public CLI command, or provide conformance-backed evidence."]
+
+[[records]]
+id = "PACKAGE-LOCKFILE-SCAFFOLD"
+kind = "package-manager-scaffold-boundary"
+scope = "Deterministic Kyokai lockfile scaffold using the final D528 [lock], [[root]], [[package]], and [[edge]] record families, with workspace graph rendering, strict parse, repair-as-normalized-render, duplicate package rejection, root reference validation, and edge reference validation"
+owner = "package-resolution"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = false
+reason = "tooling-service-behavior"
+spec_artifacts = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md"]
+implementation_artifacts = ["lib/compiler/package/lockfile/KyokaiPackageLockfile.ml", "lib/compiler/package/lockfile/KyokaiPackageLockfile.mli"]
+test_artifacts = ["test/host/frontend/KyokaiPackageLockfileTest.ml", "test/conformance/packages/workspace-lockfile-graph/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This prototype renders, parses, validates, and repairs a deterministic lockfile subset for workspace package graphs. It does not implement graph-changing resolver modes, selected package updates, Git source hash validation, indexed package source records, package-index snapshot verification, feature resolution, yanks/advisories/capability-deny policy validation, lockfile merge repair from two graph inputs, package commands, public CLI execution, or conformance-backed evidence."]
 
 [[records]]
 id = "FRONTEND-KYOKAI-LEXICAL-TOKENS"
@@ -201,15 +334,31 @@ conformance_status = "planned"
 proof_status = "intended-by-spec"
 proof_required = true
 spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
-implementation_artifacts = ["lib/KyokaiLexicalToken.ml", "lib/KyokaiLexicalToken.mli"]
-test_artifacts = ["test/KyokaiLexicalTokenTest.ml"]
+implementation_artifacts = ["lib/compiler/frontend/lexer/KyokaiLexicalToken.ml", "lib/compiler/frontend/lexer/KyokaiLexicalToken.mli"]
+test_artifacts = ["test/host/frontend/KyokaiLexicalTokenTest.ml"]
 proof_artifacts = []
 exclusions = ["This prototype is isolated from the inherited lexer and parser. It validates ordinary source input, consumes role-prepared source when requested, and tokenizes the accepted string, raw-string, code-point, and byte literal families. Documentation attachment, parser integration, diagnostic-schema integration, formatter integration, exhaustive conformance fixtures, and Kyokai lexical conformance remain open."]
 
 [[records]]
+id = "FRONTEND-KYOKAI-SURFACE-PARSER"
+kind = "frontend-scaffold-boundary"
+scope = "Isolated Kyokai surface parser scaffold for the single .kyo source-file start symbol, imports, module boundaries, public/internal/private-by-default visibility, opaque record/union modifiers, top-level definition skeletons, declaration names, structured Type/Free/Linear/Index/Region generic parameters, function signature summaries, named and applied types, anonymous and named-region borrow types, bare function-pointer types, record summaries, union summaries, semantic terminators, and stable parser spans"
+owner = "frontend-parsing"
+spec_status = "specified"
+implementation_status = "prototype"
+conformance_status = "planned"
+proof_status = "intended-by-spec"
+proof_required = true
+spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/language/03-grammar.md", "kyokaispec/src/language/05-declarations.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+implementation_artifacts = ["lib/compiler/frontend/parser/KyokaiSurfaceParser.ml", "lib/compiler/frontend/parser/KyokaiSurfaceParser.mli"]
+test_artifacts = ["test/host/frontend/KyokaiSurfaceParserTest.ml", "test/conformance/parser/function-signature-summary/fixture.toml", "test/conformance/parser/structured-reference-and-fnptr/fixture.toml", "test/conformance/parser/record-summary/fixture.toml", "test/conformance/parser/union-summary/fixture.toml"]
+proof_artifacts = []
+exclusions = ["This prototype is isolated from the inherited Menhir parser and compiler loader. It parses the one-file module skeleton, declaration visibility and opacity, declaration boundaries, declaration names, structured function-signature summaries, named/applied/borrow/function-pointer type references, structured record summaries, and structured union summaries after Kyokai source-file, source-byte, and lexical scaffolds. Const-generic arguments, associated-type projections, complete generic constraints, final declaration ASTs, expression bodies, D238 elaboration, documentation attachment, diagnostic-schema integration, .koi serialization, and parser conformance remain excluded."]
+
+[[records]]
 id = "FRONTEND-KYOKAI-SOURCE-ROLES"
 kind = "frontend-scaffold-boundary"
-scope = "Kyokai frontend source-role classifier for .kyo interfaces, .kai bodies, rejected .koi artifacts, and role-gated source-byte preparation"
+scope = "Kyokai frontend source-file classifier for one handwritten .kyo role, rejected retired .kai and inherited .aui/.aum paths, rejected .koi artifacts, and executable-entry source-byte preparation"
 owner = "frontend-source-loading"
 spec_status = "specified"
 implementation_status = "prototype"
@@ -218,8 +367,8 @@ proof_status = "intended-by-spec"
 proof_required = false
 reason = "generated-artifact-plumbing"
 spec_artifacts = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/language/04-modules-and-visibility.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
-implementation_artifacts = ["lib/KyokaiSourceFile.ml", "lib/KyokaiSourceFile.mli"]
-test_artifacts = ["test/KyokaiSourceFileTest.ml"]
+implementation_artifacts = ["lib/compiler/frontend/source/KyokaiSourceFile.ml", "lib/compiler/frontend/source/KyokaiSourceFile.mli"]
+test_artifacts = ["test/host/frontend/KyokaiSourceFileTest.ml"]
 proof_artifacts = []
 exclusions = ["This prototype classifies individual source paths and selects source-byte shebang policy for a caller-provided executable-entry fact. It deliberately defines no public CLI encoding for source sets. It is not wired into manifest discovery, module loading, executable-target discovery, parsing, .koi generation, or package conformance, and it does not change lambda_K-seq."]
 
@@ -274,7 +423,7 @@ exclusions = ["The inherited desugaring pass is bootstrap code and is not a Kyok
 [[records]]
 id = "BOOTSTRAP-C-BACKEND"
 kind = "inherited-bootstrap-boundary"
-scope = "Inherited Austral C-backend generation boundary"
+scope = "Inherited Austral generated-C boundary under the D530 one-backend architecture"
 owner = "backend-c"
 spec_status = "planned"
 implementation_status = "inherited-bootstrap"
@@ -285,7 +434,7 @@ spec_artifacts = ["kyokaispec/src/language/17-memory-layout-and-backend-contract
 implementation_artifacts = ["lib/CodeGen.ml"]
 test_artifacts = []
 proof_artifacts = []
-exclusions = ["The inherited generator is bootstrap code. Backend UB closure and preservation evidence remain open."]
+exclusions = ["The inherited generator is bootstrap code. It does not establish the D531 C11 subset, D532 compiler admission, D533 source-map/debug contract, D534 performance gates, D535 external-tool evidence, D536 profile mapping, generated-C UB closure, or preservation."]
 
 [[records]]
 id = "BOOTSTRAP-E2E-RUNNER"
@@ -316,8 +465,8 @@ proof_status = "intended-by-spec"
 proof_required = false
 reason = "generated-artifact-plumbing"
 spec_artifacts = ["kyokaispec/src/appendices/d-formalization-roadmap.md"]
-implementation_artifacts = ["tools/check_prooftrace.py", "kyokaiproofstatus.toml", "kyokaiproofstatus.md", "Makefile", ".github/workflows/build-and-test.yml"]
-test_artifacts = ["tools/check_prooftrace.py"]
+implementation_artifacts = ["toolchain/prooftrace/check_prooftrace.py", "kyokaiproofstatus.toml", "kyokaiproofstatus.md", "Makefile", ".github/workflows/build-and-test.yml"]
+test_artifacts = ["toolchain/prooftrace/check_prooftrace.py"]
 proof_artifacts = []
 exclusions = ["Registry validation checks evidence metadata consistency. It does not prove the referenced language rules or implementations."]
 

@@ -14,16 +14,16 @@ Unsafe code is not a room where the language stops speaking. It is a narrow brid
 This chapter defines unsafe modules, unsafe contracts, unsafe capability flow, raw C foreign blocks, imports, exports, callbacks, raw pointers, volatile access, inline assembly, dynamic loading, plugins, foreign ownership transfer, sum-type boundaries, and the C ABI surface.
 
 > Trace: D22, D31, D42, D80, D94/D257, D113a/D113b, D139, D228, D255
-> Covers: Unsafe facilities are individually admitted and tied to target/backend contracts rather than hidden behind backend folklore.
+> Covers: Unsafe facilities are individually admitted and tied to target and C-toolchain contracts rather than hidden behind implementation folklore.
 
 ## Unsafe Boundary
 
-`pragma Unsafe_Module;` marks a module body that contains raw unsafe operations, raw foreign declarations, inline assembly, volatile memory operations, raw dynamic loading, raw signal-handler registration, raw pointer/address conversions, trusted capability acquisition, or another unsafe primitive admitted by this specification.
+`pragma Unsafe_Module;` marks a module that contains raw unsafe operations, raw foreign declarations, inline assembly, volatile memory operations, raw dynamic loading, raw signal-handler registration, raw pointer/address conversions, trusted capability acquisition, or another unsafe primitive admitted by this specification.
 
 > Trace: D20, D73, D245
 > Covers: Unsafe is module-scoped as an implementation boundary, not an expression-level escape from the language.
 
-The pragma does not grant visibility, does not grant host authority, does not allow capability forgery, does not bypass imports, and does not make private declarations public. It only permits the module body to contain unsafe operations that safe modules cannot contain.
+The pragma does not grant visibility, does not grant host authority, does not allow capability forgery, does not bypass imports, and does not make private declarations public. It only permits the module to contain unsafe operations that safe modules cannot contain.
 
 > Trace: D17, D20, D245, D255
 > Covers: Unsafe module status changes which raw operations may appear, not the module system or authority model.
@@ -45,7 +45,7 @@ If a proposed unsafe operation cannot state its alignment, provenance, lifetime,
 
 ## Unsafe Contracts
 
-Every unsafe module must contain at least one source-level `unsafe contract ... audit;` block. The contract block is part of the module body source. It is not a comment convention, not an external `SAFETY.md`, and not optional review prose.
+Every unsafe module must contain at least one source-level `unsafe contract ... audit;` block. The contract block is part of the module source. It is not a comment convention, not an external `SAFETY.md`, and not optional review prose.
 
 > Trace: D245
 > Covers: Unsafe reasoning is machine-discoverable source metadata.
@@ -94,7 +94,7 @@ Every raw foreign declaration is called in Kyokai source as if it has an additio
 > Trace: D20
 > Covers: Raw calls require source-level unsafe authority without changing the C ABI.
 
-Unsafe primitives other than FFI may also require `&![UnsafeCapability]` when the primitive touches external authority, raw memory, machine state, device state, or backend-specific behavior. A primitive that does not require it must still be individually specified.
+Unsafe primitives other than FFI may also require `&![UnsafeCapability]` when the primitive touches external authority, raw memory, machine state, device state, or target/compiler-specific behavior. A primitive that does not require it must still be individually specified.
 
 > Trace: D20, D73, D94/D257, D211
 > Covers: Unsafe authority is attached where the operation crosses a trust boundary.
@@ -118,12 +118,12 @@ mon;
 > Trace: D20, D111/D127
 > Covers: Raw C declarations live in a visible `foreign "C" is ... mon;` boundary.
 
-Only `foreign "C"` is admitted without a target-specific ABI row. A non-`"C"` ABI string is legal only when the selected target contract lists that exact spelling, calling convention, platform set, type mapping, argument and return restrictions, unwind behavior, callback behavior, and backend lowering. Unknown ABI strings are compile-time errors. Adding an ABI string requires an accepted D-point and target-contract update.
+Only `foreign "C"` is admitted without a target-specific ABI row. A non-`"C"` ABI string is legal only when the selected target contract lists that exact spelling, calling convention, platform set, type mapping, argument and return restrictions, unwind behavior, callback behavior, and generated-C/compiler lowering. Unknown ABI strings are compile-time errors. Adding an ABI string requires an accepted D-point and target-contract update.
 
 > Trace: D20a, D80
 > Covers: The raw foreign ABI set is closed until specified.
 
-A `foreign "C"` block is legal only in a module body marked `pragma Unsafe_Module;`. Raw foreign declarations are body declarations. They are private implementation machinery unless ordinary interface declarations expose safe wrappers.
+A `foreign "C"` block is legal only in a module marked `pragma Unsafe_Module;`. Raw foreign declarations are private declarations. They are private implementation machinery unless ordinary `public` or `internal` declarations expose safe wrappers.
 
 > Trace: D17, D20, D245
 > Covers: Foreign declarations do not become public API by existing.
@@ -138,9 +138,14 @@ A raw foreign declaration is not a safe Kyokai contract. It says how to call a f
 > Trace: D20b, D85, D245
 > Covers: ABI declaration and safe API contract are different layers.
 
+An official Bridge entry that contains raw foreign declarations, generated bindings, copied upstream code, or safe wrappers follows the same unsafe rules as any other Kyokai code. Bridge status does not make a raw declaration safe, does not manufacture `UnsafeCapability`, does not bypass `unsafe contract ... audit;`, and does not erase target, link, ownership, aliasing, callback, allocator, or failure obligations. The Bridge admission record points to the unsafe contracts and wrapper APIs that make safe use possible.
+
+> Trace: D20, D85, D230, D245, D499, D529
+> Covers: Official Bridge entries are still bound by unsafe and FFI contracts, and bridge admission records point to the safe-wrapper obligations.
+
 ## C ABI Type Surface
 
-`foreign "C"` uses the selected target's C ABI exactly. The selected target triple, ABI enum, backend, C compiler family, version floor, flags, and admitted extension families belong to the target/toolchain contract.
+`foreign "C"` uses the selected target's C ABI exactly. The selected target triple, ABI enum, admitted C-toolchain contract, C compiler family, version floor, flags, and admitted extension families belong to the target/toolchain contract.
 
 > Trace: D20a, D31, D80, D139
 > Covers: The C boundary is target-specific but not guessed.
@@ -267,8 +272,15 @@ Foreign callback registration is unsafe and has a D322 coverage entry. Its contr
 
 A callback from an unknown foreign thread cannot touch task-local state, non-transferable values, TLS without selected-target support, or authority not marked callback-safe. Reentry is rejected unless the wrapper contract names the reentry-safe APIs and the nested borrow/capability protocol. Unregister consumes the registration handle. It is legal only when no callback invocation is active, or when the contract names the synchronization protocol that waits for active invocations. `.koi` records exported callback wrappers, audit summaries, target guards, thread requirements, capability requirements, and unregister synchronization facts.
 
+Framework and wrapper APIs classify capturing callbacks only through `Callable`, `CallableMut`, `CallableOnce`, and explicit state-threading types. Domain labels such as `handler`, `renderer`, `reducer`, `completion`, or `teardown` add no type-system role. Retention, affinity, reentrancy, cancellation, retry, replacement, return, failure, and state-consumption behavior remain machine-readable parameter and wrapper contracts. Distinct contracts require distinct types or entry points.
+
 > Trace: D245, D322, D326, D350
 > Covers: Retained callbacks cross FFI only through linear registration handles with explicit affinity, reentry, authority, and unregister synchronization.
+
+An erased foreign or plugin boundary uses a nominal opaque linear handle and explicit operation table. The unsafe contract records concrete type identity, ABI/operation-table identity, ownership and destruction, capability requirements, compatibility version, allocation, transfer, downcast, serialization, reload, and failure behavior. A checked downcast returns a named failure. Safe wrappers must prove layout, lifetime, aliasing, destruction, and callback obligations; a hash or version match alone is not safety evidence.
+
+> Trace: D542-D543
+> Covers: Erased foreign/plugin composition and framework callbacks stay explicit unsafe-wrapper and existing callable-class contracts rather than new hidden type-system machinery.
 
 Exporting Kyokai functions through a C ABI wrapper is legal only for signatures whose parameters and return type are in the exported C ABI surface. Exported functions must not be generic, must not expose Kyokai sum types by value, must not expose `Linear` values by value, and cannot expose Kyokai borrow references directly. C-facing borrowing uses an admitted opaque-handle or pointer-length wrapper whose unsafe export contract states lifetime window, aliasing, invalidation, thread, reentrancy, and cleanup.
 
@@ -341,10 +353,10 @@ Volatile operations require naturally aligned addresses for `T` unless a separat
 
 ## Inline Assembly
 
-`asm(...)` is an unsafe backend-independent inline assembly form. It is legal only inside `pragma Unsafe_Module;` and must be covered by an unsafe contract.
+`asm(...)` is an unsafe code-generator-independent inline assembly form. It is legal only inside `pragma Unsafe_Module;` and must be covered by an unsafe contract.
 
 > Trace: D22, D245
-> Covers: Inline assembly is unsafe, audited source, not a backend-specific escape hatch.
+> Covers: Inline assembly is unsafe, audited source, not an external-compiler-specific escape hatch.
 
 The first argument is a compile-time guard, normally over `target.arch`, `target.os`, `target.abi`, or `target.endianness`. If the guard is false, the block is not compiled for that target.
 
@@ -356,7 +368,7 @@ Operands use named forms such as `in("reg") expr`, `out("reg") binding`, `inout(
 > Trace: D22, D245
 > Covers: Assembly effects are declared by operands, clobbers, and unsafe contract.
 
-The C backend lowers inline assembly through the selected supported C compiler's admitted inline-assembly facility. The LLVM backend lowers it through LLVM inline assembly. If the selected backend/target/toolchain cannot implement the block with the declared semantics, the build fails.
+The generated-C emitter lowers inline assembly through the selected admitted C compiler's named inline-assembly facility. If the selected target/toolchain cannot implement the block with the declared semantics, the build fails.
 
 > Trace: D22, D31, D80, D139, D228
 > Covers: Assembly lowering is explicit and cannot silently degrade.
@@ -402,7 +414,7 @@ A raw C declaration stays private behind unsafe authority:
 ```kyokai
 pragma Unsafe_Module;
 
-module body Kyokai.Posix.RawFile is
+module Kyokai.Posix.RawFile is
     foreign "C" is
         function c_open(path: Address[Nat8], flags: Int32): Int32;
         function c_close(fd: Int32): Int32;
@@ -441,7 +453,7 @@ qed;
 
 ## ABI Admission Rows
 
-A non-`"C"` ABI string is legal only when the selected target contract contains an admission row for that exact spelling, calling convention, platform set, argument and return restrictions, unwind behavior, callback rules, and backend lowering. An unknown ABI string is a compile-time error.
+A non-`"C"` ABI string is legal only when the selected target contract contains an admission row for that exact spelling, calling convention, platform set, argument and return restrictions, unwind behavior, callback rules, and generated-C/compiler lowering. An unknown ABI string is a compile-time error.
 
 > Trace: D432
 > Covers: ABI spellings are target-record admissions, never guessed aliases or backend conveniences.

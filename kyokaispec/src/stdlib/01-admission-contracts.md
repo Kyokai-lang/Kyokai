@@ -49,10 +49,25 @@ Each admitted module has an admission record. The record names the module, admis
 > Trace: D85, D150, D220, D229-D232
 > Covers: Module admission records carry the evidence needed for docs, audit, and tests.
 
+An admitted Bridge entry uses the same admission-state vocabulary, but its record also names bridge-specific facts: upstream URL, exact upstream revision or release, SPDX/license facts, copied-file inventory, local modifications, generator command and inputs when generated, target/platform gates, native library or header requirements, link mode, capability requirements, unsafe-contract coverage, docs status, audit owner, update policy, and whether the entry is binding, wrapper, generated binding set, port, adapter, or copied support code.
+
+> Trace: D20, D85, D150, D229-D230, D245, D499, D529
+> Covers: Bridge admission records make third-party integration provenance, license, generation, unsafe, capability, target, docs, owner, and update facts explicit.
+
+A Bridge entry with prebuilt binary payloads is admitted only when the record names platform gates, checksums, provenance, reproducibility status, license records, storage location, verification command, and the reason a source or system-library path is insufficient. A missing or stale binary provenance record is an admission failure, not a warning.
+
+> Trace: D83, D225, D263, D529
+> Covers: Prebuilt Bridge payloads require explicit binary provenance and are rejected when provenance is absent or stale.
+
 An admission record for a pure algorithm must name why the implementation is safe native Kyokai or why a non-native implementation is temporarily or permanently justified. Convenience, performance, or existing C availability is not enough to make pure computation FFI-backed forever.
 
 > Trace: D229-D230
 > Covers: Pure algorithms default to safe native Kyokai and exceptions require evidence.
+
+A Bridge entry cannot be admitted merely because upstream source is convenient to copy. Copied upstream code has to be necessary for the integration boundary, license-compatible with the file's path class, inventoried by file, and reviewed for local changes. If the code is an ordinary library candidate, the project uses the package ecosystem or the native stdlib admission path instead of Bridge.
+
+> Trace: D64, D229-D230, D263, D529
+> Covers: Bridge copied-code admission is narrow, licensed, inventoried, and separate from ordinary packages or native stdlib modules.
 
 ## Edge Cases
 
@@ -126,5 +141,7 @@ OS-facing error records preserve the domain category, target error domain, raw t
 | Numeric API | Algorithm source, edge table, bound, oracle, vectors, target facts. | Oracle comparisons, fuzz/property checks, regression vectors. |
 | Wrapper API | Foreign range, target set, unsafe contract, provenance, audit owner, graduation rule. | ABI, layout, failure, callback, and capability tests. |
 
-> Trace: D402, D413, D421, D454, D491, D494, D499, D501, D517
-> Covers: Stable admission records name recovery, OS mapping versions, test fixtures, numeric evidence, and wrapper graduation without deferring behavior to unnamed work.
+| Bridge entry | Upstream identity, license, copied-file inventory, target gates, native-library/link contract, unsafe/capability surface, admission status, owner, update policy. | Build/link smoke tests, capability-deny tests, unsafe-contract coverage, docs/audit extraction, and provenance drift checks. |
+
+> Trace: D402, D413, D421, D454, D491, D494, D499, D501, D517, D529
+> Covers: Stable admission records name recovery, OS mapping versions, test fixtures, numeric evidence, wrapper graduation, and bridge entry governance without deferring behavior to unnamed work.

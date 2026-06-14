@@ -72,7 +72,7 @@ Exceptions make too many paths look like one path. They cross function boundarie
 ## Result
 
 [Rikona Kurasaki / Mjoyufull]
-The error model is strict because it is trying to keep the ground from moving. User-facing failure stays in values. Bugs terminate through named paths. Allocation is handled unless you visibly ask for fatal behavior. Cleanup happens where the source says cleanup can happen.
+The error model is strict because it is trying to keep the ground from moving. User-facing failure stays in values. Bugs terminate through named paths. Allocation is handled unless source explicitly requests fatal behavior. Cleanup happens where the source says cleanup can happen.
 
 > Trace: D24, D53, D74, D84, D119, D253, D259
 > Covers: Kyokai's error model preserves explicit control flow and exact failure categories.

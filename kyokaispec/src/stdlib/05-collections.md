@@ -119,6 +119,17 @@ The Analysis Server and generated docs render operation tables separately for `F
 > Trace: D491, D496-D497
 > Covers: Linear bulk operations expose retained state and early-exit ownership instead of relying on hidden destruction.
 
+## Owner, Handle, And View Collections
+
+A collection used as a long-lived framework graph defines a nominal `Linear` owner, nominal `Free` generational handle, and scoped read/write views according to the application-integration contract. The admission record states owner-identity representation, generation width and exhaustion behavior, slot retirement, mutation epochs, compaction behavior, iteration/mutation overlap, disjoint-view construction, nested-view legality, removal ownership, task-transfer rules, persistent-identity separation, and every recoverable lookup failure.
+
+A safe handle owns no element and grants no access or authority by itself. Access requires a borrow of the matching owner. Removal returns, transfers, or explicitly consumes a `Linear` payload. Generation exhaustion retires the slot instead of wrapping into a previously valid identity.
+
+Slot maps, arenas, sparse sets, ECS stores, UI trees, and observer registries can satisfy this contract with different layouts. No implementation is admitted merely because it uses integer indices or generations; its safe API and property tests must establish the complete owner/handle/view behavior.
+
+> Trace: D374, D490, D540
+> Covers: Framework graph collections share one explicit identity, invalidation, borrowing, payload-removal, and generation-exhaustion contract without standardizing one container layout.
+
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]

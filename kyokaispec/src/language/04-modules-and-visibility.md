@@ -4,74 +4,91 @@
 > ProofTrace: SPEC-LANGUAGE-04-MODULES-AND-VISIBILITY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai keeps Austral's strongest module idea: a module has an interface and a body, and the interface is the surface other code can trust before the private work is even visible. Kyokai makes that old boundary sharper. The source extensions are Kyokai's own, the package boundary is explicit, `internal` has a defined reach, and imports have one mechanical lookup story.
+Kyokai keeps Austral's strongest module idea: the interface is the surface other code can trust before the private work is even visible. Kyokai moves where that surface lives. Austral wrote it twice, once in a handwritten interface file and once again in the body, and treated the second copy as the boundary. The boundary was never the file. It was the contract. So a Kyokai module is one handwritten source file, and the compiler derives the trustable interface from it. The source extension is Kyokai's own, the package boundary is explicit, visibility is marked on each declaration, `internal` has a defined reach, and imports have one mechanical lookup story.
 
-> Trace: D5, D17, D52, D78, D86
-> Covers: Kyokai preserves Austral's interface/body module split while specifying `.kyo` interfaces, `.kai` bodies, package-visible `internal`, and deterministic package-rooted module resolution in the Kyokai spec itself.
+> Trace: D5, D17, D52, D78, D86, D537, D538
+> Covers: Kyokai keeps interface-first modularity but replaces the handwritten interface/body pair with one `.kyo` source file, per-declaration visibility, package-visible `internal`, and deterministic package-rooted module resolution specified in the Kyokai spec itself.
 
-A Kyokai module is the language-level unit named by a dotted module path such as `Kyokai.Core.Result` or `App.Main`. A public or importable source module is represented by an interface file and, when implementation is needed, a body file for the same module name: `Name.kyo` contains the importable interface surface, and `Name.kai` contains the implementation body selected for the current build. A package-private executable-internal, test-only, or manifest-admitted generated implementation-internal module can exist as a body-only `.kai` file. Such a body-only module publishes no public interface and cannot be imported from another module. A dependency may also provide a checked `.koi` interface artifact instead of source text, as specified by the toolchain chapter.
+A Kyokai module is the language-level unit named by a dotted module path such as `Kyokai.Core.Result` or `App.Main`. A module is written in exactly one handwritten source file with the `.kyo` extension: `Name.kyo` holds the whole module, its public surface and its private implementation in one place. The compiler derives the importable interface from that file. A module whose declarations are all private or `internal` publishes no public interface and cannot be imported from another package; it is still one `.kyo` file. A dependency may also provide a checked `.koi` interface artifact instead of source text, as specified by the toolchain chapter.
 
-> Trace: D52, D78, D79, D313
-> Covers: Modules are named language units, `.kyo` files provide importable source interfaces, `.kai` files provide implementation bodies or restricted non-importable body-only internals, and `.koi` artifacts provide checked package interface contracts for downstream compilation.
+> Trace: D52, D78, D79, D313, D537
+> Covers: Modules are named language units, each is one `.kyo` source file, the compiler derives the importable interface, a module with no public declarations is non-importable, and `.koi` artifacts provide checked package interface contracts for downstream compilation.
 
-The module declaration inside a source file must match the logical module path assigned by package module resolution. If `Foo.Bar` maps to `src/Foo/Bar.kyo` and `src/Foo/Bar.kai`, those files must declare `module Foo.Bar is ... seal;` and `module body Foo.Bar is ... seal;`. A mismatch is a compile-time error before name resolution inside the module proceeds.
+The module declaration inside the source file must match the logical module path assigned by package module resolution. If `Foo.Bar` maps to `src/Foo/Bar.kyo`, that file must declare `module Foo.Bar is ... seal;`. There is no separate `module body` header. A mismatch is a compile-time error before name resolution inside the module proceeds.
 
-> Trace: D52, D78
-> Covers: The declared module name must match the manifest-rooted file mapping, so source paths and module declarations cannot drift into two different identities.
+> Trace: D52, D78, D537
+> Covers: The declared module name must match the manifest-rooted single-file mapping, and the retired `module body` header is not part of accepted Kyokai.
 
-## Interface And Body
+## The Module Source File
 
-A `.kyo` interface file contains the declarations other modules may typecheck against. It may declare constants, types, records, unions, capabilities, functions, typeclasses, instances, generators, and other interface-admitted declarations from the declaration chapter. It does not contain private helper declarations that are meant only for the module body.
+One `.kyo` file holds the entire module: constants, types, records, unions, capabilities, functions, typeclasses, instances, generators, and the other declarations the declaration chapter admits. Each declaration carries its own visibility marker and, where it has one, its own body. There is no second file and no handwritten interface to keep in sync.
 
-> Trace: D17, D52, D78
-> Covers: `.kyo` files are the importable interface surface and contain declarations visible according to public or `internal` visibility.
+> Trace: D17, D52, D78, D537
+> Covers: A module's declarations and their implementations live in one source file; the two-file interface/body split is retired.
 
-A `.kai` body file contains the implementation for the same module. It may define body declarations, private helper types and functions, foreign blocks, unsafe contracts, and other body-admitted declarations from the declaration chapter. A declaration that exists only in the body is private to that module body and cannot be imported, selected, re-exported, named by qualified access from another module, or recorded as public API.
+The compiler extracts the importable interface surface from that file: the `public` and `internal` declarations under D538, recorded at the representation level each declaration promises under D539. It records that surface as the `.koi` artifact. `.koi` is the checked, separately compiled package interface; it is generated from the single source file, never handwritten, and is never higher authority than the source. A declaration with no visibility marker is module-private and never enters the derived interface.
 
-> Trace: D17, D20, D52, D78, D245
-> Covers: `.kai` files own implementation and private declarations, and body-only declarations do not cross the module boundary.
+> Trace: D17, D79, D537, D538, D539
+> Covers: The importable interface and the `.koi` artifact are derived by the compiler from the one source file, scoped by per-declaration visibility and opacity, and private declarations are excluded.
 
-An interface may be checked before the body is checked. A module that imports another module typechecks against the imported module's interface surface, not against its body. This is the old Austral modularity rule carried forward: clients depend on contracts, not implementation rooms they cannot enter.
+A module's interface can be checked, recorded, and consumed before its private implementation is checked. A module that imports another module typechecks against the imported module's derived interface surface, not against its private declarations. This is the old Austral modularity rule carried forward: clients depend on contracts, not implementation rooms they cannot enter. The contract now lives in one file the compiler defends, instead of a second file an author maintained by hand.
 
-> Trace: D5, D78, D79
-> Covers: Kyokai preserves interface-first checking: clients typecheck against `.kyo` or `.koi` interface contracts rather than private body source.
+> Trace: D5, D78, D79, D537
+> Covers: Kyokai preserves interface-first checking; clients typecheck against the derived interface or `.koi`, not against private source, and the derived interface is the single source of the contract.
 
-A module body must implement the declarations from its interface that require implementation under the declaration and typechecking chapters. Missing required definitions, incompatible signatures, weaker contracts, or representation exposure that contradicts the interface are compile-time errors. The precise compatibility checks for each declaration kind are defined in the later declaration, type, contract, and unsafe chapters.
+Because there is no separate interface to satisfy, the old interface/body divergence errors are gone: one source file cannot disagree with itself about a signature. What remains is the export-consistency rule. A `public` or `internal` declaration must not expose a name the consumer cannot see, and an `opaque` type must not leak its representation. Each whole-file target variant of a logical module (D390) must expose a compatible derived interface; a target-dependent public surface is recorded in `.koi` through the target-keyed compatibility fields. The precise per-declaration checks live in the later declaration, type, contract, and unsafe chapters.
 
-> Trace: D17, D53, D78, D79, D155
-> Covers: A body must satisfy its interface, and any interface/body divergence is a compile-time error resolved by the relevant normative declaration and type rules.
+> Trace: D17, D53, D78, D79, D155, D390, D537, D539
+> Covers: Single-file modules remove interface/body divergence; export-consistency, opacity leak, and target-variant interface compatibility are the remaining cross-boundary checks, resolved by the relevant normative chapters.
 
 ## Visibility Levels
 
-Kyokai has exactly three source visibility levels.
+Kyokai has exactly three source visibility levels, each written as a leading marker on the declaration.
 
-| Visibility | Where It Is Written | Who May Name It |
+| Visibility | How It Is Written | Who May Name It |
 | --- | --- | --- |
-| Public | `.kyo` declaration with no `internal` marker | Any package that imports the module and has dependency access to the package. |
-| Internal | `.kyo` declaration prefixed with `internal` | Only modules in the same package. |
-| Private | Declaration present only in `.kai` body source | Only the declaring module body. |
+| Public | declaration prefixed `public` | Any package that imports the module and has dependency access to the package. |
+| Internal | declaration prefixed `internal` | Only modules in the same package. |
+| Private | declaration with no visibility marker | Only the declaring module. |
 
-> Trace: D17, D78
-> Covers: Kyokai visibility is public, package-internal, or module-private; there is no workspace visibility and no path-relative visibility lattice.
+> Trace: D17, D78, D538
+> Covers: Kyokai visibility is public, package-internal, or module-private, written per declaration; there is no workspace visibility and no path-relative visibility lattice.
 
-`internal` is legal only in interface files. Writing `internal` in a `.kai` body is a compile-time error because body-only declarations are already private. `internal` changes who may name a declaration; it does not change whether a type is opaque or transparent, does not change layout, does not change typeclass coherence, and does not grant unsafe authority.
+A declaration with no visibility marker is module-private. Private is the default on purpose: in one file, a default-public rule would export private machinery the instant it is written next to public declarations, which is the invisible-export trap Kyokai rejects. Export is therefore always an explicit, source-visible act. `public` and `private` are reserved keywords and `internal` remains reserved. Writing `private` explicitly is a compile-time error that names the omit-the-marker rule; a later D-point may admit `private` as a synonym, but it is not admitted now.
 
-> Trace: D17, D20, D245
-> Covers: `internal` is an interface-only package visibility marker and does not alter opacity, layout, coherence, or unsafe authority.
+> Trace: D17, D78, D538
+> Covers: The unmarked default is module-private; `public`/`private`/`internal` are reserved; explicit `private` is rejected with a guiding diagnostic.
+
+`internal` restricts a declaration to modules in the same package. It changes who may name a declaration; it does not change whether a type's representation is opaque or transparent (that is the `opaque` modifier, D539), does not change layout, does not change typeclass coherence, and does not grant unsafe authority.
+
+> Trace: D17, D20, D245, D539
+> Covers: `internal` is a package-visibility marker and does not alter opacity, layout, coherence, or unsafe authority.
 
 Workspace membership does not widen visibility. Two packages in the same workspace are still separate packages for `internal`. A package must not import another package's internal declaration merely because both packages are listed in the same `[workspace].members` array.
 
 > Trace: D17, D78
 > Covers: `internal` is package-visible, never workspace-visible.
 
-An internal declaration cannot be surfaced across a package boundary by import tricks, aliasing, documentation generation, `.koi` consumption, or a later public declaration that simply exposes the same name. Public APIs may mention only declarations that are public to the consuming package. If a public declaration's signature mentions an internal type from the same package, that public declaration is not importable outside the package unless the later declaration/type chapters define a safe opaque exposure form for that exact case.
+An internal or private declaration cannot be surfaced across a package boundary by import tricks, aliasing, documentation generation, `.koi` consumption, or a later public declaration that simply exposes the same name. Public APIs may mention only declarations that are public to the consuming package. If a public declaration's signature would mention an internal or private type from the same package, that public declaration is not importable outside the package unless the type is exported through the `opaque` representation-hiding form defined in the declaration and type chapters.
 
-> Trace: D17, D79, D229
-> Covers: Internal declarations cannot leak through imports, artifacts, docs, or public signatures as accidental external API.
+> Trace: D17, D79, D229, D539
+> Covers: Internal and private declarations cannot leak through imports, artifacts, docs, or public signatures as accidental external API, except through an admitted `opaque` exposure.
+
+A program entry function is selected by the manifest target and the runtime startup contract, not by import. It does not require `public`; an unmarked entry function is legal because nothing imports it.
+
+> Trace: D78, D538
+> Covers: The program entry function is chosen by manifest/runtime contract rather than export, so it needs no visibility marker.
+
+## Representation Visibility
+
+Visibility controls who may name a declaration. It does not by itself control whether a type's representation is visible. A `public record` or `public union` exports its fields or variants as public API; changing that representation is a public API change. A type marked `opaque`, for example `public opaque record`, exports only its nominal identity and universe classification. Its representation is sealed against construction, destructuring, pattern matching, and inspection outside the defining module, while inside the defining module the representation is fully visible. The `opaque` modifier, its interaction with universes, and its `.koi` recording are specified in the declarations and type-system chapters; this chapter fixes only that representation visibility is orthogonal to name visibility.
+
+> Trace: D17, D466, D539
+> Covers: Name visibility and representation visibility are orthogonal; `opaque` is the representation-hiding mechanism and full rules live in the declarations and type-system chapters.
 
 ## Imports
 
-Imports are file-scope declarations and must appear before the module declaration's body items. There are no function-local imports, block-local imports, expression-local imports, wildcard imports, `open`, `using namespace`, or import-order priority rules.
+Imports are file-scope declarations and appear once per source file, before the module's declarations. There are no function-local imports, block-local imports, expression-local imports, wildcard imports, `open`, `using namespace`, or import-order priority rules.
 
 > Trace: D78, D179, D214
 > Covers: Imports are file-scope only and Kyokai rejects wildcard/open imports and import-order-dependent meaning.
@@ -88,6 +105,16 @@ The first form introduces the module path for qualified access. The second intro
 
 > Trace: D179, D214
 > Covers: Kyokai imports support qualified module access, module aliases, and selective unqualified imports with per-name renaming.
+
+The compiler records the imports that feed the public or `internal` interface in the `.koi` imports section; imports used only by private declarations stay private and do not appear in the derived interface.
+
+> Trace: D79, D537
+> Covers: The derived interface records only the imports its public/`internal` surface depends on; private-only imports are not exported.
+
+The official Bridge collection uses ordinary imports under the reserved `Kyokai.Bridge.*` namespace. Bridge modules have no special import syntax, no wildcard privilege, and no ambient authority. Their only special status is that the installed toolchain supplies them as first-party checked interface roots with D529 admission records rather than package dependencies.
+
+> Trace: D1, D17, D78-D79, D211, D529
+> Covers: Bridge modules use ordinary import and visibility rules while resolving from installed first-party bridge interfaces instead of package dependencies.
 
 Selective imports name direct exports of the imported module only. They do not recursively import exports from modules that the imported module imports, and they do not create transitive namespace injection. If code wants both qualified module access and unqualified selected names, it writes both imports explicitly.
 
@@ -116,10 +143,10 @@ No still-live binding may be shadowed by another binding, pattern binding, param
 > Trace: D60
 > Covers: Kyokai rejects shadowing of still-live bindings, including shadowing introduced by patterns or imports.
 
-Qualified access through `Foo.Bar.name` may name only declarations visible to the current package. From a different package, only public declarations are visible. From the same package, public and internal declarations are visible. Private body-only declarations are not visible through qualified access from any other module.
+Qualified access through `Foo.Bar.name` may name only declarations visible to the current package. From a different package, only public declarations are visible. From the same package, public and internal declarations are visible. Private unmarked declarations are not visible through qualified access from any other module.
 
 > Trace: D17, D179, D214
-> Covers: Qualified access respects package visibility and never exposes private body declarations.
+> Covers: Qualified access respects package visibility and never exposes private module-local declarations.
 
 UFCS receiver-module lookup is not a fourth import form. It is a narrow fallback used only after ordinary imported-name lookup fails, and it searches only the receiver type's defining module or the explicit owner of a compiler-known receiver surface. It does not search the dependency graph, repair import collisions, or act like C++ argument-dependent lookup.
 
@@ -147,7 +174,7 @@ Internal instances are visible only inside the package. `.koi` artifacts may rec
 
 ## Unsafe Modules And Importability
 
-`pragma Unsafe_Module;` is a module-body marker for modules that contain raw unsafe operations, raw foreign declarations, or other unsafe facilities admitted by the unsafe chapter. The pragma does not make a declaration public, does not widen `internal`, and does not let callers forge capabilities or bypass ordinary visibility.
+`pragma Unsafe_Module;` is a module marker for modules that contain raw unsafe operations, raw foreign declarations, or other unsafe facilities admitted by the unsafe chapter. The pragma does not make a declaration public, does not widen `internal`, and does not let callers forge capabilities or bypass ordinary visibility.
 
 > Trace: D20, D245, D255
 > Covers: `pragma Unsafe_Module;` marks a raw unsafe implementation boundary but does not alter visibility or grant authority by itself.
@@ -164,20 +191,20 @@ Unsafe contracts are source-level declarations that document and bind the unsafe
 
 ## Module Resolution Boundary
 
-The language chapter defines what a module, import, visible declaration, and name lookup mean. The toolchain chapter defines how a package manifest chooses roots, how source files are discovered, how `.koi` artifacts are produced and consumed, and how target selection chooses a body. These rules meet at one hard boundary: by the time the language checker resolves imports, the toolchain must provide one selected module graph with one interface surface for every imported module.
+The language chapter defines what a module, import, visible declaration, and name lookup mean. The toolchain chapter defines how a package manifest chooses roots, how source files are discovered, how `.koi` artifacts are produced and consumed, and how target selection chooses one source file among whole-file variants for a logical module. These rules meet at one hard boundary: by the time the language checker resolves imports, the toolchain must provide one selected module graph with one interface surface for every imported module.
 
-> Trace: D19a, D52, D78, D79, D105
-> Covers: The toolchain selects package roots, source files, target-specific bodies, editions, and artifacts before language name resolution consumes a single resolved module graph.
+> Trace: D19a, D52, D78, D79, D105, D537
+> Covers: The toolchain selects package roots, the single source file per module, target-specific whole-file variants, editions, and artifacts before language name resolution consumes a single resolved module graph.
 
 ## File Roles And Acyclic Graphs
 
-`.kyo` files are source interfaces. `.kai` files are source bodies. `.koi` files are generated KBI artifacts and are never parsed as handwritten source. Public and importable modules have `.kyo` interfaces. A body exists in `.kai` when implementation is needed. Body-only `.kai` modules are restricted to package-private executable internals, tests, and generated implementation internals admitted by the manifest.
+`.kyo` files are handwritten module source. `.koi` files are generated KBI artifacts and are never parsed as handwritten source. `.kai` is a retired source extension under D537: encountering it, or the inherited `.aui`/`.aum` extensions, as handwritten source is a diagnostic that names the single-file model and the `.kyo` extension. A module that publishes no public interface is a `.kyo` file whose declarations are all private or `internal`, restricted to package-private executable internals, tests, and generated implementation internals admitted by the manifest.
 
 The module import graph is acyclic. A module cannot import itself directly or transitively. Interface-only edges do not exempt a cycle. A cycle diagnostic prints one complete cycle path, identifies each import span on that path, and states that Kyokai has no recursive-module cycle protocol. The compiler does not promise that the printed cycle is the shortest possible cycle.
 
 The workspace package dependency graph is also acyclic. Package interfaces, `.koi` artifacts, and edition boundaries do not create a package-cycle escape hatch.
 
-Whole-file build constraints remove excluded files before declarations, bodies, `.koi` facts, generated code, or semantic diagnostics contribute to compilation. Declaration-level `when` guards remain the only source-level platform guard inside an included file. Body-level target branching is illegal.
+Whole-file build constraints remove excluded files before declarations, `.koi` facts, generated code, or semantic diagnostics contribute to compilation. Declaration-level `when` guards remain the only source-level platform guard inside an included file. Body-level target branching is illegal.
 
-> Trace: D382, D390, D433-D434, D518
-> Covers: `.kyo`, `.kai`, and `.koi` roles, body-only restrictions, module-cycle rejection, package-cycle rejection, whole-file exclusion, and declaration-only platform guards are explicit.
+> Trace: D390, D433-D434, D518, D537
+> Covers: The `.kyo` source role, the generated `.koi` role, the retired `.kai` extension, non-importable private-only modules, module-cycle rejection, package-cycle rejection, whole-file exclusion, and declaration-only platform guards are explicit.

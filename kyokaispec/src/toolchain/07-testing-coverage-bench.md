@@ -11,7 +11,7 @@ Tests in Kyokai are ordinary code standing under ordinary rules. That matters. A
 
 ## Test Declarations
 
-Inline tests are declared in module bodies. They are excluded from production artifacts unless a test build explicitly includes them. Tests may access private declarations in the same module body and public/internal declarations according to the same visibility rules as ordinary same-package code.
+Inline tests are declared inside a module. They are excluded from production artifacts unless a test build explicitly includes them. Tests may access private declarations in the same module and `public`/`internal` declarations according to the same visibility rules as ordinary same-package code.
 
 > Trace: D17, D28, D78
 > Covers: Inline tests live in bodies, are test-only artifacts, and use normal visibility.
@@ -69,7 +69,7 @@ A timeout is a harness failure, not a language-level catch of `panic` or TPOE. I
 
 ## Property Testing And Fuzzing
 
-Property tests use typed generators, deterministic seeds, shrinking for admitted data types, and replayable failure records. A property failure report must include the fully qualified test name, seed, shrink path or minimized input where available, target, backend, profile, and toolchain version. Re-running with the same seed and compatible source must reproduce the same generated input sequence until a generator contract changes under an explicit compatibility rule.
+Property tests use typed generators, deterministic seeds, shrinking for admitted data types, and replayable failure records. A property failure report must include the fully qualified test name, seed, shrink path or minimized input where available, target, C-toolchain contract, profile, and toolchain version. Re-running with the same seed and compatible source must reproduce the same generated input sequence until a generator contract changes under an explicit compatibility rule.
 
 > Trace: D83, D220, D270
 > Covers: Property tests are reproducible daily tooling, not one-off random executions.
@@ -79,7 +79,7 @@ Fuzz targets are explicit test declarations or test-adjacent declarations under 
 > Trace: D29, D83, D220, D270
 > Covers: Coverage-guided fuzzing has explicit target discovery, corpus state, crash artifacts, and deterministic replay.
 
-Minimization is a harness operation over a recorded failing input. It must preserve the failure category being minimized, such as compile error, test assertion, panic, TPOE, runtime-fatal, or sanitizer/backend failure where that target runner reports one. If minimization changes the failure category, the report must say the minimization is not valid for the original failure.
+Minimization is a harness operation over a recorded failing input. It must preserve the failure category being minimized, such as compile error, test assertion, panic, TPOE, runtime-fatal, generated-C defect, sanitizer failure, or external-tool failure. If minimization changes the failure category, the report must say the minimization is not valid for the original failure.
 
 > Trace: D84, D137, D220, D270
 > Covers: Fuzz and property minimization do not blur distinct Kyokai failure classes.
@@ -98,12 +98,12 @@ Documentation tests are extracted from documentation comments only when the fenc
 
 ## Coverage
 
-Coverage reports are produced only when requested. Coverage instrumentation must not change language semantics, evaluation order, borrow/linearity behavior, panic/TPOE behavior, volatile semantics, atomic semantics, or capability flow. If a target/backend cannot provide conforming coverage, the command must fail or report unsupported coverage for that target.
+Coverage reports are produced only when requested. Coverage points originate in checked Kyokai IR and map through the authoritative source map; generated helper C does not create user-visible points. Instrumentation must not change language semantics, evaluation order, borrow/linearity behavior, panic/TPOE behavior, volatile semantics, atomic semantics, or capability flow. If a target/C-toolchain contract cannot provide conforming coverage, the command must fail or report unsupported coverage for that target.
 
 > Trace: D28, D73, D83, D137, D141
 > Covers: Coverage instrumentation is explicit and semantics-preserving.
 
-Coverage output records package, module, declaration, branch, expression/statement region where available, test profile, target, backend, compiler version, and source revision identity. Human reports may aggregate; JSON reports must keep stable identifiers for tools.
+Coverage output records package, module, declaration, branch, expression/statement region where available, test profile, target, C-toolchain contract, compiler version, source-map identity, and source revision identity. Human reports may aggregate; JSON reports must keep stable identifiers for tools.
 
 > Trace: D29, D83, D225
 > Covers: Coverage reports are useful for humans and stable for CI tooling.
@@ -115,7 +115,7 @@ Benchmarks are ordinary test-like declarations or explicitly marked tests run by
 > Trace: D28, D83
 > Covers: Benchmarks are explicit harness operations over ordinary Kyokai code.
 
-A benchmark that needs authority must declare capabilities just like a test. The harness must report target, backend, profile, runner, CPU/OS facts when available, iteration policy, and whether measurements are comparable across runs. Bench numbers are presentation/report artifacts and are not reproducible build artifacts.
+A benchmark that needs authority must declare capabilities just like a test. The harness must report target, C-toolchain contract, profile, runner, CPU/OS facts when available, iteration policy, and whether measurements are comparable across runs. Bench numbers are presentation/report artifacts and are not reproducible build artifacts.
 
 > Trace: D80, D83, D137
 > Covers: Benchmarks report their environment and do not claim deterministic artifact identity.
@@ -157,9 +157,9 @@ Allocator-aware APIs are tested for success, fail-first, fail-each-allocation, p
 
 ## Property, Fuzz, Benchmark, And Numeric Evidence
 
-Property reports record generator ID and version, seed, generated case count, shrink path, minimized input, target, backend, profile, toolchain, and replay command. Fuzz reports record target ID, corpus identity, mutation engine identity, budget, seed, crash artifact, minimized reproducer, failure category, and replay command. Minimization preserves the original failure category.
+Property reports record generator ID and version, seed, generated case count, shrink path, minimized input, target, C-toolchain contract, profile, toolchain, and replay command. Fuzz reports record target ID, corpus identity, mutation engine identity, budget, seed, crash artifact, minimized reproducer, failure category, and replay command. Minimization preserves the original failure category.
 
-Benchmark reports record benchmark ID, source revision, toolchain, target, backend, profile, host facts, runner facts, warmup, repetitions, statistical method, confidence presentation, outlier policy, comparability class, and raw sample artifact. Wall-clock thresholds do not block ordinary PRs unless a separately reviewed policy names the environment and threshold.
+Benchmark reports record benchmark ID, source revision, toolchain, target, C-toolchain contract, profile, host facts, runner facts, warmup, repetitions, statistical method, confidence presentation, outlier policy, comparability class, and raw sample artifact. D534 compilation-time gates block the release lane only on their named reference hardware and exact workload revisions; other wall-clock thresholds require a separately reviewed policy.
 
 Numeric stdlib tests record oracle source, license, version or revision, generator command, normalization rule, target/profile, rounding mode, tolerance or exactness rule, and reviewed vector digest.
 

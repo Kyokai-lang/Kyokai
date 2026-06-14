@@ -8,7 +8,7 @@
 
 This package discharges the paper obligation created by first-core primitive nodes.
 It does not prove concrete standard-library implementations, backend lowering,
-FFI wrappers, OS behavior, allocator behavior, or C/LLVM UB closure. Those remain
+FFI wrappers, OS behavior, allocator behavior, or generated-C/C-toolchain UB closure. Those remain
 later layers. It proves the narrower statement needed for first-core progress:
 a primitive name cannot enter `Delta` unless its abstract semantic relation is
 total on every admitted typed input and its invariant footprint is explicit.

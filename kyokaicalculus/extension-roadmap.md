@@ -12,7 +12,7 @@
 | `lambda_K-layout` | Records, unions, arrays, construction state, pinning, ABI layout classes, and direct result placement. | Layout model and backend preservation links. |
 | `lambda_K-conc` | Structured tasks, spawn transfer, channels, atomics, locks, pollers, signals, cancellation, and happens-before. | `concurrency-model.md` and later proof artifacts. |
 | `lambda_K-unsafe` | Unsafe contracts, wrappers, FFI, ABI, volatile, inline assembly, plugins, and capability boundary. | `unsafe-ffi-boundary.md`, audits, and module-specific evidence. |
-| `lambda_K-backend` | C and LLVM lowering, target contracts, UB closure, evaluation-order preservation, and debug mapping. | `backend-preservation.md` and conformance evidence. |
+| `lambda_K-backend` | Generated-C lowering, admitted C-toolchain contracts, UB closure, evaluation-order preservation, and debug/source mapping. | `backend-preservation.md` and conformance evidence. |
 | `lambda_K-stdlib` | Admission contracts, allocators, containers, text, I/O, numerics, crypto, and transitional FFI records. | `stdlib-contract-model.md` and API-specific evidence. |
 | `lambda_K-toolchain` | `.koi`, builds, cache, packages, diagnostics, formatter, docs, Analysis Server, audit, and replay. | `toolchain-and-artifact-contracts.md` and fixtures. |
 | `lambda_K-services` | Website, repository-owned package-doc retrieval, optional cache-only mirrors, playground deployment, auth/data boundaries, service ownership, and repository topology. | Public service records. This is operational conformance documentation, not metatheory. |

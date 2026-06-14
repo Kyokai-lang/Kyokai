@@ -21,6 +21,7 @@ Rationale is not the law. It is the light left on beside the law, so a reader ca
 | `06-concurrency.md` | Structured tasks, SPSC channels, pollers, locks, atomics, and cancellation. | `language/15-concurrency.md`, `stdlib/09-concurrency-primitives.md` |
 | `07-stdlib-philosophy.md` | Batteries-included stdlib, admission records, RIIK, math, crypto, and FFI tracking. | `stdlib/00-stdlib-overview.md` through `stdlib/11-transitional-ffi-tracking.md` |
 | `08-toolchain-philosophy.md` | Packages, `.koi`, CLI, diagnostics, formatter, docs, audit, reproducibility, and releases. | `toolchain/00-toolchain-overview.md` through `toolchain/11-build-generation-and-playground.md` |
+| `09-backend-choice.md` | Why Kyokai maintains one generated-C backend and rejects direct LLVM, Cranelift, QBE, custom-native, and tiered backend architectures. | `language/17-memory-layout-and-backend-contract.md`, `toolchain/04-build-profiles-targets-linking.md`, `toolchain/09-reproducibility-incremental-builds.md` |
 
 > Trace: D85, D86, D152, D229
 > Covers: Rationale chapters map back to the normative language, toolchain, and stdlib specs.

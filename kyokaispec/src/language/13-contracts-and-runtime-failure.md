@@ -71,7 +71,7 @@ Multiple `require` clauses evaluate in source order. Multiple `ensure` clauses e
 > Trace: D53, D71, D140
 > Covers: Contract evaluation order is source-ordered and short-circuits only by termination.
 
-Contract clauses are part of the public interface when they appear in `.kyo` interface files. Tools, documentation, and diagnostics must preserve them as caller-visible obligations.
+Contract clauses are part of the public interface when they appear on a `public` declaration and are recorded in the derived `.koi` interface. Tools, documentation, and diagnostics must preserve them as caller-visible obligations.
 
 > Trace: D29, D53, D85, D218
 > Covers: Contracts are interface-visible API facts.
@@ -166,7 +166,7 @@ Kyokai has no in-process `catch panic`, panic recovery block, task-level panic r
 > Trace: D121, D84
 > Covers: Runtime `todo` is explicit panic-class termination.
 
-`unreachable;` states that control cannot reach that point. It has type `Never`. Reaching it at runtime triggers TPOE with diagnostic kind `UnreachableReached` and the source span. Safe `unreachable;` is not `panic`, backend undefined behavior, LLVM poison, a bare `__builtin_unreachable`, or an optimizer assumption. The compiler can remove its branch only after accepted static analysis proves that the branch cannot execute under Kyokai semantics.
+`unreachable;` states that control cannot reach that point. It has type `Never`. Reaching it at runtime triggers TPOE with diagnostic kind `UnreachableReached` and the source span. Safe `unreachable;` is not `panic`, C undefined behavior, a bare `__builtin_unreachable`, or an optimizer assumption. The compiler can remove its branch only after accepted static analysis proves that the branch cannot execute under Kyokai semantics.
 
 > Trace: D73, D84, D121, D228, D355
 > Covers: Reached safe `unreachable;` is a source-located TPOE path and never lowers directly to backend undefined behavior.
@@ -188,7 +188,7 @@ Synchronous host fault signals such as invalid instruction, segmentation fault, 
 > Trace: D95, D256
 > Covers: Synchronous host faults are fatal process conditions.
 
-An implementation bug in the compiler, runtime, backend helper, or standard library support code that violates an internal invariant is runtime-fatal or compile-fatal depending on when it is detected. It must not be reported as a user `Result` or ordinary program branch.
+An implementation bug in the compiler, runtime, generated-code helper, or standard library support code that violates an internal invariant is runtime-fatal or compile-fatal depending on when it is detected. It must not be reported as a user `Result` or ordinary program branch.
 
 > Trace: D29, D73, D84, D228
 > Covers: Implementation failures are not user-level recoverable errors.
@@ -212,7 +212,7 @@ If allocation failure occurs inside a construct whose contract does not admit al
 
 ## Hosted And Freestanding Diagnostics
 
-On hosted targets, panic, TPOE, and runtime-fatal support emits a structured fatal payload. The payload records terminal category, diagnostic code, message, source span when available, failed contract or check when available, `Optional[Backtrace]`, target triple, selected profile, backend, runtime phase, and hosted exit mapping. `ExitCode` return remains ordinary process exit and does not enter this payload path.
+On hosted targets, panic, TPOE, and runtime-fatal support emits a structured fatal payload. The payload records terminal category, diagnostic code, message, source span when available, failed contract or check when available, `Optional[Backtrace]`, target triple, selected profile, admitted C-toolchain contract identity, runtime phase, and hosted exit mapping. `ExitCode` return remains ordinary process exit and does not enter this payload path.
 
 Backtrace policy resolves in this order: explicit CLI `--backtrace=<off|short|full>`, profile key `panic_backtrace = "off"|"short"|"full"`, hosted `KYOKAI_BACKTRACE=0|1|short|full` only when the selected profile permits environment override, then target default. A reproducible profile disables environment override by default. Backtrace capture failure omits the trace and does not change the terminal category.
 

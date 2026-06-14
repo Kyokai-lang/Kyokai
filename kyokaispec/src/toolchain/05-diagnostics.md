@@ -125,6 +125,8 @@ Given the same inputs, target, profile, and diagnostic policy, diagnostics must 
 
 Human rendering may use color, underlines, source excerpts, and terminal width. Those presentation choices must not change diagnostic JSON, command success, lockfiles, artifacts, or cache keys.
 
+The canonical human renderer uses the semantic palette from the CLI chapter. Red is reserved for error and fatal lanes, cyan for success, gold for warning or authority-policy attention, and lavender for notes and structural emphasis. Severity words, diagnostic codes, labels, and source markers remain present in monochrome output; color is never the only severity or state signal.
+
 > Trace: D29, D83
 > Covers: Human diagnostic rendering is presentation-only.
 
@@ -150,20 +152,22 @@ A diagnostic must not blame a later phase when an earlier rule is the true cause
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-A good diagnostic does not flatter you. It shows the wound, names the blade, and points to the hand that has to move. Kyokai needs that because a language with linear values, contracts, unsafe walls, and capabilities can become a maze if the compiler only says no.
+A good diagnostic does not flatter. It shows the wound, names the blade, and identifies the code that has to move. Kyokai needs that because a language with linear values, contracts, unsafe walls, and capabilities can become a maze if the compiler only says no.
 
 > Trace: D29
 > Covers: Kyokai diagnostic quality is required because the language's safety model must be teachable through errors.
 
 ## Stable Diagnostic, Redaction, And Explanation Contract
 
-A structured diagnostic records schema version, stable diagnostic ID, severity, category, message key, rendered human message, primary span, related spans with roles, notes, explanation ID, fix IDs, source origin, target/profile/backend, policy facts, redaction facts, and external-tool raw-log artifact when present.
+A structured diagnostic records schema version, stable diagnostic ID, severity, category, message key, rendered human message, primary span, related spans with roles, notes, explanation ID, fix IDs, source origin, target/profile/C-toolchain contract, policy facts, redaction facts, and external-tool raw-log artifact when present.
 
 Stable IDs and JSON fields are compatibility surfaces. Human wording can improve while preserving semantic identity. A removed or repurposed ID is a compatibility change. A deprecated source surface emits its stable deprecation ID, replacement, compatibility horizon, and migration action.
 
 Redaction is default-on for secret-marked values, environment values, process arguments, raw addresses, capability internals, tokens, keys, and foreign TLS error payloads that contain secrets. A diagnostic reports that redaction happened. Revealing protected content requires an explicit local policy and never appears in machine output by accident.
 
-External-tool failures retain raw stdout, raw stderr, command identity, arguments after redaction, working directory class, environment-key names, exit category, target, and toolchain provenance. Human diagnostics summarize; artifacts preserve raw evidence.
+External-tool failures retain raw stdout, raw stderr, executable identity/version, normalized arguments after redaction, working directory class, environment-key names, exit category or signal, target, SDK/sysroot, input/output digests, generated location, source-map identity, and toolchain provenance. Human diagnostics summarize; artifacts preserve raw evidence.
+
+Kyokai remaps an external C compiler, assembler, linker, debugger, sanitizer, coverage, or profiler location only when the authoritative source map proves the Kyokai span. Machine output retains both the Kyokai span and original generated/external location. A generated-C rejection after successful Kyokai checking is categorized as a code-generation defect, unsupported C-toolchain contract, native dependency error, or external-tool failure. It is never rewritten as a fabricated source type error.
 
 `kyokai explain` exposes named compiler-backed modes: `linearity`, `borrow`, `defer`, `failure-flow`, `lowering`, `capability`, `target`, `koi`, `generated-c`, and `package-graph`. Explain output never changes program semantics. `kyokai fix` and Analysis Server code actions use the same fix IDs and closed safety classes: `note-only`, `manual`, `maybe-applicable`, `machine-applicable`, and `machine-applicable-safe`.
 
@@ -171,3 +175,14 @@ Branch-join diagnostics print each binding state per arm. Resource-flow assists 
 
 > Trace: D302-D303, D316, D328, D333, D358, D368, D378-D380, D402, D404, D414, D420, D422, D427-D428, D444, D474, D482, D485, D488, D495, D503, D518
 > Covers: Structured diagnostic identity, redaction, raw external logs, deprecations, explain modes, fix safety, branch joins, and resource-flow reporting are explicit.
+
+## Application Integration Diagnostics
+
+Integration diagnostics preserve the boundary that failed. Generator and projection failures identify request/result identity, output class, provenance, and transaction state. Migration failures identify plan identity, edit class, stale preimage, affected package/configuration, and recovery journal. Adapter, packaging, mobile, browser, and deployment failures identify the adapter/provider, target/profile, authority source, raw external-log artifact, source/projection map, and verification state.
+
+Authority-denial diagnostics carry a requirement graph from the source declaration or package artifact to the denied capability and every policy source that contributed to the effective ceiling. A suggested repair is `machine-applicable-safe` only when it threads existing authority or applies a proven attenuation without changing the authority ceiling. Policy widening, new providers, dependency replacement, secret creation, and unsafe suppression are never machine-applicable repairs.
+
+Framework-handle diagnostics distinguish wrong owner, unknown slot, stale generation, removed entry, retired slot, invalid mutation epoch, and illegal overlapping view. Callback diagnostics point at the captured binding or callback expression and preserve callable class, retention, affinity, reentrancy, cancellation, and generated-wrapper facts as related context.
+
+> Trace: D540-D545, D547-D550, D552-D557
+> Covers: Application-integration diagnostics report the true generator, migration, authority, handle, callback, adapter, packaging, target, or remote-service boundary instead of fabricating a source type error.

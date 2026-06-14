@@ -6,16 +6,16 @@
 
 Kyokai source is written as UTF-8 text and is specified here with the same clean EBNF discipline inherited from Austral: `=` defines a production, `;` ends it, concatenation is written with `,`, alternation with `|`, optional syntax with `[...]`, and zero-or-more repetition with `{...}`. That inherited shape is still useful. The city changed, the street signs changed, but the map-reading tool still works.
 
-> Trace: D5, D52, D78, D86
-> Covers: Kyokai keeps useful inherited Austral specification machinery while replacing the source language surface with `.kyo` interface files and `.kai` body files under the Kyokai module/package model.
+> Trace: D5, D52, D78, D86, D537
+> Covers: Kyokai keeps useful inherited Austral specification machinery while replacing the source language surface with the single `.kyo` module source file under the Kyokai module/package model.
 
 ## Source Files And Text
 
 [Rikona Kurasaki / Mjoyufull]
-A Kyokai source file is either a `.kyo` interface file or a `.kai` body file. A module path such as `Foo.Bar` resolves, under the manifest-declared module root, to `Foo/Bar.kyo` for the interface and `Foo/Bar.kai` for the body. Austral's `.aui` and `.aum` extensions are not Kyokai source extensions.
+A Kyokai source file is one `.kyo` module source file. A module path such as `Foo.Bar` resolves, under the manifest-declared module root, to one `Foo/Bar.kyo` file holding the whole module. The retired `.kai` extension and Austral's `.aui`/`.aum` extensions are not Kyokai source extensions; a file presented with one of them is rejected with a diagnostic that names the single-file model.
 
-> Trace: D52, D78
-> Covers: Kyokai source uses `.kyo` for interfaces and `.kai` for bodies, and dotted module names map mechanically to directory paths under the package module root.
+> Trace: D52, D78, D537
+> Covers: Kyokai source uses one `.kyo` file per module, dotted module names map mechanically to directory paths under the package module root, and the `.kai`/`.aui`/`.aum` extensions are retired source roles.
 
 Source text is a sequence of Unicode scalar values encoded as UTF-8. Lexical grammar that names ASCII letters, ASCII digits, keywords, punctuation, and operators matches those exact Unicode code points. A conforming implementation must reject malformed UTF-8 before parsing.
 
@@ -89,14 +89,14 @@ borrow borrows break build bxor capability case cleanup compile_error comptime c
 continue contract covers debug default defer do drop else ensure Err errdefer esac evidence
 exports extern false fi field fn for forbids foreign from function generator if import in
 instance internal is join layout let lifetime maps_failure method module module_invariant mon
-nil None not od of Ok or owns packed panic pick pragma preserves produce qed receiver record
-reentrancy require requires reserved return rotl rotr seal select shl shr Some spawn spec
-static static_assert target taskgroup then threading timeout to todo transfers true type
-typeclass union unreachable unsafe var wait wake when where while with yield
+nil None not od of Ok opaque or owns packed panic pick pragma preserves private produce public
+qed receiver record reentrancy require requires reserved return rotl rotr seal select shl shr
+Some spawn spec static static_assert target taskgroup then threading timeout to todo transfers
+true type typeclass union unreachable unsafe var wait wake when where while with yield
 ```
 
-> Trace: D8-D21, D24, D41, D52, D54, D63, D78, D111, D118-D120, D127, D179, D198, D214, D235, D252, D322-D323, D339-D341
-> Covers: Kyokai reserves the accepted syntax surface for declarations, control flow, contracts, FFI, unsafe contracts, tasks, generators, compile-time forms, bitrecords, waits, and semantic terminators. Contextual words remain separate.
+> Trace: D8-D21, D24, D41, D52, D54, D63, D78, D111, D118-D120, D127, D179, D198, D214, D235, D252, D322-D323, D339-D341, D538, D539
+> Covers: Kyokai reserves the accepted syntax surface for declarations, control flow, contracts, FFI, unsafe contracts, tasks, generators, compile-time forms, bitrecords, waits, visibility markers `public`/`private`, the `opaque` representation modifier, and semantic terminators. Contextual words remain separate.
 
 Some words are contextual. `result` is recognized as the postcondition result view only inside `ensure` clauses. `old` is recognized only inside `ensure` clauses. `ignore` is recognized as the discard pattern only in pattern position. Outside those contexts, they are ordinary identifiers unless another chapter gives a narrower rule.
 
@@ -230,7 +230,7 @@ The lexer rejects inherited or neighboring-language spellings that would create 
 
 ## Source Byte Contract
 
-A Kyokai source file is UTF-8. A UTF-8 byte-order mark is rejected, including as the first three bytes of a source file. A Unix shebang is legal only as the first two bytes `#!` on line 1 of an executable-entry `.kai` file in an executable-source command mode. The shebang ends at the first line terminator and is excluded from Kyokai tokens. A shebang in a `.kyo` file, a non-entry `.kai` file, or any later line is a compile-time error.
+A Kyokai source file is UTF-8. A UTF-8 byte-order mark is rejected, including as the first three bytes of a source file. A Unix shebang is legal only as the first two bytes `#!` on line 1 of an executable-entry `.kyo` source file in an executable-source command mode. The shebang ends at the first line terminator and is excluded from Kyokai tokens. A shebang in a non-executable-entry `.kyo` file, or on any line after line 1, is a compile-time error.
 
 The lexer accepts LF and CRLF line endings and normalizes both to one logical newline. A bare CR is a source-encoding diagnostic. Source spans record byte offsets into the original file plus one-based logical line and Unicode-scalar display columns. Terminal rendering can add display-width columns as presentation data, but byte offsets and logical scalar columns remain the machine contract. Any display-width column is derived with the toolchain's pinned Unicode-data version. The toolchain identity and diagnostic machine metadata record that version whenever display-width columns are emitted.
 
@@ -242,7 +242,7 @@ A plain text literal is immutable compile-time UTF-8 storage. It is `StaticStrin
 | --- | --- | --- | --- |
 | UTF-8 source | Decode the entire file as UTF-8 before tokenization. | None. | Invalid byte sequence: source-encoding diagnostic with byte offset. |
 | UTF-8 BOM | Reject in every position. | No tokenization occurs. | Source-encoding diagnostic with removal fix. |
-| Entry shebang | Accept only on the first logical line of executable-entry `.kai`. | Ignored by tokenization. | Other placement: file-role diagnostic. |
+| Entry shebang | Accept only on the first logical line of an executable-entry `.kyo`. | Ignored by tokenization. | Other placement: file-role diagnostic. |
 | CRLF | Normalize to one logical newline while preserving original byte spans. | None. | Bare CR: source-encoding diagnostic. |
 | Doc comment | Attach to the next legal declaration. | None. | Orphan: hard compile-time diagnostic. |
 | Static text literal | Produce `StaticString`. | Read immutable artifact storage. | Invalid escape or invalid UTF-8: literal diagnostic. |

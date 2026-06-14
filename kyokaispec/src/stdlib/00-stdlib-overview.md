@@ -14,10 +14,15 @@ The public namespace for the standard library is `Kyokai.*`. Public Kyokai APIs 
 > Trace: D1, D5, D152
 > Covers: The stdlib namespace follows Kyokai project identity and retires inherited public naming.
 
-The standard library is batteries-included for systems programming. The admitted surface includes core result/optional/error/display protocols, allocators, memory containers, byte/text/path types, collections, iterators, numerics, I/O, filesystems, environment access, process control, time, random, concurrency primitives, testing helpers, crypto policy, and tracked transitional FFI.
+The official Bridge collection uses the reserved namespace `Kyokai.Bridge.*` and the repository/toolchain-owned collection root `bridge/`. Bridge modules are shipped first-party integration code for selected third-party libraries, native APIs, generated bindings, small ports, and target adapters. They are not ordinary package-index dependencies, not a package cache, and not the output of `kyokai vendor`.
 
-> Trace: D152, D229-D232
-> Covers: Kyokai commits to broad systems-library families while still requiring admission criteria per API.
+> Trace: D529
+> Covers: The Bridge collection is an official shipped integration collection with a reserved namespace and path, separate from ordinary dependency vendoring.
+
+The standard library is batteries-included for systems programming. The admitted surface includes core result/optional/error/display protocols, allocators, memory containers, byte/text/path types, collections, iterators, numerics, I/O, filesystems, environment access, process control, time, random, concurrency primitives, testing helpers, crypto policy, tracked transitional FFI, and the official Bridge collection for shipped third-party integrations.
+
+> Trace: D152, D229-D232, D529
+> Covers: Kyokai commits to broad systems-library families and an official bridge collection while still requiring admission criteria per API.
 
 ## Authority And Import Model
 
@@ -30,6 +35,11 @@ Every stdlib API must state whether it is pure, capability-requiring, unsafe-int
 
 > Trace: D85, D150, D218, D229
 > Covers: Documentation and audit can surface stdlib semantic fields consistently.
+
+A Bridge module is imported explicitly like any other module. Importing it grants no filesystem, network, process, dynamic-loader, unsafe, or target authority. Any required capability appears in the module contract, `.koi`, docs, audit output, and capability-deny diagnostics. Any raw foreign operation remains behind the unsafe chapter's contract and wrapper rules.
+
+> Trace: D20, D85, D211, D245, D527, D529
+> Covers: Bridge imports do not grant authority, and bridge entries keep unsafe, capability, docs, audit, and deny-policy facts visible.
 
 ## Contract Fields
 
@@ -79,10 +89,15 @@ FFI is legitimate for OS/hardware boundaries, transitional bootstrap bridges, ex
 > Trace: D20, D230-D231, D245
 > Covers: FFI is allowed only at explicit trust boundaries with contracts and wrappers.
 
+The Bridge collection does not weaken RIIK. Pure algorithms remain safe native Kyokai by default. A Bridge entry exists when the useful boundary is integration itself: a foreign ABI, platform SDK, native library, externally maintained protocol implementation, generated binding set, or reviewed upstream port. A Bridge entry cannot become a dumping ground for code that should be a normal package or native stdlib module.
+
+> Trace: D64, D229-D230, D529
+> Covers: Bridge entries are admitted integration boundaries and do not replace native Kyokai implementations for pure stdlib work.
+
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-A standard library can become a second language hiding under function names. Kyokai refuses that. The function name tells you the ownership story. The signature shows the allocator and capability story. The contract tells you how it fails. The docs state what changes across platforms. No one has to read a source file in the rain to find out whether `push` can allocate, whether an iterator dies after mutation, or whether a file call secretly uses the current directory.
+A standard library can become a second language hiding under function names. Kyokai refuses that. The function name states the ownership story. The signature shows the allocator and capability story. The contract states how it fails. The docs state what changes across platforms. No one has to read a source file in the rain to discover whether `push` can allocate, whether an iterator dies after mutation, or whether a file call secretly uses the current directory.
 
 > Trace: D85, D152, D229
 > Covers: Kyokai's stdlib contract exists so library behavior stays as explicit as language behavior.

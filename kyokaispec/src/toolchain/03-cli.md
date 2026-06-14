@@ -36,22 +36,22 @@ The flags `--workspace` and `--package <name>` select scope inside a workspace. 
 | `--profile <name>` | Select a build profile. | check, build, run, test, doc, bench | D26, D31 |
 | `--release` | Exact alias for `--profile release`. | check, build, run, test, doc, bench | D26, D31 |
 | `--target <triple>` | Select a legal target triple. | check, build, run, test, doc, bench | D19, D80, D149 |
-| `--backend <c|llvm>` | Select the code generation backend. | build, run, test, bench | D31, D139, D149 |
 | `--message-format=human|json|json-lines` | Select the human lane, one versioned JSON document, or a stream of versioned JSON records. Scripts consume `json` or `json-lines`; `human` is presentation output. | Reporting commands whose matrix admits output selection | D29, D503 |
 | `--color auto|always|never|machine` | Select terminal presentation policy. `machine` forbids ANSI styling, cursor motion, progress animation, pager behavior, and prompts. | All reporting commands | D29, D422, D503 |
 | `--verbose` | Print resolved plan facts before execution. | Project commands | D26, D83 |
 | `--quiet` | Suppress non-error presentation output. | Project commands | D29 |
 | `--offline` | Forbid every network action. A command fails if its required inputs are not already available from workspace packages, vendored sources, or verified local caches. | Commands whose matrix admits local or remote inputs | D396, D424 |
+| `--deny-capability <name>` | Add an exact capability or capability-family denial to the effective capability deny policy for this invocation. Repeating the flag adds more denied names. | check, build, run, test, bench, doc, audit, publish, semver-check, generate, eval, repl, scratch/playground lanes, and other project commands that inspect, build, generate, publish, or execute code | D527 |
 | `--out-dir <path>` | Select the user-visible output root for this command. | build, run, test, bench, doc, audit, semver-check | D26, D83, D264 |
 | `--cache-dir <path>` | Select the disposable toolchain cache root for this command. | Project commands | D83, D144, D264 |
 
-> Trace: D26, D29, D31, D78, D80, D83, D149, D264, D396, D422, D424, D503
-> Covers: Common CLI flags have fixed meanings, machine output is versioned, machine color policy is noninteractive, and offline mode forbids network contact.
+> Trace: D26, D29, D31, D78, D80, D83, D149, D264, D396, D422, D424, D503, D527
+> Covers: Common CLI flags have fixed meanings, machine output is versioned, machine color policy is noninteractive, offline mode forbids network contact, and capability denial is an explicit per-invocation authority ceiling.
 
-`--verbose` must print the selected manifest, command scope, selected packages, selected toolchain, selected target, selected backend, selected profile, output root, project cache root, package-source cache root, docs cache root, global cache root when it is relevant to the command, lockfile path, lockfile mode, target-spec files, resolved backend tools, admitted discovery providers, explicit extra flags, and every declared network action. It must not print secrets from the environment. Presentation output can redact user-home prefixes only when the redaction marker remains visible. Deterministic artifact identity stores the unredacted normalized identity required by the reproducibility chapter.
+`--verbose` must print the selected manifest, command scope, selected packages, selected Kyokai toolchain, selected target, selected profile, admitted C-toolchain contract, output root, project cache root, package-source cache root, docs cache root, global cache root when it is relevant to the command, lockfile path, lockfile mode, target-spec files, resolved C compiler/linker/archive tools, admitted discovery providers, explicit extra flags, effective capability deny policy, each deny-policy source that contributed to it, and every declared network action. It must not print secrets from the environment. Presentation output can redact user-home prefixes only when the redaction marker remains visible. Deterministic artifact identity stores the unredacted normalized identity required by the reproducibility chapter.
 
-> Trace: D26, D29, D83, D149, D396, D404-D405, D422, D424-D425, D503
-> Covers: Verbose output exposes toolchain, cache, resolver, native-tool, and network facts without leaking secrets.
+> Trace: D26, D29, D83, D149, D396, D404-D405, D422, D424-D425, D503, D527
+> Covers: Verbose output exposes toolchain, cache, resolver, native-tool, deny-policy, and network facts without leaking secrets.
 
 ## Exit Status
 
@@ -61,7 +61,7 @@ The flags `--workspace` and `--package <name>` select scope inside a workspace. 
 | `1` | `diagnostics-failed` | Checked user input, tests, audit policy, SemVer policy, or another command-owned validation rule failed. | D26, D29, D503 |
 | `2` | `tool-usage-error` | The CLI invocation is malformed: unknown flag, missing flag value, incompatible flags, unknown subcommand, or a required explicit scope was omitted. | D26, D503 |
 | `3` | `internal-compiler-error` | The compiler, toolchain, or tool-owned artifact violated an internal invariant and the command could not recover by rebuilding validated state. | D26, D84, D429, D503 |
-| `4` | `target-or-toolchain-unavailable` | Required target support, selected component, native tool, backend, runner, or target contract is unavailable. | D31, D80, D149, D503 |
+| `4` | `target-or-toolchain-unavailable` | Required target support, selected component, admitted C tool, runner, or target contract is unavailable. | D31, D80, D149, D503, D532 |
 | `5` | `dependency-or-index-failure` | Dependency resolution, index access, advisory refresh, source retrieval, provenance verification, or an offline-required local artifact failed. | D51, D396, D424, D503 |
 | `6` | `sandbox-failure` | A declared generator, scratch, eval, playground, or hosted-development sandbox could not enforce or satisfy its contract. | D226, D465, D475, D503 |
 | `130` | `interrupted` | External interruption stopped the command before normal completion. | D503 |
@@ -79,18 +79,18 @@ A command that exits nonzero must emit at least one diagnostic or structured err
 | Command | Required Behavior | Trace |
 | --- | --- | --- |
 | `kyokai --version` | Print the selected toolchain summary without requiring a project. `kyokai version --verbose` prints the full component, source, cache-root, native-tool, and version-ABI record. | D26, D225, D268, D425 |
-| `kyokai doctor` | Inspect the host toolchain, supported targets, configured C/LLVM tools, cache/output roots, release provenance, and common setup problems without reading source as language input. | D31, D80, D149, D225, D268 |
+| `kyokai doctor` | Inspect the host toolchain, supported targets, admitted C compiler/linker contracts, cache/output roots, release provenance, and common setup problems without reading source as language input. | D31, D80, D149, D225, D268, D532, D535 |
 | `kyokai init` | Create a package manifest in the current directory, write explicit layout information, and refuse to overwrite an existing package/workspace unless an explicit force flag is passed. | D26, D78, D266 |
-| `kyokai new` | Create a new package or workspace directory from an official template, including `kyokai.toml`, module roots, initial `.kyo`/`.kai` files, and template-selected test/doc skeletons. | D26, D78, D266 |
-| `kyokai check` | Parse, resolve modules/imports, validate `.koi`, typecheck, check contracts syntactically/semantically, resolve instances, check linearity, borrow rules, capabilities, unsafe contracts, and target guards. It may skip final code generation and linking. | D26, D29, D79 |
-| `kyokai build` | Perform `check`, generate backend artifacts, compile/link as required by package output type, and emit requested build products. | D26, D31, D80, D139 |
-| `kyokai run` | Build one executable package target and execute it through the selected runner; `--` separates program arguments. | D26, D80 |
-| `kyokai test` | Build and run inline tests. It also runs documentation tests when the selected package or command enables the documented `doc-tests` lane. Both lanes use ordinary semantics and explicit capability policy. | D28, D137, D218 |
+| `kyokai new` | Create a new package or workspace directory from an official template, including `kyokai.toml`, module roots, an initial `.kyo` module source file, and template-selected test/doc skeletons. | D26, D78, D266, D537 |
+| `kyokai check` | Parse, resolve modules/imports, validate `.koi`, typecheck, check contracts syntactically/semantically, resolve instances, check linearity, borrow rules, capabilities, unsafe contracts, target guards, and the effective capability deny policy. It may skip final code generation and linking. | D26, D29, D79, D527 |
+| `kyokai build` | Perform `check`, emit generated C and source maps, invoke the admitted C compile/link plan required by the package output type, reject denied build/generator/runtime-startup authority, and emit requested build products. | D26, D31, D80, D139, D527, D530-D535 |
+| `kyokai run` | Build one executable package target, reject denied target or runner authority, and execute it through the selected runner; `--` separates program arguments. | D26, D80, D527 |
+| `kyokai test` | Build and run inline tests. It also runs documentation tests when the selected package or command enables the documented `doc-tests` lane. Both lanes use ordinary semantics, explicit capability grants, isolated authority bundles, and the effective capability deny policy. | D28, D137, D218, D527 |
 | `kyokai bench` | Build and run benchmark declarations or bench-marked tests under the selected profile and target runner. | D28, D137 |
 | `kyokai fmt` | Format source deterministically and idempotently without configuration knobs. | D25 |
-| `kyokai doc` | Generate public-interface documentation and JSON from checked interfaces and contracts. | D17, D218 |
+| `kyokai doc` | Generate public-interface documentation and JSON from checked interfaces and contracts, including installed first-party Bridge modules when those modules are selected by an explicit docs lane or imported by the checked graph. | D17, D218, D529 |
 | `kyokai lsp` | Run the official language server using the same compiler engine. | D148 |
-| `kyokai audit` | Report dependency, unsafe, FFI, capability, generation, and public-surface risk facts. | D150 |
+| `kyokai audit` | Report dependency, unsafe, FFI, capability, generation, denied-authority edges, Bridge admission/provenance facts, and public-surface risk facts. | D150, D527, D529 |
 | `kyokai explain` | Print detailed documentation for a diagnostic code, warning category, lint category, audit category, or command exit status. | D29, D267 |
 | `kyokai fix` | Apply selected `machine-applicable-safe` suggestions by default; apply `machine-applicable` edits only with explicit opt-in after checking that every edit still parses, formats, and preserves the diagnostic's stated repair semantics. | D25, D29, D267, D488 |
 | `kyokai repl` | Start a persistent interactive session using ordinary compiler semantics. | D151-D151a |
@@ -103,7 +103,9 @@ A command that exits nonzero must emit at least one diagnostic or structured err
 | `kyokai tree` | Print the resolved dependency graph from the lockfile or selected manifest resolution in deterministic order. | D51, D83, D269 |
 | `kyokai why` | Explain why a package appears in the dependency graph by printing one or more dependency paths from selected roots to that package. | D51, D269 |
 | `kyokai outdated` | Compare pinned dependencies against explicit update policy and index metadata, reporting available newer revisions, yanks, and advisories without editing files. | D51, D221, D244, D269 |
-| `kyokai vendor` | Materialize pinned dependency sources into an explicit vendor directory and rewrite or record resolution metadata so offline builds use the same revisions. | D51, D83, D269 |
+| `kyokai vendor` | Materialize pinned dependency sources into an explicit vendor directory and rewrite or record resolution metadata so offline builds use the same revisions. It does not copy or rewrite installed `Kyokai.Bridge.*` modules. | D51, D83, D269, D529 |
+| `kyokai lock repair` | Validate and deterministically rewrite lockfile formatting without changing graph meaning. | D424, D528 |
+| `kyokai lock explain-conflict` | Run the resolver in conflict-explanation mode and print the incompatibility chain without writing a graph. | D424, D528 |
 | `kyokai publish` | Validate package metadata and release policy, then prepare or submit package discovery metadata. | D221, D223, D244 |
 | `kyokai semver-check` | Compare public interface surfaces and report source/API compatibility changes. | D223 |
 | `kyokai clean` | Remove selected project cache state by default. `--outputs` removes selected project outputs. `--all` removes selected project cache and output state. `--global` is a separate global-cache scope. `kyokai clean docs` removes generated local docs and docs-cache entries. | D83, D144, D264, D397, D425, D429, D516 |
@@ -111,12 +113,12 @@ A command that exits nonzero must emit at least one diagnostic or structured err
 | `kyokai koi print` | Print a derived JSON or text view of a `.koi` artifact without making the derived view authoritative. | D79, D265 |
 | `kyokai koi diff` | Compare two `.koi` artifacts and classify public API, internal API, contract, generic metadata, target, and hash changes. | D79, D223, D265 |
 
-> Trace: D25-D29, D51, D79, D83, D137, D144, D148-D151a, D218, D221, D223-D225, D244, D264-D270, D397, D425, D429, D516
-> Covers: Required CLI commands and their top-level obligations are specified, including project creation, diagnostics explanation, safe fixes, toolchain health, scoped cleanup, offline docs cleanup, and package inspection commands.
+> Trace: D25-D29, D51, D79, D83, D137, D144, D148-D151a, D218, D221, D223-D225, D244, D264-D270, D397, D425, D429, D516, D527
+> Covers: Required CLI commands and their top-level obligations are specified, including project creation, diagnostics explanation, safe fixes, toolchain health, scoped cleanup, offline docs cleanup, package inspection commands, and capability deny-policy enforcement.
 
 ## Project Creation Commands
 
-`kyokai init` operates on the current directory. It writes `kyokai.toml`, creates the selected module root, and creates initial interface/body files only when those paths do not already exist. The default package template writes `[package]`, `version`, `edition`, and `[layout].module_root = "src"`. The default workspace template writes `[workspace].members = []` and does not invent packages unless the user asks for a package member template.
+`kyokai init` operates on the current directory. It writes `kyokai.toml`, creates the selected module root, and creates an initial `.kyo` module source file only when that path does not already exist. The default package template writes `[package]`, `version`, `edition`, and `[layout].module_root = "src"`. The default workspace template writes `[workspace].members = []` and does not invent packages unless the user asks for a package member template.
 
 > Trace: D26, D78, D266
 > Covers: Project initialization is explicit, non-destructive by default, and writes the required manifest layout instead of relying on inferred source roots.
@@ -128,27 +130,34 @@ A command that exits nonzero must emit at least one diagnostic or structured err
 
 ## Check Is A Real Compiler Pass
 
-`kyokai check` is not allowed to be a parser-only command. It must run the same resolver, type checker, contract checker, linearity checker, capability checker, target guard evaluator, instance resolver, and `.koi` compatibility checker that `build` uses. It may skip backend lowering, C compilation, LLVM emission, assembly, archiving, linking, and final executable runner checks.
+`kyokai check` is not allowed to be a parser-only command. It must run the same resolver, type checker, contract checker, linearity checker, capability checker, target guard evaluator, instance resolver, and `.koi` compatibility checker that `build` uses. It can skip generated-C lowering, external C compilation, assembly, archiving, linking, and final executable runner checks.
 
 > Trace: D26, D29, D79, D86
-> Covers: Fast checking is semantically honest but may omit backend and link phases.
+> Covers: Fast checking is semantically honest but may omit generated-C emission, external compilation, and link phases.
 
-If `check` succeeds and `build` later fails, the failure must belong to a phase `check` is allowed to skip, such as backend availability, backend-specific lowering bug, target toolchain rejection, link failure, missing native library, runner failure, or code-size/linker limit. If a later build finds a source semantic error that `check` is required to find, the toolchain is non-conforming.
+If `check` succeeds and `build` later fails, the failure must belong to a phase `check` is allowed to skip, such as generated-C lowering defect, admitted C-toolchain unavailability or rejection, link failure, missing native library, runner failure, or code-size/linker limit. If a later build finds a source semantic error that `check` is required to find, the toolchain is non-conforming.
 
 > Trace: D26, D31, D80, D139, D149
-> Covers: `check` success narrows later failure causes to backend, link, target, and runner phases.
+> Covers: `check` success narrows later failure causes to generated-code, external-toolchain, link, target, and runner phases.
 
 ## Package Commands
 
-`kyokai add --workspace <name>` writes a workspace dependency entry. `kyokai add --git <url> --rev <rev>` writes a pinned Git dependency. `kyokai add --git <url> --tag <tag>` resolves the tag to a commit and writes both `tag` and `rev`. A command that cannot determine an immutable revision must fail without editing the manifest.
+`kyokai add --workspace <name>` writes a workspace dependency entry. `kyokai add --git <url> --rev <rev>` writes a pinned Git dependency. `kyokai add --git <url> --tag <tag>` resolves the tag to a commit and writes both `tag` and `rev`. `kyokai add --index <package> --version <requirement>` writes an indexed package requirement and then resolves the graph through the final resolver model. A command that cannot determine an immutable revision for a Git dependency, cannot validate an indexed package requirement against the selected index policy, or cannot produce a valid lockfile update must fail without editing the manifest.
 
-> Trace: D51, D83
-> Covers: Adding dependencies always writes immutable resolution information.
+> Trace: D51, D83, D528
+> Covers: Adding dependencies records workspace identity, pinned Git identity, or indexed version intent while lockfile updates carry immutable resolution information.
 
-`kyokai update` may update Git revisions only when the selected dependency source and policy allow it. It must rewrite the lockfile deterministically and report the old revision, new revision, package identity, package version, and whether the new revision is yanked, superseded, or advisory-affected when such metadata is available.
+`kyokai update` updates only the selected package requirements and the minimal required transitive set in `update-selected` mode, or the whole graph in `update-all` mode. It may update Git revisions only when the selected dependency source and policy allow it. It may select a new indexed package version only when every applicable version requirement, feature constraint, target constraint, yank policy, advisory policy, and capability-deny policy is satisfied. It must rewrite the lockfile deterministically and report old and new package instances, old and new revisions, package identity, package version, selected features, selected target/profile facts, and whether the new revision is yanked, superseded, advisory-affected, or policy-blocked when such metadata is available.
 
-> Trace: D51, D83, D221, D244
-> Covers: Dependency updates are explicit lockfile changes with visible revision movement.
+> Trace: D51, D83, D221, D244, D528
+> Covers: Dependency updates are explicit resolver operations with visible package-instance and revision movement.
+
+`kyokai lock repair` reads an existing lockfile, validates graph identity against the selected manifests, source hashes, resolver version, feature-resolution version, package artifact hashes, source provenance, and index metadata version, and rewrites only deterministic formatting or ordering. It must not change selected package instances, revisions, features, target facts, `.koi` identities, advisories, yanks, policy identities, or dependency edges.
+
+`kyokai lock explain-conflict` runs the resolver in explanation mode. It reports package constraints, version requirements, exact revision pins, feature constraints, target constraints, yanks, advisories, capability-deny policy, and the minimal incompatibility chain the solver can justify. It must not write `kyokai.lock`.
+
+> Trace: D424, D528
+> Covers: Lockfile repair is non-semantic, while conflict explanation is an explicit read-only solver lane.
 
 `kyokai publish` does not make the package index the source of code or documentation truth. Publishing records discovery metadata, release metadata, and the compact documentation-index projection. The immutable source and committed `<package-root>/kdocs/` tree remain at the declared repository and exact revision. A publish command must reject package metadata whose manifest identity, source revision, version, `.koi` interface summary, package-root path, committed `kdocs/manifest.toml`, generated-file digest tree, or documentation-search projection do not agree.
 
@@ -172,6 +181,11 @@ If `check` succeeds and `build` later fails, the failure must belong to a phase 
 > Trace: D51, D83, D269
 > Covers: Offline and vendored workflows preserve the same pinned dependency identity as online resolution.
 
+`kyokai vendor` does not materialize the official Bridge collection. Bridge modules live under the installed toolchain's first-party `Kyokai.Bridge.*` interface root and repository/toolchain-owned `bridge/` collection root. A project that imports a Bridge module can audit and document that module's admission, license, provenance, capability, unsafe, and native-link facts, but it cannot turn Bridge code into an ordinary dependency directory through vendoring. If a project needs an independently pinned third-party source tree, it uses a package dependency and lockfile entry.
+
+> Trace: D51, D83, D269, D529
+> Covers: Ordinary vendoring and official bridge modules are separate workflows with different identity and provenance rules.
+
 ## Explanation And Fix Commands
 
 `kyokai explain <code-or-category>` reads the versioned diagnostic explanation catalog shipped with the toolchain. The output must include the diagnostic code or category, severity, short meaning, longer explanation, common causes, at least one repair pattern when a repair is known, and links or local anchors to the relevant spec chapter when available. Compiler-backed modes are `--linearity <span-or-symbol>`, `--borrows <span-or-symbol>`, `--defer <function-or-span>`, `--lowering <span-or-symbol>`, `--koi <symbol>`, and `--diagnostic <code>`. They read the same compiler facts as `check`, `build`, the Analysis Server, and the `.koi` reader. They cannot change program validity, suppress diagnostics, or redefine lowering.
@@ -186,7 +200,7 @@ If `check` succeeds and `build` later fails, the failure must belong to a phase 
 
 ## Toolchain Health Commands
 
-`kyokai --version` and `kyokai doctor` do not require a project. `--version` prints the public identity of the installed toolchain. `doctor` checks host support, external compiler/linker discovery, selected default backend, supported target triples, release provenance, cache writability, configured index access, and common environment problems. It reports findings as ordinary diagnostics and must not modify project files.
+`kyokai --version` and `kyokai doctor` do not require a project. `--version` prints the public identity of the installed toolchain. `doctor` checks host support, admitted C compiler/linker discovery, default target-toolchain selection, supported target triples, release provenance, cache writability, configured index access, and common environment problems. It reports findings as ordinary diagnostics and must not modify project files.
 
 > Trace: D31, D80, D149, D225, D268
 > Covers: Toolchain identity and host setup problems are inspectable without making a dummy project or reading source files.
@@ -225,18 +239,20 @@ Human diagnostics and progress output go to stderr. Command results intended for
 ## Why This Shape
 
 [Rikona Kurasaki / Mjoyufull]
-The command line is a pact. If `kyokai check` says yes, it means a real yes for the parts it claims to check. If `kyokai add` writes a dependency, it cannot smuggle a moving branch into tomorrow's build. This is the difference between a tool that helps you and a tool that leaves a note after the damage is already done.
+The command line is a pact. If `kyokai check` says yes, it means a real yes for the parts it claims to check. If `kyokai add` writes a dependency, it cannot smuggle a moving branch into tomorrow's build. This is the difference between a tool that prevents damage and one that merely reports it afterward.
 
 > Trace: D26, D51, D83
 > Covers: Kyokai CLI commands are explicit enough to make automation and trust possible.
 
 ## Human And Machine Output
 
-Human output uses fixed lanes and omits lanes with no records: command header, selected toolchain, workspace/package, target/profile/backend, dependency resolution, authority/network action, progress, diagnostics, artifacts, cache/provenance, suggestions, and next actions. Human presentation is recognizable but is not a parser contract.
+Human output uses fixed lanes and omits lanes with no records: command header, selected Kyokai toolchain, workspace/package, target/profile/C-toolchain, dependency resolution, authority/network action, progress, diagnostics, artifacts, cache/provenance, suggestions, and next actions. Human presentation is recognizable but is not a parser contract.
 
-Machine output uses `json` or `json-lines` and records schema version, command, toolchain identity, project identity, target, profile, backend, policy values, diagnostics, artifact paths, cache facts, authority/network actions, fix IDs, and exit classification. A code action uses the same fix ID in diagnostics, `kyokai fix`, Analysis Server responses, and machine reports.
+Machine output uses `json` or `json-lines` and records schema version, command, Kyokai toolchain identity, project identity, target, profile, admitted C-toolchain contract identity, policy values, diagnostics, artifact paths, cache facts, authority/network actions, fix IDs, and exit classification. A code action uses the same fix ID in diagnostics, `kyokai fix`, Analysis Server responses, and machine reports.
 
 `--color=auto` observes declared terminal facts and accepted display-only no-color policy. `--color=always` styles human streams. `--color=never` emits plain human text. `--color=machine` emits stable machine output and disables styling, animation, cursor movement, pagers, and prompts. Color never carries the only copy of information.
+
+Kyokai's canonical semantic palette uses Capability Cyan (`#4FD1C5`) only for success and accepted-state markers, Visceral Red (`#C60D2D`) only for errors, fatal termination, and rejected-state markers, Authority Gold (`#DAC564`) for warnings and authority or policy attention, and lavender (`#B8AAFF`, `#CAC0FF`, `#7A5AF5`, or `#9B7FFF`) for informational structure, notes, source emphasis, and navigation. Warm Ivory (`#EDE6D4`) and Deep Violet-Black (`#1A0F2E`) are the preferred foreground/background pair only when the client controls both surfaces. A client maps semantic roles to true-color, 256-color, 16-color, monochrome, or an explicit user theme. Labels, symbols, diagnostic codes, spans, and ordering carry the complete meaning without color.
 
 > Trace: D29, D422, D444, D474, D503
 > Covers: Output lanes, JSON schemas, fix IDs, localization boundaries, and color policy are explicit and script-safe.
@@ -270,7 +286,25 @@ Prompts exist only where a command matrix declares interactivity. `build`, `chec
 
 | Surface | Inputs | Outputs | Cache/artifact effect | Network authority | Prompt rule | Exit classifications | Trace |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Project compile lane | Manifest scope, lockfile mode, target, profile, backend, policy flags. | Human lanes or versioned machine records. | Reads project cache; `build` writes requested artifacts. | Forbidden. | Noninteractive. | `success`, `diagnostics-failed`, `target-or-toolchain-unavailable`, `internal-compiler-error`, `interrupted`. | D26, D396, D424, D503 |
+| Project compile lane | Manifest scope, lockfile mode, target, profile, admitted C-toolchain contract, policy flags. | Human lanes or versioned machine records. | Reads project cache; `build` writes requested artifacts. | Forbidden. | Noninteractive. | `success`, `diagnostics-failed`, `target-or-toolchain-unavailable`, `internal-compiler-error`, `interrupted`. | D26, D396, D424, D503, D530-D535 |
 | Package mutation lane | Manifest scope, selected dependency action, lockfile mode, index/source policy. | Graph changes, lockfile changes, package reports. | Writes only declared manifest, lockfile, vendor, index-cache, or source-cache roots. | Explicit remote lane; `--offline` forbids contact. | Declared per mutating command. | Compile-lane classes plus `dependency-or-index-failure`. | D51, D396, D424, D503 |
 | Cleanup lane | Owner root, explicit clean scope, `--dry-run`. | Reported removal plan and machine records. | Removes only selected project, docs, or global cache/output roots. | Forbidden. | Noninteractive. | `success`, `tool-usage-error`, `diagnostics-failed`, `interrupted`. | D397, D425, D429, D516 |
 | Explain lane | Diagnostic code, symbol, or source span. | Human explanation or versioned machine facts. | Read-only. | Forbidden. | Noninteractive. | `success`, `diagnostics-failed`, `tool-usage-error`, `internal-compiler-error`. | D267, D474, D503 |
+
+## Integration Plans And Authority Explanation
+
+The application-integration command family uses versioned plans and the common human/JSON output envelope:
+
+```text
+kyokai migrate edition --to <edition> [--package <name> | --workspace]
+kyokai migrate edition --apply <plan-path>
+kyokai migrate edition --recover <journal-path>
+kyokai explain authority [<capability>] [--target <name>] [--json]
+```
+
+Packaging and deployment operations use the plan/apply separation defined by the application-integration chapter. The admission record that exposes an operation records its exact subcommand spelling and machine-output schema. Plan-producing operations are read-only apart from their declared local plan artifacts. Apply operations verify plan schema, toolchain identity, target/profile identity, input digests, adapter admission, authority grants, and secret-provider identities before performing local or remote effects. A stale or incompatible plan fails without silent regeneration.
+
+`kyokai explain authority` reports the complete requirement graph and the effective deny-policy sources. It emits only the narrow machine-applicable repairs admitted by the capability-deny chapter. It never widens policy, creates authority, adds a provider, suppresses an unsafe requirement, or replaces a dependency automatically.
+
+> Trace: D503, D527, D544-D545, D548, D557
+> Covers: Migration, packaging, deployment, and authority explanation share versioned plans, explicit apply boundaries, stable machine output, and deny-only repair behavior.

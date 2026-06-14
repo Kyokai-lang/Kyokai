@@ -86,3 +86,12 @@ Security advisories record identifier, affected modules and versions, severity v
 
 > Trace: D421, D431
 > Covers: Crypto entropy, deterministic-test separation, advisory metadata, patch policy, and minimum-safe versions are explicit.
+
+## Trust And Revocation Dataset Providers
+
+Certificate roots, revocation lists, transparency metadata, algorithm-policy datasets, and similar security inputs are provider-backed behavioral datasets. Crypto and TLS APIs name the selected provider identity and its freshness, expiry, signature/provenance, offline, cache, and update contract. A provider update requires explicit filesystem or network authority according to the operation.
+
+An expired, unavailable, malformed, or unverifiable dataset produces the provider's named failure. It does not silently disable verification, accept an untrusted peer, or replace the active verified dataset. Toolchain, target-observed, and application-bundled providers remain distinct in audit and reproducibility output.
+
+> Trace: D231, D404, D421, D549
+> Covers: Security datasets fail closed and retain explicit provider identity instead of inheriting ambient host trust state without record.
