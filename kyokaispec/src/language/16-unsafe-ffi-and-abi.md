@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-16-UNSAFE-FFI-AND-ABI
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Foreign code is a gate in the wall. Austral already treated that gate as unsafe. Kyokai keeps that old warning sign, then bolts the whole frame down: the module must say it is unsafe, the call site must carry unsafe authority, the source must record the contract, and the wrapper must translate the foreign world back into Kyokai values.
+Kyokai retains Austral's rule that raw foreign interaction is unsafe and adds explicit containment requirements. The module declares its unsafe status, the operation requires unsafe authority, source records the unsafe contract, and a safe wrapper translates foreign values and failure conventions into Kyokai contracts.
 
-Unsafe code is not a room where the language stops speaking. It is a narrow bridge with posted weight limits. If the bridge cannot say what it carries, who owns it, what can fail, and what happens when the other side lies, it is not a Kyokai bridge yet.
+Unsafe code remains specified. Each admitted primitive defines its ownership, aliasing, lifetime, authority, failure, layout, and target obligations. An operation without those rules is not an admitted Kyokai unsafe operation.
 
 > Trace: D20/D20a/D20b, D73, D242/D242a, D245
 > Covers: Raw FFI and unsafe operations are specified boundaries with explicit authority, ABI, ownership, failure, and audit contracts.
@@ -50,7 +50,7 @@ Every unsafe module must contain at least one source-level `unsafe contract ... 
 > Trace: D245
 > Covers: Unsafe reasoning is machine-discoverable source metadata.
 
-An unsafe contract must enumerate each unsafe facility used by the module: raw foreign declarations, unsafe intrinsics, inline assembly, volatile operations, raw dynamic loading, raw signal handlers, raw pointer/address conversions, and trusted capability acquisition. A new unsafe primitive is absent from stable Kyokai until a separate accepted D-point defines its contract fields and adds it to this list.
+An unsafe contract must enumerate each unsafe facility used by the module: raw foreign declarations, unsafe intrinsics, inline assembly, volatile operations, raw dynamic loading, raw signal handlers, raw pointer/address conversions, and trusted capability acquisition. The unsafe-primitive set is closed for this specification revision. A later revision must define every contract field and add the primitive to the closed list before source can use it.
 
 > Trace: D20, D22, D94/D257, D113a, D245
 > Covers: Unsafe operations are covered individually, not hidden under a single vague module note.
@@ -118,7 +118,7 @@ mon;
 > Trace: D20, D111/D127
 > Covers: Raw C declarations live in a visible `foreign "C" is ... mon;` boundary.
 
-Only `foreign "C"` is admitted without a target-specific ABI row. A non-`"C"` ABI string is legal only when the selected target contract lists that exact spelling, calling convention, platform set, type mapping, argument and return restrictions, unwind behavior, callback behavior, and generated-C/compiler lowering. Unknown ABI strings are compile-time errors. Adding an ABI string requires an accepted D-point and target-contract update.
+Only `foreign "C"` is admitted without a target-specific ABI row. A non-`"C"` ABI string is legal only when the selected target contract lists that exact spelling, calling convention, platform set, type mapping, argument and return restrictions, unwind behavior, callback behavior, and generated-C/compiler lowering. Unknown ABI strings are compile-time errors. A later specification revision must add the ABI string and its target contract together.
 
 > Trace: D20a, D80
 > Covers: The raw foreign ABI set is closed until specified.
@@ -138,10 +138,10 @@ A raw foreign declaration is not a safe Kyokai contract. It says how to call a f
 > Trace: D20b, D85, D245
 > Covers: ABI declaration and safe API contract are different layers.
 
-An official Bridge entry that contains raw foreign declarations, generated bindings, copied upstream code, or safe wrappers follows the same unsafe rules as any other Kyokai code. Bridge status does not make a raw declaration safe, does not manufacture `UnsafeCapability`, does not bypass `unsafe contract ... audit;`, and does not erase target, link, ownership, aliasing, callback, allocator, or failure obligations. The Bridge admission record points to the unsafe contracts and wrapper APIs that make safe use possible.
+An official Bridge entry that contains raw foreign declarations, generated bindings, copied upstream code, or safe wrappers follows the same unsafe rules as any other Kyokai code. Bridge status does not make a raw declaration safe, does not manufacture `UnsafeCapability`, does not bypass `unsafe contract ... audit;`, and does not erase target, link, ownership, aliasing, callback, allocator, or failure obligations. Its public contract identifies the unsafe contracts and wrapper APIs that make safe use possible.
 
 > Trace: D20, D85, D230, D245, D499, D529
-> Covers: Official Bridge entries are still bound by unsafe and FFI contracts, and bridge admission records point to the safe-wrapper obligations.
+> Covers: Official Bridge entries remain bound by the same unsafe, FFI, and safe-wrapper obligations as every other foreign integration.
 
 ## C ABI Type Surface
 
@@ -182,7 +182,7 @@ Arrays do not decay implicitly in foreign declarations. If the C ABI wants a poi
 > Trace: D20a, D55
 > Covers: C array decay is not imported as Kyokai magic.
 
-`Callable`, `CallableMut`, and `CallableOnce` do not cross raw FFI directly. Only `FnPtr(...)` may cross the raw foreign boundary as a typed bare callback value.
+`CallableRead`, `CallableMut`, `CallableOnce`, and `CallableState[S]` do not cross raw FFI directly. Only `FnPtr(...)` may cross the raw foreign boundary as a typed bare callback value.
 
 > Trace: D20a, D21, D118/D126/D197
 > Covers: Capturing Kyokai closures are not C function pointers.
@@ -214,7 +214,7 @@ Safe Kyokai may pass raw address values around only where an API explicitly expo
 > Trace: D73, D77, D245
 > Covers: Validity-sensitive raw memory use is confined to unsafe contracts.
 
-Kyokai has no general `transmute`, no general type-punning primitive, and no arbitrary pointer-to-integer or integer-to-pointer roundtrip in the safe language. A representation-reinterpretation primitive is absent from stable Kyokai until a separate accepted D-point states exact provenance, alignment, lifetime, initialization, and backend rules.
+Kyokai has no general `transmute`, no general type-punning primitive, and no arbitrary pointer-to-integer or integer-to-pointer roundtrip in the safe language. A representation-reinterpretation primitive is absent from this specification revision. Any later revision must state exact provenance, alignment, lifetime, initialization, and backend rules.
 
 > Trace: D73, D228
 > Covers: The unsafe memory model stays closed and specified.
@@ -272,7 +272,7 @@ Foreign callback registration is unsafe and has a D322 coverage entry. Its contr
 
 A callback from an unknown foreign thread cannot touch task-local state, non-transferable values, TLS without selected-target support, or authority not marked callback-safe. Reentry is rejected unless the wrapper contract names the reentry-safe APIs and the nested borrow/capability protocol. Unregister consumes the registration handle. It is legal only when no callback invocation is active, or when the contract names the synchronization protocol that waits for active invocations. `.koi` records exported callback wrappers, audit summaries, target guards, thread requirements, capability requirements, and unregister synchronization facts.
 
-Framework and wrapper APIs classify capturing callbacks only through `Callable`, `CallableMut`, `CallableOnce`, and explicit state-threading types. Domain labels such as `handler`, `renderer`, `reducer`, `completion`, or `teardown` add no type-system role. Retention, affinity, reentrancy, cancellation, retry, replacement, return, failure, and state-consumption behavior remain machine-readable parameter and wrapper contracts. Distinct contracts require distinct types or entry points.
+Framework and wrapper APIs classify capturing callbacks only through `CallableRead`, `CallableMut`, `CallableOnce`, `CallableState[S]`, and explicit state-threading types. Domain labels such as `handler`, `renderer`, `reducer`, `completion`, or `teardown` add no type-system role. Retention, affinity, reentrancy, cancellation, retry, replacement, return, failure, and state-consumption behavior remain machine-readable parameter and wrapper contracts. Distinct contracts require distinct types or entry points.
 
 > Trace: D245, D322, D326, D350
 > Covers: Retained callbacks cross FFI only through linear registration handles with explicit affinity, reentry, authority, and unregister synchronization.
@@ -341,7 +341,7 @@ Volatile is not synchronization. It creates no happens-before edge and does not 
 > Trace: D90/D90a, D94/D257, D247
 > Covers: MMIO visibility is not thread synchronization.
 
-The volatile-legal type domain is closed: fixed-width integers; fixed-width floats only when the selected target contract admits volatile floating access; `bitrecord` register types with explicit backing layout; and `extern record` MMIO blocks whose fields are recursively volatile-legal. Volatile access records width, alignment, target-visible endianness, read/write permissions, and side-effect class. Capabilities, borrows, linear resource handles, generic `T`, ordinary records, raw address values used as payloads, and synchronization primitives are not volatile-legal. Expanding the volatile-legal domain requires a separate accepted D-point and target-contract update.
+The volatile-legal type domain is closed: fixed-width integers; fixed-width floats only when the selected target contract admits volatile floating access; `bitrecord` register types with explicit backing layout; and `extern record` MMIO blocks whose fields are recursively volatile-legal. Volatile access records width, alignment, target-visible endianness, read/write permissions, and side-effect class. Capabilities, borrows, linear resource handles, generic `T`, ordinary records, raw address values used as payloads, and synchronization primitives are not volatile-legal. A later specification revision must expand the type domain and target contract together.
 
 > Trace: D42, D73, D94/D257
 > Covers: Volatile does not become a back door for arbitrary value representation.
@@ -477,7 +477,43 @@ A raw signal handler requires a dedicated unsafe contract. The contract lists le
 
 A wrapper for a foreign API with thread-local error state snapshots that state immediately after the foreign call and before allocation, logging, yielding, spawning, waiting, callback dispatch, or another foreign call. The wrapper maps the snapshot into its declared Kyokai error type without depending on later ambient foreign state.
 
-`kyokai bindgen` output remains unsafe-only until a safe-wrapper admission record states foreign versions, headers, target triples, symbols, flags, layouts, ownership, aliasing, lifetimes, initialization, thread safety, callbacks, allocator behavior, error-state snapshots, capabilities, cleanup, provenance hash, and audit owner.
+`kyokai bindgen` output remains unsafe-only until a safe-wrapper contract states foreign versions, headers, target triples, symbols, flags, layouts, ownership, aliasing, lifetimes, initialization, thread safety, callbacks, allocator behavior, error-state snapshots, capabilities, cleanup, provenance hash, and audit owner.
 
 > Trace: D405-D406, D430, D457-D457a, D499
 > Covers: Foreign error state is captured before interference, and generated bindings remain unsafe until their complete wrapper contract is admitted.
+
+## Total Unsafe Operations
+
+No Kyokai source operation has undefined behavior in the Kyokai abstract
+machine, including an operation available only in an unsafe module. Unsafe
+opens a closed low-level operation under audit; it does not disable checking.
+Every Kyokai-defined unsafe primitive is total over its admitted operand type.
+Invalid provenance, bounds, alignment, lifetime, aliasing, initialization,
+permission, target-feature, or state is rejected or produces its specified
+`Result`, TPOE, panic, or runtime-fatal outcome before an invalid native
+operation occurs.
+
+Arbitrary integer addresses and untracked foreign pointers are not directly
+dereferenceable. Access proceeds through provider-issued regions that carry or
+enforce origin, extent, liveness, permissions, alignment, address space, and
+synchronization. Allocator, mapping, shared-memory, MMIO, device,
+foreign-allocation, DMA, and pinned providers specify acquisition, narrowing,
+invalidation, synchronization, and surrender. An unsupported target does not
+admit the provider.
+
+Inline assembly uses checked target-specific instruction, operand, clobber,
+memory-region, and effect contracts that exclude privileged, undefined, or
+unmodelled behavior. Unrestricted text assembly is external native code or an
+isolated execution payload. FFI validates every mechanically checkable ABI,
+layout, range, nullability, ownership, callback, unwinding, and lifetime fact;
+it cannot make a lying foreign component defined.
+
+The claim `KYOKAI_UNSAFE_DEFINED` applies only to total primitives and admitted
+providers. In-process foreign/native code adds `EXTERNAL_NATIVE_TRUST`.
+Whole-process containment requires the isolation record defined by the
+capability chapter. If foreign code corrupts the process, Kyokai promises no
+cleanup, diagnostic, or containment for that corrupted process; the corruption
+is not renamed Kyokai undefined behavior.
+
+> Trace: D564-D566
+> Covers: Unsafe Kyokai remains defined; raw native trust and containment are separately named boundaries.

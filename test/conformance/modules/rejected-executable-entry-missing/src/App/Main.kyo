@@ -1,0 +1,4 @@
+module App.Main is
+function not_main(): Unit is
+qed;
+seal;

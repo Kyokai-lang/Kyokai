@@ -64,14 +64,6 @@ Kyokai rejects `Rc[T]` and `Arc[T]` as general shared ownership. Sharing should 
 > Trace: D93/D234, D95/D256
 > Covers: Polling and safe signal handling use explicit state and capability-gated watchers.
 
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-Kyokai's concurrency model is intentionally less glamorous than a hidden executor. The ownership transfer is visible, the synchronization edge is named, the blocking behavior is in the contract, and the cleanup story remains linear.
-
-> Trace: D90-D101, D146, D183-D184, D212
-> Covers: Concurrency keeps ownership, synchronization, blocking, and authority sharing explicit.
-
 ## Brokers, Fairness, And Backpressure
 
 [Rikona Kurasaki / Mjoyufull]

@@ -1,0 +1,14 @@
+id = "modules.package-source-discovery"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/toolchain/01-manifest-package-workspace.md; kyokaispec/src/toolchain/02-module-resolution-and-koi.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.kyo"]
+command = "kyokai internal conformance-fixture modules.package-source-discovery"
+expect = "Discover the single App.Main source under the explicit module root, verify its declaration against the path-derived module name, and identify its public derived-interface surface."
+expected_outcome = "accept"
+expected_stage = "package-source"
+expected_code = "loaded-module-set"
+expected_facts = ["App.Main:source", "derived-interface=public"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"

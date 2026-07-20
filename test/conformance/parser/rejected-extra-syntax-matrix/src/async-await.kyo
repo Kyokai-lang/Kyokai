@@ -1,0 +1,5 @@
+module Demo.AsyncAwait is
+async function run(): Unit is
+    await work();
+qed;
+seal;

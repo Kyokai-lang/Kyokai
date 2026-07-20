@@ -1,0 +1,5 @@
+module Main is
+function consume(value: Optional[Int32]): Unit is
+    let _ := value;
+qed;
+seal;

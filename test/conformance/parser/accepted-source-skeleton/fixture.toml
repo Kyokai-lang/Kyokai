@@ -1,0 +1,14 @@
+id = "parser.accepted-source-skeleton"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md"
+edition = "2026"
+inputs = ["src/Main.kyo"]
+command = "kyokai internal conformance-fixture parser.accepted-source-skeleton"
+expect = "The single source file parses definitions, per-declaration visibility, and opaque representation facts with stable spans."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "source-skeleton"
+expected_facts = ["src/Main.kyo:source", "visibility=public+private", "opaque=record"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

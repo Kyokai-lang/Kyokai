@@ -1,0 +1,7 @@
+module Demo.Shapes is
+record Matrix[T: Type, Rows: Index, Cols: Index]: Auto is
+    data: Array[T, Rows * Cols];
+    header: Array[Nat8, 32];
+    grouped: Array[Nat8, (Rows + Cols) * 2];
+build;
+seal;

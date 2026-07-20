@@ -1,14 +1,13 @@
 # Kyokai Shape And Public D-Points
 
-This file indexes public Kyokai design shape while the full spec is being written in `kyokaispec/`. Live D-point bodies normally live in PRs/MRs; this file is the archive/index path when a point does not live directly in a PR/MR.
+This file holds and indexes public Kyokai design shape while the full spec is being written in `kyokaispec/`. A live D-point body can live here until a PR/MR owns it. The file also remains the decision index, migration ledger, and historical archive.
 
 Use this file for:
 
-- index rows for public D-point PRs/MRs
-- temporary proposals that do not yet have a PR/MR
+- temporary public proposal bodies that do not yet have a canonical PR/MR
+- active-proposal tracker rows, including proposals moved to PRs/MRs
 - historical D-point material kept for traceability
 - accepted shape that has not yet been moved into `kyokaispec/` when no better public artifact owns it
-- short notes about public design direction that are too live for `kyokaidecided.md`
 
 Keep this file public, concise, and traceable.
 
@@ -17,23 +16,35 @@ Keep this file public, concise, and traceable.
 1. `kyokaispec/` once a rule is written there.
 2. `kyokaidecided.md` for public accepted shape not yet fully spec-extracted.
 3. Public PRs/MRs that carry live D-point proposals and final wording.
-4. `Kyokaishape.md` for index/archive tracking when a D-point does not live directly in a PR/MR.
+4. `Kyokaishape.md` for public temporary holding, active-proposal tracking, and index/archive material when a D-point does not live directly in a PR/MR.
 5. Issues and discussions as motivation or pre-proposal material.
 6. `phase.md` for implementation order only.
 
-## Public D-Point Flow
+## Public Proposal and D-Point Flow
 
-1. Open a proposal PR/MR labeled `dpoint-needed` or `dpoint`; use `Kyokaishape.md` only as temporary/index storage when no PR/MR exists yet.
+1. Open a proposal PR/MR, or place its canonical public body in this file's temporary-holding section using the standard template in `PROJECT_STANDARDS.md`.
 2. Debate the shape publicly.
 3. Write the final proposed rule text.
-4. Gather community acks on the final shape, or record `Lead YES` from the lead maintainer.
-5. Maintainer marks the point decided or sends it back for wording.
-6. Move the decided shape into `kyokaidecided.md` and then `kyokaispec/` when the spec section exists.
-7. Update traceability, phase/status rows, conformance plans, and implementation links when affected.
+4. Gather 3 acks from administered members listed in `MEMBERS.md`, or record `Lead YES` from the lead maintainer.
+5. Maintainer marks the proposal decided or sends it back for wording.
+6. A contributor or maintainer moves the decided shape into `kyokaidecided.md`. Ordinary proposals receive the next D-point number at acceptance; umbrella-required children can already hold explicitly `PROPOSED` reserved IDs.
+7. Normative text is extracted to `kyokaispec/` when the spec section exists.
+8. Update traceability, phase/status rows, conformance plans, and implementation links when affected.
 
 The acks happen after final wording, not before. Early approval of the general direction is useful, but it does not close the point.
 
 `Lead YES` can close final wording without the normal ack count, but it does not remove the requirement for exact final text, accepted-shape extraction, traceability, and status updates.
+
+## Temporary Holding
+
+A held proposal states its status and canonical home. There is only one editable
+proposal body. When a PR takes ownership, replace the body here with a tracker
+row instead of maintaining two copies.
+
+An accepted umbrella immediately creates each required child as a reserved,
+numbered `PROPOSED` entry. The number does not imply acceptance. Umbrella rows
+record `OPEN_CHILDREN`, `CHILDREN_DECIDED`, `CHILDREN_RESOLVED`, or `EXTRACTED`,
+and list every child obligation and dependency.
 
 ## External D-Point Tracker Row
 
@@ -49,12 +60,19 @@ This tracker records how far accepted Kyokai shape has moved toward normative sp
 
 Use the highest honest state that is currently true:
 
+Gate A is closed through D635. The checked pre-D558, D558-D625, and
+D627-D635 registries cover every accepted decision in their ranges and bind
+live clauses or supersession edges to accepted-source identity, destinations,
+proof impact, review identity, and exact-name/rejected-form checks. Historical
+entries below remain history; the generated registry reviews are the current
+extraction evidence.
+
 The maturity axes are separate. `SHAPE_DECIDED` does not imply spec extraction, parser support, checker support, runtime support, stdlib admission, conformance coverage, release readiness, or proof. Any row that claims one of those stronger states must name the concrete evidence path for that exact axis.
 
 | State | Meaning | Evidence To Record Here |
 | --- | --- | --- |
 | `SHAPE_DECIDED` | The design point is decided in public accepted-shape docs. | D-point IDs, accepted-shape section, and any public thread/PR link if applicable. |
-| `SPEC_EXTRACTED` | The rule has a normative home in the specification. | `kyokaispec/` path and short note on the covered rule scope. |
+| `SPEC_EXTRACTED` | Every live accepted clause has checked normative destinations and complete or validly not-applicable state. | Clause registry/review evidence plus the owning `kyokaispec/` paths. |
 | `CALCULUS_DRAFTED` | The behavior is represented in `lambda_K` scope or explicitly excluded from it. | Calculus document path and whether the feature is included or explicitly out of scope. |
 | `CALCULUS_PROVEN_PAPER` | The sequential core proof obligation is discharged at paper level. | Proof document path and theorem/scope name. |
 | `PARSER_ACCEPTED` | Surface syntax is parsed into AST nodes with source spans. | Parser implementation path and positive/negative parser test path. |
@@ -77,74 +95,21 @@ Use these status words for live D-point flow:
 - `ACKED`: final wording reached the public ack threshold.
 - `LEAD_YES`: lead maintainer accepted final wording directly.
 - `DECIDED`: maintainer accepted the final shape.
-- `SPEC_EXTRACTED`: normative text exists in `kyokaispec/`.
+- `SPEC_EXTRACTED`: checked clause evidence shows complete or validly not-applicable normative extraction; chapter presence alone is insufficient.
 - `CONFORMANCE_BACKED`: executable conformance tests exist.
 - `IMPLEMENTED`: compiler/toolchain/stdlib implementation exists.
 
 `LEAD_YES` is a public decision-flow status, not an implementation maturity state.
 
-## D-Point Template
-
-````markdown
-### D300: Short Name **[PROPOSED | NAV: pending kyokaispec section]**
-
-**The question**: What exactly are we deciding?
-
-**Use case**: What real Kyokai code, tooling, stdlib work, or spec guarantee needs this?
-
-**Current state**: What is currently decided, implemented, inherited from Austral, or missing?
-
-**Prior art**:
-
-| System | Shape | Notes |
-| --- | --- | --- |
-| Austral | ... | ... |
-| Rust | ... | ... |
-| Zig | ... | ... |
-| C | ... | ... |
-
-**Rationale**: Why does this exact rule fit Kyokai?
-
-**Proposed shape**:
-
-```text
-Write the actual rule here. It should be close enough to become spec text.
-```
-
-**Consequences**:
-
-- What this makes simpler.
-- What this makes harder.
-- Which existing decisions/spec sections it touches.
-
-**Rejected alternatives**: Record only alternatives whose rejection matters for future readers. Omit this field when no rejected alternative needs a public record.
-
-**Ack state**:
-
-- Final wording posted: no
-- Acks: 0/3 or Lead YES
-- Decided: no
-````
-
 ## Decided Entry Template
 
-````markdown
-### D300: Short Name **[DECIDED | SPEC_EXTRACTED | NAV: kyokaispec/src/path.md]**
-
-**Naved to spec**: `kyokaispec/src/path.md`.
-
-**The question**: What was decided?
-
-**Use case**: Why does real Kyokai need this?
-
-**Justification**: Why this is the Kyokai shape.
-````
+See `PROJECT_STANDARDS.md` for the current proposal and accepted D-point templates. The templates previously kept in this section are archived.
 
 ## Decided And Spec-Extracted
 
 ### D540-D557: Application Integration And Takeover Ergonomics **[DECIDED | SPEC_EXTRACTED | NAV: kyokaispec/src/stdlib/12-application-integration-contracts.md, kyokaispec/src/toolchain/13-application-integration-and-deployment.md]**
 
-**Naved to spec**: `kyokaispec/src/stdlib/12-application-integration-contracts.md` and `kyokaispec/src/toolchain/13-application-integration-and-deployment.md`, with supporting integration in the existing language, toolchain, and stdlib chapters named by `kyokaispec/src/appendices/b-decision-traceability.md`.
+**Naved to spec**: `kyokaispec/src/stdlib/12-application-integration-contracts.md` and `kyokaispec/src/toolchain/13-application-integration-and-deployment.md`, with supporting integration in the existing language, toolchain, and stdlib chapters named by `kyokaispec/src/project/02-decision-traceability.md`.
 
 **The question**: Which shared contracts make Kyokai practical for frameworks, generated APIs, edition migration, testing, foreign builds, packaging, runtime datasets, browsers, servers, CLI/TUI, native GUI/media, mobile, embedded, GPU/ML/data, and cloud deployment without adding hidden ownership, dynamic dispatch, ambient authority, another backend, or domain-specific core syntax?
 
@@ -501,7 +466,7 @@ This fits Kyokai because `.koi` is too important to be an opaque cache, but also
 
 The initial decided shape is being cleaned into `kyokaidecided.md` first. As the public spec gets written, decisions will move from there into `kyokaispec/` and be linked here only when useful.
 
-### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index **[DECIDED | SPEC_EXTRACTED | NAV: kyokaispec/src/toolchain/01-manifest-package-workspace.md, kyokaispec/src/toolchain/03-cli.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md, kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md]**
+### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index **[DECIDED | SPEC_EXTRACTED | AMENDED BY D624a: package-root docs remain and knot pages aggregate included package docs | NAV: kyokaispec/src/toolchain/01-manifest-package-workspace.md, kyokaispec/src/toolchain/03-cli.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md, kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md]**
 
 **Naved to spec**: `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, and `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`.
 
@@ -511,9 +476,9 @@ The initial decided shape is being cleaned into `kyokaidecided.md` first. As the
 
 **Justification**: Each published package commits a generated `kdocs/` directory at its package root. The official package index stores the exact Git revision, package-root path, docs manifest digest, schema, retrieval-adapter class, status, and compact search projection. The website and `kyokai docs --pull` retrieve verified files from that exact indexed revision. A workspace monorepo stores one `kdocs/` directory under each published member package root. `kyokai-package-docs` is not a required bootstrap repository; any future mirror is cache-aside infrastructure and requires a separate service decision.
 
-### D526: ProofTrace Evidence Graph, Code Markers, And Generated Public Status **[DECIDED | SPEC_EXTRACTED | IMPLEMENTED | NAV: kyokaispec/src/appendices/d-formalization-roadmap.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md, kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md]**
+### D526: ProofTrace Evidence Graph, Code Markers, And Generated Public Status **[DECIDED | SPEC_EXTRACTED | IMPLEMENTED | NAV: kyokaispec/src/project/03-formalization-roadmap.md, kyokaispec/src/toolchain/08-docs-lsp-audit.md, kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md]**
 
-**Naved to spec**: `kyokaispec/src/appendices/d-formalization-roadmap.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, and `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`.
+**Naved to spec**: `kyokaispec/src/project/03-formalization-roadmap.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, and `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`.
 
 **The question**: How does Kyokai keep spec text, compiler and toolchain boundaries, tests, conformance suites, and proof artifacts visibly connected without pretending that one kind of evidence proves another?
 
@@ -715,7 +680,7 @@ This removes the largest remaining instance of writing-it-twice in Kyokai. It is
 - Requires the visibility surface to become explicit per declaration (D538) because the file no longer signals public vs private.
 - Requires an explicit representation-hiding mechanism (D539) because opacity can no longer come from "declared in `.kyo`, defined in `.kai`."
 - Rewrites D518 file-role diagnostics and amends D52/D78 module-path mapping to one `.kyo` candidate per logical module.
-- Implementation impact: the active Phase 3 source-role, parser-skeleton, package-discovery, target-entry, derived-interface-fact, host-test, and implementation-gated fixture migration is complete. Semantic export/opacity checks, final AST construction, `.koi` serialization, inherited-loader replacement, and standard-library/full-corpus migration remain tracked in `phase.md`.
+- Implementation impact: Phase 3 now owns a span-carrying surface AST and one composed `.kyo` frontend from package discovery through phase-local structural/interface checks and derived declarations. The inherited interface/body parser is off the active Kyokai path. Cross-module export checking, `.koi` serialization, typing, ownership, and standard-library/full-corpus migration remain tracked in `phase.md`.
 
 **Rejected alternatives**:
 
@@ -889,3 +854,159 @@ Default-private is an inversion from the two-file model, where an unmarked `.kyo
 
 - Per-field `public` fields only (Rust style) as the sole mechanism: workable but starts finer-grained than the 1:1 replacement for the file split; whole-type `opaque` is the direct replacement and keeps one boundary, one marker. Per-field visibility may be added later by a separate D-point.
 - Inferring opacity from whether any field is private: implicit and easy to get wrong; Kyokai prefers an explicit modifier.
+
+### D558-D570: Semantic Safety, Unsafe Closure, Compiler Admission, And Source Identity **[DECIDED | SPEC_EXTRACTED | NAV: owning spec chapters and kyokaispec/extraction/d558-d625-review.md]**
+
+**Accepted shape**: D558-D570 close callable-effect summaries, mutable-borrow
+lease lineage, structural `Free`, process-wide fatal arbitration, workspace and
+accepted-text authority, recurring spec review, independent field projection,
+authority-versus-native-containment claims, total unsafe primitives and unsafe
+capability topology, callable invocation classes, trust-boundary validation,
+the atomic execution model, C-toolchain admission, and KST-1 target identity.
+
+**Decision state**: Accepted on 2026-07-13. Normative language, toolchain, and
+project text was extracted on 2026-07-16. The D577 registry and generated
+review now record clause completeness, source digests, destinations, review,
+supersession, proof impact, and exact-name checks. Compiler, runtime,
+conformance, and official admission work remains pending.
+
+### D571-D583: Runtime Reclamation, KBI Closure, Evidence, Experiments, And Security Operations **[DECIDED | SPEC_EXTRACTED | NAV: owning spec/project chapters and kyokaispec/extraction/d558-d625-review.md]**
+
+**The question**: Which remaining runtime-resource, generated-C validation, `.koi` framing, Linux I/O provider, specification-evidence, public-document, formal-correspondence, proof-review, experimental-release, and vulnerability-response contracts close the 2026-07-14 judgment cluster?
+
+**Accepted shape**: D571 keeps task ownership and `join;` explicit while permitting runtime-only reclamation of completed native thread machinery. D572 requires explicitly sequenced backend IR, generated-C structural validation, stable lowering evidence IDs, differential execution, and targeted proof slices. D573-D576 complete KBI-1 framing, canonical payload grammar, hostile-input budgets, compatibility matrices, deterministic corpora, and independent-decoder admission. D573a admits an explicit capability-bounded Linux `io_uring` provider without making it portable I/O semantics or a hidden executor.
+
+D577 makes clause-level extraction records—not routing prose—the evidence for `SPEC_EXTRACTED` and Gate A. D578 separates document revision, edition, toolchain/schema ranges, target scope, and accepted-decision cutoff. D579 accepts a derived semantic atlas with prediction-based comprehension tests. D580 makes specification/calculus correspondence bidirectional and impact-classified. D581 requires revision-bound proof review packets with an identified reviewer and exact review class. D582 defines isolated XP branches, the changed-only weekly Xperimental channel, distinct artifact identity, and focused graduation into `dev`. D583 bootstraps private vulnerability intake through `SECURITY.md` and repository security advisories under an honest `LIMITED_SINGLE_OWNER` service status without custom paid infrastructure.
+
+**Decision state**: Lead YES on 2026-07-14. Normative language, toolchain,
+project, formalization, and artifact text was extracted on 2026-07-16 and is
+clause-verified by the D577 registry. Semantic-atlas publication, recurring
+review packets, conformance, implementation, provider admission, and the
+operational security service remain pending as separate maturity axes.
+
+### D584-D596a: Concrete APIs, Native Toolchain, Data, Protocol, And Bridge Portfolio **[DECIDED | SPEC_EXTRACTED | NAV: owning spec chapters and kyokaispec/extraction/d558-d625-review.md]**
+
+**Accepted shape**: D584-D591 require exact Tier-One API packets and close the
+nominal `TextView[R]` call-boundary conversion, allocator/storage safety,
+universe-aware collection families, first-party CLI parsing, one testing
+evidence protocol, generated capability maps and non-authorizing authority
+explanation, and explicit secret-safe observability contracts. D592 places
+codecs and structured formats by complexity and threat surface, with one native
+TOML 1.0 implementation shared by users and the toolchain.
+
+D592a makes Kyokai the target implementation language for its compiler and
+toolchain while retaining OCaml only as a pinned transition bootstrap. Host
+architecture must be replacement-safe immediately; actual source migration
+starts at a substantial multi-package compiler/stdlib/conformance entry gate;
+Stage 2/3 convergence and recovery evidence control OCaml retirement. D593 and
+D593a reject home-grown crypto and establish separate API, stdlib, official
+package, Bridge, provider, and dataset admission records. D594-D596 accept a
+Kyokai-maintained HTTP/WebSocket foundation, high-priority SQLite Bridge,
+database package ownership rules, and a deliberate boundary-testing Bridge
+portfolio. D596a rejects an overarching Rust frontend, ABI, Cargo importer,
+translator, or universal Bridge in favor of language-neutral migration help and
+project-specific stable-boundary Bridges. D609 is withdrawn as a duplicate of
+D585.
+
+**Decision state**: Rikona accepted the revised complete cluster on 2026-07-14.
+Normative extraction landed on 2026-07-16 and the D577 checker verifies its
+clause records. Concrete API packets, admission records, conformance, self-host
+entry evidence, implementation, and Bridge/provider releases remain pending.
+
+### D597-D614: Remaining Judgment, Daily Surface, And Reference Evidence **[DECIDED | SPEC_EXTRACTED | NAV: owning spec/project chapters and kyokaispec/extraction/d558-d625-review.md]**
+
+**Accepted shape**: D597 fails generator host admission closed before execution
+and keeps any explicit unsandboxed override outside stable evidence. D598 assigns
+owners, oracle identity, accuracy, review, and replacement duties to admitted
+math. D599 defines shared-lifetime patterns without reopening reference counting
+and places `ownership-pattern` in the dedicated `kyokai explain` family. D600
+keeps SPSC/native tasks/Poller and requires measured broker/topology evidence;
+D601 makes the long-lived Poller server the first organization-owned reference
+product after the language toolchain.
+
+D602 defines `structured`, `rendered`, and `source-only` documentation modes,
+with `structured` as default, root `[documentation].mode` manifest selection,
+and a CLI override. D603 makes `debug` non-authorizing toolchain
+instrumentation. D604-D605 keep `drop;` and the terminator system while assigning
+layout to the formatter, nesting diagnostics to `kyokai check`, and checked
+extraction to the Analysis Server. D606 uses position-bound unsafe-contract
+labels. D607 replaces the visually close creation glyphs with `&read`, `&write`,
+and `&reborrow` while retaining `~` for dereference. D608 keeps `//`, `///`,
+`//!`, and no block comments. D610 keeps `build;` and moves branch-local
+production completeness into typed control-flow checking. D611 supplies
+no-shadowing transformation guidance. D612 closes frontend ownership and dual
+inherited-pass dispositions. D614 creates typed finding intake with Rikona-only
+governance transitions.
+
+D609 remains withdrawn as a duplicate of D585. D613 remains withdrawn as a
+duplicate of D581.
+
+**Decision state**: Rikona accepted the complete revised cluster, including
+root-manifest documentation-mode selection, on 2026-07-14. Normative spec,
+manifest, workflow, CLI, formatter, diagnostic, and comparison-guide text was
+extracted on 2026-07-16 and the D577 registry verifies the live clauses and
+duplicate withdrawals. Migration, conformance, admission, and implementation
+remain pending.
+
+### D615-D625: Distribution, Deep Analysis, Development, Platform, Publication, And Experiments **[DECIDED | SPEC_EXTRACTED | NAV: owning spec/project chapters and kyokaispec/extraction/d558-d625-review.md]**
+
+**Accepted shape**: D615 names `bleedring` as a standalone bootstrap and CI
+installer for exact, bundled Kyokai distributions. The compiler and toolchain
+ship together; Bleedring cannot mix their components and is not a `kyokai`
+subcommand. D631 later adds separately identified admitted native C-compiler
+provider bundles without restoring rustup-style Kyokai component selection.
+D616 defines named deep-check engines with separate findings and evidence.
+D617 and D622 are duplicate withdrawals.
+
+D618 defines a deterministic `kyokai dev` supervisor without changing program
+semantics. D619 makes Apple-platform support an evidence-backed peer of Linux
+where the target matrix says so. D620 rejects an official game engine while
+admitting first-class game workloads and integration evidence. D621 requires
+CLI, machine-protocol, and LSP projections of one analysis engine. D623 makes
+reference workloads and suites advance with the compiler instead of arriving
+as a final validation event. D624 defines the foreign-build plan protocol.
+
+D624a keeps workspace members as independently publishable packages and adds a
+prioritized aggregate publication called a **knot**. Publishing a knot
+atomically publishes its selected package set and the knot record; packages
+remain separately indexed, documented, consumable, versioned, advised, and
+yankable. The knot page exposes its exact package set and dependency tree, while
+the index retains a separate complete package section. Manifest exclusions and
+`--exclude-package` narrow one knot release under dependency-closure checks.
+
+D625 amends D582 by allowing accepted experiments to ship in stable distributions
+when disabled by default and explicitly enabled from the root manifest. Stable
+carriage does not make an XP stable semantics: identities, artifacts, reports,
+published knots, diagnostics, and graduation remain visibly experimental and
+separate.
+
+**Decision state**: Rikona accepted the complete cluster and corrected D624a's
+knot/package relationship on 2026-07-16. Normative text was extracted the same
+day and the D577 registry records complete or superseded state for every point;
+D626 remains withdrawn by D596a. Manifest/schema migration, CLI and installer
+implementation, conformance, admission, platform/workload evidence, index/docs
+migration, and experimental releases remain pending.
+
+### D627-D635: Adversarial Evidence, Versioned Knowledge, Native Providers, Diagnostics, Findings, And Umbrellas **[DECIDED | SPEC_EXTRACTED | NAV: owning spec/project chapters and kyokaispec/extraction/d627-d635-review.md]**
+
+**Accepted shape**: D627 gives adversarial ownership and wrong-semantics cases
+a public per-case corpus and evidence protocol. D628-D630 separate spec,
+edition, toolchain, schema, calculus, proof, decision, and XP identities and
+join them through a release knowledge manifest, forward-only spec SemVer, and
+revision-bound calculus/proof review. D631-D632 let the separately released,
+Kyokai-written Bleedring provision exact admitted native compiler providers
+while projects request portable target contracts and never fall back to
+ambient `cc`.
+
+D633 makes diagnostic codes a checked registry rather than scattered compiler
+constants. D634 routes implementation findings in PRs, requires named reviewer
+disposition, and adds post-release implementation review with justified hotfix
+sets. D635 restores this file as public temporary holding and defines umbrella
+obligations, reserved proposed children, explicit closure states, and
+child-complete extraction.
+
+**Decision state**: Rikona accepted this cluster on 2026-07-20. The D577
+registry verifies its normative and project-contract destinations. Corpus
+cases, registry import/generation, provider distribution, knowledge-manifest
+generation, Git automation, and release-review evidence remain implementation
+work.

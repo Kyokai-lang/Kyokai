@@ -64,18 +64,10 @@ The rule changes the shape of standard-library APIs. `format` returns `Result[St
 ## Why Not Exceptions
 
 [Rikona Kurasaki / Mjoyufull]
-Exceptions make too many paths look like one path. They cross function boundaries without appearing in the ordinary call shape, interact badly with exactly-once resource reasoning, and turn cleanup into a hidden runtime performance. Kyokai would rather make the failure branch visible and make the hard bug terminate.
+Exceptions make too many paths look like one path. They cross function boundaries without appearing in the ordinary call shape, interact badly with exactly-once resource reasoning, and turn cleanup into hidden runtime control flow. Kyokai makes recoverable branches visible and gives contract violations a separate terminating path.
 
 > Trace: D2, D15/D15a, D84, D119, D253
 > Covers: Kyokai rejects exceptions and stack unwinding in favor of visible result flow, visible cleanup, panic, TPOE, and runtime-fatal categories.
-
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-The error model is strict because it is trying to keep the ground from moving. User-facing failure stays in values. Bugs terminate through named paths. Allocation is handled unless source explicitly requests fatal behavior. Cleanup happens where the source says cleanup can happen.
-
-> Trace: D24, D53, D74, D84, D119, D253, D259
-> Covers: Kyokai's error model preserves explicit control flow and exact failure categories.
 
 ## Partial Progress And Recovery Payloads
 

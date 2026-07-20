@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-04-TEXT-BYTES-PATHS-AND-STRINGS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Text looks gentle until it crosses a boundary. Then the old lies appear: bytes pretending to be words, paths pretending to be strings, C strings hiding a zero byte like a knife under the table. Kyokai keeps those shapes separate.
+Kyokai separates UTF-8 text, raw bytes, operating-system strings, paths, and NUL-terminated C strings. Conversion between these domains is explicit and validates the destination contract.
 
 > Trace: D30-D30a, D54, D68-D69, D120, D201
 > Covers: Text, byte, C-string, OS-string, path, parsing, and conversion APIs use separate named contracts.
@@ -123,10 +123,10 @@ Generated codecs record schema identity and version, generator provenance, budge
 > Trace: D297, D413
 > Covers: Structured codecs publish exact profiles, allocator and budget flow, duplicate-key and numeric policy, streaming recovery state, schema evolution metadata, deterministic canonical encoding, and generation provenance.
 
-## Why This Shape
+## Text Domains Stay Distinct
 
 [Rikona Kurasaki / Mjoyufull]
-The standard library never makes the programmer guess whether a value is language text, protocol bytes, a C argument, or a path crossing into the operating system. Those are different rooms. Kyokai keeps the doors labeled.
+Language text, protocol bytes, C strings, operating-system strings, and paths obey different validity and encoding rules. Separate nominal types and explicit conversions prevent one domain's assumptions from crossing into another unnoticed.
 
 > Trace: D30-D30a, D68-D69, D171
 > Covers: Separate text, byte, C-string, OS-string, and path contracts prevent hidden boundary behavior.
@@ -157,3 +157,43 @@ A target-observed provider and a toolchain-shipped provider are distinct provide
 
 > Trace: D404, D421, D549
 > Covers: Unicode and display behavior names the exact dataset identity and update authority instead of drifting with ambient host data.
+
+## Closed Read-Only Text View
+
+`TextView[R]` is the sole nominal read-only view over well-formed UTF-8 text.
+Its bytes are borrowed for region `R`; it cannot outlive, mutate, normalize, or
+retain its source. `StaticString`, owning `String`, `TextView`, raw `Bytes`,
+`OsString`, `Path`, `CString`, and `CStr` remain distinct nominal families.
+There is no `TextLike` protocol or user-defined view conversion.
+
+Read-only APIs should accept `TextView[R]` when they need neither ownership nor
+mutation. Direct calls receive only the closed formation described by the
+language elaboration rules. Storage, return, FFI, and escaping positions use an
+explicit view or copy operation whose name exposes lifetime or allocation.
+
+> Trace: D585
+> Covers: Static and owned text meet at a narrow call boundary while byte, path, OS, and C-string domains remain explicit.
+
+## First-Party Codec Placement
+
+Core pure modules provide profile-named Base64, hexadecimal, component-specific
+percent encoding, explicit CSV dialects, and strict streaming JSON. JSON
+profiles state duplicate-key behavior, number domain, non-finite handling,
+Unicode rules, depth/item/byte/allocation budgets, event and DOM terminal
+states, and canonical emission. TOML 1.0 has one native first-party
+implementation shared by package users and the Kyokai toolchain.
+
+Extended CommonMark is first-party. HTML Core contains escaping and safe
+construction helpers; full WHATWG HTML is a first-party package. YAML is an
+official package or project Bridge, not Core, and publishes alias, schema, tag,
+merge, and resource behavior. XML is a package; DTD and entity processing are
+disabled by default, external access requires capability authority, and
+namespaces, encodings, canonicalization, and schema behavior are explicit.
+
+Every codec contract states streaming terminal states, allocation and work
+budgets, canonicalization, schema/generator provenance, hostile corpora, and
+compatibility identity. Core placement neither imports a codec automatically
+nor promises it on every target.
+
+> Trace: D592
+> Covers: Data formats have an exact ownership tier and security profile instead of inheriting a parser's permissive defaults.

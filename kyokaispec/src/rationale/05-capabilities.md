@@ -61,14 +61,6 @@ The capability story is still useful at the boundary because it shrinks the audi
 > Trace: D150, D211, D245
 > Covers: Tooling can audit capability and unsafe surfaces without changing semantics.
 
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-Capability security is Kyokai saying no to ambient permission. The signature becomes part of the security review. If code can touch the machine, the value that lets it touch the machine is visible.
-
-> Trace: D67, D85, D211-D212, D255
-> Covers: Authority-bearing operations require visible capability or handle flow.
-
 ## Bundles, Ceilings, And Sandboxes
 
 [Rikona Kurasaki / Mjoyufull]

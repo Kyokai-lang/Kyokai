@@ -1,0 +1,14 @@
+id = "parser.structured-reference-and-fnptr"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/06-type-system.md; kyokaispec/src/language/11-linearity-borrowing-and-regions.md"
+edition = "2026"
+inputs = ["src/Demo/Types.kyo"]
+command = "kyokai internal conformance-fixture parser.structured-reference-and-fnptr"
+expect = "Parse anonymous and named-region borrow types plus bare function-pointer parameter and return types into structured type references."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "structured-reference-and-fnptr"
+expected_facts = ["generics=T:Type,N:Index,R:Region", "input=&[Buffer[T], R]", "callback=FnPtr(&[T], &![Buffer[T]]): Result[Unit, IoError]", "return=FnPtr(): Unit"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

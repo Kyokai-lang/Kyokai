@@ -1,0 +1,14 @@
+id = "modules.rejected-executable-entry-missing"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/toolchain/01-manifest-package-workspace.md; kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.kyo"]
+command = "kyokai internal conformance-fixture modules.rejected-executable-entry-missing"
+expect = "Reject an executable target whose selected module source does not contain the manifest-declared entry function definition."
+expected_outcome = "reject"
+expected_stage = "package-target"
+expected_code = "executable-target-entry-missing"
+expected_facts = ["target=app", "module=App.Main", "entry=main"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"

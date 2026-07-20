@@ -1,0 +1,14 @@
+id = "modules.rejected-private-type-leak"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/04-modules-and-visibility.md; kyokaispec/src/language/06-type-system.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.kyo"]
+command = "kyokai internal conformance-fixture modules.rejected-private-type-leak"
+expect = "Reject a public function signature that exposes a private type declared in the same module."
+expected_outcome = "reject"
+expected_stage = "interface-validation"
+expected_code = "private-type-leak"
+expected_facts = ["module=App.Main", "declaration=expose", "hidden=Hidden"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-INTERFACE-VALIDATION"

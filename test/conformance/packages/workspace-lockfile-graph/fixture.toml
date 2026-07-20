@@ -1,0 +1,14 @@
+id = "packages.workspace-lockfile-graph"
+lane = "packages"
+status = "implementation-gated"
+spec = "kyokaispec/src/toolchain/01-manifest-package-workspace.md"
+edition = "2026"
+inputs = ["kyokai.toml", "packages/app/kyokai.toml", "packages/core/kyokai.toml", "packages/app/src/App/Main.kyo", "packages/core/src/Core.kyo"]
+command = "kyokai internal conformance-fixture packages.workspace-lockfile-graph"
+expect = "Resolve explicitly listed workspace packages into final-model package instances and dependency edges, then render and repair a deterministic workspace lockfile using D528 record families."
+expected_outcome = "accept"
+expected_stage = "package-lockfile"
+expected_code = "workspace-graph-lockfile-repair"
+expected_facts = ["root=app", "package=core", "edge=app->core"]
+targets = "host-independent"
+prooftrace = "PACKAGE-LOCKFILE-SCAFFOLD"

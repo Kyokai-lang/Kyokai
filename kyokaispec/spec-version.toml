@@ -1,0 +1,11 @@
+schema = "kyokai-spec-identity-1"
+spec_version = "0.1.0"
+status = "unreleased-development"
+source_revision = "working-tree"
+accepted_dpoint_cutoff = "D635"
+language_editions = ["development"]
+active_xps = []
+supersedes = []
+
+# A release replaces `working-tree` with immutable source and knowledge-manifest
+# identities. This file does not claim compiler, conformance, or proof status.

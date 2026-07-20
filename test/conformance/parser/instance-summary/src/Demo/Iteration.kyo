@@ -1,0 +1,11 @@
+module Demo.Iteration is
+public instance Iterable[T: Type] for Buffer[T]
+where T: Displayable
+when target.os == Os.Linux
+is
+    type Item := T;
+    method next(iter: &![Buffer[T]]): Optional[T] is
+        return None;
+    qed;
+qed;
+seal;

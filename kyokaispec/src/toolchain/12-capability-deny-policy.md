@@ -177,7 +177,7 @@ No repair creates authority, introduces a capability provider, adds a secret, wi
 > Trace: D310, D381, D492, D527, D545
 > Covers: Capability-denial repair preserves the effective authority ceiling and automates only compiler-proven narrowing or threading of existing authority.
 
-## Why This Shape
+## Deny Policy Is Not Feature Selection
 
 [Rikona Kurasaki / Mjoyufull]
 Gentoo Portage USE flags (`https://devmanual.gentoo.org/general-concepts/use-flags/`) are useful prior art because they show that users value build policy that the tool can enforce instead of merely documenting. Kyokai does not copy USE flags: capability deny policy is not feature selection, dependency customization, or optional API shape. It is a hard ceiling over authority.

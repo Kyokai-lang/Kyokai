@@ -1,0 +1,14 @@
+id = "parser.function-contract-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/13-contracts-and-runtime-failure.md"
+edition = "2026"
+inputs = ["src/Demo/Contracts.kyo"]
+command = "kyokai internal conformance-fixture parser.function-contract-summary"
+expect = "Preserve ordered require and ensure clauses as structured expressions with stable spans on a function signature."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "function-contract-summary"
+expected_facts = ["function=clamp", "contracts=require,ensure", "require-line=3", "ensure-line=4", "require=value >= 0", "ensure=result >= 0"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

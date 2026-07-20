@@ -1,16 +1,14 @@
 (lang dune 2.1)
 (using menhir 2.0)
 
-(name austral)
-(version 0.0.1)
+(name kyokai)
+(version 0.2.0)
 
 (package
- (name austral)
- (synopsis "The bootstrapping compiler for Austral")
- (description "The bootstrapping compiler for Austral.")
+ (name kyokai)
+ (synopsis "The bootstrap compiler and toolchain for Kyokai")
+ (description "The bootstrap compiler and toolchain for the Kyokai systems programming language.")
  (license GPL-3.0-or-later)
- (homepage https://austral-lang.org/)
- (bug_reports https://github.com/austral/austral/issues)
  (depends
   (ppxlib (>= 0.25.1))
   (ppx_deriving (= 5.2.1))

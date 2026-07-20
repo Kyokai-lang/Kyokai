@@ -1,0 +1,14 @@
+id = "parser.inline-test-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/toolchain/07-testing-coverage-bench.md; D28; D137"
+edition = "2026"
+inputs = ["src/Demo/Tests.kyo"]
+command = "kyokai internal conformance-fixture parser.inline-test-summary"
+expect = "Parse pure and explicit-capability inline test declarations into structured test summaries and statement bodies."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "inline-test-summary"
+expected_facts = ["test=pure arithmetic", "capabilities=none", "body-count=1", "test=reads env", "capability=root:RootCapability", "effectful-body-count=2"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

@@ -4,7 +4,14 @@
 > ProofTrace: SPEC-TOOLCHAIN-03-CLI
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-The `kyokai` command is direct, but direct does not mean loose. Every command enters through the same manifest door, resolves the same project graph, and either reports exactly what it did or fails before it invents a shape for the project.
+> Amendment status (2026-07-16): D615, D621, corrected D624a, and D625 amend
+> this chapter. Standalone `bleedring` installs one bundled distribution;
+> `publish` supports individual packages and atomic knot publication with
+> explicit exclusions; analysis facts have CLI and machine parity with LSP;
+> stable-carried XPs use root-manifest opt-in. Conflicting command text cannot
+> close Gate A until clause-level extraction.
+
+Project-facing `kyokai` commands use the same manifest discovery and resolved project graph. A command reports its selected scope and actions or fails before producing artifacts; it does not invent an undocumented project shape.
 
 > Trace: D26, D78, D83
 > Covers: The CLI is manifest-driven, deterministic, and shared by all project-facing commands.
@@ -48,7 +55,9 @@ The flags `--workspace` and `--package <name>` select scope inside a workspace. 
 > Trace: D26, D29, D31, D78, D80, D83, D149, D264, D396, D422, D424, D503, D527
 > Covers: Common CLI flags have fixed meanings, machine output is versioned, machine color policy is noninteractive, offline mode forbids network contact, and capability denial is an explicit per-invocation authority ceiling.
 
-`--verbose` must print the selected manifest, command scope, selected packages, selected Kyokai toolchain, selected target, selected profile, admitted C-toolchain contract, output root, project cache root, package-source cache root, docs cache root, global cache root when it is relevant to the command, lockfile path, lockfile mode, target-spec files, resolved C compiler/linker/archive tools, admitted discovery providers, explicit extra flags, effective capability deny policy, each deny-policy source that contributed to it, and every declared network action. It must not print secrets from the environment. Presentation output can redact user-home prefixes only when the redaction marker remains visible. Deterministic artifact identity stores the unredacted normalized identity required by the reproducibility chapter.
+`--verbose` must print the selected manifest, command scope, packages, Kyokai toolchain, target, profile, admitted C-toolchain contract, output and cache roots relevant to the command, lockfile path and mode, target-spec files, resolved C compiler/linker/archive tools, admitted discovery providers, explicit extra flags, effective capability deny policy and its contributing sources, and every declared network action.
+
+Verbose output must not print environment secrets. Presentation may redact user-home prefixes only when the redaction marker remains visible. Deterministic artifact identity stores the unredacted normalized identity required by the reproducibility chapter.
 
 > Trace: D26, D29, D83, D149, D396, D404-D405, D422, D424-D425, D503, D527
 > Covers: Verbose output exposes toolchain, cache, resolver, native-tool, deny-policy, and network facts without leaking secrets.
@@ -78,7 +87,7 @@ A command that exits nonzero must emit at least one diagnostic or structured err
 
 | Command | Required Behavior | Trace |
 | --- | --- | --- |
-| `kyokai --version` | Print the selected toolchain summary without requiring a project. `kyokai version --verbose` prints the full component, source, cache-root, native-tool, and version-ABI record. | D26, D225, D268, D425 |
+| `kyokai --version` | Print the bundled distribution summary without requiring a project. `kyokai --version --verbose` prints the full distribution, component, source, cache-root, native-tool, and version-ABI record. | D26, D225, D268, D615 |
 | `kyokai doctor` | Inspect the host toolchain, supported targets, admitted C compiler/linker contracts, cache/output roots, release provenance, and common setup problems without reading source as language input. | D31, D80, D149, D225, D268, D532, D535 |
 | `kyokai init` | Create a package manifest in the current directory, write explicit layout information, and refuse to overwrite an existing package/workspace unless an explicit force flag is passed. | D26, D78, D266 |
 | `kyokai new` | Create a new package or workspace directory from an official template, including `kyokai.toml`, module roots, an initial `.kyo` module source file, and template-selected test/doc skeletons. | D26, D78, D266, D537 |
@@ -171,7 +180,7 @@ If `check` succeeds and `build` later fails, the failure must belong to a phase 
 > Trace: D51, D83, D269
 > Covers: Dependency removal is manifest-scoped and does not pretend transitive dependency cleanup is source cleanup.
 
-`kyokai search`, `kyokai info`, `kyokai tree`, `kyokai why`, and `kyokai outdated` are read-only inspection commands. They may refresh package-index metadata in the tool cache, but they must not edit `kyokai.toml`, `kyokai.lock`, source files, or output artifacts. A mutating variant is absent from stable Kyokai until a separate accepted D-point defines its command, prompts, network behavior, filesystem effects, and machine output.
+`kyokai search`, `kyokai info`, `kyokai tree`, `kyokai why`, and `kyokai outdated` are read-only inspection commands. They may refresh package-index metadata in the tool cache, but they must not edit `kyokai.toml`, `kyokai.lock`, source files, or output artifacts. A mutating variant is absent from this specification revision. Any later variant must define its command, prompts, network behavior, filesystem effects, and machine output normatively.
 
 > Trace: D51, D83, D221, D244, D269
 > Covers: Package discovery and graph inspection are safe daily commands with clear filesystem effects.
@@ -236,10 +245,10 @@ Human diagnostics and progress output go to stderr. Command results intended for
 > Trace: D26, D29, D225
 > Covers: CLI output streams are stable for scripts and CI.
 
-## Why This Shape
+## Command Success Has A Defined Scope
 
 [Rikona Kurasaki / Mjoyufull]
-The command line is a pact. If `kyokai check` says yes, it means a real yes for the parts it claims to check. If `kyokai add` writes a dependency, it cannot smuggle a moving branch into tomorrow's build. This is the difference between a tool that prevents damage and one that merely reports it afterward.
+A command's success classification is limited to the checks its contract names. `kyokai check` reports which semantic and target checks completed; a dependency mutation records immutable source identity instead of a moving branch. Scripts and users can therefore act on command results without inferring unstated work.
 
 > Trace: D26, D51, D83
 > Covers: Kyokai CLI commands are explicit enough to make automation and trust possible.
@@ -259,7 +268,7 @@ Kyokai's canonical semantic palette uses Capability Cyan (`#4FD1C5`) only for su
 
 ## Network And Prompt Contract
 
-Every command is classified as `network-forbidden`, `network-capable`, or `network-required`. Local `check`, `build`, `run`, `test`, `fmt`, `doc`, `lsp`, `fix`, `explain`, `--version`, and local `doctor` are `network-forbidden`. Package discovery, `search`, `info`, `add`, `update`, `publish`, explicit docs pulls, advisory-feed refresh, package-index synchronization, and `bleedring` index/update operations are `network-capable` or `network-required` only where their command matrix names the remote action. No command performs telemetry, crash upload, source upload, package-graph upload, timing upload, host-fingerprint upload, or background network contact.
+Every command is classified as `network-forbidden`, `network-capable`, or `network-required`. Local `check`, `build`, `run`, `test`, `fmt`, `doc`, `lsp`, `fix`, `explain`, `--version`, and local `doctor` are `network-forbidden`. Package discovery, `search`, `info`, `add`, `update`, `publish`, explicit docs pulls, advisory-feed refresh, and package-index synchronization are `network-capable` or `network-required` only where their command matrix names the remote action. Standalone Bleedring publishes its own equivalent network contract. Neither program performs telemetry, crash upload, source upload, package-graph upload, timing upload, host-fingerprint upload, or background network contact.
 
 Prompts exist only where a command matrix declares interactivity. `build`, `check`, `test`, `fmt --check`, `doc --check`, `fix --check`, `explain`, `audit`, and every machine-output invocation are noninteractive. A permitted prompt prints its reason, default action, authority or network consequence, and equivalent noninteractive flag.
 
@@ -267,7 +276,7 @@ Prompts exist only where a command matrix declares interactivity. `build`, `chec
 | --- | --- | --- | --- |
 | `check`, `build`, `run`, `test`, `bench`, `fmt`, local `doc`, `lsp`, `explain`, `fix`, `audit` | `network-forbidden` | Noninteractive in stable build, check, test, and machine lanes. | Reports, diagnostics, binaries, libraries, generated C, maps, and audit output. |
 | `add`, `remove`, `update`, `search`, `info`, `outdated`, `vendor`, `publish` | Command-specific package lane; `--offline` forbids contact. | Declared by each mutating command. | Manifest edits, lockfile edits, vendor tree, and package reports. |
-| `docs --pull`, advisory refresh, `bleedring` install/update-index | Explicit remote lane; `--offline` forbids contact. | Declared by each mutating command. | Docs cache, advisory cache, and installed toolchain state. |
+| `docs --pull`, advisory refresh | Explicit remote lane; `--offline` forbids contact. | Declared by each mutating command. | Docs and advisory caches. |
 | `repl`, `eval`, scratch, playground | No ambient network or authority. | Interactive only for declared frontend commands. | Sandboxed reports and requested generated output. |
 
 > Trace: D396, D424-D426, D503, D516
@@ -275,12 +284,12 @@ Prompts exist only where a command matrix declares interactivity. `build`, `chec
 
 ## Toolchain Management
 
-`kyokai bleedring` manages installed Kyokai toolchains. The bootstrap installer/proxy `kyokaibleed` delegates to that command after installation. `bleedring` installs exact versions, selects explicit directory/workspace/user pins in the precedence order defined by the toolchain-management contract, verifies checksums and provenance, separates install roots from project outputs and package caches, and never rewrites project lockfiles as a side effect of toolchain selection.
+Standalone `bleedring` installs and atomically updates an exact complete Kyokai distribution. It is neither a `kyokai` subcommand nor a proxy and defines no persistent directory, workspace, or user selection among Kyokai distributions. It verifies checksums and provenance, separates install roots from project outputs and package caches, and never rewrites project lockfiles. Bleedring may separately manage exact admitted native C-compiler provider bundles under D631; the project still selects a provider through Kyokai's manifest, target contract, or explicit CLI override.
 
-`kyokai version --verbose` and `kyokai doctor` print selected toolchain component versions, source commit and clean/dirty state, build date, tag and channel, host and target triples, `.koi`/KBI version, target metadata version, enabled compile-time flags, installed components, relevant external tool paths and versions, install root, global cache root, project cache root, and version ABI string.
+`kyokai --version --verbose` and `kyokai doctor` print bundled component versions, source commit and clean/dirty state, build date, tag and channel, host and target triples, `.koi`/KBI version, target metadata version, enabled compile-time flags, relevant external tool paths and versions, install root, global cache root, project cache root, and version ABI string.
 
-> Trace: D425
-> Covers: First-party toolchain management, pin precedence, root separation, and full version reporting are visible CLI behavior.
+> Trace: D425, D615, D631-D632
+> Covers: Atomic Kyokai-distribution installation, separate admitted native-provider installation, project-owned provider selection, root separation, and full version reporting are visible CLI behavior.
 
 ## CLI Contract Matrix
 
@@ -308,3 +317,130 @@ Packaging and deployment operations use the plan/apply separation defined by the
 
 > Trace: D503, D527, D544-D545, D548, D557
 > Covers: Migration, packaging, deployment, and authority explanation share versioned plans, explicit apply boundaries, stable machine output, and deny-only repair behavior.
+
+## Bleedring And Bundled Distributions
+
+`bleedring` is the standalone bootstrap and CI installer that exists before
+Kyokai is installed. There is no `kyokai bleedring` command, proxy shim, or
+persistent rustup-style selector among Kyokai distributions. A Kyokai release is one
+atomic distribution containing the compiler and matching stdlib, runtime,
+resolver, formatter, Analysis Server, documentation/audit tools, target data,
+artifact schemas, and required first-party components.
+
+Bleedring installs and verifies the complete distribution. A developer selects
+an exact release or channel and destination. CI selects an exact version,
+revision, or distribution digest and records checksums, signatures, provenance,
+destination, and offline inputs. Updates atomically replace the complete
+distribution. Bleedring cannot mix Kyokai components, choose a persistent
+user-default Kyokai distribution, apply directory overrides, intercept commands through proxies, or
+silently edit shell startup files.
+
+Native C compilers are separate providers, not components of that atomic
+distribution. Bleedring may list, install, verify, update, and remove exact
+admitted provider bundles in isolated roots. `kyokai.toml`, the selected target
+contract, and `--c-toolchain-provider` choose among available providers;
+Bleedring neither edits that policy nor creates ambient PATH precedence.
+
+The running `kyokai` checks the project's declared distribution compatibility.
+A mismatch reports the required identity and an exact Bleedring command;
+Kyokai never invokes the installer itself. `kyokai install` remains package and
+knot dependency tooling and can install an explicitly selected Kyokai tool
+package into a user prefix. It does not install the compiler distribution.
+`kyokai install` never installs OS packages or compiler providers. Bleedring
+does not silently invoke an external system package manager or elevate
+privileges; when a verified provider cannot be redistributed it reports the
+required system acquisition instead.
+
+> Trace: D425, D615, D631-D632
+> Covers: Bootstrap installation is standalone and atomic; the installed Kyokai distribution remains self-consistent, while exact admitted native compiler providers are separately provisioned and selected by project policy.
+
+## Deep Analysis
+
+`kyokai deep-check` requires a named engine or profile. The closed initial
+engines are `core`, `ownership`, `generated-c`, `sanitizer`, `schedule`, and
+`differential`. A profile expands to a printed engine set before execution.
+Each run records semantic case IDs, engine/schema versions, target,
+distribution, C-toolchain admission, seed or schedule, resource bounds,
+unsupported operations, raw artifacts, and evidence class.
+
+An FFI or platform operation uses an admitted deterministic model or is
+reported `UNSUPPORTED`; opacity is not success. Schedule exploration, repeated
+seeds, sanitizers, and differential execution are bounded evidence. Results are
+replayable, and a novel failure retains a minimized regression case when
+reduction succeeds. `kyokai explain analysis <finding-id>` reports the finding,
+scope, evidence, and every material fact not established.
+
+> Trace: D569a-D569c, D616
+> Covers: Expensive analysis is named, bounded, replayable, evidence-classified, and honest about unsupported operations.
+
+## Development Supervision
+
+`kyokai dev` is a foreground supervisor for watch, check, incremental build,
+run, restart, structured logs, and admitted adapter communication. It requires
+no persistent global daemon. It watches only resolved source, manifest,
+generator-input, asset, and adapter-declared roots. File-watcher events are
+hints; each coalesced batch is reconciled against a fresh containment-checked
+snapshot.
+
+Every snapshot and build has a monotonically increasing generation. Changes
+seen during generation N schedule N+1. A stale result can be reported but cannot
+replace current output or process state. Obsolete work is cancellable, and
+external programs run inside killable process groups or platform job objects.
+
+Reload classes are `restart`, `code`, `asset`, `migrate`, and `full`. An adapter
+must decide compatibility for every class weaker than `full`; incompatibility
+escalates rather than guessing preservation. Migration is
+prepare–validate–commit over a versioned schema. Old state remains authoritative
+until commit, and failure follows an explicit keep-old or clean-restart policy.
+Process replacement defines readiness, graceful-shutdown deadline, forced
+termination, port/socket handoff, crash-loop backoff, stream framing, and
+interrupt cleanup. Adapter authority and the root-manifest ceiling are explicit.
+
+> Trace: D475, D618
+> Covers: Development reload is foreground, generation-ordered, adapter-decided, transactionally migrated, and bounded by explicit authority.
+
+## Explain And Analysis Projections
+
+The `kyokai explain` family includes `authority`, `ownership-pattern`, and
+`analysis`. `explain authority` accepts a package, executable, function,
+declaration, diagnostic, or source location and reports capability types, first
+authorized operations, acquisition paths, package/generated edges, entry
+origin, attenuation, manifest ceilings/conflicts, provider/target facts, and
+public versus implementation authority. It executes no code, contacts no
+provider, reads no protected resource, prompts for nothing, and cannot derive or
+widen authority.
+
+`explain ownership-pattern` accepts a named problem, type, declaration,
+diagnostic, or source location and reports applicable accepted patterns with
+their ownership, invalidation, failure, and shutdown consequences. It does not
+rewrite source or invent inference. Every explain command has stable human and
+machine output and can analyze a rejected program partially when the available
+facts are sufficient.
+
+The compiler analysis engine owns facts through one versioned API independent
+of LSP. `kyokai check`, `kyokai explain`, `kyokai query`, and `kyokai fix`
+expose diagnostics, imports, symbols, references, call hierarchy, authority
+paths, ownership plans, borrow lineages, cleanup plans, and safe-edit previews.
+LSP is an adapter. Batch and offline commands need no daemon. Every edit records
+source revision, preimage identity, safety class, affected configurations, and
+validation duties; CLI, machine protocol, and LSP share these IDs and facts.
+
+> Trace: D590, D599, D616-D617, D621
+> Covers: Semantic facts belong to one compiler API and remain fully available through CLI and machine protocols, with LSP as a polished adapter rather than an authority.
+
+## Package And Knot Publication Commands
+
+At a workspace root, bare `kyokai publish` resolves and prints the declared
+knot package plan, then atomically publishes the selected package versions and
+knot record. `kyokai publish --package <name>` publishes exactly one package
+without changing a knot. `--dry-run` performs every non-mutating check and
+prints the human and machine plan.
+
+Repeated `--exclude-package <name>` flags remove packages from one knot
+publication after manifest exclusions. The command applies the same
+dependency-closure rule as the manifest and prints every resolved exclusion.
+No command flag can add a non-publishable package, rewrite dependencies, or
+silently replace a workspace edge.
+
+> Trace: D624a
+> Covers: Publication supports atomic knot releases, independent package releases, reviewable dry runs, and explicit dependency-closed exclusions.

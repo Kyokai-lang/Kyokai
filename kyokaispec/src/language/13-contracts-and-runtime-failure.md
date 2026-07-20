@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-13-CONTRACTS-AND-RUNTIME-FAILURE
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Some failures are doors. A missing file, a closed channel, a refused connection, a timeout at the edge of a machine that never promised to answer. Kyokai makes those ordinary values because the program can still choose its next step.
+Recoverable conditions such as a missing file, closed channel, refused connection, or timeout are ordinary values. The program may inspect them and choose another operation.
 
-A contract violation is different. That is not a locked door. That is the floor giving way under the room. Once the program proves that its own stated rule is false, Kyokai does not ask the same broken state to negotiate recovery. It stops the process, or it follows an explicitly named fatal path. No pretending. No hidden unwind. No second story where the bug was actually a branch.
+A contract violation establishes that the program broke a rule required for continued safe execution. It is not an ordinary recovery branch. Kyokai follows the specified TPOE or fatal path without hidden unwinding or in-process recovery.
 
 > Trace: D24, D53, D84, D140, D142, D211, D253
 > Covers: Recoverable failures are values; contracts, runtime checks, panic, and runtime-fatal conditions are distinct termination categories.
@@ -315,3 +315,52 @@ Driver and MMIO/DMA API records state which external hardware resources can rema
 
 > Trace: D358, D464
 > Covers: Embedded targets state fatal hardware consequences without turning TPOE into an exaggerated replacement for recoverable device errors.
+
+## Process-Wide Fatal Arbitration
+
+A hosted process has four atomic fatal states: `Running`,
+`PanicCleanup(owner, cause)`, `FatalQuiesce(owner, cause)`, and
+`Terminating(cause, exit-classification)`. The first successful transition owns
+the bounded primary report. Later failures become bounded secondary facts and
+cannot start another cleanup or reporting sequence.
+
+`panic` enters `PanicCleanup`. New tasks are forbidden. Only the initiating
+task runs panic-permitted ordinary defers; sibling tasks are asked to park at
+admitted safepoints without starting user cleanup. TPOE and runtime-fatal
+failure enter `FatalQuiesce` directly. A failure during panic cleanup escalates
+while retaining the primary cause and the bounded secondary cause.
+
+Panic cleanup has a target-recorded progress budget. Deadlock, indefinite
+blocking, or budget exhaustion escalates to fatal quiescence. Locks, syscalls,
+callbacks, foreign threads, signals, and targets without safepoint parking have
+explicit target/runtime records. Termination never waits without bound.
+Simultaneous primary selection is specified nondeterminism; after selection,
+ownership and report order are stable.
+
+Fatal reporting is allocation-bounded, reentrancy-safe, length-bounded for
+spans, and has a no-user-code raw fallback. External files, transactions,
+devices, sockets, DMA, and remote actions can remain partially changed; their
+APIs state that aftermath instead of implying rollback.
+
+> Trace: D561
+> Covers: Concurrent panic, TPOE, and runtime-fatal paths have one process-wide owner, bounded cleanup/reporting, and explicit escalation.
+
+## Untrusted Input Before Hard Stops
+
+A public boundary receiving file, socket, environment, package, foreign,
+device, user, or comparable untrusted data returns an unvalidated value or a
+recoverable result. Malformation, unsupported versions, strict-policy unknown
+fields, resource limits, checksum failure, authentication failure, and
+validation failure are recoverable. Parsers publish byte, depth, item,
+allocation, reference, decompression, and work budgets.
+
+Successful validation constructs a nominal value whose constructors preserve
+the invariant. Contract failure after that transition is a program defect.
+Indexing TPOE, `unreachable`, and other hard-stop domains are not attacker-input
+rejection. A parser may use such a check internally only after it has proved
+the relevant precondition itself. Kyokai adds no universal taint type system;
+ordinary types, admission, review, diagnostics, and conformance establish the
+declared trust transitions.
+
+> Trace: D568
+> Covers: Malformed or over-budget external data is recoverable until a validated nominal invariant has been established.

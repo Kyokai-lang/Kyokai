@@ -1,0 +1,7 @@
+module Demo.TryCatch is
+function run(): Unit is
+    try do
+    catch err do
+    qed;
+qed;
+seal;

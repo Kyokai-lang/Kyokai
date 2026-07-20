@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-19-EXAMPLES
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Examples are not decoration. They are the street-level view of the rules. A spec can name a thousand doors, but an example shows which key is in whose hand when the program walks through one.
+Examples show how normative rules compose in source. They illustrate syntax, ownership, authority, allocation, and failure behavior without replacing the chapters that define those rules.
 
-The examples here use one `.kyo` source file per module, per-declaration `public`/`internal` visibility, `seal;`, `qed;`, `build;`, `fi;`, `od;`, `esac;`, `Result`, `Optional`, explicit capabilities, explicit allocators, and contracts. They are small on purpose: each one shows the rule it is standing on instead of trying to be a whole application.
+The examples use one `.kyo` source file per module, per-declaration `public`/`internal` visibility, `seal;`, `qed;`, `build;`, `fi;`, `od;`, `esac;`, `Result`, `Optional`, explicit capabilities, explicit allocators, and contracts. Each example is deliberately small and names the rule it demonstrates.
 
 > Trace: D52, D78, D86, D155, D537, D538
 > Covers: Examples use the current single-file Kyokai source model with per-declaration visibility and demonstrate rules from the language chapters rather than inherited Austral syntax.
@@ -191,8 +191,8 @@ module Buffers.Sum is
         let buf: Buffer[Nat8] := Buffer.new(alloc, 2index) or return;
         errdefer destroyBuffer(buf);
 
-        push(&!buf, left) or return;
-        push(&!buf, right) or return;
+        push(&write buf, left) or return;
+        push(&write buf, right) or return;
 
         return Ok(buf);
     qed;
@@ -234,12 +234,12 @@ module App.Print is
     function main(root: RootCapability, args: &[Span[String]]): ExitCode is
         defer surrenderRoot(root);
 
-        let Ok(console) := consoleFromRoot(&!root) else Err(ignore) do
+        let Ok(console) := consoleFromRoot(&write root) else Err(ignore) do
             return ExitFailure;
         fi;
         defer surrenderConsole(console);
 
-        let Ok(nil) := writeFmt(&!console, static "args: {}", args.length()) else Err(ignore) do
+        let Ok(nil) := writeFmt(&write console, static "args: {}", args.length()) else Err(ignore) do
             return ExitFailure;
         fi;
 

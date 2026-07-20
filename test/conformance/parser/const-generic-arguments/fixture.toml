@@ -1,0 +1,14 @@
+id = "parser.const-generic-arguments"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/07-generics-and-typeclasses.md"
+edition = "2026"
+inputs = ["src/Demo/Shapes.kyo"]
+command = "kyokai internal conformance-fixture parser.const-generic-arguments"
+expect = "Preserve unresolved bare generic names while parsing unambiguous Index literals and deterministic parenthesized arithmetic as const-generic arguments."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "const-generic-arguments"
+expected_facts = ["field=data:Array[T, Rows * Cols]", "field=header:Array[Nat8, 32]", "field=grouped:Array[Nat8, (Rows + Cols) * 2]"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-12-IMPLICIT-COMPLETIONS-AND-ELABORATION
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai is not allergic to every omitted token. It is allergic to lies. If the compiler fills something in, there must be only one thing it could have filled, every other reading must be ill-typed, and the insertion must not smuggle in allocation, authority, blocking, cleanup, or control flow that the source did not already demand.
+Kyokai admits only a closed set of implicit completions. Each completion must be uniquely forced by the typed program; every competing reading must be ill-typed. A completion cannot introduce allocation, authority, blocking, cleanup, or control flow that the source did not already require.
 
 > Trace: D87, D238, D239, D240
 > Covers: Kyokai admits only a closed set of tautological implicit completions, records them during elaboration, and checks them before ownership and backend lowering.
@@ -139,7 +139,7 @@ The compiler must not mutable-borrow an rvalue temporary. It must not insert a b
 When a call expects `&![T]` and the argument is an existing mutable borrow `&![T]`, the compiler may insert a temporary mutable reborrow. The original mutable borrow is suspended for the reborrow's lifetime.
 
 > Trace: D7b, D87, D238-D240
-> Covers: Auto-reborrow removes repeated `&~` only when the expected mutable borrow is the sole valid operation.
+> Covers: Auto-reborrow removes repeated explicit `&reborrow` only when the expected mutable borrow is the sole valid operation.
 
 When a call expects `&[T]` and the argument is an existing mutable borrow `&![T]`, the compiler may insert a temporary immutable read reborrow. This is not subtyping. The original mutable borrow is suspended while the read reborrow is live.
 
@@ -259,13 +259,35 @@ Branch pass-through assistance, cleanup suggestions, context-bundle suggestions,
 | `or.result-flow` | Accepted `or return`, mapped return, `or break`, or `or continue` statement suffix. | Explicit lowered `case`. | Prove the scrutinee/result family, selected exit target, payload accounting, and cleanup edges. | `implicit.or.result-flow` | Record lowered control flow in exported checked generic materialization metadata; local nongeneric bodies remain local. | `language/10-statements-and-control-flow.md` |
 | `receiver.fallback` | Ordinary imported lookup failed and exactly one exported receiver fallback matches. | Resolved callable identity. | Prove ordinary lookup failure, one receiver candidate, visibility, and coherent callable identity. | `implicit.receiver.fallback` | Record the resolved public declaration identity in `.koi` whenever an exported declaration or checked generic body relies on it. | `language/09-expressions-and-evaluation.md`, `language/12-implicit-completions-and-elaboration.md` |
 | `format.template` | Checked formatting/template syntax with one admitted writer contract. | Checked template node. | Prove placeholder count, template grammar, `Displayable` obligations, writer contract, and absence of hidden allocation in the writer lane. | `implicit.format.template` | Record checked template metadata and referenced formatting protocol identities in interface-affecting constants or checked generic materialization metadata. | `language/09-expressions-and-evaluation.md`, `language/18-built-ins.md` |
+| `textview.direct-call` | Direct argument position expecting `TextView[R]`, with a source that is `StaticString`, an immutable `String` borrow, or a compatible `TextView`. | Non-retaining text-view formation with the exact source lifetime. | Prove byte preservation, no validation, normalization, allocation, capability, user call, retention, overload selection, generic inference, or escape. | `implicit.textview.direct-call` | Record the explicit view and lifetime in checked generic materialization metadata when downstream checking must reproduce it; otherwise local-body-only. | `language/12-implicit-completions-and-elaboration.md`, `stdlib/04-text-bytes-paths-and-strings.md` |
 | `build.initialize` | `build T do ... produce expr; ... build;`. | Initialization-state graph and joins. | Prove exactly one produced `T` on every non-diverging path, exact linear accounting, and no usable partial value, hidden rollback, or defaulting. | `implicit.build.initialize` | Record lowered initialization-state form in exported checked generic materialization metadata when downstream materialization needs it. | `language/03-grammar.md`, `language/09-expressions-and-evaluation.md` |
 
 
 > Trace: D356, D459, D469, D485, D495, D500
 > Covers: The completion registry is closed, inspectable, effect-bounded, checker-visible, and separate from tooling-only source assists.
 
-Kyokai has no strict-borrow mode, no alternate mutable-borrow-elision mode, and no profile that changes this registry. Adding a completion or a borrow mode requires an accepted D-point, registry update, `.koi` rule, diagnostics, and conformance evidence before implementation.
+Kyokai has no strict-borrow mode, no alternate mutable-borrow-elision mode, and no profile that changes this registry. A completion or borrow mode is absent until a later specification revision adds its registry entry, `.koi` rule, diagnostics, illegal forms, and conformance obligations.
 
 > Trace: D356-D377
 > Covers: Borrow semantics and completion semantics do not vary through hidden profiles or implementation modes.
+
+## `TextView` Formation At Direct Calls
+
+A direct call may form `TextView[R]` from `StaticString`, an immutable borrow of
+`String`, or an existing lifetime-compatible `TextView`. Formation is legal
+only when it preserves bytes, performs no validation or normalization, allocates
+nothing, invokes no user code, requires no capability, retains no source, and
+uses the exact source lifetime for `R`.
+
+This completion is considered only after the callee and parameter type are
+known. It does not select an overload, solve a generic argument, or participate
+in target-type inference. It is unavailable for returns, stored fields,
+collection elements, escaping closure captures, and foreign calls. Those
+positions require `.view()` or an ownership- and allocator-named copy.
+
+`Bytes`, `OsString`, `Path`, `CString`, and `CStr` never receive this
+completion. Diagnostics and `kyokai explain elaboration` show the formed view,
+its source, and its lifetime.
+
+> Trace: D585
+> Covers: Common read-only text calls admit one closed, non-retaining view formation without creating a conversion protocol or hidden allocation.

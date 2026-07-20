@@ -1,0 +1,19 @@
+schema = "kyokai-implementation-findings-1"
+status = "schema-scaffold"
+generated_view = "notinnormativespec.md"
+
+classes = [
+  "DEFECT",
+  "AUTHORIZED_KNOWN_ISSUE",
+  "DPOINT_CANDIDATE",
+  "XP_CANDIDATE",
+  "RESEARCH",
+  "DIRECTION",
+  "REJECTED",
+]
+
+# [[finding]] records are added only for concrete implementation discoveries.
+# The Phase 8 generator/checker will require stable ID, repository, release,
+# PR/revision, reviewer/tool, observation, witness, accepted/spec sources,
+# boundary, severity, class, owner, authority, next action, status, duplicates,
+# transitions, and resolution evidence.

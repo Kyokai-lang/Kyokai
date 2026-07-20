@@ -1,0 +1,14 @@
+id = "parser.rejected-inherited-comment"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/02-lexical-syntax.md"
+edition = "2026"
+inputs = ["src/Main.kyo"]
+command = "kyokai internal conformance-fixture parser.rejected-inherited-comment"
+expect = "Reject inherited Austral `--` comment spelling before parsing."
+expected_outcome = "reject"
+expected_stage = "lexer"
+expected_code = "unsupported-inherited-form"
+expected_facts = ["form=--", "src/Main.kyo"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-LEXICAL-TOKENS"

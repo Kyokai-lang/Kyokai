@@ -117,10 +117,10 @@ Deprecation must state replacement API, behavior difference, minimum removal hor
 > Trace: D157, D223, D243
 > Covers: Deprecations explain compatibility and migration.
 
-## Why This Shape
+## Admission Carries Evidence
 
 [Rikona Kurasaki / Mjoyufull]
-RIIK is powerful only if the rewrite is disciplined. A naive rewrite is just a fresh place to hide old mistakes. Admission records force each module to walk into the room carrying its tests, contracts, edge cases, and trust boundary where everyone can see them.
+Rewriting an implementation in Kyokai does not transfer the old implementation's correctness evidence or make the new code correct by construction. An admission record therefore identifies the module's contracts, edge cases, tests, implementation boundary, and remaining trust assumptions before the module enters a stable tier.
 
 > Trace: D229-D230
 > Covers: Admission criteria keep native Kyokai implementations trustworthy instead of merely ideological.
@@ -145,3 +145,22 @@ OS-facing error records preserve the domain category, target error domain, raw t
 
 > Trace: D402, D413, D421, D454, D491, D494, D499, D501, D517, D529
 > Covers: Stable admission records name recovery, OS mapping versions, test fixtures, numeric evidence, wrapper graduation, and bridge entry governance without deferring behavior to unnamed work.
+
+## Admission Classes And Lifecycle
+
+Admission records use distinct classes: `API_PACKET`, `STDLIB_ADMISSION`,
+`OFFICIAL_PACKAGE_ADMISSION`, `BRIDGE_ADMISSION`, `PROVIDER_ADMISSION`, and
+`DATASET_ADMISSION`. Admission in one class implies nothing about another.
+
+All classes use the states `PROPOSED`, `EXPERIMENTAL`, `CANDIDATE`, `ADMITTED`,
+`SUSPENDED`, `DEPRECATED`, `REVOKED`, and `RETIRED`. Every record preserves
+identity, owner, version/API/compatibility, targets, evidence, security contact,
+release identity, and review history. Class-specific fields add implementation,
+provenance/license, build, ABI, unsafe, capability, provider, or dataset facts.
+
+Suspension and revocation change claims, resolution, audits, docs, and release
+eligibility without deleting historical evidence. A package, provider, dataset,
+or Bridge cannot borrow `ADMITTED` status from a precise API packet.
+
+> Trace: D584, D593a
+> Covers: API shape, stdlib implementation, maintained packages, Bridges, providers, and datasets have separate evidence records and one append-only lifecycle.

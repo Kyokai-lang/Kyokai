@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-11-LINEARITY-BORROWING-AND-REGIONS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A linear value is not background scenery. It is a thing in somebody's hands. If the program moves it, the old hand is empty. If the program borrows it, the lender stands still until the borrow is done. If the program promises cleanup, that promise becomes part of the path through the room. Kyokai makes the compiler track those motions because this is where safety either becomes real or turns into a story people tell after the bug report arrives.
+A linear value has one live ownership obligation. Moving it makes the source place unavailable. Borrowing it restricts the owner for the borrow's lifetime. Registering cleanup changes the checker state for every applicable exit path. The compiler tracks these transitions explicitly.
 
 > Trace: D2, D6, D7b, D14, D72, D87, D187, D238-D240, D246
 > Covers: Linearity and borrowing are checked after typed elaboration, including explicit nodes for admitted implicit borrow and reborrow completions.
@@ -130,12 +130,12 @@ Named regions do not create ownership and do not permit arbitrary lifetime exten
 
 ## Borrow Creation
 
-`&place` creates an immutable borrow when `place` is addressable and no live mutable borrow conflicts with it. Multiple immutable borrows of the same referent may coexist while the referent is not mutably borrowed and is not moved or consumed.
+`&read place` creates an immutable borrow when `place` is addressable and no live mutable borrow conflicts with it. Multiple immutable borrows of the same referent may coexist while the referent is not mutably borrowed and is not moved or consumed.
 
 > Trace: D14, D72
 > Covers: Immutable borrow creation requires an addressable place and rejects conflicts with mutable access or movement.
 
-`&!place` creates a mutable borrow when `place` is mutable, addressable, uniquely available, and not live under any immutable or mutable borrow. Exactly one mutable borrow of a referent may be live at a time.
+`&write place` creates a mutable borrow when `place` is mutable, addressable, uniquely available, and not live under any immutable or mutable borrow. Exactly one mutable lease lineage of a referent may be live at a time.
 
 > Trace: D14, D72, D187
 > Covers: Mutable borrowing requires unique mutable access and excludes all other live access to the same referent.
@@ -152,15 +152,15 @@ A static literal may be borrowed because its storage duration is part of the lit
 
 ## Reborrowing
 
-`&~borrow` creates an explicit reborrow from an existing mutable borrow. While the nested reborrow chain is live, the source mutable borrow is unavailable. The checker represents that restriction through the active reborrow chain and restores source availability only after every derived reborrow ends; it does not introduce a separate ownership state.
+`&reborrow borrow` creates an explicit reborrow from an existing mutable borrow. While the nested reborrow chain is live, the source mutable borrow is unavailable. The checker represents that restriction through the active reborrow chain and restores source availability only after every derived reborrow ends; it does not introduce a separate ownership state.
 
 > Trace: D7b, D14, D187
 > Covers: Reborrow creates nested temporary access and suspends the source mutable borrow.
 
-When a call expects `&![T]` and the argument expression is already `&![T]`, the compiler may insert that same mutable reborrow automatically only through the elaboration pipeline. This is legal because the expected type leaves exactly one valid operation and the inserted node is checked like explicit `&~`.
+When a call expects `&![T]` and the argument expression is already `&![T]`, the compiler may insert that same mutable reborrow automatically only through the elaboration pipeline. This is legal because the expected type leaves exactly one valid operation and the inserted node is checked like explicit `&reborrow`.
 
 > Trace: D7b, D87, D238-D240
-> Covers: Auto-reborrow is a tautological typed completion, not a backend trick or unchecked aliasing exception.
+> Covers: Auto-reborrow is a tautological typed completion of explicit `&reborrow`, not a backend trick or unchecked aliasing exception.
 
 When a call expects `&[T]` and the argument expression is `&![T]`, the compiler may insert a temporary immutable read reborrow of the referent. This is not subtyping, variance, or permanent weakening of the original mutable borrow. The mutable borrow is suspended while the read reborrow is live.
 
@@ -235,7 +235,7 @@ A `case` over a union must be exhaustive. Exhaustiveness is checked structurally
 
 ## Closures, Generators, And Tasks
 
-A closure literal captures only what its explicit capture list names. Capturing a linear value by value moves it into the closure environment and normally makes the closure `CallableOnce`. Capturing a mutable borrow, or mutably using a by-value capture, selects `CallableMut`. Remaining captures select `Callable`.
+A closure literal captures only what its explicit capture list names. Capturing a linear value by value moves it into the closure environment and normally makes the closure `CallableOnce`. Capturing a mutable borrow, or mutably using a by-value capture, selects `CallableMut`. Remaining captures select `CallableRead`.
 
 > Trace: D118/D126/D197
 > Covers: Closure environment ownership is explicit and determines the callable family statically.
@@ -356,3 +356,43 @@ A resource type exposes a named consuming release operation or an accepted `defe
 
 > Trace: D498
 > Covers: Resource-release tooling points at visible ownership lifetimes and never changes legality or inserts hidden cleanup.
+
+## Mutable-Borrow Lease Lineage
+
+Copying a mutable-borrow token copies a value that refers to one
+compiler-tracked lease lineage. It does not create a second lease or independent
+write permission. A token can be used only while its lineage is live, its
+writer is active rather than suspended, and no incompatible child reborrow is
+active.
+
+`&reborrow token` creates a child in the same lineage and suspends every parent
+alias. Closing the child resumes the parent lineage once. Discarding one token
+alias does not close the lease; lexical close invalidates every alias. A
+suspended alias remains a value but cannot read, write, reborrow, escape, or be
+used as proof of active access.
+
+`T: Free`, copies, captures, calls, returns, storage, and `.koi` preserve the
+region and lineage obligation. `Free` permits copying the token value; it does
+not erase borrow state. Tokens cannot be serialized, compared for semantic
+identity, stored beyond their region, transferred incompatibly, or returned
+across region close. Checked IR keeps token-value identity separate from
+lease-lineage identity.
+
+> Trace: D559
+> Covers: Mutable-borrow token copies share one lease, reborrows suspend the lineage, and `Free` never converts a borrow token into independent authority.
+
+## Shared-Lifetime Pattern Family
+
+General reference counting is absent. The admitted shared-lifetime patterns
+are scoped borrows, arena-owned graphs, generational slot maps, stable handles,
+owner/handle/view registries, broker-owned state, and separately admitted
+synchronized structures. Each pattern specifies invalidation, stale identity,
+cycle behavior, removal ownership, task transfer, failure, and shutdown. No
+pattern implicitly extends a lifetime or creates general shared ownership.
+
+The tooling chapter defines `kyokai explain ownership-pattern`. Its output is
+advice over these accepted patterns; it does not run code, rewrite source,
+obtain authority, or invent ownership inference.
+
+> Trace: D599
+> Covers: Shared-lifetime problems use explicit owners and handles without reopening general reference counting.

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-07-GENERICS-AND-TYPECLASSES
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Generics are where a language can start lying kindly. It can let a type drift in from somewhere offscreen, let a method find a hidden witness, let a return type pull answers backward through the program, and the call still looks clean. Kyokai keeps the useful power and refuses the fog: parameters are written at declarations, obligations sit in one place, and dispatch is static.
+Kyokai generics make type parameters and obligations explicit at declarations. Inference is forward and argument-driven, obligations use one `where` surface, and dispatch is static. Return types do not drive backward inference, and generic calls do not acquire hidden runtime dictionaries or witnesses.
 
 > Trace: D82, D158, D189, D192, D193, D195
 > Covers: Kyokai generics are explicit, rank-1, statically dispatched, and do not use hidden runtime dictionaries, existential types, or opaque return types.
@@ -261,7 +261,7 @@ An instance is legal only when its package owns the typeclass or owns at least o
 
 An instance declared in an unsafe module is marked `unsafe-origin` in `.koi`. It obeys the same orphan and coherence rules as a safe instance. Unsafe status does not authorize forged witnesses, ambiguous dispatch, or weaker laws.
 
-Security-sensitive typeclasses, including equality, ordering, hashing, display, parsing, serialization, and authority-related protocols, require explicit admission records for secret-bearing, capability-bearing, unsafe-backed, and foreign-backed types. `kyokai audit` reports unsafe-origin instances and rejects policy-denied dependency admission.
+Security-sensitive typeclasses, including equality, ordering, hashing, display, parsing, serialization, and authority-related protocols, require explicit contracts for secret-bearing, capability-bearing, unsafe-backed, and foreign-backed types. `kyokai audit` reports unsafe-origin instances and rejects policy-denied dependency admission.
 
 > Trace: D460
 > Covers: Unsafe modules can define audited instances but cannot bypass coherence or hide security-sensitive behavior.
@@ -275,7 +275,7 @@ Toolchain code-size policy changes emission strategy only. It does not add runti
 > Trace: D82a-D82b, D200, D480, D497
 > Covers: Code-size controls preserve static Kyokai semantics and cannot become a hidden dispatch system.
 
-Every compiler-known or standard typeclass admission record states purpose, laws, compiler involvement, `.koi` representation, coherence effects, diagnostics, cleanup behavior, and why named functions do not suffice.
+Every compiler-known or standard typeclass is specified individually with its purpose, laws, compiler involvement, `.koi` representation, coherence effects, diagnostics, cleanup behavior, and reason for existing instead of named functions.
 
 > Trace: D360, D376
 > Covers: Compiler-known protocols remain individually admitted rather than growing by convention.
@@ -286,7 +286,57 @@ Closed known alternatives use nominal unions and exhaustive dispatch. A manifest
 
 Separately compiled plugins and foreign framework boundaries use nominal opaque `Linear` handles plus explicit operation tables. Their type identity, operation-table or ABI identity, owner/destructor, capability requirements, compatibility version, allocation, transfer, downcast, serialization, reload, and failure contracts are explicit boundary data. A compatibility hash rejects known mismatches but does not prove memory safety.
 
-This boundary adds no existential types, trait objects, universal erased container, hidden dictionary, implicit allocation, or runtime typeclass fallback. A reusable erased container requires its own standard-library or Bridge admission record and remains unsafe internally until layout, lifetime, aliasing, destruction, callback, debugger, and audit obligations are proved.
+This boundary adds no existential types, trait objects, universal erased container, hidden dictionary, implicit allocation, or runtime typeclass fallback. A reusable erased container belongs to an explicit standard-library or Bridge contract and remains unsafe internally until that contract closes layout, lifetime, aliasing, destruction, callback, debugger, and audit obligations.
 
 > Trace: D82, D139, D541-D542
 > Covers: Heterogeneous composition uses closed unions or explicit opaque foreign/plugin boundaries without weakening Kyokai's static generic and typeclass model.
+
+## Callable Invocation Classes
+
+Kyokai has four canonical capturing-callable classes:
+
+| Class | Invocation contract |
+| --- | --- |
+| `CallableRead` | Repeated invocation through immutable access to the environment. |
+| `CallableMut` | Repeated serialized invocation through mutable access to the environment. |
+| `CallableOnce` | One invocation that consumes the environment. |
+| `CallableState` | Explicit state transition with input, output, recovery, and partial-mutation ownership. |
+
+The compiler knows one implication chain: `CallableRead` satisfies read,
+mutable-access, and consuming-once requirements; `CallableMut` satisfies
+mutable-access and consuming-once requirements; `CallableOnce` satisfies only
+consuming-once requirements. This chain is not general subtyping or extensible
+inheritance. `CallableState` is outside it. Bare `Callable` is retired, and a
+migration diagnostic names `CallableRead` only when that replacement is valid.
+
+`.koi` records stable class ID, arity, parameter access, result, environment
+universe and region, effect summary, and `CallableState` recovery contract.
+Changing class, weakening recovery, or adding a possible public effect is an
+interface change.
+
+> Trace: D567
+> Covers: Source, generic dispatch, libraries, bindings, and interface artifacts use one callable-class system.
+
+## Compiler-Derived Callable Effects
+
+Every callable has a compiler-derived effect summary over this closed domain:
+mutation, linear consumption, allocation, blocking, cleanup registration, task
+operations, authority use, I/O, foreign or unsafe access, recoverable failure,
+TPOE, panic, and runtime-fatal potential. The compiler owns the domain, stable
+effect IDs, subset relation, join operation, conservative `Unknown`, inference
+inputs, and schema version. Source cannot override inference with a declaration.
+
+Direct calls, generic instantiations, callable values, typeclass dispatch,
+recursion, and mutually recursive groups contribute transitively through a
+monotone fixed point. Public and generic summaries are serialized in `.koi`.
+A restricted context names its admitted subset. Foreign, unsafe, opaque,
+missing, or schema-incompatible evidence becomes `Unknown` unless an admitted
+contract supplies the facts. An unknown effect ID never means an empty set.
+
+Adding a possible public effect is incompatible with a client that admits a
+stricter subset. Removing an effect is compatible unless another observable
+contract changes. These summaries do not create user-programmable effect rows,
+handlers, or effect polymorphism.
+
+> Trace: D558
+> Covers: Callable effects are closed, inferred, transitive, separately compilable, conservative at opaque boundaries, and compatibility-visible.

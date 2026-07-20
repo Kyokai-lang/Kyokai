@@ -1,0 +1,14 @@
+id = "parser.foreign-block-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/16-unsafe-ffi-and-abi.md"
+edition = "2026"
+inputs = ["src/Demo/Foreign.kyo"]
+command = "kyokai internal conformance-fixture parser.foreign-block-summary"
+expect = "Parse a raw foreign block into structured ABI, function, parameter, return-type, and constant facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "foreign-block-summary"
+expected_facts = ["abi=C", "function=c_open", "params=Address[Nat8],Int32", "return=Int32", "constant=EINVAL:Int32"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

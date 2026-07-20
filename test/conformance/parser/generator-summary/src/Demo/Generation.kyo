@@ -1,0 +1,8 @@
+module Demo.Generation is
+public generator Windows[T: Type, R: Region](source: &[Buffer[T], R], width: Index): Span[T]
+where T: Displayable
+when target.os == Os.Linux
+is
+    yield source[0..width];
+qed;
+seal;

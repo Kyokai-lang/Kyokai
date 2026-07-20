@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-06-ITERATORS-AND-GENERATORS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Iteration is control flow wearing a library face. It can borrow, move, allocate, suspend, and clean up. Kyokai treats it with the same suspicion and care as a loop written by hand.
+Iteration can borrow, move, allocate, suspend, and require cleanup. Iterator and generator contracts therefore participate in the same ownership and control-flow rules as explicit loops.
 
 > Trace: D32, D77, D146, D198, D249
 > Covers: Iterator, receiver, and generator contracts preserve linear state and explicit loop cleanup behavior.
@@ -107,10 +107,10 @@ Collection iteration over linear elements uses borrows, a consuming `intoIter`, 
 > Trace: D84, D361, D387, D491, D496
 > Covers: Early iterator exit preserves linear ownership through visible finalization and named recovery payloads.
 
-## Why This Shape
+## Iteration Does Not Hide Ownership
 
 [Rikona Kurasaki / Mjoyufull]
-A loop does not get more mysterious because it was made elegant. Kyokai lets iteration be pleasant, but the borrowed view, the moved value, the blocked receiver, the suspended generator, and the allocator all stay visible.
+Iteration syntax may shorten a loop without weakening its contracts. Borrowed yields retain their region, moved yields transfer ownership, receiver iteration states its blocking behavior, suspended generators retain explicit state, and allocating adapters name their allocator.
 
 > Trace: D32, D77, D146, D198, D249, D496
 > Covers: Iterator ergonomics remain bound to explicit ownership and cleanup contracts.

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-07-TESTING-COVERAGE-BENCH
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Tests in Kyokai are ordinary code standing under ordinary rules. That matters. A test harness that sneaks in authority, hidden imports, fake ownership, or catchable panics would teach a different language than the one people ship.
+Kyokai tests use ordinary language semantics. The test harness grants no ambient authority, hidden imports, alternate ownership rules, or catchable panic/TPOE behavior.
 
 > Trace: D28, D137
 > Covers: Kyokai tests use ordinary language semantics and explicit authority.
@@ -12,6 +12,19 @@ Tests in Kyokai are ordinary code standing under ordinary rules. That matters. A
 ## Test Declarations
 
 Inline tests are declared inside a module. They are excluded from production artifacts unless a test build explicitly includes them. Tests may access private declarations in the same module and `public`/`internal` declarations according to the same visibility rules as ordinary same-package code.
+
+```kyokai
+test "pure arithmetic" is
+    assert(add(2, 2) == 4);
+qed;
+
+test "reads env" with (root: RootCapability) is
+    let env := root.env();
+    assert(env.isReady());
+qed;
+```
+
+The declaration grammar is `test <static-string> [with (<parameter-list>)] is <block> qed;`. A test has no visibility or `opaque` modifier and never enters the derived `.koi` interface. The compiler preserves its description, explicit capability parameters, body, and source span for test discovery. Production compilation excludes the declaration before backend lowering; test compilation retains it as an independently runnable test entry.
 
 > Trace: D17, D28, D78
 > Covers: Inline tests live in bodies, are test-only artifacts, and use normal visibility.
@@ -120,10 +133,10 @@ A benchmark that needs authority must declare capabilities just like a test. The
 > Trace: D80, D83, D137
 > Covers: Benchmarks report their environment and do not claim deterministic artifact identity.
 
-## Why This Shape
+## Tests Use The Same Security Model
 
 [Rikona Kurasaki / Mjoyufull]
-Tests stay close enough to the code to catch the truth, but not so privileged that they become a different court. Kyokai lets them see private rooms when they live in the same module, but it does not hand them the master key to the house unless the test asks for it in the open.
+Same-module tests may inspect private declarations because they are checked as part of that module. They receive no broader authority: filesystem, process, environment, network, clock, entropy, and other external access still require declared test capabilities. Test convenience does not create a second language or security model.
 
 > Trace: D28, D137, D211
 > Covers: The test model balances practical module testing with explicit capability security.
@@ -165,3 +178,106 @@ Numeric stdlib tests record oracle source, license, version or revision, generat
 
 > Trace: D220, D270, D304, D325, D449, D517
 > Covers: Property replay, fuzz replay, benchmark comparability, and numeric-oracle provenance are explicit report contracts.
+
+## Unified Testing Evidence Protocol
+
+`Gen[T]` carries explicit random state, size/context, replay identity, generator
+version, and shrinker version. Property outcomes distinguish discard,
+assumption failure, assertion failure, panic/TPOE, timeout, resource leak, and
+harness failure. Shrinking is bounded and resumable. It preserves the original
+failure class or records the changed class separately.
+
+Fixtures are ownership state machines with isolated capabilities and defined
+teardown for every outcome. Fuzz engines are adapters to the same corpus and
+replay protocol, not a mandated engine. Evidence records corpus identity,
+seed/path, target/profile/toolchain, capability grants, budgets, and artifacts.
+Simulated concurrency and native scheduling are separate evidence classes.
+Private and secret corpora have retention and disclosure policy. Statistical
+benchmark records cannot promote a weak run into a stronger claim.
+
+> Trace: D589
+> Covers: Property, fuzz, fixture, replay, and benchmark evidence share one versioned identity and failure-class protocol.
+
+## KBI Hostile Corpus
+
+KBI lanes include mutation, truncation, offset wrap, overlapping sections,
+duplicates, invalid minimal encodings, deep graphs, decompression bombs,
+allocation failure, and bounded diagnostic rendering. Runs execute under time,
+memory, allocation, and output limits and retain the decoder policy identity.
+
+> Trace: D573-D576
+> Covers: Interface-artifact admission includes malformed, incompatible, over-budget, and allocation-failure evidence rather than happy-path decoding alone.
+
+## Cross-Phase Workload Evidence
+
+The maintained workload set includes CLI/TUI, the Poller server, browser/WASI,
+a native Apple application, a raw SDL game, an embedded/device loop, and an
+enterprise native service. Each workload record names owner, source revision,
+dependencies, targets, authority ceiling, allocation policy, expected behavior,
+source size, build latency, binary size, diagnostics, tests, profiling,
+packaging, budgets, cadence, and known gaps.
+
+Workloads use ordinary public language, knot, Bridge, stdlib, and toolchain
+surfaces. A compiler-private escape hatch invalidates the workload as public
+evidence. Every implementation phase names the workloads it adds, unblocks, or
+must preserve. Fast subsets gate assigned PR classes; complete target,
+sanitizer, device, stress, soak, and release lanes retain their own cadence and
+evidence class.
+
+Failures are classified as semantic regression, compiler defect, target defect,
+knot/Bridge defect, performance regression, flaky infrastructure, or
+unsupported surface before finding intake. A domain claim cannot exceed its
+passing workload, target, and tool-admission evidence.
+
+> Trace: D601, D620, D623
+> Covers: Workload evidence grows with implementation and constrains product claims without becoming whole-language conformance.
+
+## Adversarial Ownership And Wrong-Semantics Corpus
+
+The public adversarial corpus lives under `examples/adversarial/`. Each case
+has a directory containing a versioned `case.toml`, explanation, sources,
+expected observations, and any bounded local data or runner support. Empty
+family directories are not evidence.
+
+Case classes are `accept`, `reject`, `defined_failure`,
+`runtime_observation`, `generated_c_structure`, `differential`, `stress`, and
+`design_pressure`. Every record names its stable case ID, owner, status,
+cadence, governing clauses and conformance IDs, required compiler maturity,
+target and native-provider constraints, authority ceiling, allocation policy,
+expected diagnostics or observations, resource budgets, XP requirements, and
+known gaps.
+
+Required workload families cover arena and frame allocation, ECS component
+churn, generational handles, scene graphs, intrusive structures, retained
+callbacks, linear-container iteration and draining, transactional asset
+loading, multithreaded job ownership, and hot-reload migration. A family tests
+successful completion and every applicable rejection, early exit, partial
+failure, cancellation, abnormal exit, teardown, and invalidation path.
+
+Design-pressure cases report cleanup distance, duplicated cleanup, non-local
+redesign, checker-only API distortion, unsafe or private escapes, diagnostic
+usefulness, and reusable abstractions. Raw line count is not an ergonomics
+decision. A private compiler hook or unreviewed unsafe escape disqualifies a
+case from safe-language evidence.
+
+A fast deterministic subset gates applicable pull requests. Target matrices,
+stress, differential, sanitizer, and long-running cases retain nightly or
+release cadence. The language runner indexes the corpus through the unified
+testing evidence protocol but does not merge its evidence class with small
+parser, checker, or conformance fixtures. A case comparing settled semantics is
+a test; an XP is required only when the case compares unsettled semantics.
+
+> Trace: D614, D623, D627, D634
+> Covers: Real systems workloads can reject wrong compiler behavior and expose ownership pressure without being mislabeled as proof or whole-language conformance.
+
+## Experimental Lanes
+
+Stable conformance excludes XP behavior. Each enabled XP has separate named
+lanes, artifact identity, budgets, expected results, and expiry. A stable build
+without opt-in remains semantically unchanged except for diagnostics that name
+unavailable experimental syntax or APIs. Graduation requires accepted stable
+semantics, normative extraction, complete migration and diagnostics,
+conformance, and removal of XP-qualified identities.
+
+> Trace: D582, D625
+> Covers: Xperimental and stable-carried feature evidence is isolated from stable conformance and cannot silently upgrade a proposal into semantics.

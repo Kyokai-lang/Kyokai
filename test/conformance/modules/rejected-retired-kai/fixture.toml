@@ -1,0 +1,14 @@
+id = "modules.rejected-retired-kai"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/02-lexical-syntax.md; kyokaispec/src/toolchain/02-module-resolution-and-koi.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.kai"]
+command = "kyokai internal conformance-fixture modules.rejected-retired-kai"
+expect = "Reject the retired .kai extension and name the one-.kyo-per-module source model."
+expected_outcome = "reject"
+expected_stage = "package-source"
+expected_code = "retired-source-extension"
+expected_facts = ["src/App/Main.kai", "replacement=.kyo"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"

@@ -1,0 +1,14 @@
+id = "parser.type-alias-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/05-declarations.md"
+edition = "2026"
+inputs = ["src/Demo/Aliases.kyo"]
+command = "kyokai internal conformance-fixture parser.type-alias-summary"
+expect = "Parse a transparent type alias into structured generic-parameter and target-type facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "type-alias-summary"
+expected_facts = ["alias=IoResult", "generic=T", "target=Result[T, IoError]"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

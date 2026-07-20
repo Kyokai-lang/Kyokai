@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-10-STATEMENTS-AND-CONTROL-FLOW
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Statements are where control moves through the room. A value can be bound, a branch can split, a loop can turn back on itself, a cleanup can be promised for later, or the whole process can be told to stop. Kyokai keeps each of those motions named in source.
+Statements bind values, select branches, repeat work, register cleanup, and leave scopes or the process through named control forms. Every form that changes ownership, cleanup, or exit state is visible in source.
 
 > Trace: D2, D8, D9, D16, D43, D71
 > Covers: Kyokai is statement-oriented, uses explicit terminators and semicolons, and keeps control-flow exits visible.
@@ -207,10 +207,10 @@ A deferred body may use local control flow inside itself, but it must not perfor
 
 ## Borrow Scopes
 
-A `borrow name := &place do ... drop;` scope binds an immutable borrow for the body. A `borrow name := &!place do ... drop;` scope binds a mutable borrow. `&~place` is the explicit reborrow surface. The borrow scope ends at `drop;`.
+A `borrow name := &read place do ... drop;` scope binds an immutable borrow for the body. A `borrow name := &write place do ... drop;` scope binds a mutable borrow. `&reborrow place` is the explicit mutable reborrow surface. The borrow scope ends at `drop;`. That terminator closes access only; it does not destroy, release, free, move, consume, or discard the referent.
 
-> Trace: D7b, D14, D111, D187
-> Covers: Borrow statements make borrow lifetime visible and close with `drop;`.
+> Trace: D7b, D14, D111, D187, D604, D607
+> Covers: Borrow statements make borrow mode and lifetime visible, use distinct read/write/reborrow spellings, and close with non-destructive `drop;`.
 
 The borrow chapter defines the full checker states. This chapter fixes control-flow interaction: no control-flow path may leave a borrow scope while pretending the borrow still exists outside that scope unless the borrow type and region rules explicitly permit that escape.
 
@@ -241,15 +241,15 @@ The borrow chapter defines the full checker states. This chapter fixes control-f
 
 ## Debug Statement
 
-`debug expr;` is a language-level development instrumentation statement. It is not a function call, not a module import, and not UFCS. It formats through `Displayable` to stderr in debug/test builds and is stripped in release builds.
+`debug expr;` is a language-level development instrumentation statement. It is not a function call, not a module import, and not UFCS. In a profile that enables debug instrumentation, it emits a structured event to a toolchain-provided instrumentation channel. The statement does not write `stderr`, use `TerminalCapability`, or target an application stream. In a profile without that channel, the event is dropped after the operand passes the observation-only checks below.
 
-> Trace: D40, D45, D233
-> Covers: `debug` is built-in profile-sensitive instrumentation, not ordinary capability-gated output.
+> Trace: D40, D45, D233, D603
+> Covers: `debug` is built-in profile-sensitive structured instrumentation, not ambient terminal I/O or ordinary capability-gated output.
 
-`debug` does not require a terminal capability, does not appear in module interfaces, and is not part of the program's ordinary observable behavior contract. Production console I/O uses explicit capability-gated APIs.
+Programs cannot obtain, redirect, authorize, or rely on the debug channel as application I/O. The sink cannot change values, control flow, blocking, ordinary failure, or release behavior. Event ordering, source identity, bounded work, and secret redaction are toolchain contracts. `debug` does not appear in module interfaces or the program's ordinary observable behavior contract. Production logs, traces, metrics, and console I/O use explicit sinks and capabilities.
 
-> Trace: D45, D211, D233
-> Covers: Debug output is outside the capability model by design, while production I/O remains capability-gated.
+> Trace: D45, D211, D233, D591, D603
+> Covers: Debug instrumentation is non-authorizing and non-blocking; production observability and I/O remain explicit application surfaces.
 
 The operand of `debug` is a debug-observation expression. It may observe existing values through local names, constants, literals, immutable field projection, immutable index/slice projection, and parenthesized composition. It must not contain ordinary function calls, UFCS calls, allocating constructors, arithmetic or comparisons that may TPOE, assignment, `comptime`, `panic`, `return`, `break`, `continue`, `or ...`, `defer`, or capability-using operations.
 
@@ -274,7 +274,11 @@ For each pre-branch linear binding, a normal branch join reconciles the D348 che
 
 A panic raised while ordinary panic cleanup is executing replaces the active panic payload with a nested-abnormal-exit runtime-fatal report that retains both payloads when the target diagnostic contract can represent them. A TPOE path does not run user cleanup. A runtime-fatal path follows its target contract. Cleanup code cannot resume execution or mark an abnormal exit handled.
 
-Resources are released early through the smallest lexical owning scope, a named consuming release operation, explicit ownership transfer, or `defer` registered inside that smallest scope. Compiler-integrated `defer-distance` reports a linear resource whose cleanup is not registered before unrelated side-effecting work. Compiler-integrated `propagate-up` reports repeated `or return` propagation that adds no context, mapping, local handling, or documented pass-through contract. TPOE diagnostics state that user defers are skipped. Lock-lifetime diagnostics report guards crossing blocking operations, `spawn`, `join`, `select`, or `wait`, and large buffers or arenas retained across unrelated blocking work. These diagnostics are tooling assistance; policy can raise their severity, but they never insert cleanup or change runtime behavior.
+Resources are released early through the smallest lexical owning scope, a named consuming release operation, explicit ownership transfer, or `defer` registered inside that smallest scope.
+
+Compiler-integrated `defer-distance` reports a linear resource whose cleanup is not registered before unrelated side-effecting work. Compiler-integrated `propagate-up` reports repeated `or return` propagation that adds no context, mapping, local handling, or documented pass-through contract. TPOE diagnostics state that user defers are skipped. Lock-lifetime diagnostics report guards crossing blocking operations, `spawn`, `join`, `select`, or `wait`, and large buffers or arenas retained across unrelated blocking work.
+
+These diagnostics are tooling assistance. Policy may raise their severity, but they never insert cleanup or change runtime behavior.
 
 > Trace: D378-D380, D472, D495, D498
 > Covers: Linear branch-state equality, nested abnormal-exit behavior, TPOE cleanup skipping, and source-visible early release are explicit.

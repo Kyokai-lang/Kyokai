@@ -1,6 +1,6 @@
 # Kyokai: What Changed from Austral and Why
 
-**Kyokai** (境界, "boundary") is a systems programming language forked from Austral. It preserves Austral's core safety guarantees — linear types, **capability-based security** (unforgeable linear capabilities; entry/bootstrap in **D48**/**D162**), **D211**'s **effect-system boundary** (Kyokai tracks **external authority** through capabilities only; divergence, non-termination, blocking, transitive allocation, and potential TPOE are **not** type-tracked and must be surfaced by naming and contracts), **no language-level undefined behavior in accepted safe Kyokai code (D73)** with unsafe confined to individually specified primitives and explicit FFI/toolchain contracts, **no hidden control flow**, plus **D143**'s roadmap (honest claims now; **paper proof for sequential λ\_K before `v1.0`**; mechanized proof after self-hosting, likely Coq) — while fixing ergonomic pain points, adding missing infrastructure, and building out a complete toolchain.
+**Kyokai** (境界, "boundary") is a systems programming language forked from Austral. It preserves Austral's core safety guarantees—linear types, capability-based security, and visible control flow—then tightens several boundaries Austral left to convention. Capabilities track external authority; the compiler separately derives a closed callable-effect summary for mutation, allocation, blocking, failure, unsafe work, and related facts without adding user-programmable effect rows. No Kyokai operation, including an unsafe-only operation, has undefined behavior in the Kyokai abstract machine. Foreign native code remains an explicit external trust boundary. The formal roadmap keeps proof claims narrow and revision-bound while the implementation grows.
 
 This document explains every change Kyokai makes from Austral, why each change was made, and what Kyokai code looks like compared to Austral code. It is written for someone who wants to understand the language without reading the full design specification.
 
@@ -8,9 +8,11 @@ This document explains every change Kyokai makes from Austral, why each change w
 
 ## Public authority and traceability
 
-[`kyokaidecided.md`](./kyokaidecided.md) records accepted Kyokai shape that has not yet been fully extracted into the normative spec. The normative chapter family under `kyokaispec/` controls rules already extracted there. This comparative guide is explanatory: if it disagrees with the normative spec or accepted shape, fix this guide.
+[`kyokaidecided.md`](./kyokaidecided.md) preserves accepted wording and amendment history. One assembled specification under `kyokaispec/` contains separately identified language, toolchain, standard-library, rationale, and official-project parts. The first three state their conformance contracts; rationale explains them; project chapters govern Kyokai's own evidence and releases without changing program meaning. This comparative guide is explanatory: if it disagrees with accepted wording or the owning specification clause, fix this guide.
 
 A `D-index` entry is a traceability tag, not a substitute for explanation. The nearby prose and code state the Austral-to-Kyokai mechanic directly. The tag lets maintainers find the matching accepted-shape entry when auditing the guide. Examples labeled `baseline`, `sketch`, or `example only` remain illustrative unless the surrounding prose states the accepted mechanic.
+
+Implementation status belongs to `phase.md`, not to this comparison. As of the Phase 3 closeout, the active compiler path accepts the represented single-file `.kyo` surface, preserves source spans in a Kyokai surface AST, performs phase-local structural and interface checks, and no longer passes Kyokai source through Austral's interface/body parser. Resolution, `.koi`, typing, ownership checking, generated C, the public command set, and conformance remain later work. A syntax example below therefore explains accepted Kyokai even when the later semantic phase that gives it full meaning is still open.
 
 ---
 
@@ -85,7 +87,7 @@ A `D-index` entry is a traceability tag, not a substitute for explanation. The n
 9. [FFI and Unsafe Code](#9-ffi-and-unsafe-code)
     - [Inline Assembly](#inline-assembly)
 10. [Compile-Time Evaluation](#10-compile-time-evaluation)
-    - [`debug` Keyword Stripping](#debug-keyword-stripping)
+    - [`debug` Instrumentation](#debug-instrumentation)
 11. [Toolchain](#11-toolchain)
     - 11.1 [Build System and CLI](#111-build-system-and-cli)
     - 11.2 [Package Manager](#112-package-manager)
@@ -113,6 +115,7 @@ A `D-index` entry is a traceability tag, not a substitute for explanation. The n
     - [Vector SIMD](#vector-simd)
 13. [Naming Conventions](#13-naming-conventions)
 14. [Complete Syntax Comparison](#14-complete-syntax-comparison)
+15. [Later System Closure](#15-later-system-closure)
 
 ---
 
@@ -350,8 +353,8 @@ d9 — `fi` terminator in the Kyokai branch example.
 
 | Literal | Syntax | Type | Purpose |
 |---------|--------|------|---------|
-| String | `"hello"` | `String` | UTF-8 text |
-| Raw string | `"""..."""` | `String` | No escape processing |
+| String | `"hello"` | `StaticString` | Non-owning UTF-8 literal data |
+| Raw string | `"""..."""` | `StaticString` | Non-owning text with no escape processing |
 | Code point | `'A'` | `Nat32` | Unicode code point |
 | Byte | `b'A'` | `Nat8` | ASCII byte |
 
@@ -366,9 +369,9 @@ d9 — `fi` terminator in the Kyokai branch example.
 ```kyokai
 case mode of
     when GentooMode do
-        gentooArt(&out);
+        gentooArt(&write out);
     when CachyMode do
-        cachyArt(&out);
+        cachyArt(&write out);
 esac;
 ```
 **D-index**
@@ -531,9 +534,9 @@ d18 — `comptime` call-site forcing for table materialization when used that wa
 
 **Austral**: Functions are not values. No callbacks without typeclasses.
 
-**Kyokai**: `Callable[A, R]`, `CallableMut[A, R]`, `CallableOnce[A, R]` typeclass families (up to 4 parameters) provide function-value semantics through the existing typeclass dispatch system. Kyokai also supports explicit-capture closure literals that lower to this callable substrate.
+**Kyokai**: `CallableRead`, `CallableMut`, and `CallableOnce` form a closed invocation chain; `CallableState[S]` handles explicit state-threading and recovery outside that chain. The standardized families currently cover up to four parameters. Explicit-capture closure literals lower to the class selected by their strongest environment access.
 
-**Why**: **D21** supplies the typed callable/`FnPtr` substrate, **D118** keeps closure capture lists explicit (no Rust-style inference), and **D126** caps arity at the four-parameter families the plan actually standardizes.
+**Why**: **D21** supplies the typed callable/`FnPtr` substrate, **D118** keeps closure capture lists explicit, **D126** fixes the current arity surface, and **D567** prevents read-only, mutable, consuming, and state-recovery callbacks from collapsing into one misleading nominal family. **D558** attaches compiler-derived effect evidence to those callables and their `.koi` interfaces.
 
 ---
 
@@ -584,7 +587,7 @@ Const generic arguments must be comptime-evaluable. Value-based type equality me
 
 ```kyokai
 let name: StaticString := static "Kyokai";
-let allocName: String := name.toStringIn(&!heap) or return;
+let allocName: String := name.toStringIn(&write heap) or return;
 ```
 **D-index**
 d120 — `StaticString` + explicit `static "…"` bridge; allocator-taking `toStringIn` conversion
@@ -750,7 +753,7 @@ d138 — type-led functional update `Type { …, with source }` (`Free` copies f
 
 ```kyokai
 type alias UserId: Nat64;
-type alias Callback[T]: Callable[Box[Allocator], T, Unit];
+type alias Callback[T]: CallableRead[Box[Allocator], T, Unit];
 ```
 **D-index**
 d50 — transparent `type alias` synonyms only (no new nominal identity).
@@ -840,12 +843,12 @@ function ansi(out: &![ByteBuf], code: Index): Unit is
 qed;
 ```
 **D-index**
-d7b — compiler-inserted `&~` when passing `&![T]` to `&![T]` (tautology / D87)
+d7b/d607 — compiler-inserted mutable reborrow when passing `&![T]` to `&![T]`; explicit source form is `&reborrow`
 d12 — literal `27` without `: Nat8` where context fixes it
 d8 — omitted trailing `return nil` on `: Unit` where shown
 d9 — `qed` vs `end`.
 
-**Why**: **D7b** plus **D87**: when callee and caller both want `&![T]`, the compiler may insert the forced `&~` reborrow — there is only one well-typed completion, so spelling it every time is pure ceremony.
+**Why**: **D7b** plus **D87** permits the compiler to insert the sole well-typed reborrow. **D607** gives the explicit operation a readable spelling, `&reborrow`, for the places where it must be written or explained.
 
 ### 4.3 Mutable-to-Immutable Coercion
 
@@ -859,13 +862,15 @@ d9 — `qed` vs `end`.
 
 **Austral**: `&x` (immutable borrow), `&!x` (mutable borrow), `&~x` (re-borrow), `~x` (dereference), `&[T, R]` (immutable ref type), `&![T, R]` (mutable ref type).
 
-**Kyokai**: Same operators, but regions are inferred in types:
-- `&x` (immutable borrow) — unchanged
-- `&!x` (mutable borrow) — unchanged
-- `~x` (dereference) — unchanged
-- `&~x` (re-borrow) — still valid but rarely needed due to auto-reborrow
+**Kyokai**: Reference types retain their compact form, while creation names the operation:
+- `&read x` creates an immutable borrow
+- `&write x` creates a mutable borrow
+- `&reborrow x` explicitly reborrows a mutable borrow
+- `~x` dereferences a borrow
 - `&[T]` (immutable ref type) — region inferred
 - `&![T]` (mutable ref type) — region inferred
+
+The retired `&x`, `&!x`, and `&~x` creation forms exist only for edition migration. They are not permanent alternate syntax.
 
 ---
 
@@ -1096,14 +1101,14 @@ d2b — exit-path matrix with `panic` vs TPOE vs structured exits (**D208**, **D
 **Kyokai**: Explicit closure literals with captured variables:
 
 ```kyokai
-let adder: Callable[Int32, Int32] := fn [base] (x: Int32): Int32 => base + x;
+let adder: CallableRead[Int32, Int32] := fn [base] (x: Int32): Int32 => base + x;
 ```
 **D-index**
 d118 — explicit capture list closure literals
-d197 — lowers to the correct `Callable`/`CallableMut`/`CallableOnce` member
+d197/d567 — lowers to the correct `CallableRead`/`CallableMut`/`CallableOnce` member
 d21 — callable substrate.
 
-The explicit capture list makes the environment visible; there is no ambient closure capture (**D118**). **D197** then picks `Callable` / `CallableMut` / `CallableOnce` from the **strongest** access the body needs: owned linear captures force **`CallableOnce`**, mutable borrows or mutable use of by-value captures force **`CallableMut`**, and the remaining cases use **`Callable`**. No hidden captures and no Rust-style capture inference.
+The explicit capture list makes the environment visible; there is no ambient closure capture (**D118**). The compiler selects the class from the strongest environment access: owned Linear captures force `CallableOnce`, mutable access selects `CallableMut`, and read-only cases use `CallableRead`. APIs that thread recoverable state use `CallableState[S]` explicitly.
 
 ---
 
@@ -1183,7 +1188,7 @@ d537 — single-file module model: `module body` and the `.kai` extension are re
 
 **Austral**: No package system. No build system. `austral compile` takes a flat file list.
 
-**Kyokai**: Full package system with `kyokai.toml` manifests, git-based dependency resolution, and a lockfile.
+**Kyokai**: Full package and workspace system with `kyokai.toml` manifests, deterministic dependency resolution, a lockfile, independent package publication, and aggregate knot publication.
 
 ```toml
 # kyokai.toml
@@ -1200,10 +1205,11 @@ d51 — git + pinned `rev` dependency model (and lockfile reproducibility)
 d224 — `[generate]`-style build steps where shown in §11.13 examples.
 
 **Key design decisions**:
-- Dependencies are always git-based with explicit revision pinning. No central publish registry.
-- The lockfile records exact resolved revisions for reproducible builds.
-- `kyokai add <name>` can resolve through an official read-only package index, but the manifest always records an explicit git source + revision.
-- No `kyokai publish` command. Packages live in git.
+- The lockfile records exact immutable package and source identities for reproducible builds.
+- Workspace members remain packages with their own public names, versions, docs, advisories, yanks, and dependency identities.
+- A workspace may declare one **knot**, an immutable publication of a selected dependency-closed package set from one source revision.
+- `kyokai publish --package <name>` publishes one package. Bare `kyokai publish` at a knot workspace publishes every selected package and the knot record atomically. Manifest and CLI exclusions are explicit and dependency-checked.
+- The index prioritizes knots for discovery but keeps a complete package section; knot priority is presentation rather than a trust score.
 
 ### 6.3 Visibility
 
@@ -1287,10 +1293,10 @@ taskgroup do
         tick();
     od;
 
-    spawn [&cfg, sender, &counter] do
+    spawn [&read cfg, sender, &read counter] do
         if cfg.enabled() then
             counter.fetchAdd(1, SeqCst);
-            let _ : Unit := sendBlocking(&!sender, value) or return;
+            let _ : Unit := sendBlocking(&write sender, value) or return;
             closeSender(sender);
         fi;
     od;
@@ -1309,8 +1315,8 @@ d9 — `join;` is a **D9** semantic boundary terminator (not a reversed keyword)
 - The capture list is mandatory. `spawn [] do ... od;` is the zero-capture form.
 - `spawn` appears only inside `taskgroup do ... join;` (**D252**).
 - `name` captures by value (ownership transfer for `Linear` types).
-- `&name` captures by immutable borrow (only for `Free` types or shared-access concurrency types like `Atomic`, `Mutex`, `RwLock`); that borrow lives until the child completes at `join;`.
-- `&!name` capture is illegal in `spawn`.
+- `&read name` captures by immutable borrow (only for `Free` types or admitted shared-access concurrency types); that borrow lives until the child completes at `join;`.
+- `&write name` capture is illegal in `spawn`.
 - `join;` blocks until every child task spawned in the group has finished.
 
 ### 8.2 Channels
@@ -1356,10 +1362,10 @@ d141 — C11 `<stdatomic.h>` lowering contract for the C backend (separate from 
 let m: Mutex[Buffer[Int32]] := makeMutex(emptyBuffer());
 
 // Locking takes an immutable borrow (shared among tasks)
-let guard: MutexGuard[Buffer[Int32]] := lockBlocking(&m);
+let guard: MutexGuard[Buffer[Int32]] := lockBlocking(&read m);
 
 // Accessing data requires mutably borrowing the guard
-access(&!guard).insertBack(42);
+access(&write guard).insertBack(42);
 
 // Unlocking consumes the guard (linear type enforces this)
 unlock(guard);
@@ -1381,9 +1387,9 @@ Multi-channel waiting:
 
 ```kyokai
 select
-    when recvBlocking(&!rx1) as Some(msg) do
+    when recvBlocking(&write rx1) as Some(msg) do
         process(msg);
-    when recvBlocking(&!rx2) as Some(msg) do
+    when recvBlocking(&write rx2) as Some(msg) do
         handleOther(msg);
     when timeout(deadline) do
         handleTimeout();
@@ -1520,6 +1526,15 @@ d127 — `mon` terminator distinct from `qed`.
 - `Address[T]` is Kyokai's pointer type — explicitly named to distinguish from references.
 - The trust boundary is thin: unsafe internals are wrapped in safe linear APIs.
 
+Unsafe authority does not turn checking off. Every Kyokai-defined unsafe
+primitive is total over its admitted operand type: invalid provenance, bounds,
+alignment, lifetime, aliasing, initialization, permission, target feature, or
+state is rejected or reaches a specified `Result`, TPOE, panic, or runtime-fatal
+outcome before an invalid native operation. Raw memory access uses admitted
+provider regions rather than arbitrary integer dereference. Foreign code can
+still lie or corrupt the process; that is labeled `EXTERNAL_NATIVE_TRUST`, not
+quietly renamed Kyokai undefined behavior.
+
 ### Inline Assembly
 
 **Austral**: No inline assembly.
@@ -1536,7 +1551,7 @@ let result: Int64 := asm("addq %rax, %rbx", Int64) {
 **D-index**
 d22 — `asm` blocks (unsafe-only) with operand/clobber contracts.
 
-Inline asm is always unsafe. The block specifies input/output operands, register constraints, and clobbered registers explicitly. The compiler validates operands and clobbers against the target architecture.
+Inline asm is always unsafe. The block specifies input/output operands, register constraints, clobbered registers, effects, and admitted memory regions. The compiler validates those facts against the target architecture. Unrestricted text assembly is external native code or isolated execution rather than a hole in the Kyokai abstract machine.
 
 ---
 
@@ -1575,24 +1590,20 @@ d18a — evaluation must stay deterministic and host-independent per plan.
 
 **Asset embedding**: `@embedFile("path")` embeds file contents as a byte array at compile time with deterministic byte-for-byte semantics.
 
-### `debug` Keyword Stripping
+### `debug` Instrumentation
 
 **Austral**: No debug printing mechanism.
 
-**Kyokai**: `debug expr;` for diagnostic output, stripped entirely in release builds:
+**Kyokai**: `debug expr;` emits observation-only structured instrumentation in profiles that enable it:
 
 ```kyokai
-debug x;  // prints to stderr in debug/test builds; removed in release
+debug x;  // structured development event; never application output
 ```
 **D-index**
-d45 — `debug expr;` dev-only stderr output; stripped in release; production console I/O stays capability-gated
-d40 — operand must be `Displayable` (rendering protocol).
+d45/d603 — `debug expr;` uses a non-authorizing toolchain channel; production console I/O stays capability-gated
+d40 — the observed value uses the formatting protocol without being consumed.
 
-The `debug` keyword:
-- Formats any `Displayable` expression to stderr with a trailing newline.
-- Is stripped completely from release builds (zero runtime cost).
-- Ignores output failures — a failed debug print never changes program control flow.
-- In test builds, also prints file/line information.
+The channel cannot be obtained, redirected, or relied on as program I/O. An absent sink drops the event after the ordinary observation-only checks. Instrumentation cannot change values, control flow, blocking, failure, or release behavior. Production logs, traces, and metrics use explicit capability-bearing sinks.
 
 ---
 
@@ -1617,15 +1628,31 @@ The `kyokai` binary provides:
 | `kyokai semver-check` | Advisory SemVer compatibility check |
 | `kyokai test --coverage` | Run tests with coverage |
 | `kyokai test --fuzz` | Coverage-guided fuzzing |
+| `kyokai deep-check <engine>` | Run one named bounded semantic-analysis engine |
+| `kyokai explain ...` | Explain authority, ownership, borrow, cleanup, or analysis facts |
+| `kyokai publish` | Publish a knot, or one package with `--package` |
 
-No `kyokai lint` — the compiler IS the linter.
+No `kyokai lint`: `kyokai check` owns compiler-integrated lints. The same analysis facts remain available through CLI, a stable machine protocol, and LSP; editor support is not a second semantic engine.
+
+The compiler, runtime, standard library, resolver, formatter, Analysis Server,
+documentation and audit tools, target metadata, and artifact schemas ship as one
+atomic distribution. Standalone **Bleedring** installs that distribution before
+Kyokai exists on the machine and can install exact, separately identified
+native C compiler providers admitted by Kyokai. It is not a `kyokai` subcommand,
+does not mix Kyokai component versions, and does not edit a project's provider
+choice. Target manifests request portable admitted contracts; local provider
+configuration or `--c-toolchain-provider` selects the exact realization. Kyokai
+never falls back to ambient `cc`. The eventual compiler and ordinary toolchain
+are written in Kyokai after the self-host entry gate; OCaml remains a pinned
+bootstrap until Stage 0–3 convergence and recovery evidence retire each host
+component.
 
 ### 11.2 Package Manager
 
-- Git-based dependencies with explicit revision pinning.
+- Immutable indexed, git, workspace, and governed foreign-source dependencies with exact lock identities.
 - `kyokai.toml` manifest.
 - Lockfile for reproducible builds.
-- Official read-only package index (Go model) for discovery. No publish registry.
+- Official immutable package-and-knot index with explicit atomic publication.
 
 ### 11.3 Formatter
 
@@ -1650,6 +1677,11 @@ d2 — `defer` in tests as in normal code.
 - `kyokai test` discovers and runs all test blocks.
 - Property-based testing via `Kyokai.Test.Property` with typed generators `Gen[T]`, shrinking, and deterministic replay.
 - Coverage-guided fuzzing via `kyokai test --fuzz` with corpus management and crash reproducers.
+- A separate `examples/adversarial/` corpus pressures ownership, cleanup,
+  failure, concurrency, generated C, targets, and native providers with
+  accepted, rejected, stress, differential, and design-pressure cases. Its
+  results are concrete workload evidence, not a proof or automatic whole-language
+  conformance claim.
 
 ### 11.4a Benchmarking
 
@@ -1733,7 +1765,7 @@ Both are committed toolchain facilities:
 
 ### 11.11 Package Index
 
-Official read-only package index (Go model). Crawls git repos containing `kyokai.toml`. Provides search, docs, version listing. No `kyokai publish`. Packages stay in git. Alternative third-party indexes are allowed.
+The official index stores immutable package and knot release records. Packages remain independently searchable and consumable; knot pages aggregate the exact included package graph and receive first-class discovery. Publication is explicit and atomic, provenance and advisories remain visible at both levels, and alternative indexes or mirrors do not become package authority by presentation alone.
 
 ### 11.12 SemVer Checking
 
@@ -1807,7 +1839,8 @@ Austral's standard library has 10 modules with basic functionality. Kyokai commi
 | `Kyokai.Process` | Process spawning | `fork`, `exec` |
 | `Kyokai.Env` | Environment variables | `getenv` |
 | `Kyokai.Time` | Monotonic and wall-clock time | `clock_gettime` |
-| `Kyokai.Random` | Cryptographic and fast PRNG | `getrandom` or ChaCha |
+| `Kyokai.Entropy` | OS entropy acquisition and provider construction | OS entropy APIs behind an admitted unsafe wrapper |
+| Official cryptographic providers | Cryptography, TLS, password hashing, and secret-bearing protocols | Separately admitted external providers or Bridges; Kyokai does not maintain a native cryptographic implementation |
 | `Kyokai.Collections.HashMap` | Hash map | Pointer arithmetic in internals |
 | `Kyokai.Collections.HashSet` | Hash set | Built on HashMap |
 
@@ -1816,18 +1849,19 @@ Austral's standard library has 10 modules with basic functionality. Kyokai commi
 Kyokai uses capability-based security for system resources. Operations on environment variables, files, clocks, and random number generation require explicit capabilities:
 
 ```kyokai
-// EnvCapability is acquired from RootCapability (D67); APIs take &![EnvCapability]
-let home: Optional[String] := getEnv(&!envCap, &keyHome);
+// EnvCapability is acquired from RootCapability (D67); mutation uses an explicit write borrow.
+let home: Optional[String] := getEnv(&write envCap, &read keyHome);
 
 // FileCapability from root (D171); Path-typed opens; no ambient cwd — relative paths need a base Directory
-let opened: Result[File, IoError] := openForRead(&!fileCap, &absolutePath, mode);
+let opened: Result[File, IoError] := openForRead(&write fileCap, &read absolutePath, mode);
 
 // D172: monotonic Instant/Duration reads and pure arithmetic are ungated; wall clock / sleep / calendar need ClockCapability + Result
 let t0: Instant := monotonicNow();
-let wall: Result[SystemTime, TimeError] := systemTime(&!clockCap);
+let wall: Result[SystemTime, TimeError] := systemTime(&write clockCap);
 
-// D173: OS entropy / reseeding requires RandomCapability; FastRng/CryptoRng are explicit state after construction
-let rng: FastRng := seedFastRngFromOs(&!randCap) or return;
+// D173/D593: OS entropy requires RandomCapability. Cryptographic state comes from an admitted provider.
+let seed: EntropyBlock := readEntropy(&write randCap) or return;
+let rng: FastRng := FastRng.fromSeed(seed);
 ```
 **D-index**
 d211 — **D211** boundary: capabilities are the only built-in **external-authority** tracking; divergence, blocking, transitive allocation, and potential TPOE are not type-tracked (surface via naming/contracts).
@@ -1839,7 +1873,7 @@ d67 — `EnvCapability`; **d171** — `FileCapability` / paths / no ambient cwd;
 | `EnvCapability` | Reading environment variables |
 | `FileCapability` | File and directory operations; no ambient cwd semantics |
 | `ClockCapability` | Wall-clock observation, sleep/delay, calendar/timezone (**D172**: monotonic `Instant`/`Duration` reads and pure arithmetic stay **ungated**) |
-| `RandomCapability` | Entropy acquisition for RNG initialization |
+| `RandomCapability` | OS entropy acquisition; it does not bless a cryptographic algorithm or provider |
 
 ### OsString / Path Types
 
@@ -2187,7 +2221,7 @@ baseline — Austral surface shown for contrast; Kyokai deltas are in the paired
 let file: File := openFile(path) or return;
 defer file.close();
 
-let data: Buffer := readAll(&file) or return;
+let data: Buffer := readAll(&write file) or return;
 defer data.destroy();
 
 // use data — cleanup happens automatically
@@ -2252,6 +2286,99 @@ d6 — anonymous `&[Buffer[Int32]]` in the sketch.
 
 ---
 
+## 15. Later System Closure
+
+Austral left several questions outside the language proper: how an interface
+artifact survives hostile input, what an admitted C compiler has actually
+proved, when unsafe memory access is defined, and how a serious package or
+server ecosystem preserves the language's ownership model. Kyokai makes those
+questions part of the maintained contract.
+
+### Semantic closure
+
+- A declared `Free` type is structurally proved over fields, payloads, hidden
+  representation, aliases, recursion, generic substitutions, and foreign
+  evidence. The universe label is not trusted as a bit in `.koi` (**D560**).
+- Copies of a mutable-borrow token share one lease lineage. Reborrow suspends
+  every parent alias; copying a `Free` token never creates a second write lease
+  (**D559**).
+- Ordinary records may admit narrowly stated
+  `projection independent (field);` relations for Free disjoint fields.
+  Independence is source-visible and interface-recorded, not inferred API
+  behavior (**D563**).
+- Callable effects are compiler-derived, transitive, closed, and serialized for
+  separate compilation. Opaque or incompatible evidence becomes `Unknown`, not
+  “pure” (**D558**).
+- Fatal failure has one process-wide arbitration owner and bounded reporting.
+  Panic cleanup cannot start new work, TPOE skips user cleanup, and the contract
+  admits that external state may remain partially changed (**D561**, **D568**).
+
+### Artifacts and translation
+
+KBI-1 is a bounds-checkable binary container rather than the name of a future
+format. Its section table has fixed framing, checked ranges, canonical digests,
+registered payload tags, resource budgets, compatibility classes, hostile
+corpora, and an independent-decoder admission requirement (**D573-D576**).
+KST-1 similarly gives target descriptions one canonical schema and identity
+(**D570**).
+
+Generated C passes through an explicitly sequenced backend IR and structural
+validator. Each lowering rule joins normative text, IR case, emitted pattern,
+validator rule, tests, differential observations, and admitted C-toolchain
+records. A C compiler is admitted for an exact compiler/target/sysroot/flag
+tuple against a spec-owned semantic corpus; “supports C11” is not enough
+(**D569-D572**).
+
+### Toolchain and evidence
+
+`kyokai deep-check` names the engine it runs: core interpretation, ownership,
+generated-C validation, sanitizer execution, bounded schedule exploration, or
+differential comparison. Each result says what it did not establish
+(**D616**). `kyokai dev` is a foreground, generation-ordered supervisor with
+containment-checked snapshots, killable process trees, adapter-declared reload,
+and transactional state migration (**D618**).
+
+Specification extraction itself now has a contract. Clause IDs distinguish
+syntax, static, dynamic, ownership, authority, failure, artifact, diagnostic,
+compatibility, target, illegal-form, and conformance obligations. A routing row
+cannot promote a decision to `SPEC_EXTRACTED`; monthly and release reviews bind
+their reviewer, revisions, findings, and dispositions (**D562a**, **D577-D581**).
+The checked D558-D625 registry records accepted-source digests, destinations,
+supersession, review identity, proof impact, exact-name and rejected-form
+tripwires, and explicit reasons for inapplicable categories. That batch is
+`SPEC_EXTRACTED`; the status says nothing about compiler, library, provider,
+service, workload, conformance, or proof completion.
+
+The compiler analysis engine exposes the same facts through CLI, a versioned
+machine protocol, and LSP. Editors remain first-class clients without becoming
+semantic authority (**D590**, **D599**, **D621**). Experimental work uses
+identified XP branches and artifacts. A production-quality XP may travel in a
+stable distribution only while disabled by default and enabled from the root
+manifest; stable conformance remains separate (**D582**, **D625**).
+
+### Standard library and maintained products
+
+Tier-One APIs begin as exact machine-checked packets rather than attractive
+module lists. Storage and collections publish initialization, relocation,
+failure atomicity, invalidation, Linear recovery, and hostile test matrices.
+`TextView[R]` provides one closed, allocation-free direct-call bridge from
+static or borrowed owning text without turning paths, bytes, OS strings, or C
+strings into text (**D584-D589**).
+
+Kyokai does not write cryptographic primitives or TLS internals from scratch.
+Those surfaces use admitted providers and honest secret-lifetime claims. HTTP
+Core and WebSocket are maintained first-party protocols; SQLite is the first
+high-priority official Bridge; PostgreSQL and MySQL clients are packages with
+explicit transport, transaction, cancellation, and pooling contracts. The
+first maintained product after the toolchain is a long-lived Poller server
+(**D591-D601**).
+
+There is no official game engine and no universal Rust subsystem. SDL3 and
+raylib are separately admitted workloads; a specifically needed Rust project
+crosses its own stable C ABI, process, WASI, file, or wire boundary. This keeps
+foreign ecosystems useful without importing their resolver, ABI, memory model,
+or hidden build authority into Kyokai (**D596-D596a**, **D620**, **D624**).
+
 ## Summary of Changes at a Glance
 
 The table below is an explanatory crosswalk, not a second spec. Each row states the user-visible Austral-to-Kyokai mechanic directly. `D-index` tags elsewhere in this guide provide supporting traceability to `kyokaidecided.md`; they do not require the reader to reconstruct the mechanic from an ID.
@@ -2264,7 +2391,7 @@ The table below is an explanatory crosswalk, not a second spec. Each row states 
 | Bitwise ops | `&`, `\|` | `band`, `bor`, `bxor`, `bnot`, `shl`, `shr` |
 | File extensions | `.aui`, `.aum` | `.kyo` source, `.koi` derived interface |
 | Regions | Explicit `generic [R: Region]` | Inferred |
-| Re-borrow | Manual `&~x` | Auto-reborrow |
+| Borrow creation | `&x`, `&!x`, manual `&~x` | `&read x`, `&write x`, `&reborrow x`; checked auto-reborrow at calls |
 | Function calls | VSO: `f(x, args)` | SVO: `x.f(args)` via UFCS |
 | Integer literals | `(0 : Index)` | `0` (inferred from context) |
 | Unit return | `return nil;` required | Implicit at end of `: Unit` functions |
@@ -2273,7 +2400,7 @@ The table below is an explanatory crosswalk, not a second spec. Each row states 
 | Contracts | Manual assertions | `require` / `ensure` in signature |
 | Concurrency | None | `taskgroup`/`join` (**D252**), channels, atomics, `select`/`pick` |
 | Build system | None | `kyokai build`, `kyokai.toml` |
-| Package manager | None | Git-based with lockfile |
+| Package manager | None | Reproducible package resolution, independent packages, atomic knot publication |
 | Testing | None | First-class `test` blocks, property testing, fuzzing |
 | Formatter | None | `kyokai fmt` |
 | LSP | None | Official implementation |

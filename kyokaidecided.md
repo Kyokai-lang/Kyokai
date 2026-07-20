@@ -29,10 +29,18 @@ This tracker records how far accepted Kyokai shape has moved toward normative sp
 
 Use the highest honest state that is currently true:
 
+Gate A is closed through the current accepted boundary. The static
+`kyokaispec/extraction/pre-d558.toml`, `d558-d625.toml`, and `d627-d635.toml`
+registries inventory every accepted decision in their ranges and check every
+live clause or supersession edge against accepted-source identity, destinations,
+review identity, proof impact, exact vocabulary, and rejected forms. This is a
+specification-extraction result only; it does not imply implementation,
+conformance, admission, deployment, workload evidence, or proof.
+
 | State | Meaning | Evidence To Record Here |
 | --- | --- | --- |
 | `SHAPE_DECIDED` | The design point is decided in public accepted-shape docs. | D-point IDs, accepted-shape section, and any public thread/PR link if applicable. |
-| `SPEC_EXTRACTED` | The rule has a normative home in the specification. | `kyokaispec/` path and short note on the covered rule scope. |
+| `SPEC_EXTRACTED` | Every live accepted clause has checked normative destinations and complete or validly not-applicable state. | Clause registry/review evidence plus the owning `kyokaispec/` paths. |
 | `CALCULUS_DRAFTED` | The behavior is represented in `lambda_K` scope or explicitly excluded from it. | Calculus document path and whether the feature is included or explicitly out of scope. |
 | `CALCULUS_PROVEN_PAPER` | The sequential core proof obligation is discharged at paper level. | Proof document path and theorem/scope name. |
 | `PARSER_ACCEPTED` | Surface syntax is parsed into AST nodes with source spans. | Parser implementation path and positive/negative parser test path. |
@@ -49,8 +57,8 @@ Current high-level tracker:
 
 | Area | Key decisions | Current maturity | Spec home | Conformance | Implementation | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Project identity, philosophy, and license boundary | D1, D5, D87, D143/D241, D263 | `SPEC_EXTRACTED` | `kyokaispec/src/language/00-introduction.md`, `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/rationale/00-rationale-index.md`, `kyokaispec/src/rationale/01-language-design.md`, `kyokaispec/src/appendices/a-license.md`, `kyokaispec/src/appendices/c-austral-differences.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` for identity, self-contained fork scope, no-language-UB policy, inherited goals, attribution, rationale boundaries, license/provenance, Austral-difference indexing, inherited-file retirement status, and proof-roadmap scope | planned | partial docs/tooling metadata | Rationale and appendix extraction is present; implementation maturity still requires conformance tests, while the narrow `lambda_K-seq` paper proof is tracked in the formal calculus row. |
-| Core syntax and declarations | D8-D18, D23-D24, D35-D43, D46, D47, D50, D54-D59, D61, D71-D72, D75-D76, D78, D98, D106, D109, D128, D135/D261, D138, D179, D205-D206, D210, D213-D214, D537-D539 | `PARSER_ACCEPTED` for the D537-D539 source skeleton; broader syntax remains `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` | implementation-gated fixtures | `lib/compiler/frontend/`, `lib/compiler/package/manifest/KyokaiPackageSource.ml` prototype | The active scaffold accepts one `.kyo` source per module, records `public`/`internal`/private-by-default and `opaque`, rejects retired `.kai`, and derives the importable declaration surface. Final AST construction, semantic export/opacity checks, `.koi` serialization, inherited-loader replacement, broader syntax, and conformance-backed status remain open. |
+| Project identity, philosophy, and license boundary | D1, D5, D87, D143/D241, D263 | `SPEC_EXTRACTED` | `kyokaispec/src/language/00-introduction.md`, `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/rationale/00-rationale-index.md`, `kyokaispec/src/rationale/01-language-design.md`, `kyokaispec/src/project/04-project-licensing.md`, `kyokaispec/src/appendices/c-austral-differences.md`, and `kyokaispec/src/project/03-formalization-roadmap.md` for identity, self-contained fork scope, no-language-UB policy, inherited goals, attribution, rationale boundaries, license/provenance, Austral-difference indexing, inherited-file retirement status, and proof-roadmap scope | planned | partial docs/tooling metadata | Rationale and appendix extraction is present; implementation maturity still requires conformance tests, while the narrow `lambda_K-seq` paper proof is tracked in the formal calculus row. |
+| Core syntax and declarations | D8-D18, D23-D24, D35-D43, D46, D47, D50, D54-D59, D61, D71-D72, D75-D76, D78, D98, D106, D109, D128, D135/D261, D138, D179, D205-D206, D210, D213-D214, D537-D539 | `PARSER_ACCEPTED` for the represented Phase 3 surface; unimplemented later-phase semantics remain `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` | implementation-gated fixtures | `compiler/frontend/`, `compiler/package/manifest/KyokaiPackageSource.ml` prototype | The active source path accepts one `.kyo` file per module, constructs a span-carrying surface AST, records `public`/`internal`/private-by-default and `opaque`, rejects the named retired Austral forms, runs phase-local structural checks, and derives the importable declaration surface. Resolution, complete cross-module export checking, `.koi` serialization, typing, elaboration, ownership, stable released diagnostics, and conformance-backed status remain open in their later phases. |
 | Type system, ownership, borrows, and implicit completions | D6, D7a/D7b, D14, D24, D30/D30a, D34, D46, D72, D87, D104, D159, D188, D190, D192-D195, D213, D238-D240 | `SPEC_EXTRACTED` | `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for universes, nominal identity, generics, typeclasses, inference, pattern movement, temporaries, checker states, regions, borrows, movement, built-in type families, and example applications | planned | inherited Austral checker only | Implementation still needs conformance tests and compiler work before checker maturity can move beyond spec extraction. |
 | Closed-graph tautology and package coherence clarifications | D278-D279 | `SPEC_EXTRACTED` | `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Error handling, contracts, defer, panic/TPOE | D2, D2a/D2b, D15/D15a, D24, D53, D58, D84, D89, D111, D119, D121-D122, D124-D125, D129, D140, D142, D207, D233, D246, D253, D259-D260 | `SPEC_EXTRACTED` | `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for contract syntax, function contract declaration placement, result/old scoping, fallible patterns, `Result`/`Optional` built-ins, `or` lowering, defer/errdefer path behavior, deferred checker states, panic/todo/unreachable behavior, TPOE, runtime-fatal, diagnostics, and examples | planned | inherited Austral behavior only | Implementation still needs conformance tests and runtime/compiler work before maturity can move beyond spec extraction. |
@@ -58,24 +66,30 @@ Current high-level tracker:
 | FFI, unsafe, ABI, layout, generated-C, and C-toolchain safety | D20/D242/D242a, D31, D42, D73, D80, D89, D113a/D113b, D139, D199, D228, D245, D250-D251, D257, D530-D536 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, and `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md` for unsafe modules, unsafe contracts, raw FFI, explicit C ABI surface, callbacks, unwinding, dynamic loading/plugins, volatile/MMIO, inline assembly, layout classes, move/result placement, one generated-C backend, C11 subset, compiler admission, source maps/debug/coverage/profiling, performance gates, external-tool evidence, profiles, and failure rules | planned | inherited C generator only | Implementation still needs safe Kyokai boundary wrappers, generated-C UB closure, major-platform compiler admissions, debugger/source-map integration, full ABI/toolchain tests, and measured build-time gates before maturity can move beyond spec extraction. |
 | Concurrency, atomics, channels, poller, and signals | D3, D3a/D3b, D90-D95, D100-D101, D141, D146, D156, D164, D168, D183-D184, D212, D234-D237, D247-D248, D252, D256, D258 | `SPEC_EXTRACTED` | `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md` for task groups, spawn/capture/failure, SPSC channels, select, cancellation/deadlines, poller/event loops, signals, atomics, locks, task transfer, broker patterns, happens-before, recognized concurrency built-ins, and spawn examples | planned | planned | Implementation still needs conformance tests, runtime primitives, and backend atomic validation before maturity can move beyond spec extraction. |
 | Standard library foundation, official bridge collection, and admission policy | D40, D40a, D44, D64, D67, D74, D77, D85, D102, D117, D146, D152, D171, D201, D220, D229-D232, D250-D251, D259-D260, D263, D529 | `SPEC_EXTRACTED` | `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/stdlib/10-crypto-policy.md`, and `kyokaispec/src/stdlib/11-transitional-ffi-tracking.md` for stdlib admission, contract fields, pure-Kyokai implementation policy, transitional FFI tracking, the reserved `Kyokai.Bridge.*` official bridge collection for shipped third-party integrations, allocators, containers, text/bytes/paths, collections, iterators/generators, numerics/math accuracy, capability-gated external-world APIs, concurrency primitives, crypto policy, and core formatting/error protocols; language chapters remain the syntax and built-in source for the same rules | planned | inherited Austral stdlib only | Implementation still needs admitted Kyokai stdlib modules, bridge admission records, conformance tests, audit metadata, and transitional FFI records before maturity can move beyond spec extraction. |
+| Concrete Tier-One APIs, Kyokai-native toolchain transition, data/protocol packages, and official provider portfolio | D584-D596a | `SPEC_EXTRACTED` | owning language, toolchain, stdlib, rationale, and project chapters; `kyokaispec/extraction/d558-d625.toml` and generated review | planned | transitional OCaml/Austral-derived compiler and inherited stdlib only | D577 clause records verify the normative extraction for API packets, `TextView[R]`, storage and collections, CLI/testing/authority/observability, codecs, gated self-hosting, admission classes, crypto/provider boundaries, web/database integration, Bridge evidence, and the Rust rejection. No implementation or admission is claimed. |
+| Remaining judgment, daily surface, and reference-evidence closure | D597-D608, D610-D612, D614; D609 resolved by D585 and D613 resolved by D581 | `SPEC_EXTRACTED` | owning language, toolchain, stdlib, rationale, project, manifest, workflow, and traceability chapters; checked D577 registry and generated review | planned | inherited/scaffold behavior only | The registry verifies the live clauses and duplicate withdrawals for generator admission, math ownership, shared-lifetime explanation, concurrency evidence, the Poller product, documentation modes, debug instrumentation, syntax changes, no-shadowing help, frontend ownership, and typed intake. Implementation evidence remains separate. |
+| Bundled installation, deep analysis, supervised development, Apple/game evidence, analysis parity, workloads, foreign builds, knots, and stable-carried experiments | D615-D625; D617/D622 duplicate withdrawals and D626 withdrawn by D596a | `SPEC_EXTRACTED` | owning toolchain, stdlib, project, application-integration, manifest, release, testing, and traceability chapters; checked D577 registry and generated review | planned | inherited/scaffold behavior only | Bleedring remains standalone, knots preserve package identity, and stable-carried XPs remain opt-in and outside stable conformance. Installer, platform, index, workload, and XP evidence remain unimplemented. |
+| Adversarial evidence, public knowledge versioning, native compiler providers, diagnostic registry, implementation findings, and umbrella governance | D627-D635 | `SPEC_EXTRACTED` | `kyokaispec/src/project/01-governance.md`, `kyokaispec/src/project/03-formalization-roadmap.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `PROJECT_STANDARDS.md`, `Kyokaishape.md`, and checked D577 registry/review | `examples/adversarial/` schema only; executable cases planned | provider, registry, knowledge-manifest, and release-review implementation planned | Normative extraction is checked separately from the still-open compiler/provider, corpus, diagnostic-generation, Git-workflow, and release-review evidence. |
 | Concurrency and linear-stdlib critique cluster | D280-D290 | `SPEC_EXTRACTED` | `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, and stdlib admission docs | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Usability, comptime, platform, FFI, and pinning critique cluster | D291-D301 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, and target/stdlib admission docs | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Observability, analysis tooling, testing workflow, stdlib tiers, licensing boundary, public decision workflow, performance/cache identity, RIIK audit, capability attenuation, and KBI diffing | D302-D311 | `SPEC_EXTRACTED` | `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/10-crypto-policy.md`, `kyokaispec/src/appendices/a-license.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, `PROJECT_STANDARDS.md`, `Kyokaishape.md`, and `phase.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Proof-claim honesty, syntax/file-model closure, adoption docs, daily debug/span/docs rules, lock semantics, generic edge rules, proof-tooling boundary, CLI extensions, and target contract schema | D312-D313, D315-D321 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/d-formalization-roadmap.md`, `kyokaicalculus/scope.md`, `kyokaicalculus/claim-tiers.md`, `kyokaicalculus/paper-proof.md`, `kyokaicalculus/mechanization-plan.md`, and docs/examples | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Observability, analysis tooling, testing workflow, stdlib tiers, licensing boundary, public decision workflow, performance/cache identity, RIIK audit, capability attenuation, and KBI diffing | D302-D311 | `SPEC_EXTRACTED` | `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/10-crypto-policy.md`, `kyokaispec/src/project/04-project-licensing.md`, `kyokaispec/src/project/02-decision-traceability.md`, `PROJECT_STANDARDS.md`, `Kyokaishape.md`, and `phase.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Proof-claim honesty, syntax/file-model closure, adoption docs, daily debug/span/docs rules, lock semantics, generic edge rules, proof-tooling boundary, CLI extensions, and target contract schema | D312-D313, D315-D321 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/project/03-formalization-roadmap.md`, `kyokaicalculus/scope.md`, `kyokaicalculus/claim-tiers.md`, `kyokaicalculus/paper-proof.md`, `kyokaicalculus/mechanization-plan.md`, and docs/examples | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Granular critique closure: unsafe grammar, bit records, arenas, test generation, TLS, cancellation, backtraces, ABI, formatting, beginner scaffolds, workspace discovery, external diagnostics, embed builtins, builtin formatting identity, UFCS receiver exports, `Auto`, `Never`, and pattern legality | D322-D340 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Second granular critique closure: range loops, split readiness waiting, runtime fatal surface, spans/dynamic loading, freestanding targets, compiler-owned capabilities, Result combinators, borrow checker tables, expected-type flow, callbacks, generation/audit schema, formatter, channels, memory model, safe unreachable, implicit completions, containers, TPOE taxonomy, comptime, typeclass coherence, generators, rendering, allocation failure, `.koi`/KBI schema, and arithmetic | D341-D365 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| External systems-language critique closure: maturity honesty, doc-comment strictness, terminator reaffirmation, named modulo APIs, literal ambiguity rejection, static text and text views, nominal return values, generational handles, universe reaffirmation, typeclass admission, borrow-model reaffirmation, defer diagnostics, propagation linting, failure hooks, capability bundles, module split reaffirmation, vendor-first package discipline, allocator-context rejection, collection syntax reaffirmation, UFCS reaffirmation, iterator-first generators, structured taskgroups, unsafe audit reaffirmation, file build constraints, essential CLI path, stdlib first slice, layout fact builtins, proof-scope reaffirmation, and license-boundary reaffirmation | D366-D395 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/a-license.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| External systems-language critique closure: maturity honesty, doc-comment strictness, terminator reaffirmation, named modulo APIs, literal ambiguity rejection, static text and text views, nominal return values, generational handles, universe reaffirmation, typeclass admission, borrow-model reaffirmation, defer diagnostics, propagation linting, failure hooks, capability bundles, module split reaffirmation, vendor-first package discipline, allocator-context rejection, collection syntax reaffirmation, UFCS reaffirmation, iterator-first generators, structured taskgroups, unsafe audit reaffirmation, file build constraints, essential CLI path, stdlib first slice, layout fact builtins, proof-scope reaffirmation, and license-boundary reaffirmation | D366-D395 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/06-iterators-and-generators.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/project/04-project-licensing.md`, and `kyokaispec/src/project/03-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Toolchain, package manager, diagnostics, formatter, docs, releases, bridge collection resolution, and C-toolchain admission | D25-D29, D31, D51, D78-D80, D83, D86, D105, D137, D144, D148-D151a, D155, D157, D200, D218, D220-D226, D243-D245, D264-D270, D527-D536 | `SPEC_EXTRACTED` | `kyokaispec/src/toolchain/00-toolchain-overview.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, and `kyokaispec/src/toolchain/12-capability-deny-policy.md` for CLI, project shape, artifacts, diagnostics, formatting, tests, docs, LSP, audit, reproducibility, package ecosystem, releases, generation, REPL/eval, playground contracts, capability deny policy, final resolver/lockfile model, indexed version requirements, official bridge collection resolution, one generated-C backend, C11 subset, compiler admission, source maps, external-tool evidence, build-time gates, build output/cache layout, concrete `.koi` artifact format, project creation, diagnostic explanation/fixing, toolchain health, package inspection/offline workflows, and property/fuzz daily-use controls | planned | inherited Austral CLI only | Implementation still needs compiler/package-manager/tooling work, C-toolchain admission, source-map/debug integration, bridge collection implementation, and conformance tests before maturity can move beyond spec extraction. |
 | Toolchain privacy, feature instances, startup authority, paths, floats, hashing, OS errors, clocks, fatal redaction, native toolchains, generated-source provenance, executable examples, Unicode algorithms, env/args, atomic file updates, networking, test isolation, codecs, diagnostics, allocation-failure testing, behavior SemVer, process status, CPU dispatch, and package naming | D396-D419 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, and `kyokaispec/src/stdlib/10-crypto-policy.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Source encoding, randomness, terminal services, package artifacts, lockfiles, bleedring toolchain management, scratch execution, docs metadata, deprecation, caches, bindgen, and advisories | D420-D431 | `SPEC_EXTRACTED` | `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/10-crypto-policy.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
 | Integrated FFI/toolchain/concurrency/safety contracts: non-C ABI tables, import/package cycle bans, fixtures, SPSC broker discipline, multi-binary targets, edition-specific `.koi`, loop filtering rejection, C export wrappers, signal handlers, formatter recovery/localization, loader policy, compressed `.koi` transport, lock fairness, spawn-shareable registry, bench/property reports, LSP refactor safety, volatile/MMIO domain, failure taxonomy, inline asm, partial-error state, callback/TLS FFI, borrow/reborrow tables, unsafe instances, package provenance, authority ceilings, generational handles, embedded fatal hardware contracts, and generator sandboxing | D432-D465 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/08-patterns.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/12-implicit-completions-and-elaboration.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/06-formatter.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/stdlib/09-concurrency-primitives.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Validated wrappers, compile-time configuration errors, task-transfer packaging rejection, parameter access syntax reaffirmation, conditional typeclass instances, channel backpressure, nested defer failure, poller/protocol state, compiler explain modes, hot reload tooling contract, string literal allocation, claim tiers, and public-doc slogan cleanup | D466-D478 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, and `kyokaispec/src/appendices/d-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Modal wording, implementation-choice boundaries, full implementation conformance, proposal/search labels, policy selection, target-contract variation, specified nondeterminism, tooling-only assistance, tracked D-point dependencies, experimental absence, and modal audit process | D479-D487 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/00-toolchain-overview.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/appendices/b-decision-traceability.md` | planned | planned | Extracted as clarification over existing shape; this is not a semantic reopening. |
+| Validated wrappers, compile-time configuration errors, task-transfer packaging rejection, parameter access syntax reaffirmation, conditional typeclass instances, channel backpressure, nested defer failure, poller/protocol state, compiler explain modes, hot reload tooling contract, string literal allocation, claim tiers, and public-doc slogan cleanup | D466-D478 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/07-generics-and-typeclasses.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/18-built-ins.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/02-core-result-optional-display-error.md`, `kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, `kyokaispec/src/stdlib/09-concurrency-primitives.md`, `kyokaispec/src/project/02-decision-traceability.md`, and `kyokaispec/src/project/03-formalization-roadmap.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
+| Modal wording, implementation-choice boundaries, full implementation conformance, proposal/search labels, policy selection, target-contract variation, specified nondeterminism, tooling-only assistance, tracked D-point dependencies, experimental absence, and modal audit process | D479-D487 | `SPEC_EXTRACTED` | `kyokaispec/src/language/01-goals-and-non-goals.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/00-toolchain-overview.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/05-collections.md`, `kyokaispec/src/stdlib/08-io-files-env-process-time-random.md`, and `kyokaispec/src/project/02-decision-traceability.md` | planned | planned | Extracted as clarification over existing shape; this is not a semantic reopening. |
 | Strict-linearity pain-point closure: resource-flow refactors, sound prototyping, graph/slot-map patterns, recovery payloads, context bundles, callback invocation classes, linear test fixtures, branch-join diagnostics, hole-free collections, generic container universes, early release tooling, FFI wrapper kits, `build` expressions, and stdlib cold-start ladder | D488-D501 | `SPEC_EXTRACTED` | `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/09-expressions-and-evaluation.md`, `kyokaispec/src/language/10-statements-and-control-flow.md`, `kyokaispec/src/language/11-linearity-borrowing-and-regions.md`, `kyokaispec/src/language/13-contracts-and-runtime-failure.md`, `kyokaispec/src/language/14-capabilities-and-authority.md`, `kyokaispec/src/language/15-concurrency.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/03-allocators-and-memory-containers.md`, `kyokaispec/src/stdlib/05-collections.md`, and `kyokaispec/src/stdlib/11-transitional-ffi-tracking.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Infrastructure, public docs, CLI output, Analysis Server, editor/debug bundles, showcase, PR/MR D-points, no-maybe docs, generated C/artifacts, docs/website layout, examples, compiler architecture, OSS infrastructure reuse, repo/org topology, package docs, local docs cache, repository-owned `kdocs/`, metadata-only docs indexing, numeric admission evidence, file-role diagnostics, community surfaces, web topology, website taxonomy, package badges, spec-writing guide, service board, ProofTrace evidence graph, code-boundary markers, generated proof-status board, capability deny-policy tooling, final resolver/lockfile contract, and official bridge collection governance | D502-D529 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/toolchain/12-capability-deny-policy.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, `docs/infrastructure/services.md`, website source, `examples/`, and phase/status docs | planned | planned | Normative toolchain destinations and public workflow/service records are present. The D526 ProofTrace checker and generated status board are implemented; website, resolver implementation, capability-deny implementation, bridge implementation, and service implementation remain planned. |
+| Infrastructure, public docs, CLI output, Analysis Server, editor/debug bundles, showcase, PR/MR D-points, no-maybe docs, generated C/artifacts, docs/website layout, examples, compiler architecture, OSS infrastructure reuse, repo/org topology, package docs, local docs cache, repository-owned `kdocs/`, metadata-only docs indexing, numeric admission evidence, file-role diagnostics, community surfaces, web topology, website taxonomy, package badges, spec-writing guide, service board, ProofTrace evidence graph, code-boundary markers, generated proof-status board, capability deny-policy tooling, final resolver/lockfile contract, and official bridge collection governance | D502-D529 | `SPEC_EXTRACTED` | `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, `kyokaispec/src/toolchain/12-capability-deny-policy.md`, `kyokaispec/src/stdlib/00-stdlib-overview.md`, `kyokaispec/src/stdlib/01-admission-contracts.md`, `kyokaispec/src/stdlib/07-math-and-numerics.md`, `kyokaispec/src/project/02-decision-traceability.md`, `PROJECT_STANDARDS.md`, `docs/contributing/spec-writing.md`, `docs/infrastructure/services.md`, website source, `examples/`, and phase/status docs | planned | planned | Normative toolchain destinations and public workflow/service records are present. The D526 ProofTrace checker and generated status board are implemented; website, resolver implementation, capability-deny implementation, bridge implementation, and service implementation remain planned. |
 | Application integration, generated API projection, migration, authority explanation, service simulation, foreign adapters, packaging, behavioral datasets, browser/server/CLI/TUI/native/mobile/embedded/GPU-ML-data, and deployment/Nix contracts | D540-D557 | `SPEC_EXTRACTED` | `kyokaispec/src/stdlib/12-application-integration-contracts.md`, `kyokaispec/src/toolchain/13-application-integration-and-deployment.md`, and the owning language, stdlib, CLI, diagnostics, Analysis Server, generation, package/release, and capability-policy chapters for owner/handle/view state, explicit heterogeneous boundaries, existing callback classes, generated projection, migration plans, narrow authority repair, deterministic simulation, adapter admission, packaging plans, dataset providers, domain foundations, target/provider boundaries, and deployment plans | planned | planned | Accepted contracts and traceability exist. Compiler, stdlib, commands, adapters, targets, providers, framework bridges, deployment services, and conformance evidence remain unimplemented. |
+| Effect evidence, borrow-lineage and `Free` closure, fatal arbitration, spec review, projection syntax, unsafe/capability boundaries, callable classes, untrusted-input validation, atomics, C-compiler admission, and canonical source identity | D558-D570, including D562a and D569a-D569c | `SPEC_EXTRACTED` | owning language, toolchain, and project chapters; `kyokaispec/extraction/d558-d625.toml` and generated review | planned | planned | D577 clause records verify accepted-source digests, destinations, review, supersession, proof impact, and exact-name tripwires. Conformance, compiler/runtime implementation, and official compiler admission remain pending. |
+| Task reclamation, generated-C validation, KBI-1 closure, native `io_uring`, clause extraction, document identity, semantic atlas, spec/calculus correspondence, proof review, Xperimental governance, and vulnerability response | D571-D583, including D573a | `SPEC_EXTRACTED` | owning language, toolchain, project, and formalization chapters; checked D577 registry and generated review | planned | planned | KBI implementation/corpora, provider implementation, semantic-atlas publication, recurring review records, and operational security intake remain pending on their own axes. |
 | Package-index trust and daily toolchain critique cluster | D272-D277 | `SPEC_EXTRACTED` | `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md` | planned | planned | Normative spec destinations are present; implementation and conformance remain planned. |
-| Formal calculus and proof | D143/D241, D394, D477, D526 | `SPEC_EXTRACTED` | `kyokaispec/src/appendices/d-formalization-roadmap.md`, `kyokaicalculus/scope.md`, `kyokaicalculus/claim-tiers.md`, `kyokaicalculus/paper-proof.md`, `kyokaicalculus/frame-typing-proof.md`, `kyokaicalculus/source-expression-proof.md`, `kyokaicalculus/equivariance-proof.md`, `kyokaicalculus/theorem-assembly.md`, `kyokaicalculus/machine_runner.py`, `kyokaicalculus/mechanization-plan.md`, `kyokaicalculus/lean/KyokaiCalculusSpot.lean`, and `kyokaiproofstatus.md` for theorem scope, claim tiers, maintained paper-proof status, exclusions, frame-local, source-expression, and equivariance derivations, Theorem P/Q assembly, executable whole-machine regression traces, Lean spot-artifact evidence, and later mechanization plan | Gate-B paper proof; narrow Lean spot artifact only for mechanized evidence | 49 executable model spot checks, 25 executable whole-machine regression traces, 25 narrow Lean spot theorems, and the Gate-B paper proof | The sequential `lambda_K-seq` theorem is `paper-proven` by the maintained derivation packages and `theorem-assembly.md`. The narrow Lean artifact is `mechanically-proven` only for its twenty-five named representation theorems and does not mechanically prove the main theorem. |
+| Formal calculus and proof | D143/D241, D394, D477, D526 | `SPEC_EXTRACTED` | `kyokaispec/src/project/03-formalization-roadmap.md`, `kyokaicalculus/scope.md`, `kyokaicalculus/claim-tiers.md`, `kyokaicalculus/paper-proof.md`, `kyokaicalculus/frame-typing-proof.md`, `kyokaicalculus/source-expression-proof.md`, `kyokaicalculus/equivariance-proof.md`, `kyokaicalculus/theorem-assembly.md`, `kyokaicalculus/machine_runner.py`, `kyokaicalculus/mechanization-plan.md`, `kyokaicalculus/lean/KyokaiCalculusSpot.lean`, and `kyokaiproofstatus.md` for theorem scope, claim tiers, maintained paper-proof status, exclusions, frame-local, source-expression, and equivariance derivations, Theorem P/Q assembly, executable whole-machine regression traces, Lean spot-artifact evidence, and later mechanization plan | Gate-B paper proof; narrow Lean spot artifact only for mechanized evidence | 49 executable model spot checks, 25 executable whole-machine regression traces, 25 narrow Lean spot theorems, and the Gate-B paper proof | The sequential `lambda_K-seq` theorem is `paper-proven` by the maintained derivation packages and `theorem-assembly.md`. The narrow Lean artifact is `mechanically-proven` only for its twenty-five named representation theorems and does not mechanically prove the main theorem. |
 
 Update this tracker whenever a row moves to any higher maturity state from the shared `phase.md` maturity vocabulary. Do not mark maturity based on intent; mark only completed work with a path or concrete artifact.
 
@@ -535,7 +549,7 @@ Standard helper functions are allowed to package common authority derivations, b
 
 This keeps the explicit model intact while removing manual setup noise from the first project. New users see real Kyokai earlier, not a fake easier language that has to be unlearned afterward.
 
-### D332: Workspace Root Discovery And Manifest Precedence
+### D332: Workspace Root Discovery And Manifest Precedence **[AMENDED BY D624a: workspace members remain packages; a workspace may publish a selected package set as one knot]**
 
 Kyokai workspace discovery is deterministic. Starting from the current working directory, the tool finds the nearest `kyokai.toml`. That manifest is the candidate package manifest unless it declares `[workspace]` and no `[package]`. The tool then walks upward looking for a `kyokai.toml` with `[workspace]`.
 
@@ -933,7 +947,7 @@ Spec homes: kyokaispec/src/language/13-contracts-and-runtime-failure.md, kyokais
 
 ### D356: Implicit Completion Registry Closure, Proof Obligations, And Spec Index
 
-Spec homes: kyokaispec/src/language/12-implicit-completions-and-elaboration.md, kyokaispec/src/appendices/b-decision-traceability.md.
+Spec homes: kyokaispec/src/language/12-implicit-completions-and-elaboration.md, kyokaispec/src/project/02-decision-traceability.md.
 
 1. Kyokai has a closed compiler-maintained implicit completion registry.
 2. Each registry entry has an ID, source pattern, required static context, inserted elaboration node, proof/evidence obligation, diagnostics label, `.koi` recording rule, and spec home.
@@ -1225,7 +1239,7 @@ Standard examples and scaffolds can define visible bundles such as CLI capabilit
 
 The standard library capability set stays documented by authority tables. It is not collapsed to an arbitrary count.
 
-### D382: Single-File Modules, `.koi` Artifacts, And Import Surface Simplicity
+### D382: Single-File Modules, `.koi` Artifacts, And Import Surface Simplicity **[D624a CLARIFICATION: package identity remains; knots add aggregate publication only]**
 
 > **SUPERSEDED BY D537 (Single-File Module Source Model).** D382 rejected single-file modules and kept the handwritten `.kyo` + `.kai` pair. D537 reverses that: a module is now one handwritten `.kyo` source file, `module body` is retired, and the compiler derives the interface into `.koi`. The text below is kept as the historical record of the original rejection per the decision-process rule that reversals are explicit and never silently overwritten. The D382 conclusions about `.koi` (generated artifact, not higher authority than source) and "no new import form" survive into D537 unchanged.
 
@@ -1579,7 +1593,14 @@ CI defaults to `frozen` when a lockfile exists. A command that requires network 
 
 Lockfile formatting is deterministic and ordered by canonical package identity plus dependency edge information. Merge conflicts are resolved by rerunning the resolver from manifests plus the branch graph inputs; hand-edited conflicted lockfiles are not authoritative until `kyokai lock repair` validates graph identity, source hashes, resolver version, feature-resolution version, package artifact hashes, source provenance, and index metadata version. Resolver diagnostics include package, version or revision constraints, feature constraints, target constraints, yanks, advisories, and the minimal conflicting chain.
 
-### D425: `bleedring` Toolchain Management, Toolchain Pins, Version Output, Install Roots, And Caches
+### D425: `bleedring` Toolchain Management, Toolchain Pins, Version Output, Install Roots, And Caches **[SUPERSEDED BY D615 AND D631-D632: historical manager topology retained below only as rejected history]**
+
+The remainder of D425 is historical proposal text and has no current normative
+authority. D615 replaces the rustup-style Kyokai toolchain manager with the
+standalone installer for atomic Kyokai distributions. D631-D632 separately
+permit Bleedring to install exact admitted native C-compiler provider bundles;
+project and manifest selection remains the responsibility of `kyokai`, not
+Bleedring.
 
 Kyokai has a first-party toolchain manager named `bleedring`. The canonical user surface is `kyokai bleedring`. The bootstrap installer/proxy binary is `kyokaibleed`; after installation it delegates to `kyokai bleedring` and does not become a second package manager or a second build frontend.
 
@@ -2492,7 +2513,7 @@ A repository split records source of truth, release coupling, CI coupling, issue
 
 Manual mirroring of docs or generated website artifacts across repositories is rejected unless automation records source commit identity and generated-output identity.
 
-### D515: Package Docs, Index Auth, Ownership Claims, And Derived Documentation Hosting
+### D515: Package Docs, Index Auth, Ownership Claims, And Derived Documentation Hosting **[AMENDED BY D624a: package docs remain authoritative; knot pages aggregate and link included package docs]**
 
 Package docs are derived from package source, `.koi`, manifests, doc comments, examples, target/profile facts, and admitted docs metadata. Source remains ordinary Git under the accepted dependency model; the package-docs service is not canonical package source hosting.
 
@@ -2504,7 +2525,7 @@ The package index records ownership claims, repository reachability, source revi
 
 A generated docs host does not grant package trust, SemVer trust, vulnerability clearance, official support, or source authority.
 
-### D516: Local Package Documentation Storage And Offline Docs Cache
+### D516: Local Package Documentation Storage And Offline Docs Cache **[AMENDED BY D624a: package caches/docs remain and knot projections record the exact included set]**
 
 `kyokai doc` writes generated project documentation to `<package-root>/kdocs/` by default for project-local documentation. When build-output documentation is requested through the D264 output-root policy, the toolchain writes docs under `kyokai-out/<target-triple>/<profile>/<package-name>/doc/`.
 
@@ -2518,7 +2539,7 @@ Remote package docs are repository-owned generated artifacts retrieved from exac
 
 `kyokai clean docs` removes local generated docs and docs cache entries without removing source, manifest, or lockfile data.
 
-### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index
+### D525: Repository-Owned `kdocs/` And Central Metadata-Only Documentation Index **[AMENDED BY D624a: package-root `kdocs/` remain; knot docs aggregate included packages and their graph]**
 
 Every package published to the official Kyokai package index contains a generated `kdocs/` directory at that package's root in the exact indexed Git revision. A workspace repository containing several publishable packages contains one `kdocs/` directory under each published package root. `kdocs/` is a tracked publication artifact committed to the package repository. The official Kyokai infrastructure does not require a second upload of the full documentation tree.
 
@@ -6088,12 +6109,12 @@ A diverging pattern match that flattens nesting by binding the success variant i
   2. Prefix: `&`, `&!`, `~`, unary `-`, `not`, `bnot`
   3. Multiplicative: `*`, `/`, `%`
   4. Additive and concatenation: `+`, binary `-`, `++`
-  5. Comparison and equality: `<`, `<=`, `>`, `>=`, `=`, `!=`
+  5. Comparison and equality: `<`, `<=`, `>`, `>=`, `==`, `!=`
   6. Boolean `and`
   7. Boolean `or`
   **Rules**:
   1. Operators at the same precedence level associate left-to-right unless another rule explicitly says otherwise.
-  2. Comparison and equality operators do not chain. `a < b < c` and `a = b = c` are illegal without explicit restructuring.
+  2. Comparison and equality operators do not chain. `a < b < c` and `a == b == c` are illegal without explicit restructuring.
   3. Bitwise and rotate operators (`band`, `bor`, `bxor`, `shl`, `shr`, `rotl`, `rotr`) do not mix implicitly with arithmetic, comparison, or boolean operators. Parentheses are required whenever they are nested with those other binary families.
   4. Different bitwise/shift/rotate operator names do not mix implicitly with one another either. `a band b bor c` and `a shl n shr m` require parentheses.
   5. Same-operator chaining such as `a + b + c`, `a * b * c`, or `a band b band c` is allowed and associates left-to-right.
@@ -7357,7 +7378,7 @@ A diverging pattern match that flattens nesting by binding the success variant i
   7. The reference compiler, official toolchain components, and normative spec must converge on the same accepted behavior. Spec/compiler disagreement is a bug, not an alternate interpretation.
   8. The compiler may prototype undecided ideas only behind clearly non-default experimental flags or branch-local work. Such experiments do not change the language contract until a D-point closes and the normative spec is updated.
   **Why this fits Kyokai**: it preserves decision velocity while keeping the design auditable, explicit, and publicly traceable, and it directly rejects compiler-first drift as a source of truth.
-  **[STAGE: DECIDED_CORE_SEMANTICS | D155 → maintainer-led public D-point governance; final shape plus 3 acks; normative spec is source of truth; spec/compiler divergence is a bug]**
+  **[STAGE: DECIDED_CORE_SEMANTICS | D155 → maintainer-led public D-point governance; final shape plus 3 acks or Lead YES; normative spec is source of truth; spec/compiler divergence is a bug]**
 - **Release cadence and language editions are separate clocks** — shipping rhythm is a toolchain policy, while editions remain rare source-semantics boundaries under D105.
 **Rules**:
   1. During early development, releases ship when the maintainer judges them ready.
@@ -7516,7 +7537,7 @@ This means Austral's `end if` / `end for` terminators have LESS value than in la
 
 ### 3.5 Naming Convention Principles
 
-Drawing from the Rust API Guidelines (`api-guidelines/src/naming.md`, `api-guidelines/src/predictability.md`), adapted for Austral/Kyokai's linear type system:
+Drawing from the [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/), adapted for Austral/Kyokai's linear type system:
 
 #### Conversion Functions and Linearity
 
@@ -7619,7 +7640,7 @@ No phases. No weeks. Items are ordered by severity (how badly Kyokai needs it) �
 - Invoke compiler with correct file ordering
 - Output binary / artifact according to profile
 
-**Reference**: Zig's `std.Build` (`zig/lib/std/Build.zig`), Cargo's manifest format.
+**Reference**: Zig's [`std.Build`](https://github.com/ziglang/zig/blob/master/lib/std/Build.zig) and Cargo's manifest format.
 
 **See also**: D19 (conditional compilation / platform modules), D26 (CLI specification), D27 (debugging / `#line` directives), D31 (binary size / linking / build profiles), D51 (dependency declaration syntax), D78 (package/workspace model).
 
@@ -7975,7 +7996,7 @@ The policy applies to `check`, `build`, `run`, `test`, `bench`, `doc`, documenta
 
 Spec homes: `kyokaispec/src/toolchain/12-capability-deny-policy.md` is the normative toolchain chapter. Supporting references live in `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/08-docs-lsp-audit.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, and `kyokaispec/src/language/14-capabilities-and-authority.md`.
 
-### D528: Final Resolver Model, Version Constraints, And Lockfile Schema
+### D528: Final Resolver Model, Version Constraints, And Lockfile Schema **[AMENDED BY D624a: lockfiles record both knot selections and package instances without duplicating package identity]**
 
 Kyokai specifies the final dependency resolver and lockfile model now. Implementation slices can be smaller, but they must be slices of the final model. They cannot introduce a temporary package language, temporary lockfile meaning, temporary resolver semantics, or temporary conflict policy.
 
@@ -8068,7 +8089,7 @@ Every external-tool invocation has a reproducible build-plan record: executable 
 
 The standard profiles remain `debug`, `test`, `release`, and `bench`. `debug` is the fast daily lane with source mapping, symbols, frame pointers where admitted, no stripping, and no LTO. `test` adds selected test instrumentation and isolation. `release` is the single shipping and ordinary maximum-performance lane; LTO, PGO, and CPU dispatch are explicit recorded release settings. `bench` preserves benchmark observability over release-like code. Kyokai has no `dev-fast`, `maximum`, `assurance`, LLVM-release, or backend-selection profile. Compiler-family choice is target-toolchain selection. Sanitizers and CompCert are evidence lanes. No profile disables language safety checks or changes source semantics.
 
-Spec homes: `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, and `kyokaispec/src/appendices/b-decision-traceability.md`.
+Spec homes: `kyokaispec/src/language/17-memory-layout-and-backend-contract.md`, `kyokaispec/src/language/16-unsafe-ffi-and-abi.md`, `kyokaispec/src/toolchain/03-cli.md`, `kyokaispec/src/toolchain/04-build-profiles-targets-linking.md`, `kyokaispec/src/toolchain/05-diagnostics.md`, `kyokaispec/src/toolchain/07-testing-coverage-bench.md`, `kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md`, `kyokaispec/src/toolchain/11-build-generation-and-playground.md`, and `kyokaispec/src/project/02-decision-traceability.md`.
 
 ### D537-D539: Single-File Module Source Model, Per-Declaration Visibility, And Opaque Representation
 
@@ -8080,9 +8101,9 @@ Because the file no longer signals public versus private, visibility becomes exp
 
 Because opacity can no longer come from "declared in `.kyo`, defined in `.kai`," Kyokai adds an `opaque` type-definition modifier (D539, aligning D466). `opaque` combines with a visibility marker (for example `public opaque record`) and exports the type's nominal identity and universe classification while sealing its representation: outside the defining module, code may name, hold, move, borrow, and store the value and call visible functions over it, but may not construct, destructure, pattern match, or inspect the representation unless a separate public declaration exposes that operation. Inside the defining module the full representation is visible. `.koi` records an opaque type's nominal identity, universe, and only the layout facts the opacity level promises, never the constructible field/variant surface; this is the existing visible-opacity rule keyed by the `opaque` modifier instead of by which file held the definition. A `public record`/`public union` without `opaque` exports its full representation as public API (Swift's frozen case). D466 validated wrappers are expressed as `opaque` types whose construction is restricted to named validating constructors. `opaque` on a transparent `type alias`, on an `extern type`, or on a non-type declaration is a compile-time error.
 
-These three points are spec-extracted. The active Phase 3 scaffold implements the source-role, parser-skeleton, package-discovery, target-entry, derived-interface-fact, host-test, and implementation-gated fixture migration. Semantic export and opacity validation, final AST construction, `.koi` serialization, inherited-loader replacement, standard-library migration, and full corpus migration remain tracked in `phase.md` and `kyokailanguagedirection.md`. Prior art and the full accepted shape are recorded in `Kyokaishape.md` D537, D538, and D539.
+These three points are spec-extracted. The active Phase 3 source path implements source roles, the span-carrying surface AST, package discovery, target-entry selection, local visibility and opacity validation, derived-interface facts, host tests, and implementation-gated fixtures without calling the inherited interface/body parser. Cross-module export checking, `.koi` serialization and consumption, standard-library migration, and conformance-backed corpus execution remain tracked in `phase.md` and `project/direction/language.md`. Prior art and the full accepted shape are recorded in `Kyokaishape.md` D537, D538, and D539.
 
-Spec homes: `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/rationale/02-syntax.md`, `kyokaispec/src/appendices/b-decision-traceability.md`, and `kyokaispec/src/appendices/c-austral-differences.md`.
+Spec homes: `kyokaispec/src/language/02-lexical-syntax.md`, `kyokaispec/src/language/03-grammar.md`, `kyokaispec/src/language/04-modules-and-visibility.md`, `kyokaispec/src/language/05-declarations.md`, `kyokaispec/src/language/06-type-system.md`, `kyokaispec/src/language/19-examples.md`, `kyokaispec/src/toolchain/01-manifest-package-workspace.md`, `kyokaispec/src/toolchain/02-module-resolution-and-koi.md`, `kyokaispec/src/rationale/02-syntax.md`, `kyokaispec/src/project/02-decision-traceability.md`, and `kyokaispec/src/appendices/c-austral-differences.md`.
 
 ### D540: Borrow-Centered Framework State, Stable Identity, And Invalidation
 
@@ -8192,6 +8213,138 @@ Each official format and platform has a separate admission record with tool iden
 
 Spec homes: `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md` and `kyokaispec/src/toolchain/13-application-integration-and-deployment.md`.
 
+## D558-D570: Safety, Semantic Evidence, Admission, And Identity Closure
+
+### D558: Closed Callable Effect Evidence
+
+Every callable has a compiler-derived effect summary covering mutation, linear consumption, allocation, blocking, cleanup registration, task operations, authority use, I/O, foreign/unsafe access, recoverable failure, TPOE, panic, and runtime-fatal potential. The effect domain is closed and compiler-owned; its subset order, join, conservative `Unknown`, inference inputs, and schema version are normative, and source cannot override inference with a declaration.
+
+Direct calls, generic instantiations, callable values, typeclass dispatch, recursion, and mutually recursive groups contribute transitively through monotone fixed-point inference. Public and generic summaries are serialized into `.koi`; restricted contexts name their admitted subset. Foreign, unsafe, opaque, missing, or schema-incompatible evidence defaults to `Unknown` unless an admitted contract supplies facts.
+
+Adding a possible public effect is an interface compatibility break for stricter clients. Removing an effect is compatible unless another observable contract changes. `.koi` stores stable effect IDs and the schema version; unknown IDs never mean an empty set. This decision adds no user-programmable effect rows or handlers.
+
+### D559: Mutable-Borrow Token Copies Share One Lease Lineage
+
+Copying a mutable-borrow token copies a reference to one compiler-tracked lease lineage; it never creates a lease or independent write permission. A token is usable only while its lineage is live, it is the active unsuspended writer, and no incompatible child is active. A reborrow creates a child in the same lineage and suspends every parent alias; closing the child resumes the parent lineage once.
+
+Tokens remain region-bound and cannot be serialized, semantically identity-compared, stored beyond the region, transferred incompatibly, or returned across region close. `T: Free`, captures, calls, returns, storage, and `.koi` preserve the region and lineage obligation: `Free` permits copying the value but does not erase borrow state or permit escape. Suspended aliases remain values but cannot be accessed; discarding one alias does not close the lease, while lexical close invalidates them all. IR distinguishes token-value identity from lease-lineage identity.
+
+`kyokaicalculus/findings-divergence.md` records model/spec mismatches and routes each to a spec repair, an intentional abstraction in `deviation.md`, or a pending D-point.
+
+### D560: Declared `Free` Types Are Structurally Checked
+
+`Free` means a value may be copied and discarded without duplicating or abandoning owned linear resources; it does not imply independent authority for copied borrow tokens. A `Free` declaration is valid only when every field, payload, capture, hidden representation component, and selected representation alternative is provably `Free` for every legal instantiation. Stored generic parameters require sufficient explicit public `Free` constraints; classification is not chosen from use-site context.
+
+Associated types, conditional bounds, const-selected representations, recursive groups, closures, arrays, unions, opaque forms, newtypes, single-field records, and transparent aliases participate. Aliases cannot launder classification. Opaque foreign types require admitted copy/discard semantics and otherwise remain conservative. Phantom parameters do not affect storage but cannot hide obligations. Recursive groups use a finite normative monotone classification.
+
+Failures identify the exact storage path, projection, recursive edge, and substitution; the declaration must become `Auto` or `Linear`. `.koi` carries the universe, normalized public proof, foreign/opaque admission identity, and revalidation dependencies rather than a trusted bare bit. Generated, derived, unsafe, ABI, alias, or typeclass machinery cannot forge `Free`. A valid `Free` value must satisfy both lawful copy and cleanup-free discard.
+
+### D561: Process-Wide Fatal Arbitration
+
+A hosted process has atomic states `Running`, `PanicCleanup(owner, cause)`, `FatalQuiesce(owner, cause)`, and `Terminating(cause, exit classification)`. The first successful transition owns the bounded primary report; later failures are bounded secondary facts and cannot start competing cleanup or reporting.
+
+`PanicCleanup` forbids new tasks, lets only the initiating task run panic-permitted ordinary defers, and requests siblings to park at admitted safepoints without new user cleanup. TPOE and runtime-fatal failure enter `FatalQuiesce` directly. Failure during panic cleanup escalates while preserving the primary and bounded secondary cause. Runtime reporting is allocation-bounded, reentrancy-safe, span-length-safe, and has a no-user-code raw fallback.
+
+Panic cleanup has a target-recorded progress budget and escalates on deadlock, indefinite blocking, or exhaustion. Locks, syscalls, callbacks, foreign threads, signals, and targets without safepoint parking have explicit records, and termination never waits without bound. Simultaneous primary selection is specified nondeterminism, but the winner and report ordering are then stable. External files, transactions, devices, sockets, DMA, and remote actions may remain partially changed and document their fatal aftermath.
+
+### D562: Accepted D-Point Authority And Workspace Root Repair
+
+One `kyokai.toml` may contain `[workspace]` and `[package]`. The root package joins that workspace only when canonical member `"."` is explicitly listed. Duplicate canonical members, outside-boundary members, and nested roots are errors. Discovery, CLI scope, resolution, lock identity, features, and package commands use the same canonical member set. The contradictory prohibition is removed and D332 remains its historical source.
+
+More generally, accepted final D-point text controls intended design until explicitly superseded. A spec edit cannot change it without another accepted D-point. A contradiction makes the spec defective, reopens the affected Gate A claim, and does not authorize implementation to invent a third behavior.
+
+### D562a: Monthly And Release-Bound Specification Review
+
+Every active calendar month receives a review record, and every language/toolchain release candidate requires one. Monthly review checks the accepted-D-point, amendment, supersession, and calculus-finding delta, plus a rotating deep review of at least one full chapter family. No-change months record their evidence.
+
+Release review checks the complete accepted delta since the prior release; every changed clause and affected unchanged cross-reference; grammar, API, and artifact schemas; examples, diagnostics, traceability, calculus impact, implementation/conformance status, and generated outputs. Records bind the decision cutoff, source/spec revisions, release/edition, clauses, reviewer role, tools, findings, dispositions, exclusions, and blockers.
+
+Findings are classified as editorial defect, missing extraction, accepted/spec contradiction, stale example/diagnostic, calculus correspondence gap, implementation overclaim, or new semantic question. Accepted text resolves contradictions; new semantics require a D-point. Gate A cannot close with unresolved contradictions, missing accepted clauses, stale generated output, or unclassified semantic findings. Records are append-only and repairs link back rather than rewriting history.
+
+### D563: Independently Projectable Record Fields
+
+An ordinary record may declare `projection independent (fieldA, fieldB);` after its fields. `projection` and `independent` are reserved grammar words; parsing never depends on type or lookup. Named fields must be `Free`, occupy disjoint ordinary-record storage, and not participate in cross-field invariants, seals, unsafe representation contracts, or dependent validation. Extern, packed, opaque, handle/payload, capability-bearing, and unsafe-backed records require an owning admission or unsafe contract.
+
+Each named field is independently projectable from fields outside that clause; fields listed together are not automatically independent of each other, and pairwise independence uses singleton clauses. Only admitted fields may project during an otherwise incompatible borrow. `.koi` stores stable field IDs, the relation, and public admission identity. Diagnostics identify why independence failed. Optimizers may infer more local non-aliasing but cannot expose unmarked source behavior.
+
+### D564: Authority Enforcement Is Not Native Containment
+
+Safe Kyokai cannot invoke capability-gated operations without a received non-forgeable value, nor synthesize, deserialize, amplify, or recover surrendered authority except through admitted derivation. Conforming compilers and runtimes enforce this language-semantic provenance rule. Capability typing, package ceilings, deny policy, and audits contain behavior only within the conforming safe-operation set.
+
+They do not contain arbitrary native code, unrestricted assembly, compiler/runtime compromise, memory corruption, kernel compromise, DMA, or hostile hardware. Native containment requires a named admitted isolation domain with enforcement, resources/namespaces, ABI/protocol, failure behavior, and hostile tests. Process, WASI/module, Capsicum-like, container, VM, microVM, and hardware compartments are separate providers.
+
+Public documentation and tooling distinguish `LANGUAGE_AUTHORITY_ENFORCED`, `PACKAGE_POLICY_ENFORCED`, and `NATIVE_CONTAINMENT_ENFORCED`. Code outside admitted isolation cannot claim that withholding a source token contains native corruption.
+
+### D565: No Kyokai Undefined Behavior, Including Unsafe Kyokai
+
+No Kyokai source operation, including unsafe-only operations, has undefined behavior in the Kyokai abstract machine. Unsafe grants gated low-level operations and audit duties; it does not disable checking. Every Kyokai-defined unsafe primitive is total over its admitted operand type. Invalid provenance, bounds, alignment, lifetime, aliasing, initialization, permissions, target feature, or state is rejected or produces its specified `Result`, TPOE, panic, or runtime-fatal outcome before an invalid native operation.
+
+Arbitrary integer addresses and untracked foreign pointers are not directly dereferenceable. Access uses provider-issued regions carrying or enforcing origin, extent, liveness, permissions, alignment, address space, and synchronization. Allocator, mapping, shared-memory, MMIO, device, foreign-allocation, DMA, and pinned providers specify acquisition, narrowing, synchronization, invalidation, and surrender; unsupported targets do not admit them.
+
+Inline assembly is admitted only through checked target-specific instruction, operand, clobber, memory-region, and effect contracts excluding privileged, undefined, or unmodelled behavior. Unrestricted text assembly is external native code or isolated execution. FFI validates every mechanically checkable ABI, layout, nullability, range, ownership, callback, unwinding, and lifetime fact, but cannot make lying foreign code defined.
+
+`KYOKAI_UNSAFE_DEFINED` applies only to total primitives and admitted providers. In-process native code adds `EXTERNAL_NATIVE_TRUST`; whole-process containment requires an admitted enforcement domain under D564. Foreign corruption is not renamed Kyokai UB, but Kyokai promises no cleanup, diagnostics, or containment for the corrupted process. Unsafe contracts use typed machine-checkable evidence wherever possible, and conformance covers invalid regions, stale handles, alignment, overflow, alias conflicts, target features, callbacks, unwinding, MMIO, assembly, and hostile foreign components.
+
+### D566: Unsafe Capability Topology
+
+Hosted and freestanding startup records state whether one root `UnsafeCapability` exists and which trusted bootstrap component owns it. Ordinary source cannot construct or deserialize it. It is `Linear`, non-forgeable, non-copyable, and exists only through an admitted target/runtime bootstrap route declared by package and link audit.
+
+It may be moved or mutably borrowed into an unsafe-contract scope, but not ordinarily split, cloned, weakened into another token, imported, or obtained from an index. It grants only D565 total primitives and admitted providers, never permission for UB. Storage, captures, task transfer, TLS, callback re-entry, and process handoff require provider contracts naming ownership, serialization, affinity, and return. Concurrent work serially borrows one synchronized owner or uses proven separate isolation domains. `.koi`, audits, deny policy, bindings, Bridge records, and diagnostics expose every authority path. Surrender is irreversible.
+
+### D567: Canonical Callable Invocation Classes
+
+The canonical classes are `CallableRead`, `CallableMut`, `CallableOnce`, and `CallableState`. Read permits repeated immutable invocation; Mut permits repeated serialized mutable invocation; Once consumes the environment once; State is D493's explicit state transition with input, output, recovery, and partial-mutation ownership.
+
+The compiler-owned implication chain is Read satisfying read, mutable-access, and consuming-once requirements; Mut satisfying mutable-access and consuming-once; and Once satisfying only consuming-once. This is neither general subtyping nor extensible inheritance. State is outside the chain and requires its explicit signature and recovery contract. Bare `Callable` is retired rather than aliased, with migration diagnostics pointing to `CallableRead` where valid.
+
+Source, built-ins, libraries, bindings, diagnostics, docs, and `.koi` use the same stable class IDs. `.koi` separately records class, arity, parameter access, result, environment universe/region, D558 effects, and State recovery. Retired IDs require an explicit KBI/edition migration or rejection. Effect addition or callable/recovery weakening is an interface change. Arity remains unchanged pending XP-001 or another D-point.
+
+### D568: Validate Untrusted Input Before Hard-Stop Domains
+
+Public boundaries receiving file, socket, environment, package, foreign, device, user, or other untrusted data return an unvalidated representation or recoverable result. Malformation, unsupported versions, strict-policy unknown fields, limits, checksums, authentication, and validation failures are recoverable. Parsers declare byte, depth, item, allocation, reference, decompression, and work budgets.
+
+Contracts, indexing TPOE, `unreachable`, and other hard stops are not ordinary attacker-input rejection. Successful validation constructs a nominal type whose constructors preserve the invariant; later contract failure is a program defect. Unsafe/foreign construction follows D565/D245. Kyokai adds no universal taint system: ordinary typing plus stdlib/Bridge admission, review, linting, and conformance police declared boundaries. A parser may use hard-stop checks only after proving the relevant precondition itself. Public examples identify and test the trust transition.
+
+### D569: Kyokai-Owned Atomic Execution Model
+
+Kyokai defines atomic executions through events, source sequenced-before, reads-from, per-location modification order, synchronizes-with, happens-before, and its own order constraints. It defines data races, invalid executions, CAS success/failure ordering, fences, initialization, lifetime, mixed atomic/non-atomic access, and task/channel/lock edges.
+
+Normative litmus outcomes cover store buffering, load buffering, message passing, IRIW, release sequences, fences, CAS, and initialization. C11 lowering is a per-operation, order, and target refinement obligation—not source semantics. Every target/compiler admission passes the litmus/runtime corpus and records unsupported operations without silent strengthening or weakening. Model, spec, generated C, runtime, and conformance share stable IDs. Safe racing source receives a defined Kyokai rejection/result rather than inherited C/C++ UB. External compiler agreement is supporting evidence, never majority semantics.
+
+### D569a: Shared Semantic Corpus For C-Compiler Admission
+
+Every admission case references a stable Kyokai semantic/conformance ID and expected outcome. The frozen evidence binds the Kyokai compiler, IR schemas, generated-C bundle, runtime/prelude, target contract, and manifest. Identical generated-C bytes run across lanes except for explicitly declared target/profile transformations.
+
+The oracle is the Kyokai specification, its attached expected result, and an executable model/reference interpreter where available. Candidate agreement cannot legalize a wrong outcome. Test classes include execution, defined failure, invalid-subset rejection, structural C, sanitizers, source maps/debuggers, atomics/litmus, optimization/LTO, linking, and target runtime. Defined randomized programs retain seeds and are minimized on disagreement. GCC, LLVM, and vendor suites may be attached as upstream health evidence but are never copied, forked, or counted as Kyokai semantic passes. `PASS`, `FAIL`, `TIMEOUT`, `UNSUPPORTED`, `UNRESOLVED`, and `FLAKY` remain distinct; skipped/unsupported cases do not count.
+
+### D569b: Exact Admission Matrix
+
+Admission binds compiler executable/provenance and justified version interval, host, target, sysroot/runtime, linker, archiver, profile, optimization, LTO, debug mode, and required flags. Family names are headings, not admission facts. Required correctness covers debug, release, size, unoptimized, optimized, and every claimed LTO/ICF mode.
+
+Required families cover warning-clean generated C, structural subset, runtime semantics, failure categories, numerics, layout, atomics, FFI, stack checking, source maps/debug info, and linking. Sanitizer-like lanes are required when supported and explicitly unsupported otherwise. Cross targets distinguish compile-only, emulated/simulated, and physical execution; compile-only cannot claim runtime conformance. Performance status is separate from correctness. Partial passes narrow the admitted tuple instead of broadening a family claim. Commands, allowlisted environment, external output, artifacts, results, machine facts, and digests are retained.
+
+### D569c: Admission Lifecycle And Self-Verification
+
+Official admission is content/provenance-bound. Revalidation triggers include backend, runtime/prelude, generated-C subset, compiler/linker/sysroot, target SDK, profiles/flags, relevant corpus additions, miscompilations, security advisories, and declared review intervals. Correctness/security failure suspends the affected tuple while preserving its record. Suspension blocks default and release claims; explicit experimental use diagnoses the risk and severe corruption may be hard-blocked. Confirmed compiler failures become minimized permanent Kyokai cases unless outside the admitted subset. Readmission creates a linked append-only record. `doctor`, build JSON, release provenance, and crash reports identify the record used; offline reuse requires exact identity.
+
+A developer may run the full harness for an unlisted tuple and produce `SELF_VERIFIED` evidence. It carries the same identities and raw records but is unofficial, explicitly selected, user-owned, and gives no Kyokai support claim. It cannot add an official compiler, target, support claim, semantic case, or admission update until project-controlled infrastructure reproduces the relevant run. A minimized failure may be proposed separately, but the expected result remains spec-owned.
+
+Every Kyokai major release reruns the full official matrix. Patch releases inherit current admission and do not routinely recertify; therefore patches cannot silently change admission-relevant semantics, generated C, runtime ABI, target contracts, or flags. Minor releases rerun only affected tuples when relevant features, semantics, generated C, runtime, target, flags, or correctness/security fixes change. Unaffected minors retain records. Active correctness/security defects can suspend at any release level and require rerun before readmission.
+
+Kyokai semantics and its generated-C subset remain compiler-independent. Compiler-specific knowledge is limited to admission facts, flags, probes, ABI/target contracts, diagnostic normalization, and semantics-preserving workarounds; it cannot create compiler-specific source semantics or backend forks.
+
+### D570: Canonical Source-Tree Identity (`KST-1`)
+
+`KST-1` identifies a publishable package-source snapshot independently of archive format, Git identity/history, host paths, locale, enumeration, uid/gid, timestamps, xattrs, and clock state. Local workspace, published source, semantic compiler input, and build/artifact identities are separate.
+
+Publishable paths are non-empty NFC UTF-8 components ordered by unsigned UTF-8 bytes and canonically separated by `/`. Absolute, empty, dot/dot-dot, NUL, platform-separator, normalization-duplicate, and portable case-fold-collision paths are rejected. File contents are exact bytes with no line-ending, Unicode, comment, or formatting normalization. Only regular files and structural directories carry identity; file metadata is one normalized executable bit and empty directories are omitted.
+
+Published snapshots reject symlinks, hard-link identity, special files, mount crossings, gitlinks/submodules, and alternate streams. External content is vendored as files or separately identified. Inclusion uses a closed toolchain exclusion set and explicit manifest includes; ambient VCS/editor/archive rules have no effect, while controlling manifests/files are included. Checked-in generated files participate as ordinary selected bytes; build-time outputs remain separate identified inputs/outputs.
+
+Capture uses an immutable staging snapshot with containment-safe traversal and fails on replacement, truncation, or metadata swapping. Nodes use a canonical length-delimited binary grammar with type, lengths, executable bit, ordered children, names, and child digests. The root domain includes `KST-1`, applicable package namespace/identity, and algorithm ID. SHA-256 is initially required; algorithm agility requires a new schema/ID and never silently changes an identity.
+
+Implementations stream under path, entry, byte, depth, and work budgets and fail closed on unstable facts. The spec supplies positive and negative golden trees, Unicode/case, executable-bit, exact-byte/line-ending, special-file, mutation, streaming-reference, and independent-implementation cases. Lockfiles, packages, mirrors, caches, docs, provenance, transparency, vendoring, signatures, and plans name schema, algorithm, root, counts, and capture policy. The identity authenticates captured structure/bytes only—not publisher, review, safety, license, malicious-code absence, or reproducible output.
+
 ### D549: Runtime Data Assets And Update Authority
 
 Every admitted behavioral dataset is classified as compile-time pinned, toolchain-shipped versioned, target-provided observed, application-bundled, or explicitly network-updated. The effective dataset identity is available to APIs, diagnostics, audit, test reports, and reproducibility records whenever behavior depends on the data.
@@ -8295,3 +8448,1536 @@ Deployment mutation uses an explicit plan followed by an authority-bearing apply
 Nix integration projects the Kyokai reproducible build plan and artifact identities; Nix evaluation does not become Kyokai semantics or a hidden package resolver. Local emulators and D546 test adapters state their modeled surface and never imply production equivalence. Provider-specific semantics remain in separately admitted adapters rather than the core language.
 
 Spec homes: `kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md` and `kyokaispec/src/toolchain/13-application-integration-and-deployment.md`.
+
+## D571-D583: Runtime Reclamation, KBI Closure, Evidence, Experiments, And Security Operations
+
+### D571: Structured Task Child Reclamation
+
+A taskgroup semantically owns every direct child until its explicit `join;`
+boundary. A child cannot detach, outlive the group, produce a user task handle,
+or release a parent-side captured borrow early. `spawn` remains a statement,
+children expose no task-result wrapper, and cross-task values move only through
+accepted channels or explicit synchronization objects.
+
+After a child completes ordinary lexical cleanup and publishes terminal
+completion, the runtime eventually reaps the native thread, native stack,
+thread-local runtime state, control block, and other runtime-owned execution
+machinery without waiting for lexical `join;`. Reaping invokes no user code,
+performs no source-level cleanup, releases no captured parent borrow, and does
+not make synchronization implicit. Panic and TPOE retain their process-wide
+fatal contracts and are never stored as recoverable child results.
+
+The taskgroup retains a live-child count and bounded diagnostic or observability
+facts rather than an unbounded semantic completion payload per child. Ordinary
+completed-child diagnostic facts may be coalesced or evicted under a declared
+diagnostics budget without changing program behavior. `join;` remains the
+visible potentially blocking point and waits until every direct child has
+published terminal completion.
+
+Active-child and native-thread capacity are explicit budgets. Spawn failure or
+backpressure follows the accepted capture-recovery rules, and completed children
+stop consuming active/native capacity after terminal publication and reaping.
+Reaping makes target-recorded progress without requiring the parent to execute
+`join;`; target implementations may use detached native teardown or a runtime
+reaper only when the choice is source-unobservable apart from declared metrics,
+limits, and failure diagnostics. Metrics distinguish active children,
+terminal-but-not-yet-reaped threads, retained diagnostic facts, capacity
+pressure, and reap failures.
+
+### D572: Generated-C Semantic Preservation And Translation Validation
+
+The generated-C backend consumes ownership-checked explicitly sequenced IR.
+Every effectful operand, temporary, cleanup/failure edge, range successor,
+atomic event, and source origin has an explicit order before C rendering. The C
+renderer is total over that IR and cannot decide source semantics or introduce
+unrepresented checks, effects, cleanup, or evaluation order.
+
+A generated-C validator checks the admitted C11 subset, declaration/type/layout
+correspondence, explicit temporaries in C contexts with unspecified evaluation
+order, checked arithmetic, shifts and range patterns, tag validity, definite
+initialization, provenance-sensitive helpers, atomics, and forbidden constructs.
+Successful C parsing alone is not validation.
+
+Every lowering rule has a stable evidence ID joining its normative clause, IR
+case, emitted form, validator rule, positive and negative tests, strict-C
+compile, sanitizer evidence, differential result, and admitted-toolchain
+records. A small executable core oracle and generators compare source/core
+outcomes with generated C across admitted compilers and optimization modes;
+disagreements minimize to replay fixtures. Early mechanized or
+translation-validation slices cover evaluation order, checked arithmetic,
+ranges, ownership movement, tagged unions, contracts/TPOE, and atomics. A
+toolchain/target claim fails closed when the evidence required for its support
+tier is absent.
+
+### D573: KBI-1 Bounds-Checkable Container Framing
+
+A KBI-1 section-table entry has one normative fixed-width little-endian base
+layout containing section ID, section-schema major and minor, flags, file
+offset, byte length, required alignment, and the canonical section digest. The
+header defines the exact entry size, and table size is computed as
+`section_count * entry_size` with checked arithmetic.
+
+Before payload decoding, a reader verifies that the table fits within the file,
+starts at an admitted alignment, and overlaps no payload. Each payload range is
+checked with overflow-safe `offset + length` arithmetic and must be in-file,
+non-overlapping, correctly aligned, and ordered by numeric section ID. Duplicate
+IDs, reserved flag bits, invalid alignment, unsupported required schemas, and
+digest mismatches are malformed artifacts. Unknown KBI-1 framing flags fail
+closed. Hash coverage specifies any digest bytes excluded or zeroed to avoid
+self-reference.
+
+KBI-1 requires `entry_size` to equal the published base size. A future container
+minor may increase it only through a canonical hash-covered extension tail with
+an explicit old-reader rule. Optional future information uses registered
+extension sections after base framing succeeds. Unknown optional sections may
+be skipped under D576; unknown required sections, required flags, entry tails,
+or framing semantics fail closed. Extensions cannot redefine base offsets,
+lengths, alignment, digests, section identity, overlap rules, or validation
+order. Such a change requires a new container major.
+
+### D573a: Native Linux `io_uring` Provider
+
+`io_uring` is a first-party Linux target provider, not language syntax, a hidden
+executor, or the definition of portable readable, writable, networking, file,
+timer, cancellation, or Poller semantics. A program explicitly constructs or
+selects an `IoUringProvider` through bounded Linux-provider authority that names
+allowed operation classes, queue and pinned-memory ceilings, worker policy, and
+restrictions. Construction negotiates setup flags, features, supported opcodes,
+and limits and returns a structured unsupported/setup failure. File, network,
+process, and time operations still require their corresponding domain
+capabilities; ring construction creates no unrelated authority.
+
+The ring, registered-file tables, registered-buffer pools, buffer leases,
+provided-buffer groups, submission reservations, and in-flight operations are
+nominal linear owners or region-bound borrows. Memory and handles cannot move,
+close, unregister, resize, or surrender while the kernel may still use them.
+Every submission receives a non-forgeable generation-checked operation ID.
+Exactly one terminal completion consumes the in-flight state and returns
+ownership, partial-progress facts, result or error, and every promised lease.
+
+Cancellation is an explicit state machine: it may succeed, find no live
+request, race with completion, or report that execution progressed too far.
+The caller continues draining completions until terminal ownership return;
+cancellation alone never makes kernel-held memory safe to release. Contracts and
+hostile tests cover partial I/O, linked-operation failure, multishot termination,
+completion-queue overflow, stale completion IDs, teardown, fork/exec, signals,
+limits, and fatal aftermath.
+
+Restricted providers create a disabled ring, install an opcode and flag
+allowlist where supported, and enable it only after validation. Unrestricted
+mode is separately capability- and audit-visible. Portable APIs may use the
+provider only when their accepted observable contract is preserved; batching,
+registration, and other provider-specific behavior is explicit. No operation
+silently switches among readiness, blocking threads, and `io_uring` when that
+would affect cancellation, allocation, ordering, authority, or failure.
+
+Unsupported kernels, filesystems, devices, opcodes, and setup modes return
+provider unsupportedness. Portable fallback is an explicit application or
+toolchain policy. Admission records kernel ranges, architecture, wrapper
+identity, setup flags, opcode/feature matrix, limits, restrictions, sanitizer
+and stress evidence, and reference workloads; a kernel version string alone is
+not admission. `io_uring` has its own provider support tier. Its absence does
+not demote ordinary Linux support, and ordinary top-tier Linux support does not
+claim every kernel/device tuple supports `io_uring`.
+
+### D574: KBI-1 Canonical Semantic Payload Grammar
+
+KBI-1 has one machine-readable schema source assigning stable numeric tags to
+every value kind, type node, declaration kind, visibility, universe, constraint,
+contract/effect fact, audit fact, and reference. The schema fixes signed and
+unsigned integers, lengths, booleans, byte strings, UTF-8 strings, optionals,
+tagged unions, records, lists, maps, and field order. Encoders use the unique
+shortest admitted integer and length forms; readers reject non-minimal forms.
+
+Strings contain valid UTF-8 bytes with no reader normalization. The schema
+states which identifiers were normalized before serialization and which bytes
+remain exact source data. Each reference names its target table/domain and
+width. Forward references, cycles, and recursion are legal only for enumerated
+graph kinds; dangling, cross-domain, duplicate, and forbidden cyclic references
+are malformed. Semantically unordered collections use one canonical byte order
+and reject duplicates; source-ordered collections preserve source order.
+
+Unknown value tags in a required KBI-1 section are incompatible rather than
+skipped. Extension payloads live in registered extension sections. Generated
+encoders and decoders are checked against the schema and an independently
+written decoder. Text and JSON renderings are derived and non-authoritative.
+
+### D575: KBI-1 Hostile-Input Budgets
+
+KBI decoding is streaming and checks framing, arithmetic, digests, and policy
+budgets before allocating payload-sized structures. The decoder contract names
+ceilings for file bytes, section counts and bytes, string bytes/count, records,
+graph nodes and edges, nesting, references, generic bodies, source spans,
+diagnostic metadata, cumulative allocation, and validation work.
+
+Universal representation ceilings prevent offset and integer overflow. Lower
+practical budgets come from a versioned toolchain/target policy and participate
+in build/cache identity when they affect acceptance. Budget exhaustion produces
+a structured artifact-too-complex category distinct from malformed bytes,
+unsupported schemas, compatibility errors, and digest failures.
+
+Readers do not recurse over attacker-controlled depth on the host stack, use
+unchecked count multiplication, perform quadratic duplicate search, or render
+unbounded diagnostics. Reference validation uses bounded tables and worklists.
+Fuzz, mutation, truncation, offset-wrap, duplicate, deep-graph,
+decompression-bomb, and allocation-failure corpora run under time, memory, and
+output limits. The Analysis Server and batch compiler use the same verification
+library and budgets unless a named read-only inspection profile is stricter.
+
+### D576: KBI-1 Stability And Independent Decoder Admission
+
+KBI-1 is not stable until D573-D575 are complete and its published schema has
+no unspecified bytes, tags, fields, reference domains, digest coverage, or
+resource classifications. A compatibility table classifies every
+container-minor and section-schema change as additive, skippable, required,
+incompatible, or normalization-only; required semantic changes increment the
+appropriate major.
+
+Skipped extension sections remain hash-covered. Only lossless-rewriting tools
+that promise preservation retain them byte-for-byte; ordinary readers do not
+claim to understand them. The conformance corpus includes canonical artifacts,
+decoded semantic views, deterministic re-encoding bytes, every malformed and
+budget class, old/new reader-writer matrices, and cross-edition rejection. At
+least one decoder that does not share production schema-generated parser code
+must agree before stability is claimed.
+
+Clean builds on supported hosts and admitted toolchains produce byte-identical
+KBI-1 for the same normalized inputs. `koi verify`, `koi print`, and `koi diff`
+distinguish container, schema, compatibility, canonicality, hash, resource, and
+semantic failures in stable machine output. Migration never overwrites the only
+artifact and records source/target schemas, tool identity, lossy fields,
+compatibility result, and output digest.
+
+### D577: Clause-Level Specification Extraction Evidence
+
+Every pending or accepted D-point is decomposed into stable clause IDs for each
+applicable syntax/API, static, dynamic, ownership, borrow, capability, failure,
+artifact, diagnostic, compatibility, target, example, illegal-form, and
+conformance obligation. Each clause records its accepted-source span or digest,
+normative/workflow/service destination, extraction state, supersession edge,
+reviewer, and evidence links.
+
+Extraction states are `missing`, `partial`, `complete`,
+`not-applicable-with-reason`, and `superseded`. A D-point reaches
+`SPEC_EXTRACTED` only when every live clause is complete or validly not
+applicable. Traceability appendices, maturity tables, and Gate-A summaries are
+generated or checked views of the clause registry; prose routing and `Covers`
+claims cannot upgrade maturity.
+
+A specification change spanning multiple clauses carries a generated checklist
+and diff of accepted wording added, changed, omitted, contradicted, and
+superseded. Exact-name and contradiction checks cover accepted keywords,
+built-ins, commands, type names, manifest forms, numeric values, and rejected
+alternatives. Gate A remains open while a live clause is missing or partial, a
+destination is absent, a supersession edge is unresolved, or normative text
+contradicts accepted shape. Automation checks evidence completeness; human
+review remains responsible for semantic fidelity.
+
+### D578: Public Document Identity And Version Axes
+
+Every maintained public document has a stable document ID, document revision,
+class, status, source revision, last substantive review date, owner, and
+supersession relations. Language edition, toolchain range, KBI/manifest/lock/
+diagnostic/docs schema ranges, target scope, and accepted-D-point boundary are
+separate optional axes; no field substitutes for another.
+
+Released normative snapshots are immutable. A living development specification
+identifies its source revision and unreleased status. Generated documents name
+their source registries and generator versions and are not competing editable
+sources. A checked registry generates the public document index and verifies
+headers, links, supersession, edition claims, source hashes, and stale-review
+thresholds. A document lacking sufficient identity is draft/unversioned and
+cannot support compatibility, conformance, proof, release, or service claims.
+Public URLs and release/package artifacts retain access to the exact document
+revision that governed them.
+
+### D579: Generated Semantic Atlas
+
+Kyokai publishes a derived semantic atlas with top-level maps for values and
+ownership, borrows and regions, effects and operations, authority and
+capabilities, failure and termination, concurrency and synchronization,
+packages and artifacts, and unsafe/foreign/target boundaries. The atlas is
+teaching and audit material, never normative authority.
+
+Each node states its state, legal and illegal transitions, visible source or API
+surface, failure category, artifact facts, and exact normative links. Cross-map
+edges expose allocation, blocking, cleanup, authority use, task transfer, TPOE,
+`.koi`, and generated-C consequences. The atlas provides a one-page core,
+expanded static or interactive graphs, and unfamiliar prediction exercises
+rather than repeating the specification.
+
+Stable identities and links are generated from structured clause and decision
+metadata. Human-reviewed prose and diagrams provide explanation. Drift checks
+fail when linked rules disappear or conflict, but generated tooling cannot infer
+semantic equivalence or decide missing behavior. Evaluation measures whether
+readers predict ownership, authority, failure, cleanup, blocking, and target
+behavior in unseen examples. Confusing or duplicate nodes route to an issue or
+pending D-point; the atlas itself changes no semantics. Its public home is
+`docs/semantics/`, with a compact core, domain pages, prediction exercises, and
+derived link/index data.
+
+### D580: Bidirectional Specification–Calculus Correspondence
+
+Every calculus rule, abstraction, lemma family, executable trace, and Lean
+theorem identifies the normative clauses and surface/core/IR facts it represents
+or excludes. Every semantic spec change receives a proof-impact record covering
+the mapping, definitions, lemmas, model traces, Lean artifacts, compiler IR, and
+claim tier. Every proof/model clarification is resolved as a normative spec
+correction, an accepted model-only abstraction in `deviation.md`, or a pending
+D-point. A change to source meaning cannot remain proof-only.
+
+Correspondence records bind source revision, clause IDs, calculus revision,
+compiler IR schema, assumptions, trusted base, exclusions, reviewer, and
+disposition. Impact classes are `NO_SEMANTIC_IMPACT`, `MAPPING_ONLY`,
+`MODEL_AFFECTING`, `PROOF_AFFECTING`, and `CLAIM_INVALIDATING`; each names its
+minimum artifacts and reviewer role, and editorial link repair does not replay
+theorems by default.
+
+Clause, calculus-rule, theorem, IR-schema, model-trace, conformance, and
+ProofTrace IDs live in machine-readable registries that generate forward and
+reverse views. Humans review the relationship; links do not prove equivalence.
+Existing material migrates incrementally. Unknown correspondence blocks only
+the affected claim upgrade, Gate-A closure, or release claim, not unrelated
+compiler work.
+
+`kyokaicalculus/findings-divergence.md` is the public intake ledger. A finding
+remains open until the selected specification, calculus, proof, compiler, test,
+and claim artifacts are updated and a named reviewer records disposition. CI
+checks identifiers, revisions, links, projections, and required review packets;
+it never declares semantic equivalence from bookkeeping alone.
+
+### D581: Revision-Bound Proof Review Artifacts
+
+Every `paper-proven` claim names an immutable review packet bound to source
+commit or tree digest, theorem IDs, proof revision, model and Lean revisions,
+and verification commands. The packet records the reviewer's display name or
+stable public identity, relationship to authorship, relevant competence, review
+date, scope, checklist, findings, severity, author response, repair revision,
+unresolved assumptions, exclusions, exact review class, and disposition.
+
+Generic labels such as `maintainer`, `AI`, `community`, or `independent` without
+an identified reviewer are incomplete and cannot admit a claim tier.
+Author/lead review, AI-assisted review, community review, and independent
+qualified human review are separate evidence labels and are never silently
+renamed. A material proof, calculus, or spec change invalidates or narrows prior
+review according to its impact record and requires a new packet or explicit
+carry-forward disposition. Missing review evidence downgrades the public claim
+label; it does not by itself refute the proof. ProofTrace verifies packet
+existence, binding, coverage, and disposition, not mathematical correctness.
+
+### D582: Experiment Points And Xperimental Releases **[AMENDED BY D625: production-quality experiments can be carried disabled in stable toolchains under exact root-manifest opt-in]**
+
+An Experiment Point (`XP-NNN`) is a time-bounded evidence investigation with a
+question, competing hypotheses, corpus, metrics, rejection criteria, owner,
+start and end dates, and final disposition. XP code lives in a draft branch/PR
+or explicit non-default experimental subtree. Stable commands, builds,
+artifacts, package publication, and conformance lanes never select it.
+
+Experimental source, `.koi`, caches, diagnostics, manifests, lockfiles,
+generated C, binaries, and reports carry distinct schema and feature identity
+and are rejected by stable consumers. Experimental releases name included XP
+IDs, expiry, unsupported compatibility, security scope, network/telemetry
+policy, migration/removal plan, and test period and cannot claim stable or
+conforming status. A scaffold implements only its declared XP boundary and
+cannot emit a reduced incompatible stable artifact or claim complete semantics.
+
+An XP closes as rejected, inconclusive, an ordinary implementation task, or a
+new pending D-point. Only accepted D-point authority can admit semantic change.
+Expired experiments are removed or explicitly renewed; prototype architecture
+does not become permanent through inertia.
+
+The repository uses one lowercase `experimental` integration branch, while the
+public channel is branded Xperimental. An experiment begins on
+`xp/NNN-short-name`, normally from current `dev`, and opens a draft PR targeting
+`experimental`. Its branch, PR, build, diagnostics, and artifacts carry the XP
+ID. Before integration it runs its declared host, conformance, regression,
+security, artifact-isolation, and workload tests. Passing establishes only that
+test surface.
+
+The Xperimental channel publishes at most one scheduled release per week and
+only when code or evidence changed. A release binds date/sequence, XP IDs and
+revisions, base `dev`, known failures, security scope, expiry, artifact schemas,
+and feedback route. It uses separate install, cache, and output roots and cannot
+overwrite stable state without an accepted XP-specific migration tool.
+
+`dev` regularly flows into `experimental`; `experimental` is never wholesale
+merged back. Graduation requires the evidence packet, an accepted semantic
+D-point when applicable, complete spec, diagnostic, migration, and conformance
+work, and one focused reviewed PR to `dev`. Rejected, expired, and inconclusive
+artifacts remain historical and unsupported. D582 resolves and replaces the
+duplicate internal D625 proposal.
+
+### D583: Vulnerability Reporting And Incident Service
+
+The repository publishes `SECURITY.md` naming supported artifact/version
+classes, in-scope surfaces, private reporting channels, any maintained
+encryption option, best-effort acknowledgement/update targets, safe-harbor
+intent, and the prohibition on public issues for undisclosed vulnerabilities.
+Private cases use the states received, acknowledged, triaged, reproduced,
+impact-assessed, remediation-active, coordinated-release, disclosed,
+rejected-with-reason, duplicate, and closed.
+
+Private records separate reporter and exploit data from public advisories and
+apply access, retention, backup, redaction, and conflict rules. Severity may
+include CVSS but records reachability, authority, affected artifacts/targets,
+exploit evidence, and mitigation separately. Disclosure records name the
+coordinator, affected parties, cadence, credit preference, deadline and
+escalation, downstream notification, and early-disclosure conditions.
+
+Playbooks cover compromised signing or provenance keys, malicious packages or
+index metadata, poisoned caches/mirrors, vulnerable compiler/runtime/stdlib/
+Bridge releases, sandbox escape, secret leakage, and service compromise.
+Revocation records bind artifact digests and versions, reason, replacement or
+mitigation, index/yank/advisory action, cache invalidation, signature/checksum
+state, and user verification commands. Tabletop exercises and incident reviews
+produce tracked improvements without publishing confidential case data.
+
+Bootstrap intake uses GitHub private vulnerability reporting and repository
+security advisories. No custom database, web form, advisory mirror, paid SLA,
+or always-on service is required. Private case data stays in that provider
+unless an incident requires a recorded encrypted export. Public OSV/CSAF or
+index projections are derived, cannot expose embargoed data, and do not become a
+second private source of truth.
+
+During single-maintainer bootstrap the service status is
+`LIMITED_SINGLE_OWNER`: the actual owner is named, no backup or 24/7 response is
+invented, and account MFA/recovery material remains outside the repository.
+Trusted-release status requires either a survivable recovery path or an
+explicit statement that response pauses while the owner is unavailable. If the
+provider is unavailable or compromised, the service board records the intake
+failure and chosen recovery/export procedure rather than claiming documentary
+redundancy.
+
+### D584-D596a: Concrete APIs, Native Toolchain, Data, Protocol, And Bridge Portfolio
+
+This cluster is accepted shape. Normative text was placed in the owning
+language, toolchain, standard-library, rationale, and traceability chapters on
+2026-07-16. The D577 registry and generated review verify complete or validly
+inapplicable clause state, so the cluster is `SPEC_EXTRACTED`. Admission,
+implementation, self-hosting, and conformance evidence remain separate.
+
+#### D584: Tier-One API Packets
+
+Every Tier-One module has a pre-implementation normative API packet containing
+exact declarations and a checked machine projection. The packet records generic
+and universe constraints, access and ownership modes, borrows and regions,
+callable invocation class, allocation, failure variants, complexity,
+invalidation, determinism, target limitations, `.koi` and compatibility facts,
+examples, and positive and negative conformance cases.
+
+The first packets cover `Result`, `Optional`, standard and contextual errors,
+display/format sinks, parsing, equality/ordering, and must-use behavior. They
+close Free and Linear payload extraction, replacement, combinators, callback
+consumption, error conversion, recovery, branch state, OOM/context/backtrace
+behavior, display depth/secret/partial-write rules, full-versus-prefix parsing,
+and relevant algebraic laws. Semantic packet review is independent from code
+review. Facility prose cannot admit an API, and a precise packet does not imply
+that its implementation is admitted.
+
+#### D585: Closed `TextView[R]` Call-Boundary Formation
+
+`StaticString`, `String`, `TextView[R]`, bytes, OS strings, paths, and C strings
+remain distinct nominal families. Read-only text parameters may use exactly one
+nominal `TextView[R]`; Kyokai does not add `TextLike`, runtime dictionaries,
+existentials, user-extensible conversions, or an overloaded protocol family.
+
+A direct call boundary may form `TextView[R]` from a `StaticString`, immutable
+`String` borrow, or existing compatible view only when formation is
+byte-preserving, validation-free, normalization-free, allocation-free,
+capability-free, non-retaining, and bounded by the exact source lifetime. This
+formation invokes no user code and does not participate in general generic
+inference or overload selection. It is unavailable for returned values, stored
+fields, collections, escaping closures, and FFI; those positions use explicit
+`.view()` or an ownership/allocator-named copy. Bytes, OS strings, paths, and C
+strings never enter the conversion implicitly. Diagnostics and explanation
+tools show the formed view and lifetime. D585 resolves the duplicate D609
+proposal.
+
+#### D586: Reviewed Storage Foundation
+
+The storage foundation separately specifies `Allocator`, raw allocation,
+`Arena`, `Buffer[T]`, `Array[T, N]`, `Span[T]`, `SpanMut[T]`, initialization
+builders, and pinned/emplaced storage. Allocator contracts state alignment,
+zero-size and maximum-size behavior, checked arithmetic, identity, resize and
+deallocation rules, failure injection, and thread behavior.
+
+Raw and uninitialized storage is unsafe-only. Safe construction owns an exact
+initialized prefix, never publishes an incomplete value, and recovers or cleans
+every initialized Linear value on failure. Reallocation invalidates old
+addresses before publishing the new storage and is tested with forced
+relocation. Every operation states failure atomicity, invalidation, exclusivity,
+pin stability, allocation, and checked capacity behavior.
+
+#### D587: Collection Families And Linear Ownership
+
+Reviewed behavioral matrices define dynamic and small sequences, deque and
+priority structures, hash and ordered maps/sets, slot/generational/stable/sparse
+storage, and structure-of-arrays layouts. The matrices generate or check every
+legal universe-conditioned API family rather than allowing hand-divergent
+copies.
+
+Insertion failure returns recoverable ownership when required. Removal and
+replacement return owned values, Linear drains must be finalized, cleanup uses
+explicit bounds, and entry APIs state their ownership transitions. Each family
+publishes failure atomicity, invalidation, generation exhaustion, complexity,
+allocation, seed/order/determinism, and serialization behavior. Concurrent
+collections are separately admitted. Reference models, property tests, hostile
+allocation tests, and Linear cleanup cases are admission evidence.
+
+#### D588: First-Party CLI Schema And Parser
+
+`Kyokai.CliArgs` parses explicit native-encoding `Args` without authority. Its
+schema covers aliases, options, positionals, subcommands, cardinality,
+repetition, defaults, groups, conflicts, requirements, help/examples,
+deprecation, visibility, and secret classification. Schema validation and token,
+terminator, and value-consumption rules are deterministic.
+
+Parsing distinguishes success, help, version, completion, and structured error
+outcomes and never prints, exits, prompts, or reads environment, configuration,
+or files. Those layers are separate capability-bearing inputs with provenance.
+Help is one document model projected to terminal, man, Markdown, completion,
+documentation, and machine schema outputs with explicit width, Unicode, color,
+locale, sink failure, and redaction policy. Static completion is pure; dynamic
+completion is separately authorized. The application owns output and exit.
+
+#### D589: One Testing Evidence Protocol
+
+`Gen[T]` carries explicit random state, size/context, replay identity, versioned
+generation, and versioned shrinking. Property outcomes distinguish discard,
+assumption failure, assertion failure, panic/TPOE, timeout, resource leak, and
+harness failure. Shrinking is bounded and resumable and preserves the original
+failure class or records the changed class separately.
+
+Fixtures are explicit ownership state machines with isolated capabilities and
+defined teardown on every outcome. Fuzz engines are adapters to one corpus and
+replay protocol rather than one mandated implementation. Records bind corpus
+identity, seed/path, target/profile/toolchain, capabilities, budgets, and
+artifacts. Simulated concurrency and real scheduling are distinct evidence.
+Private or secret corpora have retention and disclosure rules. Benchmark
+methodology remains statistical and cannot promote a weak run into a claim.
+
+#### D590: Capability Registry And Authority Explanation
+
+Every capability registry entry records origin, scope, authorized operations,
+acquisition/provider, attenuation, split/borrow, task transfer, concurrency,
+surrender/revocation, denial/failure, target behavior, `.koi` facts, and audit
+identity. `RootCapability` is only a bootstrap source for narrower authority.
+Attenuation is one-way and cannot widen authority. Capability bundles are
+ordinary records, and the map is a checked projection rather than a second
+semantic source.
+
+`kyokai explain authority` accepts a package, executable, function or
+declaration, diagnostic, or source location. It reports capability types, first
+authorized operations, every acquisition/path and package/generated edge,
+entry origin, attenuation, manifest ceilings/conflicts, provider/target facts,
+and public-versus-implementation authority. Explanation never executes code,
+contacts a provider, reads protected resources, prompts, requests or derives
+authority, widens a handle, or mutates state. It supports stable machine output,
+partial rejected-program analysis, redaction, and repairs limited to an existing
+or narrower parameter or removal of the authority-causing dependency.
+
+#### D591: Explicit Observability Contracts
+
+Logging, tracing, and metrics are separate APIs over common stable descriptor,
+field, source, schema, and compatibility identities. Field types and secret
+classes are closed. Span lifetime, task/channel propagation, and closure are
+explicit; no hidden destructor closes a span. Metrics declare kind, unit,
+aggregation, monotonicity, labels and cardinality, temporality, reset, and
+overflow behavior.
+
+Disabled-event efficiency uses explicit enable checks or lazy builders, not
+magical non-evaluation. Wall, monotonic, and external clocks are named. Each
+sink states synchronization, allocation, buffering, ordering, re-entry,
+backpressure, drop/block/spill, failure, flush, and shutdown behavior. Exporters
+such as OTLP and platform log providers are separately admitted packages or
+Bridges with explicit authority and provider/version limits. Fatal reporting
+uses a separate bounded crash sink.
+
+#### D592: Codec And Data-Format Placement
+
+Core pure modules cover profile-specific Base64, hex, component-specific percent
+encoding, explicit CSV dialects, and strict streaming JSON. JSON closes duplicate
+keys, number domains, non-finite values, Unicode, depth/item/byte/allocation
+budgets, event/DOM surfaces, and canonical output. TOML 1.0 has one native
+first-party implementation shared by users and the toolchain.
+
+Markdown is first-party Extended CommonMark. HTML Core is limited to safe
+escaping and construction helpers; full WHATWG HTML is a first-party package.
+YAML is an official package or project Bridge, not Core, and states alias,
+schema, tag, merge, and resource behavior. XML is a package with DTD/entity
+processing disabled by default; external access is capability-gated and
+namespaces, encodings, canonicalization, and schemas are explicit. All formats
+state streaming terminal states, allocation/budgets, canonicalization,
+generated-schema provenance, hostile corpora, and compatibility identity. Core
+placement does not imply prelude inclusion or universal target availability.
+
+#### D592a: Gated Kyokai-Native Toolchain
+
+Kyokai is the target implementation language for the compiler, package/build
+system, formatter, test/fuzz/bench runners, documentation, audit, analysis/LSP,
+migration, and ordinary toolchain components. OCaml is a pinned transitional
+bootstrap and differential implementation, never permanent semantic authority.
+
+Before self-host entry, every host component is designed for replacement through
+typed/serialized boundaries, stable command and data protocols, shared
+conformance corpora, implementation-independent IR contracts, and an explicit
+`KEEP`, `WRAP`, `REIMPLEMENT`, or `REMOVE` disposition. New source semantics
+cannot depend on an OCaml convenience.
+
+Kyokai-source migration begins only after a self-host entry gate proves
+substantial multi-package compilation; stable parser, elaboration/type,
+linearity/borrow, module/`.koi`, generated-C/runtime, deterministic build,
+diagnostic, package/build, Tier-One stdlib, and conformance foundations; and a
+documented recovery route. Compiling a toy program or compiling itself once is
+insufficient. The gate occurs before the complete ecosystem/toolchain is built,
+so native implementation becomes a demanding reference workload early enough
+to improve the language.
+
+Stage 0 is the pinned OCaml bootstrap. Stage 1 uses it to build the Kyokai-native
+slice. Stage 2 rebuilds that slice with Stage 1. Stage 3 repeats and checks
+declared convergence of generated C, `.koi`, diagnostics, tests, package graphs,
+and final artifacts after normalization of specified nondeterminism. Every stage
+records all source, compiler, admitted C compiler, target/profile, dependency,
+generator, environment, and content identities. Mismatches are investigated and
+classified; execution success is not convergence.
+
+Cross-bootstrap uses a previous admitted Kyokai toolchain or reviewed,
+content-identified generated-C snapshot. Binary users do not require OCaml;
+source-bootstrap and recovery are separate documented paths. Each OCaml module
+retires only after its named Kyokai replacement, owner, parity suite,
+differential evidence, relevant compiler/package/diagnostic/test gates,
+convergence, and recovery role are satisfied. Native toolchain code uses the
+same admitted language and libraries as users; any bootstrap intrinsic is
+explicit, audited, minimized, and retired or standardized. Friction may open a
+D-point or XP but cannot silently change semantics.
+
+#### D593-D593a: Crypto Boundary And Admission Taxonomy
+
+Kyokai does not implement cryptographic primitives, TLS internals, password
+algorithms, JWT signature algorithms, certificate validation, or authentication
+protocols from scratch. Native hashes/checksums are explicitly non-cryptographic
+unless separately admitted. Crypto, TLS, password, token, and authentication
+surfaces use reviewed providers, packages, or project-specific Bridges with
+named specifications, versions, owners, update/advisory routes, vectors,
+side-channel claims, targets, and vulnerability response.
+
+TLS separately identifies provider, entropy, clock, trust store, hostname,
+network, certificate, session, and policy boundaries. `SecretBuffer` is Linear
+and noncopying with explicit exposure, redaction, allocator/provider identity,
+and best-effort erasure. Kyokai never promises removal from registers, swap,
+crash dumps, allocator slack, or a hostile OS. Constant-time and FIPS claims are
+only those supported by named provider evidence.
+
+Admission records have distinct classes `API_PACKET`, `STDLIB_ADMISSION`,
+`OFFICIAL_PACKAGE_ADMISSION`, `BRIDGE_ADMISSION`, `PROVIDER_ADMISSION`, and
+`DATASET_ADMISSION`. Their states are `PROPOSED`, `EXPERIMENTAL`, `CANDIDATE`,
+`ADMITTED`, `SUSPENDED`, `DEPRECATED`, `REVOKED`, and `RETIRED`. All preserve
+identity, owner, version/API/compatibility, targets, evidence, security contact,
+release identity, and review history; each class adds its own implementation,
+provenance/license/build/ABI/unsafe/capability/provider/dataset requirements.
+Suspension and revocation alter claims, resolution, audits, docs, and releases
+without deleting history. Admission in one class implies nothing about another.
+
+#### D594: First-Party Web Protocol Foundation
+
+RFC-family `Uri` and WHATWG `WebUrl` are different types, and parsing itself is
+pure. Kyokai-maintained HTTP Core defines RFC 9110 semantics, structured headers,
+methods/status, streaming Linear bodies, limits, and strict HTTP/1 framing and
+smuggling rejection. HTTP/2 and HTTP/3 have separate first-party admissions.
+Client redirect, retry, cookie, proxy, decompression, authentication, pooling,
+and cache policies are explicit; non-idempotent work is never silently retried.
+
+Server packages expose budgets, deadlines, backpressure, overload, graceful
+shutdown, limits, fatal isolation, and explicit Poller integration without a
+hidden executor. TLS follows D593. WebSocket is a complete first-party protocol
+module. OpenAPI and JSON Schema are first-party; Protobuf, FlatBuffers, Cap'n
+Proto, and similar systems use generated packages or Bridges with provenance.
+Interoperability suites, deterministic fuzz replay, and a long-lived Poller
+server workload are required evidence.
+
+#### D595: Database Ownership And Placement
+
+SQLite is the first high-priority official Bridge. Bundled and system providers
+have distinct admission identity, library version, compile flags, thread mode,
+extension policy, and update owner. Connections are Linear; statements,
+bindings, row views, and transactions have exact state, parent lifetime,
+invalidation, cancellation, and indeterminate-outcome rules. Callback re-entry
+is explicit, and extension loading is disabled by default behind authority and
+an allowlist.
+
+PostgreSQL and MySQL native-protocol clients are first-party packages composed
+from explicit sockets, Poller, DNS, TLS, time, cancellation, and observability.
+Native client-library Bridges may coexist under separate identities. Pools are
+ordinary explicit-lifetime packages, parameters are typed, errors preserve raw
+provider codes and portable categories, migrations are separately controlled,
+and ORM/query-builder layers cannot hide authority, transactions, allocation,
+or unbounded loading.
+
+#### D596-D596a: Bridge Portfolio And Rust Boundary
+
+The initial official evidence portfolio covers SQLite, one stable TLS provider,
+raylib, one Apple framework slice, CMake and Meson foreign-build adapters, one
+GPU/compute provider, one callback-heavy library, and one system-provider
+boundary; SDL follows the initial raylib work. `libc` and platform runtime
+surfaces are target contracts rather than ordinary Bridges. Bundled, system,
+vendored, and dynamic forms have distinct records and exact CI identities. Each
+Bridge ships a real reference application and an abandoned Bridge becomes
+`SUSPENDED`. Figma/design work remains separate until independently admitted.
+
+Kyokai does not add a Rust frontend, Rust compiler mode, Rust ABI/layout, Cargo
+resolver/importer, arbitrary crate loader, universal Rust-to-Kyokai translator,
+`Kyokai.Bridge.Rust`, or Rust-special port command. Language-neutral migration
+tools may inventory source, dependencies, APIs, tests, and TODOs and assist
+manual porting, but make no equivalence or safety claim. A specifically required
+Rust project receives its own official package/Bridge decision and crosses a
+stable C ABI, process, WASI, file, or wire boundary. Cargo and `build.rs` may run
+only inside that project's governed foreign-build plan. Reopening overarching
+Rust support requires a new D-point with evidence that project-specific Bridges
+and language-neutral assistance are insufficient.
+
+### D597-D614: Remaining Judgment, Daily Surface, And Reference Evidence
+
+This cluster is accepted and `SPEC_EXTRACTED`. D609 remains withdrawn because
+D585 already owns the closed `TextView[R]` call-boundary rule. D613 remains
+withdrawn because D581 already owns revision-bound proof review records and
+review-class labels. The remaining points are accepted below. Their normative
+text was placed in the owning specification, manifest, workflow, toolchain, and
+traceability chapters on 2026-07-16. The checked D577 records cover the live
+clauses and both withdrawals. Implementation, generated artifacts, service
+operation, and conformance remain pending.
+
+#### D597: Fail-Closed Generator Host Admission
+
+The toolchain computes required isolation features and host support before it
+loads or executes generator code. Missing required isolation fails closed.
+Generator programs and inputs are content-identified before execution, and the
+toolchain records every granted filesystem, process, environment, time,
+randomness, and network authority.
+
+`--allow-unsandboxed-generator` is an explicit development-only override. The
+toolchain reports the exact exposed authority and marks the generated output and
+evidence untrusted. Such output cannot satisfy reproducible-build, publication,
+release, shared-cache, package-admission, or stable generated-artifact claims.
+Warning after launch is never host admission.
+
+#### D598: Native Math Ownership And Replacement
+
+Every admitted numeric function records its accuracy tier, domain, exceptional
+cases, oracle and revision, vector sources, targets, rounding assumptions,
+implementation owner/reviewer, review cadence, and compatible replacement
+trigger. Tests cover reference results, boundaries, subnormals, signed zero,
+infinities, NaNs, and rounding-sensitive cases. Security-sensitive numeric code
+receives separate timing and side-channel review.
+
+A new function without an owner remains experimental or provider-backed. If a
+stable native implementation loses its owner, expansion freezes and the project
+must reassign ownership, suspend unsupported claims, or install a compatible
+reviewed provider replacement. It does not silently retain an unowned accuracy
+claim or delete the stable API. Native replacement requires measured parity or
+an explicitly versioned contract change.
+
+#### D599: Shared-Lifetime Pattern Family And Explanation
+
+Kyokai does not reopen general reference counting. The official pattern family
+covers scoped borrows, arena-owned graphs, generational slot maps, stable
+handles, owner/handle/view registries, broker-owned state, and explicitly
+synchronized shared structures. Each pattern specifies invalidation, stale
+identity, cycle behavior, removal ownership, task transfer, failure, and
+shutdown. Reference workloads include a GUI-like graph and a game-world
+registry. No pattern implicitly extends a lifetime or creates general shared
+ownership.
+
+`kyokai explain ownership-pattern` belongs to a dedicated `kyokai explain`
+command family. It accepts a named problem, type, declaration, diagnostic, or
+source location and reports applicable patterns plus their ownership,
+invalidation, failure, and shutdown consequences. Human and stable machine
+forms are supported. Explanation executes no program code, rewrites no source,
+obtains no authority, and does not invent ownership inference.
+
+#### D600: SPSC And Native-Task Topology Evidence
+
+Kyokai keeps Linear SPSC endpoints, explicit brokers, one-to-one native tasks,
+and explicit `Poller`. This decision does not add async/await, a hidden
+executor, general MPMC endpoints, or an M:N scheduler. The design is grounded
+in established CSP/occam, ownership-passing channel, broker/actor, reactor, and
+linear/session-endpoint prior art; Kyokai must still measure its exact combined
+model.
+
+Canonical material covers fan-in, fan-out, reply endpoints, sharded brokers,
+work distribution, broadcast-by-copy, supervision, bounded backpressure, load
+shedding, cancellation, and graceful shutdown. Evidence records thread count,
+memory, tail latency, broker contention, starvation, cancellation latency, and
+topology code size, with suitable direct-channel and lock-based comparisons.
+Diagnostics may identify provable broker bottlenecks and task/channel cycles.
+Only repeated measured problems from real workloads justify a later ergonomic
+D-point.
+
+#### D601: First Poller Reference Product
+
+After the language's own toolchain, the first organization-owned reference
+product is a maintained long-lived Poller server. It uses only public Kyokai
+package, standard-library, capability, allocator, network, and Poller surfaces;
+compiler-private hooks and hidden executors are forbidden.
+
+The product exercises HTTP Core, WebSocket, configuration, structured logging,
+metrics, deadlines, cancellation, bounded queues, overload/load shedding, and
+graceful shutdown. Its evidence includes deterministic simulation, load and
+soak runs, malformed input, slow clients, dependency failure, injected OOM,
+restart and upgrade behavior, and security-boundary tests. It publishes
+unsupported features and is never treated as whole-language conformance. Pain
+found by the product enters the ordinary typed intake, XP, or D-point process;
+the product cannot silently alter semantics.
+
+#### D602: Repository-Owned Documentation Modes
+
+Documentation generation has exactly three deterministic storage modes:
+
+- `structured` is the default. It commits a versioned deterministic `kdocs/`
+  data artifact and minimal non-executable assets.
+- `rendered` additionally commits sanitized static HTML/assets derived from the
+  same structured artifact. Rendered output is not package or API authority.
+- `source-only` commits no generated documentation artifact and uses local or
+  CI generation with an honest remote-availability status.
+
+The workspace-root manifest selects the default with:
+
+```toml
+[documentation]
+mode = "structured" # "rendered" or "source-only"
+```
+
+An explicitly selected owner/package may override that inherited value under
+the ordinary manifest-inheritance rules. `kyokai doc --mode
+<structured|rendered|source-only>` is the command-line override under the
+ordinary configuration-precedence contract. A mode transition deterministically
+removes or rejects stale output belonging to the previous mode.
+
+The structured artifact records package, source revision, toolchain, schema,
+target/profile context, and content identity and is drift-checked against the
+exact source. Package documentation is untrusted content: index, search,
+renderer, cache, and official service apply sanitization and resource budgets
+and execute no active package script. The official service may render and cache
+a submitted content-identified structured artifact on demand; an ordinary
+documentation request never compiles package source or runs arbitrary package
+generators. Repository hosting and later mirrors consume the same artifact
+contract. The website is a renderer/index, not documentation authority.
+
+#### D603: Non-Authorizing `debug` Instrumentation
+
+`debug expr;` emits a structured event to a toolchain-provided instrumentation
+channel, not to `TerminalCapability` or an application stream. The channel is
+present only in profiles that enable debug instrumentation. Programs cannot
+obtain, redirect, authorize, or rely on it as application I/O.
+
+The sink cannot alter program values, control flow, blocking, failure, or
+release behavior; absence drops the event after the existing observation-only,
+non-consuming restrictions. Event ordering, source identity, bounded work, and
+secret/redaction behavior are specified. Production logs, traces, and metrics
+continue to use explicit sinks and capabilities.
+
+#### D604-D605: Borrow Terminator And Layout Discipline
+
+`drop;` remains the sole closing delimiter of a lexical borrow scope. It never
+destroys, releases, closes, frees, moves, consumes, or discards a value.
+Diagnostics describe the end of a borrow scope. Formatter pairing, semantic
+highlighting, and conformance cases cover nested immutable/mutable borrows,
+early borrow endings, adjacent domain destructors, and false-friend cases
+without relying on color. D604 authorizes no alternate spelling or XP.
+
+The accepted non-brace terminator system remains closed. The formatter owns
+canonical indentation, vertical expansion, terminator alignment, and line
+breaking and does not perform semantic refactors. `kyokai check` owns excessive
+nesting and related quality lints; the Analysis Server may provide checked
+helper-extraction actions. Tutorials use realistic nesting and paired
+opener/terminator recognition. Braces, generic `end`, and `end if` remain
+rejected unless a later amendment explicitly reopens them.
+
+#### D606: Position-Bound Unsafe-Contract Labels
+
+`unsafe`, `foreign`, and the structural words needed to establish unsafe/foreign
+grammar remain reserved. Audit clause labels are position-bound grammar labels
+only inside an already recognized `unsafe contract` production. Outside that
+production the same spellings are ordinary identifiers.
+
+Parsing and recovery require one stable interpretation without symbol-table or
+semantic feedback, and formatter/LSP round trips preserve it. A label whose
+position-bound form creates recovery ambiguity remains globally reserved and
+the conflict is recorded. This is a closed grammar mechanism, not general
+contextual name resolution.
+
+#### D607: Distinct Borrow Spellings
+
+The surface borrow operations are:
+
+```text
+&read place        // immutable borrow
+&write place       // mutable borrow
+&reborrow borrow   // explicit mutable reborrow
+~borrow            // dereference
+```
+
+`&move` is rejected because reborrow is not movement. This changes surface
+spelling only. Borrow modes, regions, source suspension, auto-reborrow,
+tautology checks, and explicit checked-core nodes retain their accepted
+semantics. Parser recovery, formatter output, diagnostics, migration tooling,
+monochrome presentation, and conformance tests distinguish every operation
+without relying on color. Retired `&`, `&!`, and `&~` creation forms receive
+edition/migration handling instead of permanent dual syntax. D607 authorizes no
+XP.
+
+#### D608: Comment Syntax Reaffirmation
+
+Kyokai keeps `//` line comments, `///` item documentation, and `//!` module
+documentation. Block comments remain absent. `--`, `''`, `**`, and `||` are
+rejected as comment delimiters. Tooling preserves and recovers the accepted
+forms without presenting a glyph preference as neuroscience.
+
+#### D610: `build;` And Branch-Local Production
+
+`build;` remains the sole terminator of a `build` expression. The outer grammar
+accepts a statement body without requiring a direct outer `produce`. Every
+reachable normal path must execute exactly one compatible `produce expr;`;
+production may be branch-local. Typed control-flow analysis, not shallow
+grammar, proves production completeness and compatible Linear joins and rejects
+zero, duplicate, or incompatible production.
+
+`produce expr;` transfers the result and exits the build expression. Abnormal or
+diverging exits follow ordinary cleanup and failure rules and do not create an
+implicit result. `built;`, `qed;`, and alternate build terminators are rejected.
+
+#### D611: No-Shadowing Transformation Assistance
+
+The no-shadowing rule remains absolute. Official examples teach semantic stage
+names such as `raw`, `parsed`, `validated`, `resolved`, and `normalized`, plus
+UFCS chains where intermediate inspection is unnecessary. Builders and named
+result records carry multiple live stages when necessary.
+
+Diagnostics and checked refactors may introduce stage names, extract pipeline
+functions, and convert pass-through branches. They do not recommend meaningless
+numeric suffixes by default and cannot introduce hidden rebinding. Ceremony and
+name churn are measured before any later syntax proposal.
+
+#### D612: Frontend Ownership And Migration Boundaries
+
+The frontend boundaries are tokens, CST, surface AST, resolved AST,
+typed/elaborated IR, ownership/capability/contract-checked IR, explicitly
+sequenced backend IR, and generated C. Every fact has exactly one owner among
+these boundaries and their passes. Parser-local validation is restricted to
+syntax and context facts that need no name, type, ownership, capability, or
+lowering semantics.
+
+Every inherited pass records one semantic disposition—`RETAIN`, `ADAPT`,
+`REPLACE`, or `DELETE`—and one bootstrap-language disposition—`KEEP_BOOTSTRAP`,
+`WRAP`, `REIMPLEMENT_IN_KYOKAI`, or `REMOVE`—with dependencies, owner, tests,
+and replacement evidence. `REPLACE` is required when adaptation would preserve
+duplicate semantic authority or Austral's retired file/module model. Component
+status is independent: parser progress cannot upgrade resolution, elaboration,
+checking, or lowering maturity.
+
+#### D614: Typed Finding Intake
+
+Every captured finding is classified as exactly one of `DEFECT`,
+`AUTHORIZED_KNOWN_ISSUE`, `DPOINT_CANDIDATE`, `XP_CANDIDATE`, `RESEARCH`,
+`DIRECTION`, or `REJECTED`. A record carries origin, evidence, impact, scope,
+owner, authority, next action, current status, deduplication links, and complete
+transition history.
+
+Only Rikona authorizes additions to the private known-issue ledger, accepts D-points, and grants
+the corresponding governance transition. AI may propose classifications,
+evidence, and text but has no governance vote. Class conversion is explicit and
+authorized; `discussed` is not `resolved`. Phase and public status files contain
+only accepted or authorized work, while private direction records may retain
+clearly labeled candidates.
+
+## D615-D625: Installation, Analysis, Development, Platform, Build, Publication, And Experimental Closure
+
+The following shape was accepted on 2026-07-16. D617 is consolidated into
+D527/D545/D590, D622 is consolidated into D531-D536/D569a-D569c, and D626
+remains withdrawn under D596a. Those duplicate withdrawals create no second
+command, record, or interoperability contract. The checked D577 registry makes
+the live D615-D625 clauses `SPEC_EXTRACTED`; it does not claim installer,
+platform, publication, workload, or experimental-release implementation.
+
+### D615: Bleedring Bootstrap Installation And Bundled Distribution
+
+`bleedring` is a standalone bootstrap and CI installer. It exists before
+Kyokai is installed. There is no `kyokai bleedring` command and no separate
+`kyokaibleed` proxy. D425's historical rustup-style manager topology is
+rejected.
+
+A Kyokai release is one atomic distribution containing the compiler and its
+matching standard library, runtime, resolver, formatter, Analysis Server,
+documentation and audit tools, target metadata, artifact schemas, and other
+required first-party toolchain components. Bleedring installs and verifies the
+complete distribution. It cannot construct a supported installation by mixing
+components from different distributions.
+
+Bleedring is not a persistent multi-toolchain selector. It defines no
+user-default toolchain, directory override, component-selection graph,
+target-component installation, implicit project override, or PATH-intercepting
+proxy. A developer installation selects an exact release or channel and an
+explicit destination. A CI installation selects an exact version, revision, or
+distribution digest, runs non-interactively, and records resolved identity,
+checksums, signatures, provenance, destination, and offline inputs.
+
+This restriction concerns selection and mixing of Kyokai distributions and
+their first-party components. Under D631-D632, Bleedring may separately list,
+install, verify, update, and remove exact admitted native C-compiler provider
+bundles. Those providers have their own isolated roots and identities and do
+not become Kyokai distribution components.
+
+An update installs a new complete distribution atomically and never partially
+mutates the installed distribution. The running `kyokai` checks a project's
+declared distribution compatibility. A mismatch reports the required identity
+and an exact Bleedring invocation; Kyokai does not invoke Bleedring or update
+itself. `kyokai --version --verbose`, `kyokai doctor`, and build provenance
+report every compatibility-critical bundled component identity.
+
+`kyokai install` is package/knot dependency-domain tooling. It materializes locked external
+dependencies into the shared content-addressed cache or an explicit local or
+vendored destination and can install an explicitly selected Kyokai tool package
+into a user prefix. It does not install the compiler distribution.
+
+`kyokai install` does not install operating-system packages or native compiler
+providers. Bleedring may install an exact admitted compiler provider from an
+official verified bundle, but it does not silently invoke an operating-system
+package manager, elevate privileges, mutate unrelated system-package state, or
+edit shell startup files. Where redistribution is unavailable, Bleedring emits
+platform-specific instructions and machine-readable acquisition facts. Every
+mutation reports destination, provenance, offline behavior, interruption state,
+and recovery behavior.
+
+### D616: Named Deep-Analysis Engines
+
+`kyokai deep-check` orchestrates named analysis engines. It requires a named
+engine or named profile and does not silently run every expensive analysis.
+The closed initial engines are:
+
+- `core`, which interprets checked core and compares normalized semantic observations;
+- `ownership`, which checks linearity, borrow lineage, cleanup, and state transitions;
+- `generated-c`, which checks the structural C subset and lowering evidence;
+- `sanitizer`, which executes an admitted sanitizer/compiler/target tuple;
+- `schedule`, which explores bounded schedules and memory/concurrency litmus cases;
+- `differential`, which compares admitted target/compiler/profile tuples against one spec-owned corpus.
+
+A named profile expands into a printed engine set before execution. Each run
+records semantic case IDs, engine and schema versions, target, Kyokai
+distribution, external compiler admission, seed or schedule, resource bounds,
+unsupported operations, raw artifacts, and evidence class. FFI or platform
+operations use an explicit admitted deterministic model or report
+`UNSUPPORTED`; an opaque operation is never treated as verified.
+
+Schedule exploration, repeated seeds, sanitizer runs, and differential runs are
+bounded evidence rather than proof of all executions. Results are replayable.
+Novel failures retain minimized regression cases when reduction succeeds.
+`kyokai explain analysis <finding-id>` reports the finding, supporting evidence,
+scope, and every material fact the engine did not establish.
+
+### D617 And D622: Duplicate Consolidation
+
+D617 adds no rule beyond the accepted capability-denial and authority-explain
+contracts in D527, D545, and D590. CLI spelling is extracted under those owners.
+No runtime permission prompt can grant authority.
+
+D622 adds no record beyond D531-D536 and D569a-D569c. C compiler admission
+continues to bind exact compiler, target, sysroot, flags, profiles, tools,
+semantic corpus, raw evidence, lifecycle, suspension, and self-verification.
+There is no second admission-record format or weaker generic C11 lane.
+
+### D618: `kyokai dev` Supervision And Reload
+
+`kyokai dev` is a foreground supervisor for watch, check, incremental build,
+run, restart, structured logs, and admitted adapter communication. No persistent
+global daemon is required by this command.
+
+The supervisor watches only resolved source, manifest, generator-input, asset,
+and adapter-declared roots. Native file-watcher events are hints. Each
+coalesced event batch is reconciled against a fresh containment-checked snapshot.
+Every snapshot and build has a monotonically increasing generation ID. Changes
+observed during generation N schedule N+1; a stale result can be reported but
+cannot replace the current artifact or process.
+
+Obsolete work is cancellable. External programs run in killable process groups
+or platform-equivalent job objects, and cancellation cannot leave unknown
+descendants. The closed reload classes are `restart`, `code`, `asset`,
+`migrate`, and `full`. An adapter supplies a compatibility decision for every
+class weaker than `full`; incompatibility escalates to the declared stronger
+class and never guesses preservation.
+
+State migration is explicit prepare–validate–commit over a versioned schema.
+The old process and state remain authoritative until commit. Failure follows an
+explicit keep-old or clean-restart policy. Kyokai performs no reflective,
+guessed, or hidden state serialization. Code/state reload retains only state
+named by an admitted adapter contract.
+
+Process replacement defines readiness, graceful-shutdown deadline, forced
+termination, socket/port handoff, crash-loop backoff, output framing, and Ctrl-C
+cleanup. Adapters receive explicit filesystem, process, network, device, and
+secret authority. A server adapter binds loopback unless another address is
+explicitly authorized.
+
+The root manifest records dev adapter, reload class, failure policy, watched
+assets, launch target, and authority ceiling. CLI overrides follow ordinary
+recorded configuration precedence. Human and machine logs identify generation,
+process, stream, adapter, snapshot, and raw external output. Conformance covers
+atomic saves, rename storms, delete/recreate, symlink attacks, concurrent
+changes, stale completion, adapter crashes, migration failure, port conflict,
+crash loops, and interrupted shutdown.
+
+### D619: Apple Support Is An Evidence Matrix
+
+`aarch64-macos-none` is the first Tier-One Apple host and target identity.
+External Apple/Clang triples and deployment targets are recorded separately and
+do not create a second Kyokai target naming system. Intel macOS is a separate
+compatibility tuple. iOS, iPadOS, tvOS, watchOS, visionOS, Mac Catalyst, and
+every simulator/device/architecture combination are separate admission tuples.
+
+Each tuple records Xcode and SDK identities and paths, deployment target,
+Clang, linker, archiver, frameworks, external triple, destination, signing
+class, entitlements, and runtime evidence. Generated C, module maps, headers,
+static and dynamic libraries, bundles, symbols, and XCFramework slices are
+explicit outputs. Swift and Objective-C adapters specify ARC retention,
+callback ownership, exception boundaries, thread affinity, and teardown.
+
+Apple plan, build, test, and package commands are adapter/toolchain surfaces,
+not language semantics. External commands use argv execution and retain raw
+structured logs. Simulator execution cannot establish physical-device behavior
+or performance. Tier-One status requires hosted CI, simulator lanes, named
+physical-device lanes, debugging, packaging, release provenance, and maintained
+admission ownership. Signing, notarization, deployment, and store submission
+are separate authority-bearing packaging steps.
+
+### D620: Game Reference Stacks Without An Official Engine
+
+Kyokai adopts no official game engine. SDL3 is the first serious raw systems
+Bridge and workload. Raylib is the first small beginner game surface after its
+own Bridge admission.
+
+Engine integrations classify themselves as C ABI libraries, native plugins,
+generated bindings, embedded hosts, process protocols, or a recorded
+combination. Every integration records callback thread and affinity, lifetime,
+reload, allocation, errors, capabilities, targets, assets, and packaging. No
+engine receives hidden garbage collection or shared ownership, a second
+backend, or engine-specific source semantics.
+
+Reference games exercise 2D rendering, fixed-step simulation, explicit frame
+arenas, data-oriented/ECS and slot-map pressure, input, audio, save/load, asset
+reload, profiling, and deterministic replay. Godot and Unity work begins as
+Rikona-owned side-project experiments; neither name establishes official
+support or Bridge admission.
+
+### D621: One Analysis Engine, Complete CLI And Machine Access
+
+The compiler analysis engine owns semantic facts through one versioned API and
+machine schema independent of LSP. `kyokai check`, `kyokai explain`,
+`kyokai query`, and `kyokai fix` expose diagnostics, imports, symbols,
+references, call hierarchy, authority paths, ownership plans, borrow lineages,
+cleanup plans, and safe edit previews.
+
+LSP and editor clients are adapters over those facts. LSP remains a primary
+polished user surface but cannot own semantic operations unavailable to CLI or
+machine clients. Batch and offline commands require no daemon. A long-lived
+Analysis Server is an optimization and editor service, not a semantic
+dependency.
+
+Every edit carries source revision, preimage identity, safety class, affected
+configurations, and validation requirements. CLI, machine protocol, and LSP
+share refactor safety classes, edit identities, and result facts.
+Presentation-only editor interactions require no artificial terminal analogue.
+
+### D623: Cross-Phase Workload Evidence
+
+Kyokai maintains identified reference workloads for CLI/TUI, the D601 Poller
+server, browser/WASI, a native Apple application, a raw SDL game, an embedded
+or device loop, and an enterprise native service. Each record names its owner,
+source revision, dependency identities, targets, authority ceiling, allocation
+policy, expected behavior, source size, build latency, binary size, diagnostics,
+tests, profiling, packaging, budgets, CI cadence, and known gaps.
+
+Workloads use ordinary public language, knot, Bridge, stdlib, and toolchain
+surfaces. A private compiler escape hatch invalidates the workload as public
+evidence. Every implementation subphase identifies workloads it adds, unblocks,
+or must keep passing; workload and conformance growth is cross-cutting and not
+a one-shot final testing phase.
+
+Fast subsets gate the PR classes assigned to them. Complete target, sanitizer,
+device, stress, soak, and release lanes run at their recorded cadence and retain
+distinct evidence. A failure is classified as semantic regression, compiler
+defect, target defect, knot or Bridge defect, performance regression, flaky
+infrastructure, or unsupported surface before D614 intake. A domain claim
+cannot exceed the evidence tier established by passing workloads and relevant
+target/tool admission.
+
+### D624: Foreign Build Plan Protocol
+
+Foreign adapter planning and execution are separate protocol phases. A plan is
+a versioned DAG with stable node IDs, dependency edges, declared inputs and
+outputs, executable identities, argv, allowlisted environment, working
+directory, target/profile, resource class, and cache identity.
+
+Link facts record ordered objects, libraries, search paths, frameworks,
+whole-archive groups, runtime files, and platform loader facts. Rerun predicates
+use a closed grammar over declared files, directories, manifests, environment
+keys, tool identities, target facts, and adapter configuration.
+
+Planning supports dry-run and offline review. Offline planning reports absent
+facts instead of probing the network. Execution begins only after D597
+fail-closed admission and plan validation. It runs under explicit authority and
+executor-issued concurrency permits, cannot widen planning authority, and
+cannot infer ambient parallelism.
+
+Stdout and stderr are logs and never executable directives. Dynamic discovery
+writes a structured result artifact inside a declared output root. Kyokai
+validates that artifact and creates a new plan identity before dependent work
+runs. Partial outputs remain quarantined until the producing node and complete
+plan validate.
+
+A plan cannot mutate source, manifests, lockfiles, the knot index, or installed
+Kyokai distributions unless a separately authorized workflow owns that
+mutation. Plan, result, raw logs, environment facts, and artifacts are
+content-identified inputs to reproducibility, caching, and admission records.
+
+### D624a: Workspace Packages, Individual Publication, And Published Knots
+
+A workspace remains the local build, development, lock, profile,
+configuration, and source-discovery boundary. Its members remain packages, and
+targets belong to packages. D624a adds an aggregate publication identity; it
+does not replace package identity with components.
+
+Every publishable package retains its own public name, version,
+edition/compatibility facts, owners, features, dependencies, source identity,
+license/provenance, documentation, SemVer surface, advisories, yanks, and index
+page. A consumer can depend on a package without depending on its knot.
+
+A workspace can declare one knot identity. A `knot` is an immutable indexed
+publication set for an exact selected package graph from one workspace source
+revision. A knot has its own name, version, owners, repository and exact
+revision, KST identity, manifest digest, license/provenance summary,
+documentation overview, support matrix, and release status.
+
+A knot version records every included package name, package version, package
+content and interface digest, source path, dependency edges, selected features,
+target support, and publication result. Knot and package versions are
+independent fields. Publishing a knot never rewrites package versions.
+
+Publishing a knot publishes every selected package and the knot record in one
+atomic index transaction. An existing package version is reusable only when
+its complete immutable identity and content match. A same-name/version mismatch
+fails the transaction. Failure leaves no newly visible package version or knot
+record.
+
+`kyokai publish` at a workspace root publishes the declared knot by default
+after printing the resolved package plan. `kyokai publish --package <name>`
+publishes exactly one package without publishing or updating the knot.
+`kyokai publish --dry-run` supports both modes and performs no index mutation.
+
+The default knot set is every publishable workspace package. A package with
+manifest `publish = false` is never selected. The knot manifest can list
+persistent exclusions. Repeated `--exclude-package <name>` flags narrow one
+knot publication. The resolved exclusions appear in the human and machine
+plans and in the immutable knot release record.
+
+Exclusion is subtractive only. It cannot add a private package, change a
+version, rewrite a dependency, or silently substitute an indexed package for a
+workspace edge. When an included package depends on an excluded workspace
+package through a workspace dependency, publication fails and reports the
+dependency path. The maintainer must include the dependency, exclude its
+dependents, or explicitly change the dependency to an indexed package release.
+
+Every selected package must pass its required build/check/tests,
+documentation, target/admission, SemVer, license/provenance, advisory-policy,
+and publication checks. One failure aborts the complete knot transaction.
+
+Each included package keeps its package-root `kdocs/` artifact and package
+documentation page under the selected documentation mode. The knot owns an
+overview projection listing and linking its included package docs, dependency
+tree, targets, compatibility, exclusions, and release provenance. Knot docs do
+not replace package API-documentation authority.
+
+The index prioritizes knots on its main ecosystem discovery surfaces and keeps
+a separate complete packages section. A knot page shows the exact included
+package set and dependency tree. A package page shows its version, dependencies,
+docs, advisories, yanks, provenance, and containing-knot facts. Knot priority is
+presentation, not a trust score and not permission to hide packages.
+
+Lockfiles can contain knot selections and package instances. A knot dependency
+records the exact knot version and selected package instances. A direct package
+dependency records the package instance and, when applicable, the knot release
+that supplied it as provenance. Resolution does not create two semantic package
+identities for the same immutable package release merely because one path came
+through a knot.
+
+`internal` visibility remains package-scoped. Sharing a workspace or knot does
+not expose one package's `internal` declarations to another package.
+
+A package can appear in knot releases, individual releases, or no knot.
+Package advisories and yanks apply everywhere that package release appears.
+Knot advisories and yanks describe set-level faults and never suppress
+package-level records.
+
+This corrected wording supersedes the first D624a component-only model. The
+first wording must not drive manifest migration, docs layout, visibility,
+resolver behavior, publication, or index implementation.
+
+### D625: Stable-Carried Experiments
+
+The experimental lifecycle is draft XP branch, Xperimental channel evidence,
+stable-carried experimental feature, then stabilization or removal. `dev`
+remains unreleased staging. D582 continues to own branch and Xperimental release
+isolation; D625 adds the stable-carried stage.
+
+A stable distribution carries an XP only after an accepted D-point authorizes
+that boundary and the implementation is production-quality, isolated, tested,
+and disabled by default. The root workspace manifest is the reproducible opt-in
+authority:
+
+```toml
+[experimental]
+enable = ["XP-NNN"]
+```
+
+User-global configuration and dependencies cannot silently enable an XP for a
+workspace. CLI-only opt-in is restricted to scratch and evaluation workflows,
+is recorded, and cannot produce publishable or release artifacts without the
+root manifest declaration.
+
+Source, `.koi`, generated C, caches, binaries, diagnostics, lockfiles, package
+and knot records, and provenance carry every enabled XP identity. Stable and
+experimental artifact identities never collide. A public interface using an XP
+propagates the exact requirement to downstream `.koi` consumers, whose root
+workspace must opt into it.
+
+A package or knot using an XP publishes only with an explicit experimental
+marker and exact XP and distribution requirements. It cannot satisfy a stable dependency
+requirement unless the consuming root workspace opts into the exact experiment.
+Adding a stable-carried XP requires a minor or major distribution release.
+Patch releases can repair security or correctness defects without changing the
+experiment's intended semantic contract.
+
+XP behavior is outside ordinary stable SemVer guarantees, but its supported
+distribution range, migration, expiry, security support, and removal behavior
+are explicit. Stable conformance excludes XP behavior; separate named lanes
+establish XP evidence. Stable builds without opt-in remain semantically
+unaffected except for diagnostics that identify unavailable experimental
+syntax or APIs.
+
+Graduation requires accepted stable semantics, normative extraction, complete
+diagnostics and migration, conformance, and removal of experimental identities.
+Expiry removes or explicitly renews the feature. Branch and release-channel
+state remains implementation/evidence state and has no decision authority.
+
+## Accepted Shape: D627-D635
+
+### D627: Adversarial And Wrong-Semantics Workload Corpus
+
+`examples/adversarial/` is the public root for adversarial ownership,
+wrong-semantics, failure-path, and systems-workload cases. Each case owns a
+directory containing `case.toml`, an explanation, sources, expected
+observations, and its admitted local data or runner support.
+
+The case classes are `accept`, `reject`, `defined_failure`,
+`runtime_observation`, `generated_c_structure`, `differential`, `stress`, and
+`design_pressure`. A case records stable identity, governing clauses and
+conformance IDs, required compiler maturity, target and native-provider
+constraints, authority ceiling, allocation policy, expected diagnostics or
+observations, budgets, cadence, owner, and evidence gaps.
+
+The first workload families cover arena and frame allocation, ECS component
+churn, generational resource handles, scene-graph reparenting, intrusive
+structures, retained callbacks, linear-container iteration and draining,
+transactional asset loading, multithreaded job ownership, and hot-reload state
+migration. Each family exercises successful completion and every applicable
+rejection, early-exit, partial-failure, cancellation, abnormal-exit, teardown,
+and invalidation path.
+
+Design-pressure evidence records cleanup distance, duplicated cleanup,
+non-local redesign, checker-only API distortion, unsafe or private escapes,
+diagnostic usefulness, and reusable abstractions. Line count alone is not an
+ergonomics judgment. Private compiler hooks or unreviewed unsafe escapes
+invalidate a case as public safe-language evidence.
+
+A fast deterministic subset gates relevant changes. Larger target, stress,
+differential, and long-running lanes run at their declared cadence and before
+affected releases. The language test path indexes the corpus through a stable
+machine result protocol while keeping it distinct from small compiler and
+conformance fixtures. Findings route through D614 and D634. An XP is needed
+only when a case compares unsettled semantics.
+
+### D628-D630: Public Knowledge, Specification, Calculus, And Proof Versioning
+
+Specification version, language edition, toolchain version, schema version,
+calculus model epoch and revision, proof-artifact revision, accepted D-point
+cutoff, and XP set are separate axes. Every project release publishes a
+machine-readable knowledge manifest binding those axes to exact source
+revisions, content digests, generated outputs, review records, target scope,
+and supersession state. GitHub forms and checks enforce completeness; they do
+not acquire decision authority.
+
+The assembled normative specification declares a forward-only Semantic
+Versioning version. Its public contract includes normative language,
+toolchain, standard-library, artifact, compatibility, target, and
+project-governance requirements. Major versions contain incompatible released
+normative change outside an already declared edition or compatibility
+boundary; minor versions contain backward-compatible normative additions or
+new declared boundaries; patch versions repair prose, examples, references,
+omissions, or contradictions without changing accepted meaning.
+
+Released specification snapshots are immutable. A correction creates a
+greater version. Each release records edition coverage, compatible toolchain
+and schema ranges, targets, latest accepted D-point, source revision, review
+packet, owner, supersession, and exact XP set. Stable-carried experiments live
+in an explicitly experimental annex or profile and do not become stable
+semantics by being distributed. A specification release requires its periodic
+review, clause-completeness checks, impact analysis, regenerated outputs, and
+knowledge manifest. Pre-1.0 versions follow the same change classification.
+
+Each calculus family has a stable identity, model epoch, monotonic revision,
+source digest, accepted-spec cutoff, and trusted base. Rules, judgments,
+lemmas, theorems, traces, executable models, and proof-assistant artifacts have
+stable IDs and revisions that are never reused for different statements. An
+incompatible representation, judgment, transition relation, trusted base, or
+theorem interpretation advances the model epoch.
+
+A proof review packet binds the exact statement, dependencies, artifact
+revisions, commands, results, source and spec cutoffs, and named human
+reviewer. Pull requests declare `spec_only`, `calculus_only`,
+`coupled_semantic`, or `proof_review`; applicable checks cover registries,
+correspondence, executable models, Lean, ProofTrace, clause extraction,
+generated views, and the review packet. A calculus-only change that changes a
+source-language claim becomes a coupled semantic change and cites or opens a
+D-point. Public issue forms exist for semantic/spec findings, proof defects,
+correspondence drift, and proposals, but a complete PR-local finding does not
+need a duplicate issue.
+
+### D631-D632: Bleedring Native Compiler Providers And Selection
+
+Bleedring is a separately released, officially supported installer repository.
+Its implementation is written in Kyokai and its bootstrap artifacts are
+standalone binaries. It installs complete Kyokai distributions and can install
+exact native-compiler provider bundles required by admitted target contracts.
+`kyokai install` remains a package/dependency operation and does not install C
+compilers, SDKs, or arbitrary system software.
+
+Kyokai distributions and native providers use separate content-addressed
+roots, manifests, caches, locks, provenance, update, verification, and removal
+state. Provider classes are `bleedring_managed`, `system`, `explicit_path`,
+`container`, and `self_verified`. A managed provider binds the exact compiler,
+linker, archiver, runtime, sysroot or SDK, targets, admission record, upstream
+provenance, licenses, signatures and checksums, archive and unpacked manifests,
+host requirements, and security state.
+
+Compiler admission is exact per build, version, and provider. Version intervals
+are projections over individually admitted records, never substitutes for
+testing their members. Installation uses safe extraction and atomic publication
+under explicit roots; it neither invokes an external OS package manager nor
+elevates privileges silently. Where redistribution is unavailable, Bleedring
+provides exact probes and instructions for a declared system or path provider.
+Managed and system providers never compete through PATH. Bleedring's compiler
+commands list, install, verify, update, and remove providers without silently
+editing project selection.
+
+For each target, `kyokai.toml` declares an ordered
+`c_toolchain_contracts = ["<contract-id>", ...]` list. Release and reproducible
+profiles resolve exactly one contract and provider into the lock/build plan.
+Development configurations can name alternatives, but the chosen realization
+remains part of build identity.
+
+Host-local configuration maps a named provider to its contract, provider
+class, installation or content identity, exact tools, sysroot or SDK,
+environment policy, and verification state. Published manifests do not contain
+developer-local paths. `--c-toolchain-provider <name>` selects one compatible
+declared provider for one invocation. Resolution precedence is command
+selection, manifest/profile requirement, user provider mapping, then the
+distribution target default. Every result must satisfy the requested contract;
+there is no ambient fallback and Kyokai never searches bare `cc`, `gcc`, or
+`clang`.
+
+Failure diagnostics enumerate requested contracts and rejected providers and
+give an exact Bleedring install command when possible. Doctor output, machine
+reports, cache keys, artifacts, provenance, crash records, and admission
+records expose the resolved contract and provider. Dependencies cannot select
+the workspace provider.
+
+### D633: Diagnostic And Error Code Registry
+
+`toolchain/diagnostics/registry.toml` is the canonical diagnostic-code
+registry. Every record contains the code, stable semantic key, severity,
+category, owner, emitting phase, governing clauses, introduced specification
+and toolchain versions, lifecycle, explanation, repair guidance, suppression
+policy, related codes, required tests, ProofTrace links, and any external-tool
+mapping.
+
+Numeric portions are opaque and monotonically allocated within the existing
+severity families; they are not partitioned into subsystem ranges. A new code
+requires a materially different violated rule, suppression behavior, repair,
+command consequence, or explanation. Codes are never reused. Deprecation
+records an alias or successor, and removal preserves history under the machine
+schema's compatibility policy.
+
+Human wording can improve independently, but semantic key, meaning, severity,
+primary-span policy, suppression, suggested-fix safety, and machine fields are
+governed compatibility surface. The registry generates or checks compiler
+tables, explanation pages, documentation and test indexes, and allocation
+reports. A released compiler cannot emit an unregistered Kyokai code.
+External-tool diagnostics retain the external tool and native code; a Kyokai
+code classifies the invocation boundary without replacing the native diagnosis.
+
+### D634: Implementation Findings And Release Review
+
+The project owns one typed implementation-finding registry and a generated
+human view implementing D614. A finding records stable ID, repository,
+release, PR and revision, named reviewer or tool, observed behavior and witness,
+governing spec and accepted decisions, affected boundary, severity, D614 class,
+owner, decision authority, next action, state transitions, duplicates, and
+resolution evidence.
+
+A finding discovered in a pull request is recorded and routed there. A separate
+issue is optional unless work continues beyond the PR or needs a durable public
+discussion. Before merge, the named reviewer states the disposition and
+updates the registry. A `DPOINT_CANDIDATE` receives a public proposal or
+holding entry in `Kyokaishape.md` or the PR and records the allocated D-point
+ID. Routing is not resolution.
+
+Spec mismatch is a defect; omitted accepted text is an extraction repair; an
+open semantic choice is a D-point; controlled comparison is an XP. Only Rikona
+authorizes known-issue commitment, D-point acceptance, XP acceptance, or
+rejection.
+
+Every repository release has an append-only post-release implementation review
+covering changed shipped boundaries, integration, conformance, adversarial
+workloads, targets and providers, generated artifacts, diagnostics, security,
+packaging, and evidence gaps. A main Kyokai release reviews compiler, runtime,
+standard library, toolchain, bundled first-party packages, schemas, and
+workload evidence as one project release. Separately released repositories,
+including Bleedring, own separate release reviews.
+
+A review closes as `NO_HOTFIX_REQUIRED` or names a frozen hotfix set. Required
+findings produce the smallest justified hotfix after review completes. A
+hotfix is itself reviewed, and a further hotfix requires a newly established
+repair. A release is not review-complete while findings are unclassified,
+required owners are absent, or evidence artifacts differ from the shipped bits.
+
+### D635: Umbrella D-Points And Public Temporary Holding
+
+An umbrella D-point decides only its explicit invariant, scope, exclusions,
+obligation list, and closure rule. Obligations have stable IDs and dependency
+edges. On umbrella acceptance, required child D-points receive reserved IDs and
+`PROPOSED` status immediately. A D-point number does not imply acceptance;
+status is mandatory.
+
+A public child lives in its PR or the temporary-holding section of
+`Kyokaishape.md`. A private drafting child can live in `kyokaiplan.md`. Each
+record has one canonical home. Moving a proposal into a PR leaves a tracker row
+with its canonical location and state.
+
+`Kyokaishape.md` is the public temporary holding area and active-proposal
+tracker as well as the public decision index, migration ledger, and historical
+archive. Umbrella closure states are `OPEN_CHILDREN`, `CHILDREN_DECIDED`,
+`CHILDREN_RESOLVED`, and `EXTRACTED`; decision, extraction, implementation, and
+evidence maturity remain separate. A child closes as accepted, rejected,
+withdrawn, superseded, or explicitly not applicable. Silence is not closure.
+
+An umbrella reaches `SPEC_EXTRACTED` only after the umbrella and every accepted
+normative child pass the clause registry and completeness checks. Generated
+trackers expose the umbrella-child graph, status, canonical home, accepted
+cutoff, XP relationship, and extraction and evidence gaps.

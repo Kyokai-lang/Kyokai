@@ -1,0 +1,14 @@
+id = "parser.expression-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/09-expressions-and-evaluation.md"
+edition = "2026"
+inputs = ["src/Demo/Expressions.kyo"]
+command = "kyokai internal conformance-fixture parser.expression-summary"
+expect = "Parse representative initializer expressions through the shared structured expression AST."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "expression-summary"
+expected_facts = ["call=makeBuffer()", "slice=values[start + 1..limit]", "construction=Point { x: 2, with point }", "closure=fn [limit, &cfg] (value: Int32): Bool => value < limit and cfg.ready", "block-closure=fn [limit] (value: Int32): Int32 is return value + limit; qed", "build=Pair/produce"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

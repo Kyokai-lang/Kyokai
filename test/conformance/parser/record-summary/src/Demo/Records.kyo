@@ -1,0 +1,10 @@
+module Demo.Records is
+record Point[T: Type]: Free is
+    x: T;
+    y: Int32;
+build;
+packed record Header: Free is
+    tag: Nat8;
+    length: Nat16;
+build;
+seal;

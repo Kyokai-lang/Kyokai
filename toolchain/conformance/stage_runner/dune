@@ -1,0 +1,10 @@
+(library
+ (name kyokai_conformance_stage_lib)
+ (modules KyokaiConformanceStageLib)
+ (wrapped false)
+ (libraries kyokai_frontend unix))
+
+(executable
+ (name KyokaiConformanceStage)
+ (modules KyokaiConformanceStage)
+ (libraries kyokai_conformance_stage_lib))

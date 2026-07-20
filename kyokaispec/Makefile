@@ -56,10 +56,14 @@ SOURCES := spec.md \
            src/rationale/07-stdlib-philosophy.md \
            src/rationale/08-toolchain-philosophy.md \
            src/rationale/09-backend-choice.md \
-           src/appendices/a-license.md \
-           src/appendices/b-decision-traceability.md \
+           src/project/00-project-boundary.md \
+           src/project/01-governance.md \
+           src/project/02-decision-traceability.md \
+           src/project/03-formalization-roadmap.md \
+           src/project/04-project-licensing.md \
+           src/project/05-admission-and-change-control.md \
+           src/project/06-reference-products-and-workloads.md \
            src/appendices/c-austral-differences.md \
-           src/appendices/d-formalization-roadmap.md \
            src/appendix-a.md
 
 PANDOC_FLAGS := --standalone --embed-resources --section-divs --table-of-contents --toc-depth=3
@@ -69,7 +73,7 @@ OUTPUT_HTML := spec.html
 PDF_ENGINE ?= pdflatex
 PDF_ENGINE_NAME := $(notdir $(PDF_ENGINE))
 
-.PHONY: default all pdf html check-sources check-pdf-engine clean
+.PHONY: default all pdf html check-sources check-clause-extraction check-pdf-engine clean
 
 default: html
 
@@ -79,7 +83,12 @@ pdf: check-pdf-engine $(OUTPUT_PDF)
 
 html: $(OUTPUT_HTML)
 
-check-sources:
+check-clause-extraction:
+	python3 ../toolchain/spec/check_clause_extraction.py --check --registry kyokaispec/extraction/pre-d558.toml --report kyokaispec/extraction/pre-d558-review.md
+	python3 ../toolchain/spec/check_clause_extraction.py --check
+	python3 ../toolchain/spec/check_clause_extraction.py --check --registry kyokaispec/extraction/d627-d635.toml --report kyokaispec/extraction/d627-d635-review.md
+
+check-sources: check-clause-extraction
 	@status=0; \
 	for source in $(SOURCES); do \
 		if [ ! -f "$$source" ]; then \

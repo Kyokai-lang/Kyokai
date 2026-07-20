@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-06-FORMATTER
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-The formatter is where style stops being a debate in every doorway. Kyokai has one official format, because source code is hard enough when ownership matters without also carrying a private weather map of indentation habits.
+Kyokai has one official source format. The formatter applies it deterministically and without changing source meaning.
 
 > Trace: D25
 > Covers: Kyokai has an official formatter with one deterministic style.
@@ -38,7 +38,7 @@ The formatter owns whitespace around operators, delimiters, declarations, blocks
 > Trace: D25
 > Covers: Whitespace layout is formatter-owned.
 
-The formatter must preserve ordinary comments and documentation comments. It may move a comment only when the comment remains attached to the same syntax node or trivia position by the formatter's documented attachment rules. It must not reflow code examples inside documentation comments. A documentation-format mode is absent from stable Kyokai until a separate accepted D-point defines one.
+The formatter must preserve ordinary comments and documentation comments. It may move a comment only when the comment remains attached to the same syntax node or trivia position by the formatter's documented attachment rules. It must not reflow code examples inside documentation comments. A documentation-format mode is absent from this specification revision; a later revision must define one before a conforming formatter exposes it.
 
 > Trace: D25, D218
 > Covers: Formatting preserves comment and documentation meaning.
@@ -74,7 +74,7 @@ In package scope, `kyokai fmt` selects all `.kyo` files under the package module
 > Trace: D25, D78, D83
 > Covers: Formatter file selection follows package/workspace/module roots deterministically.
 
-Files outside module roots are not formatted unless passed explicitly by path. Explicit paths must still use a recognized Kyokai source extension. Additional source-like extensions are absent from stable Kyokai until a separate accepted D-point defines them.
+Files outside module roots are not formatted unless passed explicitly by path. Explicit paths must still use a recognized Kyokai source extension. Additional source-like extensions are absent from this specification revision and cannot be introduced by formatter configuration alone.
 
 > Trace: D25, D52, D78
 > Covers: Formatter discovery does not wander through unrelated repository files.
@@ -91,10 +91,10 @@ If a formatting choice would obscure a language boundary, the boundary wins. Ter
 > Trace: D9, D25
 > Covers: Formatter style preserves Kyokai's visible boundary syntax.
 
-## Why This Shape
+## Formatting Owns Layout Only
 
 [Rikona Kurasaki / Mjoyufull]
-A formatter does not get clever in the places where the language is already doing heavy work. Make the code clean. Leave the meaning alone. Let review talk about ownership, contracts, and names instead of arguing over how far a `where` clause leaned to the right.
+The formatter owns layout, not semantics. Its single canonical style removes review disputes about indentation, wrapping, import grouping, and `where`-clause layout while preserving tokens and source meaning under the formatter contract.
 
 > Trace: D25
 > Covers: Kyokai formatting removes style noise without touching semantics.
@@ -107,3 +107,22 @@ Formatting parse-invalid source is off by default. A workspace or package enable
 
 > Trace: D442-D443, D482
 > Covers: Canonical import sorting and opt-in noncanonical parse-error subtree recovery are explicit formatter policies.
+
+## Terminator And Layout Discipline
+
+The formatter canonically aligns each accepted opener with its specific
+terminator, expands dense nesting vertically, and applies deterministic line
+breaking and indentation. It does not replace terminators, insert braces,
+rewrite control flow, extract helpers, or perform another semantic refactor.
+
+`drop;` is formatted and paired only as the terminator of a lexical borrow
+scope. Formatter and semantic-highlighting tests cover nested immutable and
+mutable borrows, early scope endings, nearby domain cleanup calls, and
+monochrome output. The spelling never means destruction.
+
+`kyokai check`, not the formatter, owns excessive-nesting and related quality
+lints. The Analysis Server may offer checked helper extraction with the normal
+preimage and safety records.
+
+> Trace: D604-D605
+> Covers: The non-brace terminator system receives strong visual structure without granting the formatter semantic authority.

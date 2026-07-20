@@ -1,0 +1,14 @@
+id = "modules.rejected-generated-koi"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/toolchain/02-module-resolution-and-koi.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.koi"]
+command = "kyokai internal conformance-fixture modules.rejected-generated-koi"
+expect = "Reject `.koi` under the module root as a generated interface artifact, not handwritten source."
+expected_outcome = "reject"
+expected_stage = "package-source"
+expected_code = "generated-artifact-discovered"
+expected_facts = ["src/App/Main.koi"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"

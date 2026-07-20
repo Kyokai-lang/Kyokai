@@ -56,14 +56,6 @@ Moves are as-if bytewise relocation. That is simple until a value points into it
 > Trace: D89/D199, D89a/D89b
 > Covers: Safe self-reference requires explicit stable-address/pinning rules.
 
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-Linear resources are Kyokai's answer to lifecycle bugs: not a linter pass, not a destructor convention, not a culture of careful people, but a rule the compiler enforces and the spec explains. The program says who owns the thing, who borrows it, who moves it, and who consumes it.
-
-> Trace: D6, D77, D89, D194
-> Covers: Linear ownership and borrowing make resource lifecycle boundaries explicit and statically checked.
-
 ## Strict Linearity Without Affine Escape Hatches
 
 [Rikona Kurasaki / Mjoyufull]

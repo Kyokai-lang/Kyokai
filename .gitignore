@@ -1,9 +1,20 @@
 _build
 austral
+kyokai
 calltree.html
 error.html
 *~
 lib/BuiltInModules.ml
 FAILURES.txt
 result
+__pycache__/
+*.pyc
 kyokaicalculus/lean/.lake/
+
+# Maintainer-local direction, research, and reference material.
+/project/
+/kyokaicalculus/internal/
+/kyokaispec/kyokaispecdirection.md
+/kyokaispec/Rikonawritingref/
+/assets/.cursor/
+/assets/notingit/

@@ -48,7 +48,9 @@ A discovered `.kyo` file is a module source file. A source file whose module dec
 > Trace: D52, D78, D537
 > Covers: `.kyo` is the only Kyokai source extension, the `.kai`/`.aui`/`.aum` extensions are retired, and source declarations must match resolved module identity.
 
-A logical module has one selected `.kyo` source file. The compiler derives the importable interface from that file: a module that marks declarations `public` publishes them, and a module whose declarations are all private or `internal` is non-importable and is the in-file replacement for the old body-only module. The toolchain rejects any attempt to import a non-importable module or publish its private declarations into external `.koi` API surface. If a package depends on a module from another package, the downstream checker consumes that dependency through the dependency package's `.koi` interface artifact rather than reading the dependency's private source. Within the same package, a module's full source is available for implementation checking, but only its derived public/`internal` surface becomes importable.
+A logical module has one selected `.kyo` source file. The compiler derives its importable interface: declarations marked `public` are published, while a module containing only private or `internal` declarations is non-importable and replaces the old body-only module. The toolchain rejects attempts to import a non-importable module or publish its private declarations in an external `.koi` API surface.
+
+Downstream packages consume a dependency module through that package's `.koi` interface artifact rather than reading private source. Within the same package, full module source remains available for implementation checking, but only the derived public and `internal` surface is importable.
 
 > Trace: D17, D52, D78, D79, D313, D537
 > Covers: Each logical module is one source file whose interface is derived by the compiler, non-importable private-only modules replace body-only modules, dependency checking consumes `.koi` interfaces, and same-package source stays an implementation input outside its derived surface.
@@ -288,10 +290,10 @@ Documentation generation must follow visibility. Public docs for external consum
 > Trace: D17, D29, D79
 > Covers: Documentation output respects public/internal/private visibility and uses `.koi` metadata where appropriate.
 
-## Why This Shape
+## Interface Artifacts, Not Compiler Memory
 
 [Rikona Kurasaki / Mjoyufull]
-The `.koi` file is the sealed envelope at the package boundary. Not a cache. Not whatever the last compiler happened to remember. It is the checked interface contract: names, visibility, types, instances, edition, target, and enough generic truth for the next package to stand on it without walking through private rooms.
+A `.koi` file is a checked package-interface artifact, not an opaque incremental cache. It records names, visibility, types, instances, edition, target identity, contracts, and the generic metadata required for downstream checking without exposing private implementation state.
 
 > Trace: D79, D83
 > Covers: `.koi` makes package interfaces inspectable, reproducible, and consumable without exposing private implementation.
@@ -327,3 +329,105 @@ The compiler, package manager, docs generator, audit tool, Analysis Server, SemV
 
 > Trace: D79, D265, D518, D537
 > Covers: Every tool consumes one `.koi` parser and reports file-role mistakes, including the retired `.kai` extension, without pretending generated artifacts are editable source.
+
+## KBI-1 Container Framing
+
+KBI-1 begins with a fixed header that identifies the magic, container major and
+minor, byte order, header size, directory offset, section count, directory-entry
+size, required/optional framing flags, total file length, and whole-artifact
+digest algorithm and bytes. All integers have one fixed byte order. Readers
+perform checked arithmetic before slicing, allocating, or converting to host
+integer widths.
+
+Each fixed-size directory entry records numeric section ID, section-schema
+major and minor, flags, alignment, offset, stored length, logical length,
+payload digest algorithm and bytes, and reserved-zero fields. Sections must be
+inside the file, non-overlapping, correctly aligned, and ordered by numeric
+section ID. Duplicate IDs, reserved flag bits, invalid alignment, unsupported
+required schemas, and digest mismatch are malformed. Unknown framing flags
+fail closed. Digest coverage states which self-referential digest bytes are
+zeroed or excluded.
+
+`entry_size` equals the published base size. A later container minor can
+increase it only through a canonical, hash-covered extension tail whose old
+reader behavior is specified. Optional future information uses registered
+extension sections after base framing succeeds. Unknown optional sections can
+be skipped; unknown required sections, required flags, entry tails, or framing
+semantics fail closed. No extension redefines base offsets, lengths, alignment,
+digests, section identity, overlap checks, or validation order. Such a change
+requires a new container major.
+
+> Trace: D573
+> Covers: A reader can bounds-check and authenticate every KBI-1 section from fixed framing before interpreting semantic payloads.
+
+## KBI-1 Semantic Byte Grammar
+
+One machine-readable schema assigns stable numeric tags to every KBI value
+kind, type node, declaration kind, visibility, universe, constraint,
+contract/effect fact, audit fact, and reference. It fixes the encodings of
+signed and unsigned integers, lengths, booleans, byte strings, UTF-8 strings,
+optionals, tagged unions, records, lists, maps, and field order. Encoders use
+the shortest admitted integer and length form; readers reject non-minimal forms.
+
+Strings contain valid UTF-8 and receive no reader normalization. The schema
+distinguishes identifiers normalized before serialization from exact source
+bytes. Each reference names its target table/domain and width. Forward
+references, cycles, and recursion are legal only for enumerated graph kinds;
+dangling, cross-domain, duplicate, and forbidden cyclic references are
+malformed. Semantically unordered collections use one canonical byte order and
+reject duplicates. Source-ordered collections preserve source order.
+
+An unknown value tag in a required section is incompatible. Extension payloads
+belong in registered extension sections. Generated encoders/decoders are
+checked against the schema and an independently written decoder. Text and JSON
+views are derived and non-authoritative.
+
+> Trace: D574
+> Covers: KBI-1 has one canonical tagged payload grammar with closed reference domains and minimal encodings.
+
+## Hostile-Input Budgets
+
+KBI decoding is streaming. It checks framing, arithmetic, digests, and policy
+budgets before allocating payload-sized structures. The decoder names ceilings
+for file and section bytes, section count, strings, records, graph nodes and
+edges, nesting, references, generic bodies, spans, diagnostic metadata,
+cumulative allocation, and validation work.
+
+Universal representation ceilings prevent integer and offset overflow. Lower
+practical budgets come from versioned target/toolchain policy and enter build
+and cache identity when they change acceptance. Exhaustion produces
+`artifact-too-complex`, distinct from malformed bytes, unsupported schema,
+compatibility failure, and digest failure.
+
+Readers do not recurse over attacker-controlled depth on the host stack, use
+unchecked count multiplication, perform quadratic duplicate search, or render
+unbounded diagnostics. Compiler and Analysis Server use the same verification
+library and budgets unless a named read-only inspection profile is stricter.
+
+> Trace: D575
+> Covers: KBI parsing is streaming, allocation-bounded, work-bounded, and explicit about malformed, incompatible, and over-budget artifacts.
+
+## Stability, Inspection, And Decoder Admission
+
+KBI-1 is stable only when its published container and payload schemas leave no
+unspecified bytes, tags, fields, reference domains, digest coverage, or resource
+classes. A compatibility table classifies each container-minor and section
+schema change as additive, skippable, required, incompatible, or
+normalization-only. Required semantic changes increment the applicable major.
+
+Skipped extension sections remain hash-covered. Only a lossless rewriting tool
+that promises preservation retains unknown sections byte-for-byte. The
+conformance corpus contains canonical bytes and semantic views, deterministic
+re-encoding, each malformed/budget class, old/new reader-writer matrices, and
+cross-edition rejection. At least one decoder independent of the production
+schema-generated parser must agree before stability is claimed.
+
+Clean builds on supported hosts and admitted toolchains produce byte-identical
+KBI-1 for identical normalized inputs. `koi verify`, `koi print`, and `koi
+diff` distinguish container, schema, compatibility, canonicality, hash,
+resource, and semantic failures in stable machine output. Migration never
+overwrites the only artifact and records source/target schemas, tool identity,
+lossy fields, compatibility result, and output digest.
+
+> Trace: D576
+> Covers: KBI stability requires closed schemas, independent decoding, hostile corpora, deterministic bytes, explicit compatibility, and non-destructive migration.

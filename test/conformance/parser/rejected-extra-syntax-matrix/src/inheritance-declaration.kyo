@@ -1,0 +1,5 @@
+module Demo.InheritanceDeclaration is
+record Child extends Parent is
+    field value: Int32;
+qed;
+seal;

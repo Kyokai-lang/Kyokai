@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-09-REPRODUCIBILITY-INCREMENTAL-BUILDS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Reproducibility is the build system telling the truth twice. Incremental compilation is the toolchain moving faster without changing that truth. Kyokai needs both: trust for releases, and speed for daily work.
+Reproducible builds fix the observable result for one declared build identity. Incremental compilation may reuse prior work only when that reuse preserves the same result. Kyokai requires both release reproducibility and bounded daily rebuild work.
 
 > Trace: D83, D144
 > Covers: Reproducible outputs and incremental compilation are both normative toolchain concerns.
@@ -89,7 +89,9 @@ Incremental cache keys include every build identity input that could affect the 
 > Trace: D83, D144
 > Covers: Incremental cache correctness is required.
 
-A build-result cache entry records cache-format version, toolchain identity, version ABI string, source and generated-input hashes, manifest and lockfile hashes, canonical package-source hashes, package-instance feature set, target contract, profile, selected C compiler/linker contract, code-generation schema, policy values, effective capability deny policy when it affects acceptance or artifacts, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, output-integrity hash, and the compatibility class needed to validate reuse. Cache state is partitioned under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<c-toolchain-contract>/<package-instance>/` when those components apply. Cache sharing between package instances exists only after the tool proves identical public `.koi`, identical semantic facts, compatible deny-policy effect, compatible generated-code inputs, and compatible C-toolchain contracts. Sharing never changes diagnostics, audit output, build identity, or package-graph reporting.
+A build-result cache entry records cache-format version, toolchain identity, version ABI string, source and generated-input hashes, manifest and lockfile hashes, canonical package-source hashes, package-instance feature set, target contract, profile, selected C compiler/linker contract, code-generation schema, policy values, effective capability deny policy when it affects acceptance or artifacts, admitted environment inputs, external tool identities, `.koi`/KBI version, package-index schema version, output-integrity hash, and the compatibility class needed to validate reuse.
+
+Cache state is partitioned under `<cache-root>/<toolchain-compat>/<target-triple>/<profile>/<c-toolchain-contract>/<package-instance>/` when those components apply. The tool may share cache state between package instances only after proving identical public `.koi`, identical semantic facts, compatible deny-policy effect, compatible generated-code inputs, and compatible C-toolchain contracts. Sharing never changes diagnostics, audit output, build identity, or package-graph reporting.
 
 > Trace: D29, D79, D83, D144, D218, D264, D397, D425, D429, D480, D497, D527
 > Covers: Build-result cache reuse is keyed by complete package-instance, policy, and toolchain facts and is a semantics-preserving optimization only.
@@ -117,10 +119,87 @@ Release provenance records include build identity, source revision, Kyokai toolc
 > Trace: D83, D225
 > Covers: Release provenance names its deterministic and authority-backed fields.
 
-## Why This Shape
+## Reuse Cannot Change Meaning
 
 [Rikona Kurasaki / Mjoyufull]
-A build that changes because the clock ticked is not trustworthy. A cache that changes meaning is not a cache; it is a trap with a progress bar. Kyokai keeps the fast path, but it makes the fast path prove it is still walking on the same road.
+Wall-clock time and undeclared host state are not build inputs. Incremental reuse is permitted only when the cache key covers every input that can affect the reused result and validation confirms the artifact's identity. A cache miss may cost time; a false hit would change program meaning.
 
 > Trace: D83, D144
 > Covers: Kyokai treats reproducibility as trust and incremental compilation as a checked optimization.
+
+## Canonical Source-Tree Identity (`KST-1`)
+
+`KST-1` identifies a publishable package-source snapshot independently of
+archive format, Git history, host paths, locale, enumeration order, uid/gid,
+timestamps, extended attributes, and clock state. It is distinct from local
+workspace identity, semantic compiler-input identity, and build/artifact
+identity.
+
+Selected paths contain non-empty NFC UTF-8 components, use `/` as the canonical
+separator, and sort by unsigned UTF-8 bytes. Absolute, empty, dot, dot-dot, NUL,
+platform-separator, normalization-duplicate, and portable case-fold-collision
+paths are rejected. File contents are exact bytes. KST performs no newline,
+Unicode, comment, or formatter normalization. Identity includes one normalized
+executable bit; empty directories and other metadata are absent.
+
+Published snapshots reject symlinks, hard-link identity, special files, mount
+crossings, gitlinks/submodules, and alternate streams. External content is
+vendored as ordinary selected files or separately identified. Selection uses a
+closed toolchain exclusion set plus explicit manifest includes; VCS, editor,
+archive, and ambient ignore files have no effect. Controlling manifests are
+included. Checked-in generated files are ordinary bytes; build outputs remain
+separate inputs and outputs.
+
+Capture uses an immutable staging snapshot with containment-safe traversal and
+fails on replacement, truncation, or metadata swap. Nodes use a canonical
+length-delimited binary grammar containing node type, lengths, executable bit,
+ordered child names, and child digests. The root domain includes `KST-1`, the
+package namespace/identity where applicable, and algorithm ID. SHA-256 is the
+initial algorithm. Algorithm agility requires a new schema/ID.
+
+Implementations stream under path, entry, byte, depth, and work budgets.
+Lockfiles, package and knot records, mirrors, caches, docs, provenance,
+transparency, vendoring, signatures, and plans record schema, algorithm, root,
+counts, and capture policy. KST authenticates captured structure and bytes; it
+does not establish publisher identity, review, safety, licensing, absence of
+malice, or reproducible outputs.
+
+> Trace: D570
+> Covers: Publishable source has one exact cross-host tree identity with hostile traversal, exact-byte, and metadata boundaries.
+
+## Kyokai-Native Toolchain Convergence
+
+Kyokai is the target implementation language for the compiler, package/build
+system, formatter, test/fuzz/bench runners, docs, audit, Analysis Server/LSP,
+migration, and ordinary toolchain components. OCaml is a pinned transitional
+bootstrap and differential implementation, not semantic authority.
+
+Every bootstrap component has both a semantic disposition (`RETAIN`, `ADAPT`,
+`REPLACE`, or `DELETE`) and a language-transition disposition (`KEEP`, `WRAP`,
+`REIMPLEMENT`, or `REMOVE`). Replacement seams use stable command/data
+protocols, shared conformance corpora, and implementation-independent IR
+contracts. Source semantics cannot depend on an OCaml convenience.
+
+Native migration starts only after the self-host entry gate proves substantial
+multi-package compilation plus stable parsing, elaboration/type checking,
+linearity and borrowing, module/`.koi`, generated-C/runtime, deterministic
+builds, diagnostics, package/build foundations, Tier-One stdlib, conformance,
+and a documented recovery route. A toy self-compile is insufficient.
+
+Stage 0 is the pinned OCaml bootstrap. Stage 1 builds a Kyokai-native slice with
+Stage 0. Stage 2 rebuilds it with Stage 1. Stage 3 repeats and checks declared
+convergence of generated C, `.koi`, diagnostics, tests, package graphs, and
+final artifacts after normalization of specified nondeterminism. Each stage
+records source, compiler, admitted C toolchain, target/profile, dependency,
+generator, environment, and content identities. Execution success alone is not
+convergence.
+
+Cross-bootstrap uses a previous admitted Kyokai toolchain or a reviewed,
+content-identified generated-C snapshot. Binary users do not require OCaml.
+An OCaml component retires only after its named replacement, owner, parity and
+differential suites, convergence evidence, relevant gates, and recovery role
+are satisfied. Bootstrap intrinsics are explicit, audited, minimized, and
+retired or standardized.
+
+> Trace: D592a
+> Covers: Self-hosting begins at an evidence gate, proceeds through reproducible stages, and retains an audited recovery path while OCaml authority is removed component by component.

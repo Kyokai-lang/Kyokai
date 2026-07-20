@@ -1,0 +1,737 @@
+schema_version = 1
+registry_id = "KYOKAI-EXTRACT-D558-D625"
+accepted_source = "kyokaidecided.md"
+traceability_view = "kyokaispec/src/project/02-decision-traceability.md"
+generated_review = "kyokaispec/extraction/d558-d625-review.md"
+required_decisions = ["D558", "D559", "D560", "D561", "D562", "D562a", "D563", "D564", "D565", "D566", "D567", "D568", "D569", "D569a", "D569b", "D569c", "D570", "D571", "D572", "D573", "D573a", "D574", "D575", "D576", "D577", "D578", "D579", "D580", "D581", "D582", "D583", "D584", "D585", "D586", "D587", "D588", "D589", "D590", "D591", "D592", "D592a", "D593", "D593a", "D594", "D595", "D596", "D596a", "D597", "D598", "D599", "D600", "D601", "D602", "D603", "D604", "D605", "D606", "D607", "D608", "D609", "D610", "D611", "D612", "D613", "D614", "D615", "D616", "D617", "D618", "D619", "D620", "D621", "D622", "D623", "D624", "D624a", "D625", "D626"]
+
+[policy]
+batch_label = "D558-D625"
+clause_id_shape = "<decision>.<obligation-category>"
+categories = ["syntax-api", "static", "dynamic", "ownership", "borrow", "capability", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "illegal-form", "conformance"]
+default_not_applicable_reason = "The accepted decision creates no independent obligation in this category; applicability was reviewed against the accepted source."
+maturity_result = "SPEC_EXTRACTED"
+maturity_exclusions = ["implementation", "conformance", "admission", "service readiness", "workload evidence", "proof"]
+evidence_links = ["kyokaispec/extraction/d558-d625.toml", "kyokaispec/extraction/d558-d625-review.md", "kyokaispec/src/project/02-decision-traceability.md"]
+maturity_lines = ["Every required D558-D625 decision, including sub-decisions, is clause-complete or recorded as superseded. This batch satisfies D577's clause-evidence condition for `SPEC_EXTRACTED`. Together with the checked pre-D558 and D627-D635 registries, Gate A is closed through D635. This does not upgrade implementation, conformance, admission, service, workload, or proof state."]
+
+[review]
+reviewer = "Rikona Kurasaki / Mjoyufull"
+review_class = "lead-maintainer-directed-extraction"
+reviewed_revision = "working tree accepted through D625"
+accepted_cutoff = "D625; D626 withdrawn by D596a"
+date = "2026-07-16"
+basis = "The lead maintainer accepted D558-D625 and explicitly directed clause-evidence closure. The checker performs the mechanical completeness audit; it does not invent an independent reviewer or semantic vote."
+
+[[projection]]
+kind = "traceability"
+path = "kyokaispec/src/project/02-decision-traceability.md"
+required_terms = ["| D558 |", "| D625 |", "| D626 |"]
+
+[[projection]]
+kind = "maturity"
+path = "Kyokaishape.md"
+required_terms = ["### D558-D570: Semantic Safety, Unsafe Closure, Compiler Admission, And Source Identity **[DECIDED | SPEC_EXTRACTED", "### D571-D583: Runtime Reclamation, KBI Closure, Evidence, Experiments, And Security Operations **[DECIDED | SPEC_EXTRACTED", "### D584-D596a: Concrete APIs, Native Toolchain, Data, Protocol, And Bridge Portfolio **[DECIDED | SPEC_EXTRACTED", "### D597-D614: Remaining Judgment, Daily Surface, And Reference Evidence **[DECIDED | SPEC_EXTRACTED", "### D615-D625: Distribution, Deep Analysis, Development, Platform, Publication, And Experiments **[DECIDED | SPEC_EXTRACTED"]
+forbidden_terms = ["The clusters remain `SHAPE_DECIDED` until D577"]
+
+[[projection]]
+kind = "maturity"
+path = "kyokaidecided.md"
+required_terms = ["D558-D570, including D562a and D569a-D569c | `SPEC_EXTRACTED`", "D571-D583, including D573a | `SPEC_EXTRACTED`", "D584-D596a | `SPEC_EXTRACTED`", "D615-D625; D617/D622 duplicate withdrawals and D626 withdrawn by D596a | `SPEC_EXTRACTED`"]
+
+[[projection]]
+kind = "gate"
+path = "phase.md"
+required_terms = ["Gate A: Plan-To-Spec Closure | Closed through D635", "pre-d558.toml", "D558-D625"]
+forbidden_terms = ["Gate A remains open through D625", "Open for the pre-D558 accepted range"]
+
+[[decision]]
+id = "D558"
+state = "complete"
+source_heading = "### D558: Closed Callable Effect Evidence"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/07-generics-and-typeclasses.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
+required_terms = ["Unknown", ".koi"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D559"
+state = "complete"
+source_heading = "### D559: Mutable-Borrow Token Copies Share One Lease Lineage"
+categories = ["static", "dynamic", "ownership", "borrow", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/11-linearity-borrowing-and-regions.md", "kyokaispec/src/project/03-formalization-roadmap.md"]
+required_terms = ["lease lineage", "reborrow"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D560"
+state = "complete"
+source_heading = "### D560: Declared `Free` Types Are Structurally Checked"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/06-type-system.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
+required_terms = ["structural", "Free"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D561"
+state = "complete"
+source_heading = "### D561: Process-Wide Fatal Arbitration"
+categories = ["dynamic", "ownership", "failure", "diagnostic", "target", "conformance"]
+destinations = ["kyokaispec/src/language/13-contracts-and-runtime-failure.md", "kyokaispec/src/language/15-concurrency.md"]
+required_terms = ["fatal", "bounded primary report"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D562"
+state = "complete"
+source_heading = "### D562: Accepted D-Point Authority And Workspace Root Repair"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/project/01-governance.md"]
+required_terms = ["root package", "canonical member"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D562a"
+state = "complete"
+source_heading = "### D562a: Monthly And Release-Bound Specification Review"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "kyokaispec/src/project/02-decision-traceability.md"]
+required_terms = ["review", "release candidate"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D563"
+state = "complete"
+source_heading = "### D563: Independently Projectable Record Fields"
+categories = ["static", "dynamic", "ownership", "borrow", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/03-grammar.md", "kyokaispec/src/language/06-type-system.md"]
+required_terms = ["projection independent"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D564"
+state = "complete"
+source_heading = "### D564: Authority Enforcement Is Not Native Containment"
+categories = ["static", "dynamic", "ownership", "capability", "failure", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/14-capabilities-and-authority.md", "kyokaispec/src/language/16-unsafe-ffi-and-abi.md"]
+required_terms = ["containment", "authority"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D565"
+state = "complete"
+source_heading = "### D565: No Kyokai Undefined Behavior, Including Unsafe Kyokai"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/16-unsafe-ffi-and-abi.md", "kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+required_terms = ["undefined behavior", "unsafe"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D566"
+state = "complete"
+source_heading = "### D566: Unsafe Capability Topology"
+categories = ["static", "dynamic", "ownership", "capability", "failure", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/14-capabilities-and-authority.md", "kyokaispec/src/language/16-unsafe-ffi-and-abi.md"]
+required_terms = ["UnsafeCapability", "surrender"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D567"
+state = "complete"
+source_heading = "### D567: Canonical Callable Invocation Classes"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/07-generics-and-typeclasses.md", "kyokaispec/src/language/11-linearity-borrowing-and-regions.md", "kyokaispec/src/language/16-unsafe-ffi-and-abi.md"]
+required_terms = ["CallableRead", "CallableOnce"]
+forbidden_active_patterns = ["(?m)^typeclass Callable\\b"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D568"
+state = "complete"
+source_heading = "### D568: Validate Untrusted Input Before Hard-Stop Domains"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/13-contracts-and-runtime-failure.md"]
+required_terms = ["untrusted", "recoverable"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D569"
+state = "complete"
+source_heading = "### D569: Kyokai-Owned Atomic Execution Model"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/15-concurrency.md", "kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+required_terms = ["Kyokai atomic behavior"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D569a"
+state = "complete"
+source_heading = "### D569a: Shared Semantic Corpus For C-Compiler Admission"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+required_terms = ["C-Toolchain Semantic Corpus"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D569b"
+state = "complete"
+source_heading = "### D569b: Exact Admission Matrix"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"]
+required_terms = ["compiler family", "version"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D569c"
+state = "complete"
+source_heading = "### D569c: Admission Lifecycle And Self-Verification"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+required_terms = ["A minor reruns affected tuples", "self-verification"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D570"
+state = "complete"
+source_heading = "### D570: Canonical Source-Tree Identity (`KST-1`)"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md", "kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"]
+required_terms = ["KST-1"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D571"
+state = "complete"
+source_heading = "### D571: Structured Task Child Reclamation"
+categories = ["dynamic", "ownership", "failure", "diagnostic", "target", "conformance"]
+destinations = ["kyokaispec/src/language/15-concurrency.md", "kyokaispec/src/stdlib/09-concurrency-primitives.md"]
+required_terms = ["reap", "join"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D572"
+state = "complete"
+source_heading = "### D572: Generated-C Semantic Preservation And Translation Validation"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/17-memory-layout-and-backend-contract.md", "kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"]
+required_terms = ["sequenced backend IR", "generated C"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D573"
+state = "complete"
+source_heading = "### D573: KBI-1 Bounds-Checkable Container Framing"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
+required_terms = ["little-endian", "section"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D573a"
+state = "complete"
+source_heading = "### D573a: Native Linux `io_uring` Provider"
+categories = ["static", "dynamic", "ownership", "capability", "failure", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/14-capabilities-and-authority.md", "kyokaispec/src/language/15-concurrency.md", "kyokaispec/src/stdlib/08-io-files-env-process-time-random.md", "kyokaispec/src/stdlib/09-concurrency-primitives.md"]
+required_terms = ["io_uring", "IoUringProvider"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D574"
+state = "complete"
+source_heading = "### D574: KBI-1 Canonical Semantic Payload Grammar"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/02-module-resolution-and-koi.md"]
+required_terms = ["canonical", "tag"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D575"
+state = "complete"
+source_heading = "### D575: KBI-1 Hostile-Input Budgets"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/02-module-resolution-and-koi.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+required_terms = ["resource", "malformed"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D576"
+state = "complete"
+source_heading = "### D576: KBI-1 Stability And Independent Decoder Admission"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/02-module-resolution-and-koi.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["decoder independent", "KBI-1"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D577"
+state = "complete"
+source_heading = "### D577: Clause-Level Specification Extraction Evidence"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "kyokaispec/src/project/02-decision-traceability.md", "PROJECT_STANDARDS.md", "docs/contributing/spec-writing.md"]
+required_terms = ["not-applicable-with-reason", "SPEC_EXTRACTED"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D578"
+state = "complete"
+source_heading = "### D578: Public Document Identity And Version Axes"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "kyokaispec/src/project/02-decision-traceability.md"]
+required_terms = ["document revision", "source revision"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D579"
+state = "complete"
+source_heading = "### D579: Generated Semantic Atlas"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/08-docs-lsp-audit.md", "kyokaispec/src/rationale/00-rationale-index.md"]
+required_terms = ["semantic atlas", "prediction"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D580"
+state = "complete"
+source_heading = "### D580: Bidirectional Specification–Calculus Correspondence"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/03-formalization-roadmap.md", "kyokaicalculus/findings-divergence.md", "PROJECT_STANDARDS.md", "docs/contributing/spec-writing.md"]
+required_terms = ["Correspondence", "proof impact"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D581"
+state = "complete"
+source_heading = "### D581: Revision-Bound Proof Review Artifacts"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/03-formalization-roadmap.md", "kyokaicalculus/claim-tiers.md", "kyokaicalculus/reviews/README.md", "phase.md", "kyokaiproofstatus.toml"]
+required_terms = ["review packet", "reviewer"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D582"
+state = "complete"
+source_heading = "### D582: Experiment Points And Xperimental Releases **[AMENDED BY D625: production-quality experiments can be carried disabled in stable toolchains under exact root-manifest opt-in]**"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["PROJECT_STANDARDS.md", "CODE_STANDARDS.md", "kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "phase.md"]
+required_terms = ["Xperimental", "XP"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D583"
+state = "complete"
+source_heading = "### D583: Vulnerability Reporting And Incident Service"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md", "docs/infrastructure/services.md"]
+required_terms = ["vulnerability", "LIMITED_SINGLE_OWNER"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D584"
+state = "complete"
+source_heading = "#### D584: Tier-One API Packets"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/00-stdlib-overview.md", "kyokaispec/src/stdlib/01-admission-contracts.md", "kyokaispec/src/stdlib/02-core-result-optional-display-error.md"]
+required_terms = ["API packet", "Tier-One"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D585"
+state = "complete"
+source_heading = "#### D585: Closed `TextView[R]` Call-Boundary Formation"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/12-implicit-completions-and-elaboration.md", "kyokaispec/src/language/18-built-ins.md", "kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md"]
+required_terms = ["textview.direct-call", "TextView"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D586"
+state = "complete"
+source_heading = "#### D586: Reviewed Storage Foundation"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/03-allocators-and-memory-containers.md", "kyokaispec/src/language/11-linearity-borrowing-and-regions.md"]
+required_terms = ["uninitialized", "relocation"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D587"
+state = "complete"
+source_heading = "#### D587: Collection Families And Linear Ownership"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/05-collections.md", "kyokaispec/src/language/11-linearity-borrowing-and-regions.md"]
+required_terms = ["invalidation", "drain"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D588"
+state = "complete"
+source_heading = "#### D588: First-Party CLI Schema And Parser"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/08-io-files-env-process-time-random.md", "kyokaispec/src/toolchain/03-cli.md"]
+required_terms = ["First-Party Command Schema", "Args"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D589"
+state = "complete"
+source_heading = "#### D589: One Testing Evidence Protocol"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/stdlib/01-admission-contracts.md"]
+required_terms = ["Unified Testing Evidence Protocol", "seed"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D590"
+state = "complete"
+source_heading = "#### D590: Capability Registry And Authority Explanation"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/language/14-capabilities-and-authority.md", "kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/05-diagnostics.md", "kyokaispec/src/toolchain/08-docs-lsp-audit.md"]
+required_terms = ["explain authority", "capability registry"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D591"
+state = "complete"
+source_heading = "#### D591: Explicit Observability Contracts"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/08-io-files-env-process-time-random.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+required_terms = ["Explicit Observability", "backpressure"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D592"
+state = "complete"
+source_heading = "#### D592: Codec And Data-Format Placement"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/01-admission-contracts.md", "kyokaispec/src/stdlib/04-text-bytes-paths-and-strings.md", "kyokaispec/src/toolchain/11-build-generation-and-playground.md"]
+required_terms = ["JSON", "TOML"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D592a"
+state = "complete"
+source_heading = "#### D592a: Gated Kyokai-Native Toolchain"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/toolchain/00-toolchain-overview.md", "kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md", "kyokaispec/src/project/03-formalization-roadmap.md"]
+required_terms = ["Stage 0", "self-host"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D593"
+state = "complete"
+source_heading = "#### D593-D593a: Crypto Boundary And Admission Taxonomy"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/10-crypto-policy.md", "kyokaispec/src/stdlib/11-transitional-ffi-tracking.md"]
+required_terms = ["cryptographic", "provider"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D593a"
+state = "complete"
+source_heading = "#### D593-D593a: Crypto Boundary And Admission Taxonomy"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/stdlib/01-admission-contracts.md", "kyokaispec/src/stdlib/11-transitional-ffi-tracking.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["admission", "lifecycle"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D594"
+state = "complete"
+source_heading = "#### D594: First-Party Web Protocol Foundation"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/08-io-files-env-process-time-random.md", "kyokaispec/src/stdlib/09-concurrency-primitives.md", "kyokaispec/src/stdlib/12-application-integration-contracts.md"]
+required_terms = ["HTTP Core", "WebSocket"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D595"
+state = "complete"
+source_heading = "#### D595: Database Ownership And Placement"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/12-application-integration-contracts.md", "kyokaispec/src/stdlib/11-transitional-ffi-tracking.md"]
+required_terms = ["SQLite", "transaction"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D596"
+state = "complete"
+source_heading = "#### D596-D596a: Bridge Portfolio And Rust Boundary"
+categories = ["syntax-api", "static", "dynamic", "ownership", "failure", "diagnostic", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/stdlib/11-transitional-ffi-tracking.md", "kyokaispec/src/stdlib/12-application-integration-contracts.md", "kyokaispec/src/language/16-unsafe-ffi-and-abi.md"]
+required_terms = ["Bridge"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D596a"
+state = "complete"
+source_heading = "#### D596-D596a: Bridge Portfolio And Rust Boundary"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/toolchain/11-build-generation-and-playground.md", "kyokaispec/src/rationale/01-language-design.md", "kyokaispec/src/stdlib/11-transitional-ffi-tracking.md"]
+required_terms = ["Rust", "rejected"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D597"
+state = "complete"
+source_heading = "#### D597: Fail-Closed Generator Host Admission"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/11-build-generation-and-playground.md", "kyokaispec/src/language/14-capabilities-and-authority.md"]
+required_terms = ["fails closed", "generator"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D598"
+state = "complete"
+source_heading = "#### D598: Native Math Ownership And Replacement"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/stdlib/07-math-and-numerics.md", "kyokaispec/src/stdlib/01-admission-contracts.md"]
+required_terms = ["accuracy", "owner"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D599"
+state = "complete"
+source_heading = "#### D599: Shared-Lifetime Pattern Family And Explanation"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/language/11-linearity-borrowing-and-regions.md", "kyokaispec/src/toolchain/03-cli.md"]
+required_terms = ["ownership-pattern", "generational"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D600"
+state = "complete"
+source_heading = "#### D600: SPSC And Native-Task Topology Evidence"
+categories = ["capability", "failure", "artifact", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/language/15-concurrency.md", "kyokaispec/src/stdlib/09-concurrency-primitives.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+required_terms = ["SPSC", "Poller"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D601"
+state = "complete"
+source_heading = "#### D601: First Poller Reference Product"
+categories = ["capability", "failure", "artifact", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/project/06-reference-products-and-workloads.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md"]
+required_terms = ["Poller server", "soak"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D602"
+state = "complete"
+source_heading = "#### D602: Repository-Owned Documentation Modes"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/08-docs-lsp-audit.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["source-only", "structured"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D603"
+state = "complete"
+source_heading = "#### D603: Non-Authorizing `debug` Instrumentation"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/10-statements-and-control-flow.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+required_terms = ["debug", "instrumentation"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D604"
+state = "complete"
+source_heading = "#### D604-D605: Borrow Terminator And Layout Discipline"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/10-statements-and-control-flow.md", "kyokaispec/src/toolchain/06-formatter.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+required_terms = ["drop;", "borrow"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D605"
+state = "complete"
+source_heading = "#### D604-D605: Borrow Terminator And Layout Discipline"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/06-formatter.md", "kyokaispec/src/toolchain/05-diagnostics.md"]
+required_terms = ["nesting", "formatter"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D606"
+state = "complete"
+source_heading = "#### D606: Position-Bound Unsafe-Contract Labels"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/language/03-grammar.md"]
+required_terms = ["unsafe contract", "reserved"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D607"
+state = "complete"
+source_heading = "#### D607: Distinct Borrow Spellings"
+categories = ["static", "dynamic", "ownership", "borrow", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/language/03-grammar.md", "kyokaispec/src/language/11-linearity-borrowing-and-regions.md", "kyokaispec/src/rationale/02-syntax.md"]
+required_terms = ["&read", "&write"]
+forbidden_active_patterns = ["(?m)^borrow_expr\\s*::=\\s*['\"]&['\"]"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D608"
+state = "complete"
+source_heading = "#### D608: Comment Syntax Reaffirmation"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/02-lexical-syntax.md", "kyokaispec/src/rationale/02-syntax.md"]
+required_terms = ["//", "block comments"]
+forbidden_active_patterns = ["(?m)^block_comment\\s*::="]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D609"
+state = "superseded"
+superseded_by = "D585"
+supersession_reason = "D609 was withdrawn as a duplicate of D585's closed TextView formation rule."
+
+[[decision]]
+id = "D610"
+state = "complete"
+source_heading = "#### D610: `build;` And Branch-Local Production"
+categories = ["static", "dynamic", "diagnostic", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/language/03-grammar.md", "kyokaispec/src/language/09-expressions-and-evaluation.md", "kyokaispec/src/language/10-statements-and-control-flow.md"]
+required_terms = ["produce", "build;"]
+proof_impact = "MODEL_AFFECTING"
+
+[[decision]]
+id = "D611"
+state = "complete"
+source_heading = "#### D611: No-Shadowing Transformation Assistance"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/05-diagnostics.md", "kyokaispec/src/toolchain/08-docs-lsp-audit.md"]
+required_terms = ["shadowing", "stage"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D612"
+state = "complete"
+source_heading = "#### D612: Frontend Ownership And Migration Boundaries"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/toolchain/00-toolchain-overview.md", "kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+required_terms = ["sequenced backend IR"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D613"
+state = "superseded"
+superseded_by = "D581"
+supersession_reason = "D613 was withdrawn as a duplicate of D581's revision-bound proof review rule."
+
+[[decision]]
+id = "D614"
+state = "complete"
+source_heading = "#### D614: Typed Finding Intake"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "PROJECT_STANDARDS.md", "phase.md"]
+required_terms = ["DPOINT_CANDIDATE", "AI"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D615"
+state = "complete"
+source_heading = "### D615: Bleedring Bootstrap Installation And Bundled Distribution"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/04-build-profiles-targets-linking.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["Bleedring", "bundled distribution"]
+forbidden_active_patterns = ["(?m)^\\s*kyokai toolchain install\\b"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D616"
+state = "complete"
+source_heading = "### D616: Named Deep-Analysis Engines"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/05-diagnostics.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/language/17-memory-layout-and-backend-contract.md"]
+required_terms = ["deep-check", "sanitizer"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D617"
+state = "superseded"
+superseded_by = "D527/D545/D590"
+supersession_reason = "D617 was withdrawn because it adds no rule beyond D527, D545, and D590."
+
+[[decision]]
+id = "D618"
+state = "complete"
+source_heading = "### D618: `kyokai dev` Supervision And Reload"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/11-build-generation-and-playground.md", "kyokaispec/src/language/14-capabilities-and-authority.md"]
+required_terms = ["kyokai dev", "reload"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D619"
+state = "complete"
+source_heading = "### D619: Apple Support Is An Evidence Matrix"
+categories = ["capability", "failure", "artifact", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/toolchain/13-application-integration-and-deployment.md"]
+required_terms = ["Apple", "SDK"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D620"
+state = "complete"
+source_heading = "### D620: Game Reference Stacks Without An Official Engine"
+categories = ["capability", "failure", "artifact", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/project/06-reference-products-and-workloads.md", "kyokaispec/src/stdlib/12-application-integration-contracts.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/toolchain/13-application-integration-and-deployment.md"]
+required_terms = ["SDL3", "raylib"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D621"
+state = "complete"
+source_heading = "### D621: One Analysis Engine, Complete CLI And Machine Access"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/05-diagnostics.md", "kyokaispec/src/toolchain/08-docs-lsp-audit.md"]
+required_terms = ["machine protocol", "LSP"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D622"
+state = "superseded"
+superseded_by = "D531-D536/D569a-D569c"
+supersession_reason = "D622 was withdrawn because the generated-C evidence rule is already owned by D531-D536 and D569a-D569c."
+
+[[decision]]
+id = "D623"
+state = "complete"
+source_heading = "### D623: Cross-Phase Workload Evidence"
+categories = ["capability", "failure", "artifact", "target", "example", "conformance"]
+destinations = ["kyokaispec/src/project/06-reference-products-and-workloads.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/language/19-examples.md", "phase.md"]
+required_terms = ["workload", "claim ceiling"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D624"
+state = "complete"
+source_heading = "### D624: Foreign Build Plan Protocol"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md", "kyokaispec/src/toolchain/11-build-generation-and-playground.md", "kyokaispec/src/language/14-capabilities-and-authority.md"]
+required_terms = ["Foreign Build Plan Protocol", "argv"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D624a"
+state = "complete"
+source_heading = "### D624a: Workspace Packages, Individual Publication, And Published Knots"
+categories = ["syntax-api", "static", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/02-module-resolution-and-koi.md", "kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/08-docs-lsp-audit.md", "kyokaispec/src/toolchain/09-reproducibility-incremental-builds.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["knot", "exclude"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D625"
+state = "complete"
+source_heading = "### D625: Stable-Carried Experiments"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["PROJECT_STANDARDS.md", "kyokaispec/src/toolchain/01-manifest-package-workspace.md", "kyokaispec/src/toolchain/03-cli.md", "kyokaispec/src/toolchain/07-testing-coverage-bench.md", "kyokaispec/src/toolchain/10-package-index-semver-releases-ci.md"]
+required_terms = ["stable-carried", "root manifest"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D626"
+state = "superseded"
+superseded_by = "D596a"
+supersession_reason = "D626 was withdrawn by D596a; overarching Rust integration remains rejected."

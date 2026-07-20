@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-17-MEMORY-LAYOUT-AND-BACKEND-CONTRACT
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A program has a shape before the machine ever touches it. Fields sit in order. Values move. A result lands somewhere. A check either guards the edge or it does not. If the backend is allowed to redraw that shape in secret, the language becomes a rumor told by generated C.
+Kyokai defines field layout classes, value movement, result placement, evaluation order, and checked failure before backend lowering. Generated C and the selected target toolchain must preserve those rules or reject the build.
 
-Kyokai does not let that happen. Generated C carries the program into an admitted target toolchain, but neither C nor that toolchain gets to decide what the program means.
+Neither C semantics nor external-compiler behavior may redefine an accepted Kyokai program.
 
 > Trace: D4, D42, D73, D89, D139, D199, D228, D530-D536
 > Covers: Layout and lowering are language/backend contracts, not backend folklore or optimizer luck.
@@ -111,7 +111,7 @@ Reading or writing a packed field uses copy semantics, not reference semantics. 
 > Trace: D42, D73
 > Covers: Packed access cannot create misaligned safe references.
 
-Taking `&field` or `&!field` of a packed field is illegal. Packed fields cannot produce ordinary Kyokai borrows because that could create potentially misaligned references.
+Taking `&read value.field` or `&write value.field` is illegal for a packed field. Packed fields cannot produce ordinary Kyokai borrows because that could create potentially misaligned references.
 
 > Trace: D14, D42, D73
 > Covers: Packed layout preserves borrow/reference alignment guarantees.
@@ -293,7 +293,7 @@ Generated C for valid Kyokai programs stays inside Kyokai's documented C11 subse
 > Trace: D31, D80, D139, D531
 > Covers: Generated C is constrained by a written supported-toolchain contract.
 
-C11 is the baseline because it provides the oldest broadly available standard facilities Kyokai needs directly: static assertions, alignment, no-return declarations, thread-local syntax, and atomics. C17 adds defect corrections but no required Kyokai lowering facility. C23 support is not yet uniform enough across the major hosted, SDK, embedded, bootstrap, and freestanding toolchains to replace the baseline. Changing this dialect contract requires a later accepted D-point and compiler/platform conformance evidence.
+C11 is the baseline because it provides the oldest broadly available standard facilities Kyokai needs directly: static assertions, alignment, no-return declarations, thread-local syntax, and atomics. C17 adds defect corrections but no required Kyokai lowering facility. C23 support is not yet uniform enough across the major hosted, SDK, embedded, bootstrap, and freestanding toolchains to replace the baseline. A later specification revision can change the dialect contract only with matching compiler and platform conformance obligations.
 
 > Trace: D531
 > Covers: The C dialect floor is an evidence-backed portability contract, not an arbitrary version preference.
@@ -489,3 +489,26 @@ A freestanding target record states fatal action, stack policy, allocator availa
 
 > Trace: D451, D464
 > Covers: Freestanding lowering has an explicit target record for the runtime facts hosted systems otherwise supply.
+
+## Translation Validation And Lowering Evidence
+
+The checked frontend lowers into an explicitly sequenced backend IR before C
+emission. That IR fixes evaluation order, temporaries, checked arithmetic and
+bounds, borrow and lifetime-sensitive accesses, cleanup edges, failure exits,
+atomics, volatile operations, calls, layout operations, and source locations.
+The emitter does not rediscover these facts from a surface AST.
+
+Each lowering rule and generated helper has a stable evidence ID. Generated C
+passes structural validation for the admitted C11 subset before external
+compilation. Differential lanes compare normalized observable behavior across
+the checked-core interpreter or executable model, backend IR, generated C, and
+admitted compiler/target/profile tuples. A disagreement is a compiler defect or
+unresolved semantic case; compiler majority cannot select the answer.
+
+Preservation evidence is sliced by operation family and includes success,
+defined failure, evaluation order, lifetime, aliasing, layout, atomics, volatile
+access, source mapping, and termination. Translation validation is supporting
+evidence, not a substitute for the language proof or conformance corpus.
+
+> Trace: D572
+> Covers: Generated C is emitted from sequenced checked IR, structurally validated, and compared against spec-owned semantic observations.

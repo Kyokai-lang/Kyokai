@@ -1,0 +1,6 @@
+module App.Main is
+public function api(): Unit is
+qed;
+function main(): Unit is
+qed;
+seal;

@@ -1,0 +1,14 @@
+id = "parser.rejected-extra-syntax-matrix"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md#intentionally-rejected-syntax"
+edition = "2026"
+inputs = ["src/tuple-expression.kyo", "src/class-declaration.kyo", "src/inheritance-declaration.kyo", "src/exception-declaration.kyo", "src/try-catch.kyo", "src/macro-definition.kyo", "src/block-local-import.kyo", "src/body-target-when.kyo", "src/pattern-guard.kyo", "src/drop-declaration.kyo", "src/module-var.kyo", "src/async-await.kyo"]
+command = "kyokai internal conformance-fixture parser.rejected-extra-syntax-matrix"
+expect = "Reject intentionally unadmitted tuple, class, inheritance, exception, macro, local-import, body-target-when, pattern-guard, drop-hook, module-global, and async/await surfaces."
+expected_outcome = "reject"
+expected_stage = "parser"
+expected_code = "rejected-extra-syntax-matrix"
+expected_facts = ["form=tuple-expression", "form=class-declaration", "form=inheritance-declaration", "form=exception-declaration", "form=try-catch", "form=macro-definition", "form=block-local-import", "form=body-target-when", "form=pattern-guard", "form=drop-declaration", "form=module-var", "form=async-await"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

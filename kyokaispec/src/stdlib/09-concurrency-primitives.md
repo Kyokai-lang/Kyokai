@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-09-CONCURRENCY-PRIMITIVES
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Concurrency is where invisible behavior becomes expensive. A hidden share, a forgotten close, a lock nobody knows can block, a task boundary that moved authority without saying so: Kyokai gives these things names before they can become habits.
+Concurrency primitives state sharing, close behavior, blocking, ownership transfer, authority transfer, synchronization, and cleanup explicitly.
 
 > Trace: D3-D3b, D90-D101, D146, D164, D183-D184, D212
 > Covers: Stdlib concurrency primitives follow structured tasks, explicit transfer, SPSC channels, locks, atomics, pollers, and capability-sharing rules.
@@ -154,10 +154,27 @@ Compiler-integrated diagnostics report a lock guard that crosses a blocking call
 > Trace: D498
 > Covers: Tooling exposes risky lock lifetimes without changing legality or pretending to solve general deadlock detection.
 
-## Why This Shape
+## Synchronization Is A Contract
 
 [Rikona Kurasaki / Mjoyufull]
 Kyokai requires concurrency that can be audited from the signature and the cleanup path. The task transfer is named. The channel drain is named. The lock guard is linear. The atomic order is written where the operation happens.
 
 > Trace: D90-D101, D146, D183-D184, D212, D436, D447-D448, D493, D498
 > Covers: Concurrency primitives expose transfer, cleanup, blocking, ordering, fairness, and authority-sharing behavior.
+
+## Topology Evidence For SPSC And Native Tasks
+
+Kyokai keeps Linear SPSC endpoints, explicit brokers, one-to-one native tasks,
+and explicit `Poller`. The standard concurrency surface does not add
+async/await, a hidden executor, general MPMC endpoints, or an M:N scheduler.
+
+Canonical material covers fan-in, fan-out, reply endpoints, sharded brokers,
+work distribution, broadcast-by-copy, supervision, bounded backpressure, load
+shedding, cancellation, and graceful shutdown. Workload records measure thread
+count, memory, tail latency, broker contention, starvation, cancellation
+latency, and topology code size, with appropriate direct-channel and lock-based
+comparisons. Diagnostics may report provable bottlenecks or task/channel cycles;
+only repeated measured problems justify reopening ergonomics.
+
+> Trace: D600
+> Covers: The CSP, broker, reactor, and linear-endpoint design is supported by concrete examples and measurements rather than treated as novel folklore.

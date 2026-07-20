@@ -1,0 +1,8 @@
+pragma Unsafe_Module;
+module Demo.Foreign is
+unsafe contract RawIo is
+    module_invariant "descriptors remain owned" evidence "fd tests";
+    covers foreign:c_open assumes "C ABI" maps_failure "negative errno" owns "returned descriptor";
+    additional_invariant foreign:c_close cleanup "close exactly once";
+audit;
+seal;

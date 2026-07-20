@@ -1,0 +1,6 @@
+module Demo.Constraints is
+function collect[C: Type, E: Type](iter: &[C]): Result[Buffer[C.Item], E]
+where C: Iterable, C.Item: Displayable, C.Error == E,
+is
+qed;
+seal;

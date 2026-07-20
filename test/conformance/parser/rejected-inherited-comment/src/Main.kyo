@@ -1,0 +1,3 @@
+-- inherited Austral comment spelling is not Kyokai
+module Main is
+seal;

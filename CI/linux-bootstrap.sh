@@ -11,19 +11,12 @@ run_in_nix() {
 
 run_tests() {
     run_in_nix 'true'
-    run_in_nix 'make'
-    run_in_nix 'make test'
-    run_in_nix 'make check-prooftrace'
-    run_in_nix 'make gate-b-model'
-    run_in_nix 'python test-programs/runner.py'
-    run_in_nix 'bash run-examples.sh'
-    run_in_nix 'make -C standard clean && make -C standard'
-    run_in_nix './standard/test_bin'
+    run_in_nix './run-tests.sh'
 }
 
 run_clean_check() {
     make clean
-    test ! -f austral
+    test ! -f kyokai
 }
 
 case "${1:-}" in

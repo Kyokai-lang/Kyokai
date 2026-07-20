@@ -5,9 +5,9 @@
    SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 *)
 open OUnit2
-(*open Austral_core.Common*)
-open Austral_core.Cst
-open Austral_core.ParserInterface
+(*open Kyokai_bootstrap_core.Common*)
+open Kyokai_bootstrap_core.Cst
+open Kyokai_bootstrap_core.ParserInterface
 open TestUtil
 
 let p = parse_expr

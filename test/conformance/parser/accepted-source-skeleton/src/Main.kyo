@@ -1,0 +1,9 @@
+import Kyokai.Core;
+
+module Main is
+public opaque record Handle(value: Int64): Linear;
+public function run(handle: &[Handle]): Unit is
+qed;
+function main(): Unit is
+qed;
+seal;

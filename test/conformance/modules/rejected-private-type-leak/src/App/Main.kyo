@@ -1,0 +1,6 @@
+module App.Main is
+record Hidden: Free is
+build;
+public function expose(value: Hidden): Unit is
+qed;
+seal;

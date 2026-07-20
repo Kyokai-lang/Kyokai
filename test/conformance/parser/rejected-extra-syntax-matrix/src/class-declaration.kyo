@@ -1,0 +1,4 @@
+module Demo.ClassDeclaration is
+class Widget is
+qed;
+seal;

@@ -1,0 +1,3 @@
+module Demo.Aliases is
+public type alias IoResult[T: Type] := Result[T, IoError];
+seal;

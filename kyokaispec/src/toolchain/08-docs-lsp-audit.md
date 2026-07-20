@@ -4,7 +4,12 @@
 > ProofTrace: SPEC-TOOLCHAIN-08-DOCS-LSP-AUDIT
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Docs, editor tooling, and audit reports look like separate tools from the street. Inside Kyokai they stand on the same floor: the checked interface graph, the package boundary, visibility, contracts, capabilities, and unsafe facts the compiler already knows.
+> Amendment status (2026-07-16): D621 and corrected D624a require one analysis
+> engine projected through CLI, machine protocol, and LSP. Package-root
+> `kdocs/` remain authoritative; knot pages derive an overview, package list,
+> dependency tree, exclusions, and provenance. Full extraction remains pending.
+
+Documentation, editor tooling, and audit reports consume the same checked interface graph and project facts: package boundaries, visibility, contracts, capabilities, and unsafe metadata. They do not maintain independent language semantics.
 
 > Trace: D148, D150, D218
 > Covers: Documentation, LSP, and audit tooling share the compiler engine and project graph.
@@ -138,10 +143,10 @@ Audit must distinguish implementation ceiling from public surface. A package may
 > Trace: D17, D150, D245
 > Covers: Audit separates internal implementation risk from public API risk.
 
-## Why This Shape
+## One Fact, Several Views
 
 [Rikona Kurasaki / Mjoyufull]
-Documentation is the face of the API. The Analysis Server keeps the compiler's facts beside the source while it is written. Audit checks the locks after sunset. They cannot be three different stories. If the compiler knows a function needs authority, or an unsafe wrapper holds the line against C, those tools show it plainly.
+Documentation, Analysis Server responses, and audit reports project the same checked compiler facts for different uses. A function's authority requirement, ownership behavior, target gate, or unsafe-wrapper contract must not differ between generated docs, an editor hover, and an audit record.
 
 > Trace: D148, D150, D218
 > Covers: Docs, LSP, and audit are trustworthy only when they share the compiler's semantic facts.
@@ -167,3 +172,62 @@ Authority views use the same requirement graph and policy precedence as `kyokai 
 
 > Trace: D504, D540-D545
 > Covers: Documentation and editor assistance project generated, migration, framework-state, callback, and authority facts without changing source semantics or applying authority-expanding edits.
+
+## Repository Documentation Modes
+
+Documentation generation has three deterministic storage modes:
+
+| Mode | Repository artifact |
+| --- | --- |
+| `structured` | The default. Commit versioned deterministic `kdocs/` data and minimal non-executable assets. |
+| `rendered` | Commit the structured artifact plus sanitized static HTML/assets derived from it. |
+| `source-only` | Commit no generated docs; local/CI generation and remote availability are reported honestly. |
+
+The workspace root selects the inherited default with
+`[documentation].mode`. An explicitly selected package can override it under
+ordinary manifest inheritance. `kyokai doc --mode <mode>` is the recorded CLI
+override. A transition removes or rejects stale output from the previous mode.
+
+Structured docs record package, source revision, toolchain, schema,
+target/profile context, and content identity and are drift-checked against exact
+source. Package docs are untrusted content. Index, renderer, search, cache, and
+official service apply sanitization and resource budgets and execute no package
+script. The official service can render/cache a submitted content-identified
+structured artifact, but an ordinary request never compiles package source or
+runs a generator. The website is a renderer and index, not documentation
+authority.
+
+> Trace: D525, D602, D624a
+> Covers: Structured, rendered, and source-only modes share one authoritative structured contract, selected from the root manifest or explicit recorded override.
+
+## Semantic Atlas
+
+The toolchain derives a non-normative semantic atlas with maps for ownership
+and values, borrows and regions, effects, authority, failure, concurrency,
+packages/artifacts, and unsafe/target boundaries. Each node records state,
+legal and illegal transitions, visible source/API surface, failure category,
+artifact facts, and exact normative clause links. Cross-map edges expose
+allocation, blocking, cleanup, authority, task transfer, TPOE, `.koi`, and
+generated-C consequences.
+
+The atlas has a one-page core, expanded graphs, and prediction exercises. Its
+identifiers and links derive from clause/decision metadata; prose and diagrams
+remain human-reviewed. Drift checks detect missing or conflicting links but do
+not infer semantic equivalence or choose missing behavior. Evaluation measures
+whether readers predict unfamiliar ownership, authority, failure, cleanup,
+blocking, and target cases. A confusing or duplicate node enters finding or
+D-point intake; the atlas changes no semantics.
+
+> Trace: D579
+> Covers: The semantic atlas is a generated teaching and audit projection with exact normative links and no authority to define behavior.
+
+## Projection Parity
+
+CLI, machine protocol, LSP, docs, and audit views consume the same versioned
+analysis facts and stable IDs. Projection-parity tests compare diagnostic,
+symbol, reference, authority, ownership, borrow, cleanup, and edit facts across
+surfaces. A presentation-only editor interaction needs no fake terminal command,
+but no semantic operation can exist only inside LSP.
+
+> Trace: D621
+> Covers: LSP remains first-class while semantic analysis stays available to batch, offline, CLI, and machine clients.

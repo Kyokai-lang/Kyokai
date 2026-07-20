@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-18-BUILT-INS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Built-ins are the pieces of Kyokai that are so close to the checker that pretending they came from a hidden module would be lying. They are the floorboards: `Bool`, `Unit`, `Never`, fixed integers, `Result`, `Optional`, target facts, borrow forms, raw pointer forms, and the small set of compiler-known protocols that syntax lowers through.
+Built-ins are language-defined names and type families recognized directly by parsing, elaboration, or checking. They include `Bool`, `Unit`, `Never`, fixed integers, `Result`, `Optional`, target facts, borrow forms, raw pointer forms, and the closed set of compiler-known protocols used by syntax lowering.
 
-This chapter names that floor. Nothing here creates a prelude. Nothing here grants ambient authority. A programmer does not need to wonder whether a name appeared because a secret import drifted in through the back door.
+Built-ins do not create a prelude or grant ambient authority. Their availability never depends on an implicit import.
 
 > Trace: D24, D87, D147, D155, D214
 > Covers: Kyokai built-ins are language-level names, protected constructor words, and compiler-known protocols rather than hidden prelude imports.
@@ -289,7 +289,11 @@ Kyokai has no hidden prelude, no wildcard built-in module import, no tuple type,
 > Trace: D47/D131, D67, D84/D253, D101, D147, D156, D177, D250-D251
 > Covers: Rejected conveniences remain absent instead of half-specified.
 
-Adding a built-in requires an accepted D-point, an update to the public language spec and traceability entry, and implementation tests. It cannot arrive by standard-library naming convention, backend convenience, or compiler-source drift.
+The built-in set is closed for each specification revision and language edition.
+A later revision can add a built-in only by specifying its source form, static
+and dynamic semantics, artifact identity, compatibility treatment,
+diagnostics, and conformance cases. Standard-library naming, backend
+convenience, and compiler-source drift never create a built-in.
 
 > Trace: D155, D229
 > Covers: Built-in status is governed, public, and testable.

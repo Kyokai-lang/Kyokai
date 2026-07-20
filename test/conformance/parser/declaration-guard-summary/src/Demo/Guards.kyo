@@ -1,0 +1,9 @@
+module Demo.Guards is
+public type alias Word := Nat64 when target.arch == Arch.X86_64;
+extern type FILE when target.os == Os.Linux;
+capability DeviceCapability when target.os == Os.Linux;
+public function pageSize(): Index
+when target.os == Os.Linux and target.abi == Abi.Musl
+is
+qed;
+seal;

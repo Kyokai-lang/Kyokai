@@ -1,0 +1,26 @@
+name: Specification-calculus correspondence drift
+description: Report disagreement between normative clauses, calculus, IR, executable models, conformance, or proof claims.
+title: "[correspondence] "
+labels: ["correspondence"]
+body:
+  - type: textarea
+    id: identities
+    attributes:
+      label: Bound identities
+      description: List clause IDs, calculus/artifact revisions, IR schema, tests, and ProofTrace records.
+    validations:
+      required: true
+  - type: textarea
+    id: divergence
+    attributes:
+      label: Divergence
+      description: Explain the conflicting meanings and provide a concrete witness.
+    validations:
+      required: true
+  - type: textarea
+    id: disposition
+    attributes:
+      label: Proposed disposition
+      description: Normative repair, valid model-only deviation, implementation defect, or pending D-point.
+    validations:
+      required: true

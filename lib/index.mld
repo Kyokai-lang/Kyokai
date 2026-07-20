@@ -4,81 +4,81 @@
 
 Code used throughout the compiler.
 
-- {!Austral_core.Identifier}
-- {!Austral_core.IdentifierMap}
-- {!Austral_core.Common}
-- {!Austral_core.Span}
-- {!Austral_core.SourceContext}
-- {!Austral_core.ErrorText}
-- {!Austral_core.Error}
-- {!Austral_core.Util}
-- {!Austral_core.StringSet}
+- {!Kyokai_bootstrap_core.Identifier}
+- {!Kyokai_bootstrap_core.IdentifierMap}
+- {!Kyokai_bootstrap_core.Common}
+- {!Kyokai_bootstrap_core.Span}
+- {!Kyokai_bootstrap_core.SourceContext}
+- {!Kyokai_bootstrap_core.ErrorText}
+- {!Kyokai_bootstrap_core.Error}
+- {!Kyokai_bootstrap_core.Util}
+- {!Kyokai_bootstrap_core.StringSet}
 
 {1 Frontend}
 
 The compiler frontend.
 
-- {!Austral_core.Cst}
-- {!Austral_core.CstUtil}
-- {!Austral_core.Ast}
-- {!Austral_core.Combined}
-- {!Austral_core.Linked}
-- {!Austral_core.Lexer}
-- {!Austral_core.Parser}
-- {!Austral_core.ParserInterface}
-- {!Austral_core.AbstractionPass}
-- {!Austral_core.CombiningPass}
-- {!Austral_core.Escape}
-- {!Austral_core.ExtractionPass}
-- {!Austral_core.Imports}
-- {!Austral_core.ImportResolution}
-- {!Austral_core.Qualifier}
+- {!Kyokai_bootstrap_core.Cst}
+- {!Kyokai_bootstrap_core.CstUtil}
+- {!Kyokai_bootstrap_core.Ast}
+- {!Kyokai_bootstrap_core.Combined}
+- {!Kyokai_bootstrap_core.Linked}
+- {!Kyokai_bootstrap_core.Lexer}
+- {!Kyokai_bootstrap_core.Parser}
+- {!Kyokai_bootstrap_core.ParserInterface}
+- {!Kyokai_bootstrap_core.AbstractionPass}
+- {!Kyokai_bootstrap_core.CombiningPass}
+- {!Kyokai_bootstrap_core.Escape}
+- {!Kyokai_bootstrap_core.ExtractionPass}
+- {!Kyokai_bootstrap_core.Imports}
+- {!Kyokai_bootstrap_core.ImportResolution}
+- {!Kyokai_bootstrap_core.Qualifier}
 
 {1 Middle}
 
 The compiler's middle end.
 
-- {!Austral_core.Id}
-- {!Austral_core.EnvTypes}
-- {!Austral_core.Env}
-- {!Austral_core.Region}
-- {!Austral_core.Tast}
-- {!Austral_core.TastUtil}
-- {!Austral_core.TypeBindings}
-- {!Austral_core.TypeMatch}
-- {!Austral_core.Type}
-- {!Austral_core.TypeParser}
-- {!Austral_core.TypeSystem}
-- {!Austral_core.TypeVarSet}
-- {!Austral_core.TypeParameter}
-- {!Austral_core.TypeParameters}
-- {!Austral_core.TypeSignature}
-- {!Austral_core.TypeReplace}
-- {!Austral_core.LexEnv}
-- {!Austral_core.TypingPass}
-- {!Austral_core.BuiltIn}
-- {!Austral_core.BuiltInModules}
-- {!Austral_core.LinearityCheck}
-- {!Austral_core.TypeStripping}
-- {!Austral_core.MonoType}
-- {!Austral_core.MonoTypeBindings}
-- {!Austral_core.Mtast}
-- {!Austral_core.Monomorphize}
-- {!Austral_core.ReturnCheck}
+- {!Kyokai_bootstrap_core.Id}
+- {!Kyokai_bootstrap_core.EnvTypes}
+- {!Kyokai_bootstrap_core.Env}
+- {!Kyokai_bootstrap_core.Region}
+- {!Kyokai_bootstrap_core.Tast}
+- {!Kyokai_bootstrap_core.TastUtil}
+- {!Kyokai_bootstrap_core.TypeBindings}
+- {!Kyokai_bootstrap_core.TypeMatch}
+- {!Kyokai_bootstrap_core.Type}
+- {!Kyokai_bootstrap_core.TypeParser}
+- {!Kyokai_bootstrap_core.TypeSystem}
+- {!Kyokai_bootstrap_core.TypeVarSet}
+- {!Kyokai_bootstrap_core.TypeParameter}
+- {!Kyokai_bootstrap_core.TypeParameters}
+- {!Kyokai_bootstrap_core.TypeSignature}
+- {!Kyokai_bootstrap_core.TypeReplace}
+- {!Kyokai_bootstrap_core.LexEnv}
+- {!Kyokai_bootstrap_core.TypingPass}
+- {!Kyokai_bootstrap_core.BuiltIn}
+- {!Kyokai_bootstrap_core.BuiltInModules}
+- {!Kyokai_bootstrap_core.LinearityCheck}
+- {!Kyokai_bootstrap_core.TypeStripping}
+- {!Kyokai_bootstrap_core.MonoType}
+- {!Kyokai_bootstrap_core.MonoTypeBindings}
+- {!Kyokai_bootstrap_core.Mtast}
+- {!Kyokai_bootstrap_core.Monomorphize}
+- {!Kyokai_bootstrap_core.ReturnCheck}
 
 {1 Backend}
 
 The compiler backend.
 
-- {!Austral_core.CodeGen}
-- {!Austral_core.CRepr}
-- {!Austral_core.CRenderer}
-- {!Austral_core.ExportInstantiation}
+- {!Kyokai_bootstrap_core.CodeGen}
+- {!Kyokai_bootstrap_core.CRepr}
+- {!Kyokai_bootstrap_core.CRenderer}
+- {!Kyokai_bootstrap_core.ExportInstantiation}
 
 {1 Integration}
 
 The compiler's large-scale control structures.
 
-- {!Austral_core.Cli}
-- {!Austral_core.Entrypoint}
-- {!Austral_core.Compiler}
+- {!Kyokai_bootstrap_core.Cli}
+- {!Kyokai_bootstrap_core.Entrypoint}
+- {!Kyokai_bootstrap_core.Compiler}

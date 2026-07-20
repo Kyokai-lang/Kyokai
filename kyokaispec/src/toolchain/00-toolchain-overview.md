@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-00-TOOLCHAIN-OVERVIEW
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai's toolchain is not a pile of side quests around the language. It is part of the language's public shape because the compiler, package manager, project scaffolder, formatter, docs generator, LSP, test runner, audit report, diagnostic explainer, fix engine, and release artifacts decide what programmers can trust before code ever reaches production.
+Kyokai's toolchain is a normative public surface. The compiler, package manager, project scaffolder, formatter, documentation generator, LSP, test runner, audit reporter, diagnostic explainer, fix engine, and release tooling all operate under specified contracts.
 
 > Trace: D26, D83, D86, D155
 > Covers: The Kyokai toolchain spec is normative, user-visible tooling behavior is specified, and build behavior cannot drift through convention.
@@ -99,10 +99,10 @@ When an older behavior is retired, the new behavior must state whether it is an 
 > Trace: D105, D157, D223, D243
 > Covers: Toolchain changes are categorized through editions, compatibility classes, SemVer, or bug-fix status.
 
-## Why This Shape
+## Toolchain Inputs Are Program Inputs
 
 [Rikona Kurasaki / Mjoyufull]
-A language that says ownership is explicit cannot let the build system live off vibes. The command line is where a lot of languages let ghosts into the room: search paths, target defaults, profile folklore, hidden build scripts, registry state, and whatever the editor guessed yesterday. Kyokai makes the doorframe visible. The spec says what the tool reads, what it writes, and what cannot quietly matter.
+Toolchain defaults can change a program as surely as source text can. Search paths, target selection, profile policy, build-time execution, registry state, and editor configuration therefore have declared precedence and input boundaries. Each command specifies what it reads, what it writes, and which ambient state is irrelevant.
 
 > Trace: D26, D83, D86, D155
 > Covers: Kyokai keeps the toolchain explicit for the same reason it keeps language authority, ownership, and failure explicit.
@@ -124,3 +124,23 @@ Official commands perform no ambient telemetry, background update check, hidden 
 
 > Trace: D396, D479-D487, D503, D508
 > Covers: Full conformance, target gates, policy keys, specified nondeterminism, experiments, and the absence of ambient network activity are explicit toolchain contracts.
+
+## Frontend Fact Ownership
+
+The compiler frontend uses these semantic boundaries, in order: tokens, CST,
+surface AST, resolved AST, typed and elaborated IR, ownership/capability/
+contract-checked IR, explicitly sequenced backend IR, and generated C. Every
+fact has one owner among these forms and their passes. Parser-local validation
+is limited to syntax and context facts that require no name, type, ownership,
+authority, contract, or lowering knowledge.
+
+Every inherited pass records one semantic disposition—`RETAIN`, `ADAPT`,
+`REPLACE`, or `DELETE`—and one bootstrap-language disposition—
+`KEEP_BOOTSTRAP`, `WRAP`, `REIMPLEMENT_IN_KYOKAI`, or `REMOVE`—with its
+dependencies, owner, tests, and replacement evidence. `REPLACE` is mandatory
+when adaptation would preserve duplicate semantic authority or Austral's
+retired file/module model. Maturity is per component; parser progress cannot
+upgrade resolution, elaboration, checking, or lowering.
+
+> Trace: D612
+> Covers: The frontend is a sequence of owned facts and replacement boundaries, not a second compiler assembled inside the parser.

@@ -1,0 +1,14 @@
+id = "parser.rejected-inherited-form-matrix"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/02-lexical-syntax.md#rejected-lexical-forms; kyokaispec/src/language/03-grammar.md"
+edition = "2026"
+inputs = ["src/austral-not-equal.kyo", "src/austral-base-prefix.kyo", "src/austral-binary-prefix.kyo", "src/austral-octal-prefix.kyo", "src/block-comment.kyo", "src/pipeline.kyo", "src/apostrophe-separator.kyo", "src/compound-suffix.kyo", "src/platform-char-literal.kyo", "src/wildcard-pattern.kyo", "src/module-body.kyo", "src/explicit-private.kyo", "src/wildcard-import.kyo", "src/docstring-syntax.kyo", "src/arrow-field-access.kyo", "src/retired-read-borrow.kyo", "src/retired-write-borrow.kyo", "src/retired-reborrow.kyo"]
+command = "kyokai internal conformance-fixture parser.rejected-inherited-form-matrix"
+expect = "Reject the named inherited and neighboring-language lexical or parser spellings instead of admitting a second Kyokai surface."
+expected_outcome = "reject"
+expected_stage = "parser"
+expected_code = "rejected-inherited-form-matrix"
+expected_facts = ["form=/=", "form=#x", "form=#b", "form=#o", "form=block-comment", "form=pipeline", "form=apostrophe-separator", "form=compound-suffix", "form=platform-char-literal", "form=wildcard-pattern", "form=module-body", "form=explicit-private", "form=wildcard-import", "form=docstring-syntax", "form=arrow-field-access", "form=retired-read-borrow", "form=retired-write-borrow", "form=retired-reborrow"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

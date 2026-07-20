@@ -1,0 +1,3 @@
+module Demo.ModuleVar is
+var global: Int32;
+seal;

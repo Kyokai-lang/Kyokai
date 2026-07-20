@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-02-CORE-RESULT-OPTIONAL-DISPLAY-ERROR
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-The core library shapes are the language's daily grammar for absence, failure, rendering, and diagnostic identity. They have to be small enough to remember and explicit enough that they do not grow into hidden control flow.
+The core library protocols cover absence, recoverable failure, rendering, formatting, and diagnostic identity. Their operations remain explicit and introduce no hidden control flow.
 
 > Trace: D24, D40, D40a, D102, D259
 > Covers: Core `Optional`, `Result`, formatting, and standard error protocols are stdlib contract surfaces tied to language built-ins.
@@ -91,10 +91,10 @@ Core helpers follow ownership-signaling names. `as*` borrows and returns a view,
 > Trace: D11b, D201
 > Covers: Core helper names signal ownership and allocation boundaries.
 
-## Why This Shape
+## Protocols Stay Separate
 
 [Rikona Kurasaki / Mjoyufull]
-`Result` does not become exceptions wearing a different coat. `Displayable` does not become I/O authority. `StandardError` does not become a dynamic object system. These shapes stay small because Kyokai wants the branch, the allocator, the sink, and the error mapping to be visible at the call site.
+These protocols have deliberately separate jobs. `Result` carries a visible recoverable branch; `Displayable` renders to a caller-provided sink without gaining I/O authority; `StandardError` supplies diagnostic structure without dynamic dispatch. Allocation and error conversion remain explicit at the call site.
 
 > Trace: D24, D40, D102, D119, D259
 > Covers: Core stdlib protocols keep absence, failure, rendering, and diagnostics explicit.
@@ -115,3 +115,25 @@ Every OS-backed error preserves operation, portable category, raw target code, t
 
 > Trace: D402, D452, D455, D466
 > Covers: Domain failures, validated wrappers, bug classification, and versioned OS-backed errors preserve portable category, raw target detail, context, and compatibility behavior explicitly.
+
+## Required Tier-One Packet Content
+
+The `Optional` and `Result` packet contains exact declarations for construction,
+inspection, borrowing, owned extraction, replacement, mapping, chaining,
+recovery, collection, and must-use handling. Every operation states whether a
+payload is copied, borrowed, moved, returned on failure, or consumed by a
+`CallableRead`, `CallableMut`, `CallableOnce`, or `CallableState` argument.
+
+For Linear payloads, failure returns every owner required to retry, recover, or
+dispose. A combinator cannot hide partial mutation, discard a payload, or run a
+callback more times than its class permits. Branch and propagation rules expose
+the resulting ownership state in diagnostics and `.koi`.
+
+Display and formatting packets state sink ownership, partial-write recovery,
+allocation, recursion/depth budget, redaction/secret behavior, and error
+attachment. Parsing distinguishes full-input and prefix parsing, records
+consumed input, and names overflow, range, encoding, trailing-input, and budget
+failures. Equality and ordering packets state laws and unsupported domains.
+
+> Trace: D584
+> Covers: Core result, optional, error, display, parsing, equality, and must-use APIs expose exact ownership, callback, partial-progress, law, and failure contracts.

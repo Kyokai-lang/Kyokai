@@ -1,0 +1,33 @@
+name: Calculus or proof defect
+description: Report a rule, judgment, lemma, theorem, model, Lean, or trusted-base defect.
+title: "[proof defect] "
+labels: ["calculus", "proof-finding"]
+body:
+  - type: input
+    id: identity
+    attributes:
+      label: Model and artifact identity
+      description: Give family ID, model epoch/revision, artifact IDs, and source/spec cutoff.
+    validations:
+      required: true
+  - type: textarea
+    id: statement
+    attributes:
+      label: Defect and witness
+      description: State the exact rule, theorem, trace, command, or counterexample.
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Proposed impact class
+      options: [NO_SEMANTIC_IMPACT, MAPPING_ONLY, MODEL_AFFECTING, PROOF_AFFECTING, CLAIM_INVALIDATING]
+    validations:
+      required: true
+  - type: textarea
+    id: source_meaning
+    attributes:
+      label: Source-language consequence
+      description: Say whether accepted Kyokai meaning changes and cite/open the required D-point when it does.
+    validations:
+      required: true

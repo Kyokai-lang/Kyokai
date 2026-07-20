@@ -6,16 +6,15 @@
 
 set -euxo pipefail
 
-# Ensure the compiler binary is up to date.
+# Build the Kyokai bootstrap executable.
 make
-# Run the OCaml tests.
+# Run inherited and Kyokai host tests through the aggregate Dune alias.
 make test
-# Run the end-to-end tests.
-python3 test-programs/runner.py
-# Run the examples.
-./run-examples.sh
-# Build the stdlib tests.
-make -C standard clean
-make -C standard
-# Run the stdlib tests.
-./standard/test_bin
+# Check the Phase 3 identity and transition boundary.
+make check-phase3-identity
+# Validate and execute the implementation-gated Kyokai fixtures.
+make run-conformance-fixtures
+# Keep the accepted spec and evidence projections synchronized.
+make check-spec-integrity
+# Retain the executable evidence for the closed narrow Gate-B paper scope.
+make gate-b-model

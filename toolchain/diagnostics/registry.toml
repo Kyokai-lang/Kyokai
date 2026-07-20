@@ -1,0 +1,13 @@
+schema = "kyokai-diagnostic-registry-1"
+status = "schema-scaffold"
+authority = "kyokaispec/src/toolchain/05-diagnostics.md"
+
+# The first allocation pass imports every code already emitted by the compiler
+# or named by the specification. A released compiler must not consume this
+# scaffold until that import and the registry checker are complete.
+
+[allocation]
+families = ["E", "W", "L", "A", "I"]
+opaque_monotonic_numbers = true
+subsystem_ranges = false
+reuse_forbidden = true

@@ -19,7 +19,7 @@ The conformance lanes are:
 | `capabilities/` | Explicit authority, denial paths, safe wrappers, and audit facts. |
 | `unsafe/` | Unsafe contracts, raw primitive gates, ABI wrappers, and audit coverage. |
 | `runtime/` | Defined execution, fatal behavior, cleanup, and target-sensitive runtime contracts. |
-| `backend/` | Generated-C inspection, sanitizer runs, and later shared C/LLVM behavior. |
+| `backend/` | Generated-C inspection, sanitizer runs, target contracts, source mapping, and admitted C-compiler agreement. |
 | `diagnostics/` | Stable diagnostic IDs, spans, related facts, explain entries, and checked fixes. |
 | `koi/` | Deterministic `.koi` structure, verification, printing, diffs, and compatibility. |
 | `toolchain/` | CLI, manifests, outputs, caches, docs, formatter, LSP, audit, and replay behavior. |
@@ -27,21 +27,21 @@ The conformance lanes are:
 
 Host-level OCaml tests remain under `test/`. Minimized replay fixtures belong under `test/replay/` once the runner schema is implemented. The runner must report implementation-gated cases separately from passes; skipped work is not conformance evidence.
 
-`SCHEMA.md` records the required fixture metadata. The lane directories now exist as scaffold homes, but no lane claims conformance status until a runner consumes that metadata and reports results.
+`SCHEMA.md` records the required fixture metadata. The lane directories exist whether or not their implementation has started. No lane claims conformance status until the public runner, released diagnostic contract, and owning gate permit it.
 
-Initial `implementation-gated` fixture packs exist for parser source skeletons, parser span preservation, parser function signature summaries, parser record summaries, parser union summaries, inherited lexical rejection, package source discovery, executable-entry validation, generated `.koi` rejection, module-name/path mismatch, and workspace package graph plus lockfile rendering. They define expected public behavior for the conformance runner but are not pass/fail evidence yet.
+Thirty-one `implementation-gated` fixtures cover the represented parser surface, span preservation, inherited-form rejection, package source discovery, executable-entry validation, generated `.koi` rejection, module-name/path checks, a local interface leak, and the workspace graph/lockfile precursor. Their internal executions are pass/fail implementation evidence, not public conformance results.
 
 `make check-conformance-fixtures` validates fixture metadata, lane placement, input paths, status labels, and ProofTrace references. It is a metadata checker, not an execution runner.
 
-`make run-conformance-fixtures` first runs the metadata checker, then executes the current implementation-gated parser, module, and package fixture scaffolds through the Dune-built compiler-stage frontend/package runner. The runner compares `expected_outcome`, `expected_stage`, `expected_code`, and `expected_facts` against the implementation result, then reports `implementation-gated` passes as supporting evidence only. They are not Kyokai conformance passes because the public `kyokai check` command, full diagnostic-code catalog, full semantic frontend, type checker, linearity checker, runtime execution, and release conformance reporter are not wired yet.
+`make run-conformance-fixtures` first checks metadata, then executes the parser, module, and package fixtures through `kyokai internal conformance-fixture`. That probe reaches the same `KyokaiFrontend` and package boundaries as the host tests. The runner compares `expected_outcome`, `expected_stage`, `expected_code`, and `expected_facts`, then reports `implementation-gated` passes separately. They are not Kyokai conformance passes because the public `kyokai check` contract, released diagnostic catalog, name/type/ownership pipeline, runtime/backend execution, and release conformance reporter are not implemented.
 
-## Prototype Host Tests
+## Phase 3 Supporting Host Tests
 
 `test/host/frontend/KyokaiSourceFileTest.ml`, `test/host/frontend/KyokaiSourceTextTest.ml`,
-`test/host/frontend/KyokaiLexicalTokenTest.ml`, `test/host/frontend/KyokaiSurfaceParserTest.ml`, and
-`test/host/frontend/KyokaiPackageSourceTest.ml` are host-side prototype tests. They establish scaffold
-behavior for source roles, the source-byte contract, an isolated lexical-token
-layer, source-file skeleton parsing with function signature, record, and union
-summaries, and manifest-rooted package source discovery.
-They are not Kyokai conformance evidence until the frontend is wired to the
-Kyokai loader and public fixture lanes are executed by a conformance runner.
+`test/host/frontend/KyokaiLexicalTokenTest.ml`, `test/host/frontend/KyokaiSurfaceParserTest.ml`,
+`test/host/frontend/KyokaiFrontendTest.ml`, `test/host/frontend/KyokaiControlFlowValidationTest.ml`,
+`test/host/frontend/KyokaiInterfaceValidationTest.ml`, and
+`test/host/frontend/KyokaiPackageSourceTest.ml` exercise the active Phase 3 frontend path.
+They establish implementation behavior for source roles and bytes, tokens, the surface AST,
+phase-local semantic checks, derived interfaces, and manifest-rooted package loading. They are not
+public conformance evidence.

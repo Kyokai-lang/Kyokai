@@ -30,7 +30,7 @@ Borretti's Austral argument still works: words are easier to search and remember
 > Trace: D9, D13, D15, D41, D63
 > Covers: Kyokai uses keyword operators and named control forms while keeping formal grammar boundaries.
 
-Kyokai does use symbols where the symbol is already a strong visual contract: `&`, `&!`, and `&~` for borrowing, `!=` for inequality, `[T]` for generic arguments, and the `.kyo` source versus `.koi` artifact extension split that separates handwritten source from the generated interface. The point is not words over symbols as a superstition. The point is that the mark should teach the boundary faster than it decorates the page.
+Kyokai uses a symbol when it carries a stable visual contract and adds words when adjacent punctuation became too easy to misread. Borrow creation therefore spells `&read`, `&write`, and `&reborrow`; dereference remains `~`. Equality keeps `==` and `!=`, generic arguments keep `[T]`, and `.kyo`/`.koi` distinguishes handwritten source from derived interface artifacts. `:=` remains visibly different because assignment is a statement rather than a comparison.
 
 > Trace: D7b, D10, D14, D52, D158/D189
 > Covers: Symbol use is admitted when it carries a clear, stable semantic boundary.
@@ -63,11 +63,3 @@ Kyokai is not allergic to convenience. It is allergic to guessing. The compiler 
 
 > Trace: D7b, D8, D34, D46, D87, D238-D240
 > Covers: Implicit completions are tautological, effect-neutral, recorded, and checked in a fixed elaboration order.
-
-## Syntax Result
-
-[Rikona Kurasaki / Mjoyufull]
-The result should feel strict but not ornate. Kyokai asks for a few extra marks so later readers can recover the shape of the program without archaeology: where the borrow ends, where the foreign boundary closes, where failure returns, where a resource moves, where a module surface begins.
-
-> Trace: D52, D78, D111/D127, D155
-> Covers: Syntax is designed to make program structure and semantic boundaries auditable.

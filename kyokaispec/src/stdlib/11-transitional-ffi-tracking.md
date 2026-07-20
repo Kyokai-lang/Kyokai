@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-11-TRANSITIONAL-FFI-TRACKING
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Transitional code is not shameful. Untracked transitional code is. Kyokai can borrow a bridge while the road is being built, but the map has to mark that bridge and say whether it stays.
+Kyokai permits transitional FFI only when the boundary is recorded, audited, tested, and assigned a retention or replacement disposition.
 
 > Trace: D20, D64, D229-D230, D245
 > Covers: Transitional FFI is allowed only with unsafe contracts, safe wrappers, and replacement tracking.
@@ -66,10 +66,10 @@ When a native Kyokai replacement is proposed, it must satisfy the same admission
 > Trace: D64, D220, D229-D232
 > Covers: Native replacements are admitted by evidence, not by ideology.
 
-## Why This Shape
+## Transitional Does Not Mean Untracked
 
 [Rikona Kurasaki / Mjoyufull]
-The point is to be practical without letting practical become permanent by accident. Kyokai can touch C, the OS, hardware, and mature libraries, but every touch leaves a record: why it exists, what it promises, and whether it is meant to disappear.
+Some foreign boundaries are permanent platform interfaces; others exist only to bootstrap missing native code. Tracking records distinguish those cases, state the wrapper contract, and assign either a retention justification or a replacement condition so transitional code does not become permanent by neglect.
 
 > Trace: D20, D64, D229-D230, D245
 > Covers: Transitional FFI stays useful, visible, and replaceable.
@@ -89,3 +89,35 @@ A safe-wrapper record names foreign library version range, headers, target tripl
 
 > Trace: D430, D499, D501
 > Covers: Bindgen provenance, wrapper-kit admission, owners, target coverage, evidence, and graduation criteria are explicit.
+
+## Initial Official Bridge Portfolio
+
+The initial evidence portfolio covers SQLite, one stable TLS provider, raylib,
+one Apple-framework slice, CMake and Meson foreign-build adapters, one
+GPU/compute provider, one callback-heavy library, and one system-provider
+boundary. SDL follows the initial raylib work as the first serious raw game and
+systems workload. `libc` and platform runtime surfaces are target contracts,
+not ordinary Bridges.
+
+Bundled, system, vendored, and dynamic provider forms have distinct records and
+exact CI identities. Each Bridge ships a real reference application. An
+abandoned Bridge becomes `SUSPENDED`; documentation does not continue to call
+it admitted. Figma and design-tool work remains separate until it receives its
+own admission.
+
+## Rust Project Boundary
+
+Kyokai defines no Rust frontend, compiler mode, Rust ABI or layout contract,
+Cargo resolver or importer, arbitrary crate loader, universal translator,
+`Kyokai.Bridge.Rust`, or Rust-special port command. Language-neutral migration
+tools may inventory source, dependencies, APIs, tests, and unfinished work, but
+make no equivalence or safety claim.
+
+A required Rust project receives an individual package or Bridge decision and
+crosses a stable C ABI, process, WASI, file, or wire boundary. Cargo and
+`build.rs` may run only inside that project's governed foreign-build plan.
+Overarching Rust integration can be reopened only by a new D-point showing that
+project-specific Bridges and neutral migration help are insufficient.
+
+> Trace: D596-D596a
+> Covers: Official Bridges are concrete maintained products; Rust receives project-specific boundaries rather than a second language ecosystem inside Kyokai.

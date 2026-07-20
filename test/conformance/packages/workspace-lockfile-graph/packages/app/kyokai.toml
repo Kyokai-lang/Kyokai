@@ -1,0 +1,10 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2026"
+
+[layout]
+module_root = "src"
+
+[dependencies]
+core = { workspace = "core" }

@@ -1,0 +1,4 @@
+module Demo.MacroDefinition is
+macro log(message) is
+qed;
+seal;

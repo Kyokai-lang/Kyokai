@@ -1,0 +1,7 @@
+module Rejected.Reborrow is
+function invalid(loan: &![Int32]): Unit is
+    borrow view := &~loan do
+        debug view;
+    drop;
+qed;
+seal;

@@ -4,8 +4,8 @@
 
    SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 *)
-(** Sources of the builtin modules and the prelude, injected into OCaml source
-    by the concat_builtins.py script. *)
+(** Sources of the inherited builtin modules and prelude, injected into OCaml
+    source by [toolchain/bootstrap/concat_builtins.py]. *)
 
 (** Source code of the Austral.Pervasive interface file. *)
 val pervasive_interface_source: string

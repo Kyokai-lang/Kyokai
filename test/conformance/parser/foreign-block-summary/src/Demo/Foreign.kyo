@@ -1,0 +1,7 @@
+pragma Unsafe_Module;
+module Demo.Foreign is
+foreign "C" is
+    function c_open(path: Address[Nat8], flags: Int32): Int32;
+    constant EINVAL: Int32;
+mon;
+seal;

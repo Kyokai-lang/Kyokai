@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-RATIONALE-08-TOOLCHAIN-PHILOSOPHY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A language without a toolchain spec is a city with beautiful laws and no roads. Kyokai does not leave build behavior, package resolution, diagnostics, formatting, docs, audit, and artifacts to rumor. The tools are part of the language experience, so their contracts are written down.
+A language specification does not settle what its builds, packages, diagnostics, formatted source, or published artifacts mean. Kyokai specifies those toolchain contracts rather than leaving them to implementation custom.
 
 > Trace: D26, D78, D86, D155
 > Covers: The toolchain spec is normative and shares the same public source-of-truth discipline as the language spec.
@@ -56,14 +56,6 @@ Releases carry compatibility classifications, checksums, provenance, setup metad
 
 > Trace: D105, D157, D223, D225
 > Covers: Release and compatibility policy distinguishes editions, SemVer, and artifact provenance.
-
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-The toolchain philosophy is the same as the language philosophy: no quiet second source of truth. The command, manifest, artifact, diagnostic, explanation, fix, format, audit report, package graph, and release all say what they mean.
-
-> Trace: D86, D155, D264-D270
-> Covers: Toolchain behavior is specified rather than inherited from implementation habit.
 
 ## Tooling That Shows Its Work
 

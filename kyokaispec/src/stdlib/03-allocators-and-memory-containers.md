@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-03-ALLOCATORS-AND-MEMORY-CONTAINERS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Memory APIs are where a systems standard library either earns trust or starts lying. Kyokai makes the allocator visible, the failure visible, and the lifetime of stored values visible.
+Kyokai memory APIs expose allocator identity, allocation failure, ownership, and the lifetime and invalidation rules of stored values.
 
 > Trace: D44, D74, D77, D201, D250-D251
 > Covers: Allocation and container APIs use explicit allocator identity, explicit failure, and explicit invalidation contracts.
@@ -70,10 +70,10 @@ In-place mutation uses stored allocator identity. View operations allocate nothi
 > Trace: D11b, D201
 > Covers: Container API names expose allocation and ownership effects.
 
-## Why This Shape
+## Memory Policy Is Observable
 
 [Rikona Kurasaki / Mjoyufull]
-A hidden allocator is a hidden policy decision. A silent reallocation is a hidden invalidation. A dropped linear element is a broken promise. Kyokai containers make those promises public, because memory is not background scenery in systems code.
+Allocator choice controls failure and reclamation policy. Reallocation can invalidate outstanding views, and removal can transfer a linear obligation. Kyokai container contracts expose those effects instead of treating storage as an implementation detail.
 
 > Trace: D44, D74, D77, D201
 > Covers: Kyokai memory containers expose allocator, ownership, and invalidation behavior directly.
@@ -97,3 +97,24 @@ Transactional construction uses `begin`, step operations, `commit`, and `abort`.
 
 > Trace: D374, D463, D490-D491, D496-D497
 > Covers: Graphs, slot maps, transactional builders, hole-free extraction, pinning, and universe-aware containers preserve linear ownership without ambient sharing.
+
+## Reviewed Storage Foundation
+
+The storage foundation specifies `Allocator`, raw allocation, `Arena`,
+`Buffer[T]`, `Array[T, N]`, `Span[T]`, `SpanMut[T]`, definite-initialization
+builders, and pinned or emplaced storage as separate contracts. Allocators state
+alignment, zero-size and maximum-size behavior, checked size arithmetic,
+identity, resize, deallocation, failure injection, and concurrency behavior.
+
+Raw or uninitialized storage is unsafe-only. A safe builder owns one exact
+initialized prefix, never exposes an incomplete value, and recovers or cleans
+every initialized Linear element on failure. Reallocation invalidates every old
+address before the new storage is published; forced-relocation tests exercise
+that rule.
+
+Each operation states failure atomicity, invalidation, alias exclusivity, pin
+stability, allocation, and checked capacity behavior. A signature alone is not
+an admission record for storage code.
+
+> Trace: D586
+> Covers: The memory substrate closes initialization, relocation, failure, and pinning rules before higher containers rely on it.

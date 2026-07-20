@@ -1,0 +1,4 @@
+module Demo.Types is
+function adapt[T: Type, N: Index, R: Region](input: &[Buffer[T], R], callback: FnPtr(&[T], &![Buffer[T]]): Result[Unit, IoError]): FnPtr(): Unit is
+qed;
+seal;

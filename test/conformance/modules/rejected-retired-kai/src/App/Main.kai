@@ -1,0 +1,2 @@
+module body App.Main is
+seal;

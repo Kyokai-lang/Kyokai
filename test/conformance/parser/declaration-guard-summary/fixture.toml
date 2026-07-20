@@ -1,0 +1,14 @@
+id = "parser.declaration-guard-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/05-declarations.md"
+edition = "2026"
+inputs = ["src/Demo/Guards.kyo"]
+command = "kyokai internal conformance-fixture parser.declaration-guard-summary"
+expect = "Preserve declaration-level when guards as structured expressions with stable spans for function, type-alias, extern-type, and capability declarations."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "declaration-guard-summary"
+expected_facts = ["alias-guard-line=2", "extern-guard-line=3", "capability-guard-line=4", "function-guard-line=6", "function-guard=target.os == Os.Linux and target.abi == Abi.Musl"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

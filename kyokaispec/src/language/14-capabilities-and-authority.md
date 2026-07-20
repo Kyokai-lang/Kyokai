@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-14-CAPABILITIES-AND-AUTHORITY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Authority in Kyokai is not a smell in the air. It is not something a function wakes up owning because it happens to run inside the same process. It is a value with a boundary around it. If code wants the filesystem, the clock, the network, a process handle, an unsafe operation, or a raw device edge, the authority has to cross the line in source.
+Kyokai represents external authority with explicit values. Filesystem, clock, network, process, unsafe, and raw-device operations require the corresponding capability or narrower handle to cross a source-visible boundary. Running in the same process grants no authority by itself.
 
-That is the point. The reader can look at a signature and see which doors the code can open. A dependency that never receives the key cannot quietly walk through the building at night.
+A signature therefore exposes the authority an operation requires. Code that never receives or derives a capability cannot use the authority represented by that capability.
 
 > Trace: D20, D48, D67, D162, D211, D212, D255
 > Covers: External authority is tracked through explicit capability values, not ambient process permission.
@@ -250,7 +250,9 @@ Signal watching is capability-gated and notification-based. Safe Kyokai exposes 
 
 ## Visible Bundles, Ceilings, And Sandboxes
 
-Startup authority bundles are ordinary nominal source-visible records constructed explicitly at process entry from `RootCapability` or narrower startup inputs. An admitted bundle field is a concrete authority value or borrowed startup view: arguments, terminal streams, filesystem roots, environment authority, clock authority, entropy authority, process authority, network authority, cancellation or shutdown source, and an allocator only when that bundle declaration names it. Bundle declarations can choose a narrower subset. A bundle is passed, borrowed, stored, split, and surrendered through ordinary Kyokai rules; it appears in `.koi` when a public API mentions it. Libraries take the narrow capability value they need instead of the whole startup bundle. Kyokai rejects `CliApp`, `AppEnv`, ambient context lookup, hidden capability parameters, compiler-passed application state, automatic dependency injection, automatic minting, and implicit allocators.
+Startup authority bundles are ordinary nominal source-visible records constructed explicitly at process entry from `RootCapability` or narrower startup inputs. A bundle field is a concrete authority value or borrowed startup view: arguments, terminal streams, filesystem roots, environment authority, clock authority, entropy authority, process authority, network authority, cancellation or shutdown source, and an allocator only when the declaration names it. Bundle declarations may choose a narrower subset.
+
+A bundle is passed, borrowed, stored, split, and surrendered through ordinary Kyokai rules. It appears in `.koi` when a public API mentions it. Libraries take the narrow capability value they need instead of the whole startup bundle. Kyokai rejects `CliApp`, `AppEnv`, ambient context lookup, hidden capability parameters, compiler-passed application state, automatic dependency injection, automatic minting, and implicit allocators.
 
 Public leaf APIs take the narrowest admitted authority. Passing `RootCapability` or a broad application bundle into a leaf operation produces an overbroad-authority diagnostic unless the operation is an explicit authority-construction boundary.
 
@@ -271,3 +273,68 @@ Safe thread-local storage uses `TlsCapability` or a narrower derived capability.
 
 > Trace: D289, D310, D326
 > Covers: Attenuation edges, bounded-resource values, and keyed capability-gated TLS are explicit sealed APIs rather than ambient authority.
+
+## Enforcement And Native Containment
+
+Conforming safe Kyokai code cannot call a capability-gated operation without a
+received non-forgeable value. It cannot synthesize, deserialize, amplify, or
+recover surrendered authority except through an admitted derivation. The type
+system, package ceilings, deny policy, and audit enforce this provenance rule
+inside the conforming safe-operation set.
+
+Those mechanisms do not contain arbitrary native code, unrestricted assembly,
+compiler or runtime compromise, memory corruption, kernel compromise, DMA, or
+hostile hardware. Native containment exists only through a named admitted
+isolation provider whose record states enforcement, resources and namespaces,
+ABI or protocol, failure behavior, and hostile tests. Process, WASI/module,
+Capsicum-like, container, VM, microVM, and hardware compartments are separate
+providers.
+
+Public tool output uses distinct claims:
+`LANGUAGE_AUTHORITY_ENFORCED`, `PACKAGE_POLICY_ENFORCED`, and
+`NATIVE_CONTAINMENT_ENFORCED`. Withholding a source capability from code that
+runs outside an admitted isolation provider is not a claim that native
+corruption is contained.
+
+> Trace: D564
+> Covers: Capability provenance is enforceable language authority, while native containment requires a separate admitted isolation domain.
+
+## Unsafe Capability Topology
+
+Each hosted or freestanding startup record states whether one root
+`UnsafeCapability` exists and which trusted bootstrap component owns it.
+Ordinary source cannot construct or deserialize the token. It is `Linear`,
+non-forgeable, non-copyable, and enters through an admitted target/runtime route
+declared by package and link audit.
+
+The token may be moved or mutably borrowed into an unsafe-contract scope. It is
+not ordinarily split, cloned, weakened into another token, imported, or
+obtained from an index. It grants only total unsafe primitives and admitted
+providers; it never grants undefined behavior. Storage, capture, task transfer,
+TLS, callback re-entry, and process handoff require provider contracts covering
+ownership, affinity, return, and any serialization boundary. Concurrent work
+serially borrows one synchronized owner or uses separately admitted isolation
+domains. Surrender is irreversible.
+
+`.koi`, audits, capability-deny output, bindings, Bridge records, and
+diagnostics expose the complete authority path.
+
+> Trace: D565-D566
+> Covers: Unsafe authority has one declared bootstrap route, linear ownership, no ordinary splitting, and no power to legalize undefined behavior.
+
+## Capability Registry Projection
+
+Every capability registry entry records its origin, scope, authorized
+operations, acquisition or provider, attenuation, split and borrow behavior,
+task transfer, concurrent use, surrender or revocation, denial and failure,
+target behavior, `.koi` facts, and audit identity. `RootCapability` is a
+bootstrap source for narrower authority, never a convenient leaf parameter.
+Attenuation is one-way. Capability bundles are ordinary records.
+
+The registry is a checked projection from declarations, provider contracts,
+target facts, and accepted package policy. It cannot add authority or become a
+second semantic source. `kyokai explain authority` reports the path represented
+by these entries under the non-executing explanation contract.
+
+> Trace: D590
+> Covers: Capability maps remain complete, machine-readable projections of the authority model rather than hand-maintained diagrams.

@@ -57,14 +57,6 @@ Kyokai can write native math and native crypto, but the admission bar is differe
 > Trace: D229-D232
 > Covers: Correctness evidence scales with domain risk.
 
-## Result
-
-[Rikona Kurasaki / Mjoyufull]
-The stdlib philosophy is this: make ordinary systems work possible without making ordinary systems behavior vague. If an API allocates, blocks, fails, uses authority, changes platform behavior, or crosses FFI, the contract says so.
-
-> Trace: D85, D152, D229
-> Covers: Kyokai's stdlib exposes semantic behavior instead of hiding it behind convenience.
-
 ## Cold Start As A Ladder
 
 [Rikona Kurasaki / Mjoyufull]

@@ -1,0 +1,7 @@
+module Demo.Contracts is
+function clamp(value: Int32): Int32
+require value >= 0;
+ensure result >= 0;
+is
+qed;
+seal;

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-05-DIAGNOSTICS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Diagnostics are part of the language experience, but they are also part of the toolchain contract. A compiler that knows the rule but cannot say what went wrong has left the programmer outside in the rain with a locked door and a key that almost fits.
+Diagnostics are a normative toolchain surface. A rejection identifies the violated rule, relevant source or artifact locations, and applicable repair information through stable human and machine records.
 
 > Trace: D29
 > Covers: Kyokai diagnostics are a normative toolchain surface, not a polish-only feature.
@@ -87,6 +87,39 @@ Every released diagnostic code has an explanation catalog entry shipped with the
 > Trace: D29, D225, D267
 > Covers: Explanation lookup works offline, matches the installed compiler version, and keeps online docs as mirrors rather than hidden authority.
 
+## Diagnostic Code Registry
+
+`toolchain/diagnostics/registry.toml` is the canonical registry for Kyokai
+diagnostic codes. A record contains the code, stable semantic key, severity,
+category, owner, emitting phase, governing clauses, introduced specification
+and toolchain versions, lifecycle, explanation, repair guidance, suppression
+policy, related codes, required tests, ProofTrace links, and any external-tool
+mapping.
+
+The numeric part is opaque and monotonically allocated within its severity
+family. Numbers are not divided into subsystem ranges and are never reused. A
+new code is created only when the violated rule, suppression behavior, repair,
+command consequence, or explanation is materially distinct. Deprecation names
+an alias or successor; removal preserves the historical record and follows the
+diagnostic-schema compatibility policy.
+
+Message prose can improve without a code change. The semantic key, meaning,
+severity, primary-span policy, suppression behavior, suggested-fix safety, and
+machine fields are compatibility surface. The registry generates or checks
+compiler tables, explanation pages, documentation indexes, test indexes, and
+allocation reports. A released Kyokai tool must not emit an unregistered Kyokai
+code.
+
+An external compiler, linker, generator, or OS diagnostic retains its native
+tool identity and native code. Kyokai can emit a registered code for the
+invocation or translation boundary, but it must not replace the external
+diagnosis with a fabricated Kyokai identity. A code-changing pull request
+updates the registry, explanation, tests, JSON examples, suggested fixes, and
+compatibility notes together.
+
+> Trace: D29, D333, D414, D633
+> Covers: Diagnostic identifiers are governed machine API with stable allocation and lifecycle, not strings embedded independently in compiler passes.
+
 ## Automatic Fixes
 
 A diagnostic carries edits only when the compiler can state the exact repair being offered. `machine-applicable-safe` means the edit passed the repair-specific validation required for default `kyokai fix`. `machine-applicable` means an edit set exists but requires explicit opt-in. `maybe-applicable` means the compiler can suggest a plausible candidate but cannot prove the intended repair. `manual` and `note-only` never apply edits.
@@ -149,10 +182,10 @@ A diagnostic must not blame a later phase when an earlier rule is the true cause
 > Trace: D29, D31, D78, D150
 > Covers: Diagnostics point at the first meaningful rule violation.
 
-## Why This Shape
+## Diagnostics Explain State
 
 [Rikona Kurasaki / Mjoyufull]
-A good diagnostic does not flatter. It shows the wound, names the blade, and identifies the code that has to move. Kyokai needs that because a language with linear values, contracts, unsafe walls, and capabilities can become a maze if the compiler only says no.
+Kyokai diagnostics must explain the rejected rule and the relevant program state. For ownership, contracts, unsafe operations, and capabilities, a bare rejection is insufficient: the report identifies the primary span, the conflicting state or obligation, related spans, and only those repairs whose safety class the compiler can justify.
 
 > Trace: D29
 > Covers: Kyokai diagnostic quality is required because the language's safety model must be teachable through errors.
@@ -186,3 +219,19 @@ Framework-handle diagnostics distinguish wrong owner, unknown slot, stale genera
 
 > Trace: D540-D545, D547-D550, D552-D557
 > Covers: Application-integration diagnostics report the true generator, migration, authority, handle, callback, adapter, packaging, target, or remote-service boundary instead of fabricating a source type error.
+
+## No-Shadowing Transformation Help
+
+The no-shadowing rule is absolute. Diagnostics and checked refactors teach
+semantic stage names such as `raw`, `parsed`, `validated`, `resolved`, and
+`normalized`; use UFCS chains when an intermediate does not need inspection;
+and use builders or named result records when several stages remain live.
+
+A checked action may introduce stage names, extract a pipeline function, or
+convert a pass-through branch. It may not introduce hidden rebinding and does
+not recommend meaningless numeric suffixes by default. Tooling records name
+churn and ceremony in workload evidence before a later syntax proposal can
+claim an ergonomic defect.
+
+> Trace: D611
+> Covers: Transformation pipelines retain explicit identity while tooling removes needless naming labor without weakening the shadowing ban.

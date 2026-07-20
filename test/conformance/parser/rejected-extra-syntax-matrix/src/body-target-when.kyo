@@ -1,0 +1,7 @@
+module Demo.BodyTargetWhen is
+function run(): Unit is
+    when target.os == Os.Linux do
+        return;
+    od;
+qed;
+seal;

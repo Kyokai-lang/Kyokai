@@ -1,0 +1,4 @@
+module Main is
+private function hidden(): Unit is
+qed;
+seal;

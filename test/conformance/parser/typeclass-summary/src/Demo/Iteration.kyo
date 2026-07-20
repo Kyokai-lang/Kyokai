@@ -1,0 +1,9 @@
+module Demo.Iteration is
+public typeclass Iterable[Self: Type] is
+    type Item;
+    method next(iter: &![Self]): Optional[Self.Item];
+    method isEmpty(iter: &[Self]): Bool is
+        return false;
+    qed;
+spec;
+seal;

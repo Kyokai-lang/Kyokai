@@ -1,0 +1,3 @@
+module Demo.TupleExpression is
+constant pair: Pair := (1, 2);
+seal;

@@ -1,0 +1,7 @@
+module Demo.Bits is
+bitrecord TcpFlags: Nat16 is
+    field fin: bit 0;
+    field window: bits 7..4;
+    reserved bits 15..8;
+build;
+seal;

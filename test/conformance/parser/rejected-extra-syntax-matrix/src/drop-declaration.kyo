@@ -1,0 +1,4 @@
+module Demo.DropDeclaration is
+Drop Resource is
+qed;
+seal;

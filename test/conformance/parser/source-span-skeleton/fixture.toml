@@ -1,0 +1,14 @@
+id = "parser.source-span-skeleton"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/toolchain/05-diagnostics.md"
+edition = "2026"
+inputs = ["src/Demo/Spans.kyo"]
+command = "kyokai internal conformance-fixture parser.source-span-skeleton"
+expect = "Parse one module source while preserving pragma, import, module, and declaration line spans for later diagnostic and elaboration-origin checks."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "source-spans"
+expected_facts = ["module-lines", "import-lines", "declaration-lines", "qed-terminator"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

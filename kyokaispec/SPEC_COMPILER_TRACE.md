@@ -1,18 +1,21 @@
 # Kyokai Spec Compiler Traceability
 
-This document tracks the relationship between the extracted Kyokai specification, inherited Austral compiler evidence, future Kyokai implementation work, and conformance tests.
+This document is a maintained structural map between the extracted Kyokai specification, inherited Austral compiler evidence, future Kyokai implementation work, and conformance tests. It is not the authority for evidence status. `kyokaiproofstatus.toml` is the ProofTrace registry, and generated `kyokaiproofstatus.md` is the public status projection. If a status here disagrees with ProofTrace or cited executable evidence, this document is stale and must be repaired; it cannot upgrade a claim.
 
-The Kyokai specification has now been extracted through Phase 15. The current normative source tree is `src/language/`, `src/toolchain/`, `src/stdlib/`, and `src/appendices/`. Rationale chapters in `src/rationale/` are non-normative explanation. The old inherited Austral chapter files have been removed from the active build after replacement by Kyokai chapters; `src/appendices/c-austral-differences.md` records where the source material moved.
+The intended end state is a checked projection generated from spec clause identifiers, compiler boundary identifiers, test families, and ProofTrace records. Until that generator exists, edits to a mapped boundary must update this map and the owning ProofTrace record together.
+
+The Kyokai specification has normative chapter text through D635. A 2026-07-12 clause audit reopened Gate A because routing and chapter presence did not prove that every accepted rule had complete normative clauses. The checked `extraction/pre-d558.toml`, `extraction/d558-d625.toml`, and `extraction/d627-d635.toml` registries now provide D577 clause evidence for the complete accepted boundary, so Gate A is closed through D635. One assembled specification is built from `src/language/`, `src/toolchain/`, `src/stdlib/`, `src/rationale/`, `src/project/`, and the remaining appendices. The project chapters keep governance and evidence visible without turning them into program semantics.
 
 The inherited compiler evidence below is still useful, but it must not be read as proof that the current compiler implements Kyokai. Rows marked `Legacy Verified` describe inherited Austral behavior that was checked against inherited Austral source or tests. A Kyokai row becomes `Verified` only after the extracted Kyokai rule is checked against current Kyokai compiler/source paths and tests.
 
-The active Phase 3 scaffold now implements the D537-D539 source prefix: one `.kyo` source role, one module parser start symbol, retired `.kai` rejection, `public`/`internal`/private-by-default declaration markers, `opaque` record/union markers, single-source package discovery, and derived public/`internal` interface facts. These are implementation-scaffold facts, not full frontend or conformance claims. The inherited rows below remain migration evidence for the code path that still needs replacement.
+The Phase 3 source boundary is now a composed Kyokai path: source roles and bytes, Kyokai tokens, a span-carrying surface AST, phase-local structural checks, manifest-rooted source discovery, and derived public/`internal` interface facts. `KyokaiPackageSource` invokes `KyokaiFrontend`; it does not invoke the inherited interface/body parser. These are implementation facts for the Phase 3 scope, not typing, ownership, `.koi`, backend, or conformance claims. The inherited rows below remain migration evidence for later passes.
 
 ## Legend
 
 | Status | Meaning |
 |--------|---------|
-| **Spec Extracted** | Kyokai rule text exists in the extracted specification, but implementation and conformance evidence are not claimed here. |
+| **Normative Text Present** | The owning chapter contains normative rule text. This status does not satisfy D577 clause-level extraction evidence and cannot close Gate A. |
+| **Spec Extracted** | Every live accepted clause has the D577 evidence required for `SPEC_EXTRACTED`. Implementation and conformance remain separate claims. |
 | **Kyokai Pending** | A Kyokai implementation/conformance row still needs to be written or checked. |
 | **Verified** | Extracted Kyokai claim matches current Kyokai compiler source and tests cited in the row. |
 | **Legacy Verified** | Inherited Austral claim matched inherited Austral compiler evidence. Useful migration evidence, not Kyokai implementation status. |
@@ -26,12 +29,12 @@ The active Phase 3 scaffold now implements the D537-D539 source prefix: one `.ky
 
 | Spec | Claim | Compiler evidence | Tests | Status |
 |------|-------|-------------------|-------|--------|
-| D537 / language modules | One handwritten `.kyo` file owns a module; `.kai` and `module body` are retired. | `KyokaiSourceFile`, `KyokaiSurfaceParser`, `KyokaiPackageSource` | source-role, parser, package-source host tests; implementation-gated fixtures | Reviewed |
-| D538 / visibility | `public` and `internal` are explicit; an unmarked declaration is private; explicit `private` is rejected. | `KyokaiSurfaceParser.declaration_visibility` | surface-parser host tests and accepted source fixture | Reviewed |
-| D539 / opacity | `opaque` is accepted only on ordinary record and union definitions in the current parser slice. | `KyokaiSurfaceParser.declaration_opaque` | surface-parser host tests | Reviewed |
-| D79 / derived interface prefix | Package loading derives public and `internal` declarations and excludes private declarations from the future `.koi` input surface. | `KyokaiPackageSource.derived_interface_declarations` | package-source host tests and package discovery fixture | Reviewed |
+| D537 / language modules | One handwritten `.kyo` file owns a module; `.kai` and `module body` are retired. | `KyokaiSourceFile`, `KyokaiSurfaceParser`, `KyokaiFrontend`, `KyokaiPackageSource` | source-role, parser, frontend, and package-source host tests; implementation-gated fixtures | Verified |
+| D538 / visibility | `public` and `internal` are explicit; an unmarked declaration is private; explicit `private` is rejected. | `KyokaiSurfaceAst`, `KyokaiSurfaceParser`, `KyokaiInterfaceValidation` | parser/interface/frontend host tests and accepted/rejected fixtures | Verified |
+| D539 / opacity | `opaque` is accepted only on ordinary record and union definitions, and local interface validation hides their representation. | `KyokaiSurfaceParser`, `KyokaiInterfaceValidation` | parser and interface-validation host tests | Verified |
+| D79 / derived interface prefix | Package loading derives public and `internal` declarations and excludes private declarations from the future `.koi` input surface. | `KyokaiFrontend.derived_interface_declarations`, `KyokaiPackageSource` | frontend/package-source host tests and package discovery fixture | Verified |
 
-`Reviewed` here means the isolated scaffold and supporting tests match the cited slice. Final AST construction, semantic export/opacity checks, `.koi` serialization, inherited-loader replacement, full diagnostic identity, and conformance-backed execution remain gaps.
+`Verified` here is limited to the cited Phase 3 rule and implementation path. It does not claim cross-module resolution, `.koi` serialization or consumption, typing, ownership checking, released diagnostic identities, or conformance-backed execution.
 
 Columns: **Spec** | **Claim (summary)** | **Compiler evidence** | **Tests** | **Status**
 
@@ -97,26 +100,30 @@ Columns: **Spec** | **Claim (summary)** | **Compiler evidence** | **Tests** | **
 56. [src/rationale/07-stdlib-philosophy.md](src/rationale/07-stdlib-philosophy.md)
 57. [src/rationale/08-toolchain-philosophy.md](src/rationale/08-toolchain-philosophy.md)
 58. [src/rationale/09-backend-choice.md](src/rationale/09-backend-choice.md)
-59. [src/appendices/a-license.md](src/appendices/a-license.md)
-60. [src/appendices/b-decision-traceability.md](src/appendices/b-decision-traceability.md)
-61. [src/appendices/c-austral-differences.md](src/appendices/c-austral-differences.md)
-62. [src/appendices/d-formalization-roadmap.md](src/appendices/d-formalization-roadmap.md)
-63. [src/appendix-a.md](src/appendix-a.md)
+59. [src/project/00-project-boundary.md](src/project/00-project-boundary.md)
+60. [src/project/01-governance.md](src/project/01-governance.md)
+61. [src/project/02-decision-traceability.md](src/project/02-decision-traceability.md)
+62. [src/project/03-formalization-roadmap.md](src/project/03-formalization-roadmap.md)
+63. [src/project/04-project-licensing.md](src/project/04-project-licensing.md)
+64. [src/project/05-admission-and-change-control.md](src/project/05-admission-and-change-control.md)
+65. [src/project/06-reference-products-and-workloads.md](src/project/06-reference-products-and-workloads.md)
+66. [src/appendices/c-austral-differences.md](src/appendices/c-austral-differences.md)
+67. [src/appendix-a.md](src/appendix-a.md)
 
 ## Current Kyokai extraction summary
 
 | Spec Family | Current Spec Locations | Compiler Evidence | Tests | Status |
 | --- | --- | --- | --- | --- |
-| Language specification | `src/language/00-introduction.md` through `src/language/19-examples.md` | Inherited Austral compiler still needs rule-by-rule Kyokai audit. | Planned conformance suites. | Spec Extracted |
-| Toolchain specification | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/13-application-integration-and-deployment.md` | Current inherited CLI/build behavior is not yet a Kyokai toolchain implementation claim. | Planned command, manifest, artifact, diagnostic, formatter, docs, LSP, audit, reproducibility, generation, migration, adapter, packaging, browser/mobile, deployment, capability deny-policy, and release tests. | Spec Extracted |
-| Standard-library contract specification | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/12-application-integration-contracts.md` | Inherited Austral stdlib is reference evidence only; Kyokai `Kyokai.*` APIs still need admission and implementation. | Planned stdlib admission, edge-case, property/fuzz, oracle/vector, platform, framework, server, terminal, mobile, embedded, GPU, and data integration tests. | Spec Extracted |
+| Language specification | `src/language/00-introduction.md` through `src/language/19-examples.md` | Inherited Austral compiler still needs rule-by-rule Kyokai audit. | Accepted clauses through D635 are checked; executable conformance remains open. | Normative Text Present |
+| Toolchain specification | `src/toolchain/00-toolchain-overview.md` through `src/toolchain/13-application-integration-and-deployment.md` | Current inherited CLI/build behavior is not yet a Kyokai toolchain implementation claim. | D558-D625 clauses are checked where routed here; command, manifest, artifact, diagnostic, formatter, docs, analysis, release, and conformance implementation remains planned. | Normative Text Present |
+| Standard-library contract specification | `src/stdlib/00-stdlib-overview.md` through `src/stdlib/12-application-integration-contracts.md` | Inherited Austral stdlib is reference evidence only; Kyokai `Kyokai.*` APIs still need admission and implementation. | D558-D625 clauses are checked where routed here; stdlib admission, edge-case, property/fuzz, oracle/vector, platform, and integration evidence remains planned. | Normative Text Present |
 | Rationale | `src/rationale/00-rationale-index.md` through `src/rationale/09-backend-choice.md` | Compiler evidence not applicable except where rationale points to normative chapters. | N/A. | Reviewed |
-| Appendices | `src/appendices/a-license.md` through `src/appendices/d-formalization-roadmap.md` | Traceability and roadmap documents, not compiler implementation. | N/A except future proof artifact checks. | Reviewed |
-| Austral source material and GFDL text | Old inherited chapter files were replaced by Kyokai chapters; `src/appendix-a.md` carries the full GFDL text. | Source provenance is recorded in `src/appendices/a-license.md` and `src/appendices/c-austral-differences.md`. | Informative |
+| Official-project contract and evidence | `src/project/00-project-boundary.md` through `src/project/06-reference-products-and-workloads.md` | Governance, traceability, formalization, licensing, admission, and workload records; not compiler semantics. | D577 registry/checker covers the accepted boundary through D635; recurring records and operational evidence remain. | Normative Text Present |
+| Austral source material and GFDL text | Old inherited chapter files were replaced by Kyokai chapters; `src/appendix-a.md` carries the full GFDL text. | Source provenance is recorded in `src/project/04-project-licensing.md` and `src/appendices/c-austral-differences.md`. | Informative |
 
-## Post-D557 normative integration map
+## Post-D557 and D558-D625 normative integration map
 
-The accepted D396-D557 surface is integrated into normative chapters by behavior family. This table records the rewritten homes so later implementation and conformance work can cite the actual contract instead of an appended decision cluster.
+The accepted D396-D625 surface is integrated into normative chapters by behavior family. This table records the rewritten homes so later implementation and conformance work can cite the actual contract instead of an appended decision cluster. It is a routing aid and cannot promote a D-point by itself. The checked D558-D625 registry and generated review provide that batch's separate D577 evidence.
 
 | Behavior family | Integrated spec homes | Extracted mechanics |
 | --- | --- | --- |
@@ -239,7 +246,7 @@ flowchart LR
 | appendix-a | GFDL text | N/A | - | N/A |
 | 8.examples | Examples pair interface+body where `main` is entry | `Entrypoint.ml` | - | Legacy Verified |
 
-## Phase 7 - `austral/lib/*.ml` ownership checklist
+## Phase 7 - upstream Austral `lib/*.ml` ownership checklist
 
 Each file is assigned to a **phase** for coverage closure (helpers are **N/A** unless the spec names them).
 
@@ -271,9 +278,9 @@ Each file is assigned to a **phase** for coverage closure (helpers are **N/A** u
 
 ## Phase 8 - Legacy convergence / CI
 
-- Run `dune build` / `dune runtest` in an upstream `austral/` checkout when OCaml deps (`yojson`, `ounit2`, etc.) are available and `austral/lib/dune` lists `builtInModules` under `modules_without_implementation` if required by the toolchain.
+- Run `dune build` / `dune runtest` in a separate upstream Austral checkout when OCaml deps (`yojson`, `ounit2`, etc.) are available and its `lib/dune` lists `builtInModules` under `modules_without_implementation` if required by the toolchain.
 - **Last verification attempt:** `dune runtest` failed: missing `ounit2`, missing `yojson` for `austral_core`, and Menhir stanza reports `builtInModules` without implementation - fix local opam/switch before treating CI as green.
-- **Installed compiler E2E verification:** `AUSTRAL=austral python3 austral/test-programs/runner.py` against an upstream `austral/` checkout passed every upstream end-to-end test.
+- **Installed compiler E2E verification:** `AUSTRAL=austral python3 test-programs/runner.py` in a separate upstream Austral checkout passed every upstream end-to-end test.
 - **Spec fence verification:** `make check-austral-fences AUSTRAL=austral` passed: 14 complete Austral fences compiled; 101 fragment fences skipped by design.
 - **Spec build verification:** `nix-shell -p pandoc texliveSmall --run 'make'` passed and generated `spec.pdf` plus `spec.html`.
 - After any Kyokai implementation or conformance edit, update Kyokai rows from **Kyokai Pending** or **Gap** to **Verified** only with a cited current Kyokai source/test path. Do not upgrade `Legacy Verified` rows merely because inherited Austral tests pass.
@@ -288,4 +295,4 @@ Optional sibling site: replay the same **Phase 1-5** rows against `_spec/*.md`. 
 2. **Kyokai conformance suites**: parser, checker, linearity, capability, unsafe/FFI, generated-C/C-toolchain, toolchain, and stdlib tests still need paths and status rows.
 3. **Stdlib admission records**: `Kyokai.*` modules need implementation paths, admission records, edge-case tests, oracle/vector tests where relevant, and transitional FFI records.
 4. **Toolchain behavior**: `kyokai` CLI, package manager, `.koi`, formatter, docs, LSP, audit, build output/cache layout, and release commands need implementation evidence and tests.
-5. **Formal proof**: `src/appendices/d-formalization-roadmap.md` records the proof obligation; the `lambda_K-seq` paper proof is still a future artifact.
+5. **Formal proof**: `src/project/03-formalization-roadmap.md` records the proof obligation; the `lambda_K-seq` paper proof is still a future artifact.

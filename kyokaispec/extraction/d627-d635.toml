@@ -1,0 +1,126 @@
+schema_version = 1
+registry_id = "KYOKAI-EXTRACT-D627-D635"
+accepted_source = "kyokaidecided.md"
+traceability_view = "kyokaispec/src/project/02-decision-traceability.md"
+generated_review = "kyokaispec/extraction/d627-d635-review.md"
+required_decisions = ["D627", "D628", "D629", "D630", "D631", "D632", "D633", "D634", "D635"]
+
+[policy]
+batch_label = "D627-D635"
+clause_id_shape = "<decision>.<obligation-category>"
+categories = ["syntax-api", "static", "dynamic", "ownership", "borrow", "capability", "failure", "artifact", "diagnostic", "compatibility", "target", "example", "illegal-form", "conformance"]
+default_not_applicable_reason = "The accepted decision creates no independent obligation in this category; applicability was reviewed against the accepted source."
+maturity_result = "SPEC_EXTRACTED"
+maturity_exclusions = ["implementation", "conformance", "admission", "service readiness", "workload evidence", "proof"]
+evidence_links = ["kyokaispec/extraction/d627-d635.toml", "kyokaispec/extraction/d627-d635-review.md", "kyokaispec/src/project/02-decision-traceability.md"]
+maturity_lines = ["Every required D627-D635 decision is clause-complete. This batch satisfies D577's clause-evidence condition for `SPEC_EXTRACTED`. Together with the checked pre-D558 and D558-D625 registries, Gate A is closed through D635. This does not upgrade implementation, conformance, admission, service, workload, or proof state."]
+
+[review]
+reviewer = "Rikona Kurasaki / Mjoyufull"
+review_class = "lead-maintainer-directed-extraction"
+reviewed_revision = "working tree accepted through D635"
+accepted_cutoff = "D635"
+date = "2026-07-20"
+basis = "The lead maintainer explicitly accepted the adversarial, versioning, native-provider, diagnostic, finding, and umbrella cluster and directed normal decision-to-spec processing. The checker verifies mechanical clause closure without claiming implementation, conformance, admission, operational readiness, or independent review."
+
+[[projection]]
+kind = "traceability"
+path = "kyokaispec/src/project/02-decision-traceability.md"
+required_terms = ["| D627 |", "| D635 |"]
+
+[[projection]]
+kind = "maturity"
+path = "Kyokaishape.md"
+required_terms = ["### D627-D635: Adversarial Evidence, Versioned Knowledge, Native Providers, Diagnostics, Findings, And Umbrellas **[DECIDED | SPEC_EXTRACTED"]
+
+[[projection]]
+kind = "maturity"
+path = "kyokaidecided.md"
+required_terms = ["Adversarial evidence, public knowledge versioning, native compiler providers, diagnostic registry, implementation findings, and umbrella governance | D627-D635 | `SPEC_EXTRACTED`"]
+
+[[projection]]
+kind = "gate"
+path = "phase.md"
+required_terms = ["Gate A: Plan-To-Spec Closure | Closed through D635", "D627-D635"]
+
+[[decision]]
+id = "D627"
+state = "complete"
+source_heading = "### D627: Adversarial And Wrong-Semantics Workload Corpus"
+categories = ["failure", "artifact", "diagnostic", "target", "example", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/07-testing-coverage-bench.md", "examples/adversarial/README.md", "examples/adversarial/SCHEMA.md"]
+required_terms = ["examples/adversarial/", "design_pressure"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D628"
+state = "complete"
+source_heading = "### D628-D630: Public Knowledge, Specification, Calculus, And Proof Versioning"
+categories = ["artifact", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "PROJECT_STANDARDS.md"]
+required_terms = ["knowledge manifest", "separate identity"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D629"
+state = "complete"
+source_heading = "### D628-D630: Public Knowledge, Specification, Calculus, And Proof Versioning"
+categories = ["artifact", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "kyokaispec/spec-version.toml", "PROJECT_STANDARDS.md"]
+required_terms = ["forward-only", "Semantic Versioning", "spec_version"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D630"
+state = "complete"
+source_heading = "### D628-D630: Public Knowledge, Specification, Calculus, And Proof Versioning"
+categories = ["artifact", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/03-formalization-roadmap.md", "kyokaispec/src/project/01-governance.md"]
+required_terms = ["model epoch", "coupled_semantic"]
+proof_impact = "MAPPING_ONLY"
+
+[[decision]]
+id = "D631"
+state = "complete"
+source_heading = "### D631-D632: Bleedring Native Compiler Providers And Selection"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"]
+required_terms = ["bleedring_managed", "safe extraction"]
+forbidden_active_patterns = ["c_toolchain_provider\\s*=\\s*[\"']ambient"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D632"
+state = "complete"
+source_heading = "### D631-D632: Bleedring Native Compiler Providers And Selection"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "target", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/04-build-profiles-targets-linking.md"]
+required_terms = ["c_toolchain_contracts", "--c-toolchain-provider"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D633"
+state = "complete"
+source_heading = "### D633: Diagnostic And Error Code Registry"
+categories = ["syntax-api", "failure", "artifact", "diagnostic", "compatibility", "illegal-form", "conformance"]
+destinations = ["kyokaispec/src/toolchain/05-diagnostics.md", "toolchain/diagnostics/registry.toml"]
+required_terms = ["registry.toml", "never reused"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D634"
+state = "complete"
+source_heading = "### D634: Implementation Findings And Release Review"
+categories = ["failure", "artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "PROJECT_STANDARDS.md", "notinnormativespec.md", "toolchain/findings/registry.toml"]
+required_terms = ["NO_HOTFIX_REQUIRED", "PR-local finding", "DPOINT_CANDIDATE"]
+proof_impact = "NO_SEMANTIC_IMPACT"
+
+[[decision]]
+id = "D635"
+state = "complete"
+source_heading = "### D635: Umbrella D-Points And Public Temporary Holding"
+categories = ["artifact", "diagnostic", "compatibility", "conformance"]
+destinations = ["kyokaispec/src/project/01-governance.md", "PROJECT_STANDARDS.md", "Kyokaishape.md"]
+required_terms = ["OPEN_CHILDREN", "temporary-holding"]
+proof_impact = "NO_SEMANTIC_IMPACT"

@@ -1,7 +1,4 @@
 (executable
- (name austral)
- (libraries austral_core))
-
-(executable
  (name kyokai)
- (libraries austral_core kyokai_conformance_stage_lib unix))
+ (modules kyokai)
+ (libraries kyokai_frontend kyokai_cli_support kyokai_conformance_stage_lib unix))

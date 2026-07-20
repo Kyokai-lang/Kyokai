@@ -1,0 +1,14 @@
+id = "parser.function-body-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/10-statements-and-control-flow.md"
+edition = "2026"
+inputs = ["src/Demo/Bodies.kyo"]
+command = "kyokai internal conformance-fixture parser.function-body-summary"
+expect = "Parse a function definition body into structured pattern binding, fallible binding, borrow, concurrency, debug, deferred-call, loop, conditional, return, todo, and panic statements."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "function-body-summary"
+expected_facts = ["function=classify", "body-count=14", "pattern={ x, y: ignore }", "let-else=Ok(result)/Err(error)", "or-return=plain,mapped", "or-loop=break retry,continue retry", "borrow=view:&read value", "taskgroup=spawn:value,&counter", "select=receive,timeout", "wait=ready,default", "debug=debug value;", "defer=defer closeLog();", "while-let=Some(next)", "if-branches=2", "else=panic"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

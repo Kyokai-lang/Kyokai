@@ -5,14 +5,11 @@
 (include_subdirs unqualified)
 
 (library
- (name austral_core)
- (public_name austral.austral_core)
- (synopsis "The bootstrapping compiler for Austral.")
+ (name kyokai_bootstrap_core)
+ (synopsis "The inherited bootstrap compiler core retained during Kyokai migration.")
  (libraries unix str sexplib zarith yojson)
  (preprocess (pps ppx_deriving.eq ppx_deriving.show ppx_sexp_conv))
  (flags
   ;menhir generates instances of the "unused rec flag"
   ; warning
   (:standard -w -39)))
-
-(documentation)

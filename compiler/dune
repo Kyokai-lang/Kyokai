@@ -1,0 +1,7 @@
+(include_subdirs unqualified)
+
+(library
+ (name kyokai_frontend)
+ (libraries unix str sexplib zarith yojson)
+ (preprocess (pps ppx_deriving.eq ppx_deriving.show ppx_sexp_conv))
+ (flags (:standard -w -39)))

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-10-PACKAGE-INDEX-SEMVER-RELEASES-CI
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-An ecosystem needs discoverability, but Kyokai does not need a central altar where source truth goes to be renamed. Packages are discovered through an index, resolved through pinned source, checked through interfaces, and released with provenance people can actually inspect.
+The package index provides discovery and resolution metadata; it is not the source of package contents. Resolution selects immutable source identity, interface checking validates the selected package, and release artifacts carry inspectable provenance.
 
 > Trace: D51, D221, D223-D225, D244
 > Covers: Package discovery, versioning, yanks, release artifacts, and CI are explicit ecosystem contracts.
@@ -137,10 +137,10 @@ The installed toolchain reports its identity through `kyokai --version`: toolcha
 > Trace: D31, D80, D149, D225, D268
 > Covers: Host setup failures are diagnosable through a first-party command instead of surfacing as late build folklore.
 
-## Why This Shape
+## Discovery Is Not Trust
 
 [Rikona Kurasaki / Mjoyufull]
-Discoverability is good. Blind trust is not. Kyokai's index is a map, not the land. The lockfile records the resolved ground. The `.koi` records what the package promised. The release artifact records who built what, from which source, for which target. That is enough ceremony to matter, and not so much that the ecosystem drowns in it.
+The package index supports discovery but does not establish source or build identity. The lockfile records the resolved source, `.koi` records the checked interface, and release provenance records which source and target produced an artifact. Search rank, ownership, support, advisories, and provenance remain separate facts rather than collapsing into one trust score.
 
 > Trace: D51, D83, D221, D223-D225, D244
 > Covers: Kyokai's ecosystem model combines discoverability with pinned, auditable, reproducible source identity.
@@ -202,3 +202,107 @@ Official package formats, stores, deployment providers, and Nix projections requ
 
 > Trace: D225, D263, D503, D548, D554, D557
 > Covers: Release and deployment metadata preserve exact plan, adapter, artifact, authority, provenance, verification, and rollback identity without turning an external platform into semantic authority.
+
+## Knot And Package Publication
+
+Every package keeps its own public name, version, edition/compatibility facts,
+owners, features, dependencies, KST/source identity, license/provenance, docs,
+SemVer surface, advisories, yanks, and index page. A consumer can depend on a
+package without selecting its knot.
+
+A knot is an immutable indexed publication set for one exact selected package
+graph from one workspace source revision. It has a distinct name, version,
+owners, repository/revision, KST and manifest digest, license/provenance
+summary, docs overview, support matrix, and release status. A knot version
+records every included package name/version, content and interface digest,
+source path, dependency edge, selected feature, target support, exclusion, and
+publication result. Knot and package versions are independent.
+
+Knot publication is one atomic index transaction containing the selected
+package releases and knot record. An existing package version is reusable only
+when its complete immutable identity and content match. A same-name/version
+mismatch fails. Any selected package failure in build/check/tests, docs,
+target/admission, SemVer, license/provenance, advisory policy, or publication
+aborts the transaction and exposes no newly published record.
+
+The main discovery surface is knot-first. A separate complete packages section
+remains available. A knot page shows exact packages and dependency tree; a
+package page shows versions, dependencies, docs, advisories, yanks, provenance,
+and containing-knot facts. Knot priority is presentation, not trust. Each
+package keeps package-root `kdocs/`; the knot overview links those docs and
+projects package versions, dependency tree, targets, compatibility, exclusions,
+and provenance.
+
+Package advisories and yanks apply wherever a package release appears. Knot
+advisories and yanks describe set-level faults and never suppress package
+records. A package can appear in knot releases, be published independently, or
+belong to no knot.
+
+> Trace: D624a
+> Covers: Knots are atomic aggregate releases over separately addressable package releases, with knot-first discovery and complete package-level records.
+
+## Vulnerability Intake And Incident Records
+
+The repository publishes `SECURITY.md` with supported artifact/version classes,
+in-scope surfaces, private reporting channels, maintained encryption options,
+best-effort acknowledgement/update targets, safe-harbor intent, and a ban on
+public issues for undisclosed vulnerabilities. Private cases use the states
+`received`, `acknowledged`, `triaged`, `reproduced`, `impact-assessed`,
+`remediation-active`, `coordinated-release`, `disclosed`,
+`rejected-with-reason`, `duplicate`, and `closed`.
+
+Private records separate reporter/exploit data from public advisories and state
+access, retention, backup, redaction, and conflict policy. Severity records
+reachability, authority, affected artifacts/targets, exploit evidence, and
+mitigation independently of any CVSS score. Disclosure records coordinator,
+affected parties, cadence, credit preference, deadline/escalation, downstream
+notification, and early-disclosure conditions.
+
+Playbooks cover compromised signing/provenance keys, malicious packages or
+index metadata, poisoned caches/mirrors, vulnerable compiler/runtime/stdlib or
+Bridge releases, sandbox escape, secret leakage, and service compromise.
+Revocation binds exact artifacts and versions, reason, mitigation/replacement,
+index/yank/advisory action, cache invalidation, signature/checksum state, and
+verification commands.
+
+Bootstrap intake uses GitHub private vulnerability reporting and repository
+security advisories. No custom database, public web form, paid SLA, or always-on
+service is implied. During single-maintainer bootstrap the status is
+`LIMITED_SINGLE_OWNER` with the actual owner and survivability limits named.
+Provider failure or compromise is recorded as an intake failure with an
+explicit recovery/export procedure.
+
+> Trace: D274, D431, D583
+> Covers: Vulnerability handling has a private case state machine, public advisory boundary, revocation evidence, and honest single-owner service status.
+
+## Experimental Release And Artifact Identity
+
+An XP can enter a stable distribution only after a specification revision
+defines the boundary and the official project accepts the corresponding release
+change. The implementation must be production-quality, isolated, tested, and
+disabled by default. Source, `.koi`, generated C, caches, binaries,
+diagnostics, lockfiles, package/knot records, and provenance carry every enabled
+XP ID. Stable and experimental identities never collide.
+
+Packages and knots using an XP publish only with an explicit experimental marker
+and exact XP/distribution requirements. Adding a stable-carried XP requires a
+minor or major distribution release. A patch can repair security or correctness
+without changing intended experimental semantics. XP behavior is outside
+ordinary stable SemVer, but support range, migration, expiry, security support,
+renewal, and removal remain explicit. Graduation removes XP identities only
+after stable semantic acceptance, normative extraction, migration,
+diagnostics, and conformance.
+
+> Trace: D582, D625
+> Covers: Stable-carried experiments remain opt-in, identity-separated, release-bounded, and unable to masquerade as stable dependencies or conformance.
+
+## Bundled Distribution Release Records
+
+Each official release record identifies the complete bundled Kyokai
+distribution and every compatibility-critical component inside it. The record
+includes the Bleedring installation identity and exact CI invocation. A release
+cannot advertise a supported distribution assembled from components belonging
+to different release identities.
+
+> Trace: D615
+> Covers: Release and CI metadata identify the same atomic distribution installed by Bleedring.

@@ -1,0 +1,13 @@
+module Demo.Expressions is
+constant empty: Buffer := makeBuffer();
+constant slice: Span := values[start + 1..limit];
+constant moved: Point := Point { x: 2, with point };
+constant predicate: Predicate := fn [limit, &cfg] (value: Int32): Bool => value < limit and cfg.ready;
+constant mapper: Mapper := fn [limit] (value: Int32): Int32 is
+    return value + limit;
+qed;
+constant pair: Pair := build Pair do
+    let left := 1;
+    produce Pair { left, right: 2 };
+build;
+seal;

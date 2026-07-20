@@ -5,9 +5,9 @@
    SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 *)
 open OUnit2
-open Austral_core.Identifier
-open Austral_core.CliUtil
-open Austral_core.CliParser
+open Kyokai_bootstrap_core.Identifier
+open Kyokai_bootstrap_core.CliUtil
+open Kyokai_bootstrap_core.CliParser
 
 let parse_cmd (args: string list): cmd =
   parse (parse_args args)

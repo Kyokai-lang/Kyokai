@@ -47,7 +47,7 @@ The old inherited Austral chapter files are out of the active Kyokai build after
 | FFI | `language/16-unsafe-ffi-and-abi.md`, `stdlib/11-transitional-ffi-tracking.md`. |
 | Examples and style | `language/19-examples.md` plus the accepted syntax and naming rules. |
 | Rationale | `rationale/00-rationale-index.md` through `rationale/09-backend-choice.md`; Borretti wording is marked as source text when reused. |
-| Full GFDL text | `src/appendix-a.md`, navigated by `appendices/a-license.md`. |
+| Full GFDL text | `src/appendix-a.md`, navigated by `project/04-project-licensing.md`. |
 
 > Trace: D5, D86, Attribution policy
 > Covers: Old Austral chapter files have Kyokai replacements, Borretti source wording is credited when used, and the GFDL text remains included.

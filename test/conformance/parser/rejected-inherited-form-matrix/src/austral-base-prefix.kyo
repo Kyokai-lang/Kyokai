@@ -1,0 +1,3 @@
+module Main is
+constant mask: Nat8 := #xFF;
+seal;

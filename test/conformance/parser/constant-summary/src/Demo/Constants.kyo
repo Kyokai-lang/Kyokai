@@ -1,0 +1,3 @@
+module Demo.Constants is
+public constant maxPathBytes: Index := 4096;
+seal;

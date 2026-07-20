@@ -1,0 +1,14 @@
+id = "parser.instance-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/07-generics-and-typeclasses.md"
+edition = "2026"
+inputs = ["src/Demo/Iteration.kyo"]
+command = "kyokai internal conformance-fixture parser.instance-summary"
+expect = "Parse an instance head, generic parameters, where obligations, declaration guard, associated-type definitions, and method definitions into structured facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "instance-summary"
+expected_facts = ["instance=Iterable", "generic=T", "target=Buffer[T]", "where=T: Displayable", "guard-line=4", "associated=Item:T", "method=next", "return=Optional[T]", "method-body=return None;"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

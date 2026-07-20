@@ -1,0 +1,4 @@
+module Demo.Signatures is
+function copyText[T: Type](text: &[StaticString], output: &![Buffer[T]]): Result[Unit, IoError] is
+qed;
+seal;

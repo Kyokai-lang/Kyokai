@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-02-LEXICAL-SYNTAX
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai source is written as UTF-8 text and is specified here with the same clean EBNF discipline inherited from Austral: `=` defines a production, `;` ends it, concatenation is written with `,`, alternation with `|`, optional syntax with `[...]`, and zero-or-more repetition with `{...}`. That inherited shape is still useful. The city changed, the street signs changed, but the map-reading tool still works.
+Kyokai source is UTF-8 text. This chapter uses Austral's EBNF notation: `=` defines a production, `;` ends it, `,` denotes concatenation, `|` denotes alternation, `[...]` denotes optional syntax, and `{...}` denotes zero-or-more repetition. The notation is inherited; the source language is Kyokai's.
 
 > Trace: D5, D52, D78, D86, D537
 > Covers: Kyokai keeps useful inherited Austral specification machinery while replacing the source language surface with the single `.kyo` module source file under the Kyokai module/package model.
@@ -38,8 +38,12 @@ declaration doc comment = "///", {not line break}, line end;
 module doc comment = "//!", {not line break}, line end;
 ```
 
-> Trace: D63
-> Covers: Kyokai uses `//`, `///`, and `//!` comments, replaces Austral's `--` and triple-quote docstring surface, and has no block comments.
+The spellings `--`, `''`, `**`, and `||` do not begin comments. They are
+tokenized according to the ordinary operator/error rules. Tooling must not
+offer them as alternate comment syntax.
+
+> Trace: D63, D608
+> Covers: Kyokai uses `//`, `///`, and `//!` comments, replaces Austral's `--` and triple-quote docstring surface, has no block comments, and admits no alternate comment delimiter.
 
 Documentation comments attach to the next declaration or file/module item according to the documentation chapter. They are comments first: they do not create string literals, declarations, hidden attributes, or executable statements.
 
@@ -84,24 +88,24 @@ No still-live binding may be shadowed by another local binding, parameter, patte
 The following words are reserved as language keywords and cannot be used as ordinary identifiers:
 
 ```text
-additional_invariant alias and as assumes audit band below bit bitrecord bits bnot body bor
-borrow borrows break build bxor capability case cleanup compile_error comptime constant
-continue contract covers debug default defer do drop else ensure Err errdefer esac evidence
-exports extern false fi field fn for forbids foreign from function generator if import in
-instance internal is join layout let lifetime maps_failure method module module_invariant mon
-nil None not od of Ok opaque or owns packed panic pick pragma preserves private produce public
-qed receiver record reentrancy require requires reserved return rotl rotr seal select shl shr
-Some spawn spec static static_assert target taskgroup then threading timeout to todo transfers
+additional_invariant alias and as audit band below bit bitrecord bits bnot body bor
+borrow break build bxor capability case compile_error comptime constant
+continue contract covers debug default defer do drop else ensure Err errdefer esac
+extern false fi field fn for foreign from function generator if import in
+instance internal is join let method module module_invariant mon
+nil None not od of Ok opaque or packed panic pick pragma private produce public
+qed receiver record require reserved return rotl rotr seal select shl shr
+Some spawn spec static static_assert target taskgroup then timeout to todo
 true type typeclass union unreachable unsafe var wait wake when where while with yield
 ```
 
 > Trace: D8-D21, D24, D41, D52, D54, D63, D78, D111, D118-D120, D127, D179, D198, D214, D235, D252, D322-D323, D339-D341, D538, D539
 > Covers: Kyokai reserves the accepted syntax surface for declarations, control flow, contracts, FFI, unsafe contracts, tasks, generators, compile-time forms, bitrecords, waits, visibility markers `public`/`private`, the `opaque` representation modifier, and semantic terminators. Contextual words remain separate.
 
-Some words are contextual. `result` is recognized as the postcondition result view only inside `ensure` clauses. `old` is recognized only inside `ensure` clauses. `ignore` is recognized as the discard pattern only in pattern position. Outside those contexts, they are ordinary identifiers unless another chapter gives a narrower rule.
+Some words are contextual. `result` is recognized as the postcondition result view only inside `ensure` clauses. `old` is recognized only inside `ensure` clauses. `ignore` is recognized as the discard pattern only in pattern position. The unsafe-contract field labels `assumes`, `requires`, `preserves`, `forbids`, `maps_failure`, `owns`, `borrows`, `transfers`, `threading`, `lifetime`, `layout`, `reentrancy`, `cleanup`, `exports`, and `evidence` are labels only in the grammar position following a recognized unsafe-contract item. Outside those positions, they are ordinary identifiers unless another chapter gives the word a separate reserved role. `target` also labels an unsafe-contract field, but remains globally reserved because it is a language built-in. Structural words including `unsafe`, `contract`, `covers`, `module_invariant`, `additional_invariant`, and `audit` remain globally reserved.
 
-> Trace: D125, D129, D205, D206
-> Covers: `result`, `old`, and `ignore` have context-limited syntax roles rather than becoming global reserved words.
+> Trace: D125, D129, D205, D206, D606
+> Covers: Postcondition names, discard patterns, and unsafe-contract field labels have position-limited syntax roles; contextual audit labels do not create a general contextual-keyword system.
 
 The built-in names `Unit`, `Bool`, `Never`, `Int8`, `Int16`, `Int32`, `Int64`, `Nat8`, `Nat16`, `Nat32`, `Nat64`, `Float32`, `Float64`, `Index`, `String`, `StaticString`, `Result`, `Optional`, `Ok`, `Err`, `Some`, `None`, `target`, `Os`, `Arch`, `Abi`, and `Endian` are language-level names, not an imported prelude. They are available without an import and cannot be shadowed by imports.
 
@@ -196,14 +200,14 @@ Kyokai punctuation is small enough that the reader can hold it in their head wit
 ```text
 ( ) [ ] { }
 , . .. : ; :=
-= != < <= > >=
+== != < <= > >=
 -> =>
 + - * / % ++
-& &! &~ ~
+& &! ~
 ```
 
 > Trace: D7a, D7b, D10, D14, D15, D15a, D34, D35, D36, D56, D65, D106, D119
-> Covers: Kyokai reserves punctuation for calls, indexing, construction, assignment, equality, explicit references, dereference, UFCS/member access, slicing, function types, and `or return` error mapping.
+> Covers: Kyokai keeps `:=` for assignment and `==`/`!=` for value equality and inequality, while reserving punctuation for calls, indexing, construction, explicit references, dereference, UFCS/member access, slicing, function types, and `or return` error mapping.
 
 Keyword operators are `and`, `or`, `not`, `band`, `bor`, `bxor`, `bnot`, `shl`, `shr`, `rotl`, and `rotr`. `and` and `or` are short-circuiting boolean operators. Bitwise and shift operators are keywords so they do not collide with borrow syntax.
 

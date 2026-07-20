@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-06-TYPE-SYSTEM
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai keeps Austral's hard center: the type system is not decoration around memory management. It is the first wall between ordinary values, resource-owning values, borrowed access, and authority. The wall has to be visible in source, because a hidden ownership rule is just another way to make the reader guess where the trapdoor is.
+Kyokai retains Austral's linear type foundation. The type system distinguishes ordinary values, resource-owning values, borrowed access, and authority-bearing values. These distinctions are visible in source and determine copying, movement, borrowing, consumption, and generic legality.
 
 > Trace: D5, D14, D73, D143/D241, D195
 > Covers: Kyokai inherits Austral's linear type foundation while stating the Kyokai universe, borrow, and no-UB rules directly in this spec.
@@ -201,7 +201,7 @@ A type whose layout or ownership behavior depends on unsafe or target-specific f
 
 ## Ownership-Indexed Types And Synchronized Sharing
 
-Projecting a `Free` field from a linear record through a legal immutable borrow copies or borrows only that field according to its field type. Projecting a `Free` field never consumes the linear owner. A `Free` field is independently projectable only when the record declaration marks that field independently projectable or the compiler proves that projection cannot violate a cross-field invariant. Handle-and-payload records, capability-bearing records, and unsafe-backed records default to non-independent fields unless their admission record states otherwise.
+Projecting a `Free` field from a linear record through a legal immutable borrow copies or borrows only that field according to its field type. Projecting a `Free` field never consumes the linear owner. A `Free` field is independently projectable only when the record declaration marks that field independently projectable or the compiler proves that projection cannot violate a cross-field invariant. Handle-and-payload records, capability-bearing records, and unsafe-backed records default to non-independent fields unless their normative projection contract establishes independence.
 
 During an active mutable borrow of another field, projecting an independently projectable `Free` field is legal only when the projected field and mutably borrowed field occupy disjoint field regions and no declared invariant ties their states together. Projecting a linear field by value consumes through an explicit movement path and is rejected while an incompatible borrow is live.
 
@@ -209,7 +209,52 @@ Generational handles are nominal `Free` keys containing an owner identity compon
 
 Generic containers declare universe behavior. An `Auto` container is `Free` exactly when every stored field and element is `Free`; otherwise it is `Linear`. A container operation states its constraints. Copy lookup requires `T: Free`. Borrow lookup works for every admitted stored universe. Moving extraction exists only through named invariant-preserving operations.
 
-Synchronized immutable sharing is closed. A type participates only through a compiler-known or audited stdlib admission record such as atomics, mutexes, read-write locks, and admitted synchronization cells. Ordinary records do not gain shared mutation by implementing a broad user typeclass.
+Synchronized immutable sharing is closed. A type participates only when a built-in or standard-library semantic contract names it, as with atomics, mutexes, read-write locks, and named synchronization cells. Ordinary records do not gain shared mutation by implementing a broad user typeclass.
 
 > Trace: D374-D375, D448, D458, D463, D497
 > Covers: Free-field projection, nominal generational handles, universe-aware containers, and the closed synchronized-sharing boundary are explicit.
+
+## Structural Proof Of `Free`
+
+A declaration classified `Free` is accepted only when every stored field,
+union payload, closure capture, hidden representation component, and selected
+representation alternative is `Free` for every legal instantiation. A stored
+generic parameter therefore carries a sufficient public `Free` constraint.
+Use-site context cannot change the classification.
+
+Associated types, conditional bounds, const-selected representations,
+recursive declaration groups, arrays, opaque forms, newtypes, single-field
+records, transparent aliases, and foreign opaque types participate in the
+proof. An alias cannot launder classification. A phantom parameter contributes
+no storage obligation, but it cannot conceal an obligation selected elsewhere.
+Foreign opaque storage is `Free` only under an admitted copy-and-discard
+contract. Recursive groups use the finite monotone classifier defined above.
+
+The compiler diagnoses the exact field, payload, capture, recursive edge, or
+substitution that defeats the proof. The declaration must instead be `Auto` or
+`Linear`. `.koi` records the universe, normalized public proof dependencies,
+and any foreign admission identity. Generated, unsafe, ABI, alias, and
+typeclass machinery cannot replace that proof with a trusted bit.
+
+> Trace: D560
+> Covers: Declared `Free` types are structurally valid for lawful copying and cleanup-free discard under every legal instantiation.
+
+## Independently Projectable Fields
+
+An ordinary record can declare `projection independent (fields...);`. Each
+named field must be `Free`, occupy disjoint ordinary-record storage, and be
+free of cross-field invariants, seals, dependent validation, and unsafe
+representation obligations. `extern`, `packed`, opaque, capability-bearing,
+handle/payload, and unsafe-backed records require an owning admission or unsafe
+contract before they can expose the relation.
+
+One clause states that each listed field is independent of fields outside the
+clause. It does not make listed fields independent of each other. Pairwise
+independence between two fields is written with singleton clauses. During an
+otherwise incompatible borrow, only a marked field can be projected through
+this source rule. `.koi` records stable field IDs, the relation, and the public
+admission identity. A compiler may prove stronger local non-aliasing for an
+optimization, but that proof cannot expose unmarked source behavior.
+
+> Trace: D563
+> Covers: Field projection through concurrent disjoint access is declaration-visible, checked, artifact-stable, and unavailable to representation classes that cannot prove independence.

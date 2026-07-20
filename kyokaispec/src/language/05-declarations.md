@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-05-DECLARATIONS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Declarations are the names a module lets the rest of the program touch. They are not loose notes at the top of a file. A declaration says what exists, who may name it, what type it has, what contract it carries, and the body that proves the promise true, all in one source file.
+A declaration introduces a program entity and states who may name it, its type and contracts, and, when required, its implementation. Kyokai keeps those facts in the module's single source file.
 
 > Trace: D5, D17, D52, D78, D537, D538
 > Covers: Kyokai declaration rules are part of the self-contained Kyokai spec and are checked within one `.kyo` module source file with per-declaration visibility.
@@ -139,7 +139,7 @@ Ordinary records use Kyokai layout. Fields stay in source order, each field is p
 > Trace: D20, D20a, D42, D242
 > Covers: Raw by-value aggregate FFI requires `extern record`; ordinary records do not inherit C ABI layout.
 
-`packed record` is byte-tight. Fields have no implicit padding between them, the record alignment is 1, and field access behaves as copy-in/copy-out through aligned temporaries when needed. Taking `&field` or `&!field` of a packed field is illegal because it could create a misaligned reference. Packed layout does not imply C compatibility, bitfields, or endian conversion.
+`packed record` is byte-tight. Fields have no implicit padding between them, the record alignment is 1, and field access behaves as copy-in/copy-out through aligned temporaries when needed. Taking `&read value.field` or `&write value.field` is illegal because it could create a misaligned reference. Packed layout does not imply C compatibility, bitfields, or endian conversion.
 
 > Trace: D42, D116
 > Covers: Packed records are explicit byte-tight records with copy field access and no field borrowing.
@@ -171,7 +171,7 @@ A `bitrecord` declares a nominal fixed-width value over `Nat8`, `Nat16`, `Nat32`
 
 A single-bit field has type `Bool` unless its declaration uses an admitted one-bit unsigned view. A multi-bit field has the smallest admitted unsigned view that contains its width unless the declaration names a matching unsigned view explicitly. A profile that permits uncovered bits emits a formatter or lint finding for every uncovered position. A strict profile rejects uncovered positions. No profile permits overlap or out-of-range positions.
 
-A `bitrecord` has exactly the storage and alignment of its backing integer. `toBits(value)` returns that integer unchanged. `fromBits(bits)` preserves it unchanged and does not validate reserved bits unless a named constructor states that validation contract. Field reads and updates lower to masks, shifts, and checked range operations. A field has no address and no borrow semantics; `&value.field` and `&!value.field` are compile-time errors. Serialization crosses byte boundaries through explicit endian conversion of the backing integer. The backend never emits C bitfields for Kyokai `bitrecord` semantics.
+A `bitrecord` has exactly the storage and alignment of its backing integer. `toBits(value)` returns that integer unchanged. `fromBits(bits)` preserves it unchanged and does not validate reserved bits unless a named constructor states that validation contract. Field reads and updates lower to masks, shifts, and checked range operations. A field has no address and no borrow semantics; `&read value.field` and `&write value.field` are compile-time errors. Serialization crosses byte boundaries through explicit endian conversion of the backing integer. The backend never emits C bitfields for Kyokai `bitrecord` semantics.
 
 > Trace: D116, D117/D260, D323
 > Covers: `bitrecord` is a nominal masks-and-shifts value with fixed backing storage, closed position rules, no field borrows, and explicit endian boundaries.

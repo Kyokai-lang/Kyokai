@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-12-APPLICATION-INTEGRATION-CONTRACTS
 > Covers: This chapter specifies common ownership, identity, testing, data, server, terminal, native, mobile, embedded, accelerator, and data-integration contracts. It does not claim that a framework, provider, board, SDK, or runtime implementation has been admitted.
 
-A language can reach the edge of an application and lose every promise it made in the center. A window retains a callback longer than its borrow. A terminal leaves raw mode behind after a fatal exit. A database pool hides cancellation in a queue. A GPU wrapper moves a buffer without saying which device owns it. Kyokai treats those edges as contracts, not ecosystem folklore.
+Application integrations must preserve Kyokai's ownership, authority, allocation, failure, and cleanup rules. This chapter defines the common contracts for retained callbacks, terminal state, queued cancellation, device-owned buffers, and other boundaries where a framework or platform can outlive or obscure an ordinary source-level operation.
 
 > Trace: D540, D542-D543, D546, D549-D556
 > Covers: Application-domain ergonomics use shared explicit ownership and tool contracts without adding hidden ownership, authority, allocation, dispatch, or failure semantics.
@@ -46,7 +46,7 @@ Kyokai has no general trait object, existential value, universal erased containe
 
 ## Callback Contracts
 
-The language-level callback classes remain `Callable`, `CallableMut`, `CallableOnce`, and the accepted state-threading forms. Framework terms such as handler, renderer, reducer, completion, and teardown are parameter or API names. They do not create new callable classes.
+The language-level callback classes remain `CallableRead`, `CallableMut`, `CallableOnce`, and `CallableState[S]`. Framework terms such as handler, renderer, reducer, completion, and teardown are parameter or API names. They do not create new callable classes.
 
 Every retained or foreign callback parameter records callable class, arity, capture restrictions, storage duration, thread or executor affinity, reentrancy, cancellation, retry, replacement, return, failure, and teardown behavior. Distinct contracts use distinct actual types or entry points. Generated adapters preserve capture, ownership, source, affinity, unsafe-wrapper, and callable-class provenance.
 
@@ -200,7 +200,49 @@ An integration remains absent until its admission record exists. Naming a candid
 > Trace: D85, D229-D232, D499, D529, D540-D556
 > Covers: Common integration contracts do not overclaim actual framework or provider support.
 
-## Why This Shape
+## Frameworks Obey Language Rules
 
 [Rikona Kurasaki / Mjoyufull]
-The easy lie is that framework code lives above the language. It does not. It reaches down into ownership, callbacks, devices, terminals, processes, foreign runtimes, and every place a cleanup can disappear. Kyokai keeps those edges visible. The framework can still be beautiful. It simply cannot build that beauty out of rules nobody wrote down.
+Framework code crosses the same ownership and authority boundaries as lower-level library code, often with longer-lived callbacks and more external state. Its contracts must therefore identify retained ownership, cleanup, device and process authority, terminal restoration, foreign-runtime behavior, and failure recovery rather than treating those facts as framework internals.
+
+## First-Party Web Protocol Foundation
+
+RFC-family `Uri` and WHATWG `WebUrl` are different types; parsing either is
+pure. Kyokai-maintained HTTP Core defines RFC 9110 semantics, structured
+headers, methods and status, streaming Linear bodies, limits, and strict HTTP/1
+framing with request-smuggling rejection. HTTP/2 and HTTP/3 require separate
+first-party admission.
+
+Client redirect, retry, cookie, proxy, decompression, authentication, pooling,
+and cache policies are explicit. Non-idempotent work is never silently retried.
+Server packages expose budgets, deadlines, backpressure, overload, graceful
+shutdown, fatal isolation, and direct Poller integration without a hidden
+executor. WebSocket is a complete first-party protocol module. OpenAPI and JSON
+Schema are first-party; Protobuf, FlatBuffers, Cap'n Proto, and similar systems
+use generated packages or Bridges with recorded provenance.
+
+Interoperability suites, deterministic fuzz replay, and the maintained Poller
+server workload are admission evidence.
+
+> Trace: D594
+> Covers: The first-party web story owns protocol semantics and hostile framing without importing hidden scheduling, retry, or authority.
+
+## Database Placement
+
+SQLite is the first high-priority official Bridge. Bundled and system forms
+have distinct admission identity, library version, compile flags, thread mode,
+extension policy, and update owner. Connections are Linear. Statements,
+bindings, row views, and transactions state their parent lifetime,
+invalidation, cancellation, callback re-entry, and indeterminate-outcome rules.
+Extension loading is disabled by default and requires authority plus an
+allowlist.
+
+PostgreSQL and MySQL native-protocol clients are first-party packages composed
+from explicit sockets, Poller, DNS, TLS, clocks, cancellation, and observability.
+Native client-library Bridges may coexist under separate identities. Pools are
+ordinary explicit-lifetime packages; parameters are typed; errors retain raw
+provider codes and portable categories. Migrations, ORMs, and query builders
+cannot hide authority, transactions, allocation, or unbounded loading.
+
+> Trace: D595
+> Covers: Database integration preserves provider identity and transaction state instead of disguising them behind one universal data layer.

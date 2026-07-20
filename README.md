@@ -9,9 +9,9 @@ Kyokai is currently in early public development. The accepted language shape and
 | Area | Status |
 | --- | --- |
 | Accepted language shape | Present in `kyokaidecided.md`. |
-| Live public D-points | Normally carried by PRs/MRs; `Kyokaishape.md` is index/archive. |
+| Live public D-points | Carried by PRs/MRs or held temporarily in `Kyokaishape.md`; that file also keeps the decision index and archive. |
 | Normative Kyokai spec | Active under `kyokaispec/`; accepted shape not yet fully extracted remains in `kyokaidecided.md`. |
-| Compiler | Inherited Austral OCaml compiler, being forked toward Kyokai. |
+| Compiler | Kyokai source/frontend boundary is active in `compiler/`; later passes still use classified Austral bootstrap code in `lib/`. |
 | Standard library | Inherited Austral stdlib, being redesigned/admitted under Kyokai rules. |
 | Roadmap | `phase.md`. |
 | Code standards | `CODE_STANDARDS.md`. |
@@ -36,7 +36,7 @@ Kyokai keeps Austral's most important safety ideas and pushes them toward a prod
 1. `kyokaispec/` once a Kyokai rule is written there.
 2. `kyokaidecided.md` for accepted Kyokai shape not yet spec-extracted.
 3. Public PRs/MRs carrying live D-point proposals and final wording.
-4. `Kyokaishape.md` for index/archive tracking when a D-point does not live directly in a PR/MR.
+4. `Kyokaishape.md` for public temporary holding, active-proposal tracking, and index/archive material when a D-point does not live directly in a PR/MR.
 5. Issues and discussions as motivation or pre-proposal material.
 6. `phase.md` for implementation order only.
 
@@ -46,22 +46,26 @@ Kyokai keeps Austral's most important safety ideas and pushes them toward a prod
 
 | Path | Purpose |
 | --- | --- |
-| `lib/` | Current OCaml compiler source inherited from Austral. |
+| `compiler/` | Active Kyokai compiler source, including the Phase 3 frontend and package source loader. |
+| `lib/` | Classified inherited OCaml bootstrap passes; not an owner for new Kyokai compiler code. |
+| `toolchain/` | Bootstrap CLI support, fixture execution, identity checks, ProofTrace, and spec integrity tools. |
 | `standard/` | Current inherited standard-library tree. |
 | `test/` | Unit-level compiler tests. |
 | `test-programs/` | End-to-end compiler tests inherited from Austral. |
 | `kyokaispec/` | Normative Kyokai specification source and generated outputs. |
 | `kyokaidecided.md` | Accepted Kyokai shape and maturity tracker. |
-| `Kyokaishape.md` | Public D-point index/archive, not the normal home for new D-point bodies. |
+| `Kyokaishape.md` | Public temporary holding area, active-proposal tracker, decision index, and historical archive. |
 | `phase.md` | Implementation/proof roadmap. |
 | `CODE_STANDARDS.md` | Mandatory code standards. |
 | `PROJECT_STANDARDS.md` | Public project workflow. |
 | `docs/contributing/spec-writing.md` | Public guide for D-point/spec prose. |
 | `docs/infrastructure/services.md` | Public service/infrastructure ownership board. |
 
-## Building The Current Inherited Compiler
+## Building the current bootstrap compiler
 
-The compiler is still inherited from Austral, so some package names and commands may still say `austral` until the fork identity work is complete.
+The installed bootstrap executable is named `kyokai`. It exposes version output
+and explicitly internal Phase 3 frontend probes. The accepted public `check`,
+build, run, and other toolchain commands are not claimed by those probes.
 
 With Nix:
 
@@ -81,6 +85,13 @@ Run tests with:
 
 ```bash
 ./run-tests.sh
+```
+
+Run the Phase 3 source boundary directly with:
+
+```bash
+./kyokai internal frontend-check path/to/package-or-workspace
+./kyokai internal conformance-fixture parser.accepted-source-skeleton
 ```
 
 Build the inherited standard library with:

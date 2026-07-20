@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-08-PATTERNS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A pattern is a hand reaching into a value. It can name what it takes, refuse what does not match, or step past free data with `ignore`. What it cannot do is make ownership vanish. If a payload owns something, the pattern must bring it into the light.
+A pattern tests or decomposes a value, introduces bindings, and may skip `Free` data with `ignore`. It cannot discard a `Linear` payload. Every linear component selected by a pattern remains subject to exactly-once ownership checking.
 
 > Trace: D38, D98, D205, D206
 > Covers: Kyokai patterns are structural, exhaustive where required, and cannot hide linear-resource discard.

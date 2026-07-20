@@ -1,0 +1,14 @@
+id = "parser.typeclass-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/07-generics-and-typeclasses.md"
+edition = "2026"
+inputs = ["src/Demo/Iteration.kyo"]
+command = "kyokai internal conformance-fixture parser.typeclass-summary"
+expect = "Parse typeclass generic parameters, associated types, required method signatures, and default method bodies into structured facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "typeclass-summary"
+expected_facts = ["typeclass=Iterable", "generic=Self", "associated=Item", "method=next:required", "return=Optional[Self.Item]", "method=isEmpty:default", "default-body=return false;"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

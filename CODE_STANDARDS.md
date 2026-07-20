@@ -1,7 +1,7 @@
 # Kyokai Code Standards
 
-**Document Version:** 0.2.0  
-**Last Updated:** 2026-05-02  
+**Document Version:** 0.3.1
+**Last Updated:** 2026-07-14
 **Scope:** Kyokai compiler, runtime, standard library, generated code, tests, tools, examples, documentation-adjacent code, and future Kyokai source code
 
 This is the code-quality handbook for Kyokai. It is not a short checklist. It is the standard for how code in this repository should be written, reviewed, split, tested, and maintained while Kyokai moves from an Austral-derived compiler into its own language, standard library, toolchain, and spec.
@@ -65,7 +65,7 @@ Rules:
 
 - If behavior is accepted, link or cite the public shape/spec source in the PR when it is non-obvious.
 - If behavior is experimental, keep it behind a non-default flag or branch-local work.
-- If implementation reveals a missing semantic question, open or update a D-point instead of filling the gap silently.
+- If implementation reveals a missing semantic question, open or update a proposal instead of filling the gap silently.
 - If a diagnostic, runtime check, lowering rule, or stdlib API depends on a subtle guarantee, write that guarantee down.
 
 Good code is not just code that passes tests. Good Kyokai code makes it obvious which language rule it implements.
@@ -123,6 +123,30 @@ Rules:
 
 When a behavior has no test, say why. If the reason is "the harness does not exist yet," add the missing harness to the roadmap or PR notes.
 
+### 1.6 Optimize For Local Reasoning
+
+A maintainer should be able to understand a change from the owning module, its interface, its pass contract, and its focused tests. Important behavior must not depend on invisible setup, ambient mutable state, an unrelated pass, or a helper whose name hides authority or control flow.
+
+Rules:
+
+- Keep inputs, outputs, failure modes, authority, allocation, blocking, and state transitions visible at the nearest useful boundary.
+- Keep one main abstraction level inside a function. Extract policy selection, traversal, validation, mutation, and rendering when mixing them obscures the invariant.
+- Prefer narrow interfaces and explicit parameter objects over long argument lists or ambient context.
+- Do not require callers to know an undocumented call order, mutation history, cache state, or global initialization fact.
+- A helper is justified when it gives a rule a name or isolates a responsibility. Moving lines without improving the reasoning boundary is not decomposition.
+
+### 1.7 Prefer Reversible Changes
+
+Early compiler and toolchain decisions should be easy to replace until their semantics and evidence are mature.
+
+Rules:
+
+- Put unstable representations behind narrow interfaces.
+- Stage migrations through explicit adapters or versioned artifacts instead of flag-day rewrites when both forms must coexist temporarily.
+- State the deletion or replacement trigger for scaffolds, compatibility layers, and temporary representations.
+- Keep refactors behavior-preserving unless the semantic change is separately identified and tested.
+- A reversible design must not create two permanent sources of truth. Transitional duplication has an owner, validation rule, and removal condition.
+
 ---
 
 ## 2. Scope And Authority
@@ -166,6 +190,17 @@ Rules:
 - When modifying inherited code, preserve its working behavior unless the PR is intentionally changing that behavior.
 - When the inherited behavior conflicts with Kyokai, add tests that prove the new Kyokai behavior.
 
+Every inherited module or pass touched during migration receives exactly one disposition in `docs/compiler-pipeline-inventory.md` or the owning PR/MR:
+
+| Disposition | Meaning | Required evidence |
+| --- | --- | --- |
+| `RETAIN` | Its behavior and architecture remain valid Kyokai implementation material. | Kyokai rule mapping, invariant review, focused tests, and public identity cleanup where relevant. |
+| `ADAPT` | Its structure is useful but its contract changes for Kyokai. | Explicit inherited/new boundary, migration tests, compatibility-code removal owner, and removal condition. |
+| `REPLACE` | It cannot safely or maintainably carry the accepted Kyokai contract. | Replacement design, input/output migration tests, and deletion trigger. |
+| `DELETE` | It implements retired behavior or has no Kyokai owner. | Reference/build search, dependency removal, and test/status update. |
+
+`REWRITE` is an implementation technique for `REPLACE`, not an unlabeled fifth disposition. A touched inherited path without a disposition remains unreviewed migration debt.
+
 ### 2.4 Public Shape And Implementation
 
 A code change may do one of four things:
@@ -175,7 +210,7 @@ A code change may do one of four things:
 | Implements accepted shape | Link the accepted shape/spec and add tests. |
 | Repairs implementation to match accepted shape | Explain the mismatch and add regression tests. |
 | Prototypes undecided behavior | Keep it non-default and clearly experimental. |
-| Reveals a missing decision | Open/update the D-point before treating it as a contract. |
+| Reveals a missing decision | Open/update a proposal before treating it as a contract. |
 
 Do not smuggle language design through a code PR.
 
@@ -190,8 +225,8 @@ Use local sources first for project reality.
 | Path | Use |
 | --- | --- |
 | `PROJECT_STANDARDS.md` | Workflow, PR, D-point, branch, release, and review process. |
-| public D-point PRs/MRs | Normal home for live public D-point proposals, final wording, acks, spec edits, and tests. |
-| `Kyokaishape.md` | Public index/archive or temporary holding area for D-points that do not live directly in PRs/MRs. |
+| public proposal PRs/MRs | Normal home for live public proposals, final wording, acks, spec edits, and tests. |
+| `Kyokaishape.md` | Public index/archive for D-points. |
 | `kyokaidecided.md` | Public accepted shape while the full spec is being written. |
 | `kyokaispec/` | Normative spec as it is extracted and written. |
 | `phase.md` | Implementation order, proof gates, and done-when checks. |
@@ -357,8 +392,8 @@ Expected current layout:
 ```text
 kyokailang/kyokai/
   bin/                 compiler entrypoints
-  lib/                 OCaml compiler implementation
-  lib/compiler/        Kyokai-owned compiler subtrees during migration
+  compiler/            active Kyokai compiler implementation
+  lib/                 inherited OCaml bootstrap implementation
   toolchain/           Kyokai-owned toolchain support code
   standard/            inherited/current standard library sources
   test/                OCaml/unit-level tests
@@ -377,6 +412,11 @@ kyokailang/kyokai/
 ```
 
 Do not create a parallel compiler, runtime, or stdlib tree without a migration plan.
+
+`compiler/` is the owner of active Kyokai compiler code. `lib/` is not a
+general compiler bucket: it contains the classified inherited bootstrap modules
+listed by `docs/compiler-transition-inventory.toml`. New Kyokai frontend or
+semantic code may not be added to `lib/`.
 
 The target Kyokai layout separates compiler implementation from toolchain implementation. Broad new toolchain work belongs under a `toolchain/` owner directory rather than being added to the inherited flat `lib/` compiler tree. Compiler internals split by boundary: `frontend/`, `package/`, `resolver/`, `typing/`, `elaboration/`, `checking/`, `ir/`, `backend/`, and `diagnostics/`. Toolchain internals split by user-facing service: `cli/`, `build/`, `conformance/`, `fmt/`, `lsp/`, `docs/`, `package/`, `audit/`, `prooftrace/`, and `ci/`. A migration PR/MR that moves code from `lib/` updates tests, ProofTrace records, generated status boards, and public path references in the same change.
 
@@ -410,7 +450,18 @@ Bad file purposes:
 
 ### 5.3 Module Size
 
-There is no hard line-count law, but large modules must earn their size.
+Line counts are review triggers, not a substitute for design judgment. They exist because very large handwritten files hide mixed responsibilities, make review incomplete, and turn small changes into repository-wide reasoning exercises.
+
+Soft budgets for maintained handwritten source:
+
+| Unit | Preferred | Mandatory review trigger | Split or recorded exception |
+| --- | ---: | ---: | ---: |
+| Implementation file | 250-400 logical lines | More than 500 | More than 800 |
+| Interface file | Up to 250 logical lines | More than 350 | More than 500 |
+| Function | 20-50 logical lines | More than 80 | More than 120 |
+| Individual match arm | A few statements | More than 25 | Extract unless extraction would hide one state transition |
+
+A logical line is a nonblank, non-comment source line. Removing comments, compressing expressions, or putting several operations on one physical line does not satisfy the budget. A maintained handwritten source file of 4,000 logical lines is prohibited. It must be decomposed before additional feature work is accepted.
 
 Rules:
 
@@ -419,6 +470,11 @@ Rules:
 - A long algorithm module needs section comments and tests for the major cases.
 - A module with unrelated responsibilities should be split.
 - New code should not make already-large inherited modules worse without a reason.
+- Crossing a mandatory review trigger requires the reviewer to state whether the unit remains coherent, should be split in the same change, or has a tracked split plan.
+- Crossing the exception threshold requires a large-file exception in the owning direction/status record or PR. It states the single responsibility, why splitting would harm local reasoning, navigation aids, test partitions, owner, and a concrete revisit trigger.
+- Generated parser tables, Unicode or target data, machine-generated bindings, golden corpora, and vendored upstream inputs are excluded only when they are not hand-maintained and carry generator or upstream provenance, regeneration instructions, and an owner.
+- Handwritten grammars, state machines, and declarative tables are not automatically generated-data exceptions.
+- Do not game these limits by creating `part1`, `part2`, `misc`, or thin forwarding files. A split names real responsibilities and narrows dependencies or invariants.
 
 Signals that a module should split:
 
@@ -427,6 +483,13 @@ Signals that a module should split:
 - helpers have names like `misc`, `util`, `stuff`, or `common2`
 - small edits routinely cause unrelated behavior changes
 - the module has several independent mutable states
+- the file contains more than one compiler pass or more than one artifact schema
+- a function performs selection, validation, mutation, diagnostics, and serialization in one body
+- reviewers need broad repository knowledge to verify a local change
+
+For compiler frontend modules, breadth is itself a split signal. A parser that owns declarations, types, patterns, expressions, statements, contracts, unsafe records, generators, and concurrency forms must be decomposed before its summary records become permanent semantic interfaces. The target boundaries are source bytes, tokens, CST, surface AST, resolved AST, typed/elaborated IR, ownership/capability/contract-checked IR, backend IR, and rendered C. Each transition names its invariants, spans, diagnostics, and tests.
+
+Do not preserve a broad scaffold API merely because later passes already consume it. If a scaffold loses syntax or stores a semantic body as a summary, its loss boundary and replacement trigger are explicit.
 
 ### 5.4 Interface Files
 
@@ -451,6 +514,23 @@ Rules:
 - Avoid shell scripts that depend on the caller's current directory unless that is checked.
 - Use strict shell flags for non-trivial shell scripts.
 - Do not leave generated files stale after changing a generator.
+
+### 5.6 Scaffolds And Experimental Code
+
+Scaffolds are allowed only as non-default evidence probes. They do not become production architecture by location or age.
+
+Rules:
+
+- A scaffold lives in a draft PR/branch or an explicitly named non-default experimental subtree/feature.
+- An Experiment Point uses `xp/NNN-short-name`, normally from current `dev`, and opens a draft PR against the lowercase `experimental` integration branch. The branch, diagnostics, version, reports, and artifacts carry the XP ID.
+- Stable CLI commands, normal builds, package publication, conformance lanes, and release artifacts do not select it.
+- A partial parser/manifest/lockfile/`.koi`/protocol implementation must not write a smaller incompatible artifact under the stable filename or schema identity.
+- Scaffolds state which invariants they preserve, which data they summarize or discard, and the condition for replacement or deletion.
+- Experimental artifacts, caches, diagnostics, and generated output have a distinct identity and cannot be mistaken for stable output.
+- Graduation requires accepted semantics where applicable, final representation review, tests, diagnostics, ProofTrace/status updates, and removal of the experimental gate.
+- Before integration into `experimental`, the XP passes its declared host, conformance, regression, security, artifact-isolation, and workload tests. These passes establish only the declared experimental surface.
+- `experimental` receives current `dev`; it is never wholesale merged back. Graduation uses one focused reviewed PR to `dev` after its evidence packet, accepted semantic D-point when applicable, final representation, spec, diagnostics, migration, and conformance work are complete.
+- Rejected, expired, or inconclusive experiments are removed from current Xperimental builds. Prototype architecture does not become permanent because deletion or rewriting is inconvenient.
 
 ---
 
@@ -1139,6 +1219,67 @@ Rules:
 - Helpers that may terminate must state the TPOE condition.
 - Helpers that wrap OS calls must translate OS errors into Kyokai's chosen error shape.
 
+### 11.6a Reallocation And Raw-Storage Review
+
+Any allocation, reallocation, capacity-growth, raw-storage, or initialization-state change includes a written before/after ownership trace in review.
+
+For `realloc`-shaped operations, the reviewer must prove all of these cases:
+
+```text
+failure:
+  old allocation remains live and owned; returned failure carries no replacement owner
+
+success, same address:
+  returned allocation is the sole live owner; no extra copy is needed
+
+success, moved address:
+  returned allocation is the sole live owner; the old pointer is invalid and is never read
+```
+
+The implementation uses checked element-count-to-byte-count arithmetic, checked capacity growth, explicit zero-size behavior, and failure that does not lose the original owner. Tests cover zero size, same-address growth when injectable, moved growth, maximum size, arithmetic overflow, allocation failure, partially initialized storage, aliasing, and sanitizers.
+
+The inherited `Buffer.bump` pattern is a prohibited example: calling a `realloc`-like helper and then copying from the old pointer can read freed storage when the allocation moved. Successful `realloc` already preserves the old bytes.
+
+### 11.6b Span, C-String, And Fatal-Reporter Review
+
+A `(pointer, length)` span is never treated as a NUL-terminated C string without an explicit validated conversion. In particular:
+
+- do not pass span data to `%s`, `strlen`, `strcpy`, or an equivalent unbounded API;
+- use length-bounded writes and validate conversion from Kyokai length types to the native API width;
+- preserve embedded NUL bytes according to the owning diagnostic contract;
+- bound fatal output, avoid user callbacks and allocation where possible, and provide a recursion-safe fallback.
+
+The inherited `au_abort` pattern is a prohibited example: printing `message.data` with `%s` ignores `message.length`, can overread adjacent memory, can leak data, and can fault inside the fatal reporter.
+
+### 11.6c External Process Invocation
+
+Structured external-tool invocations never use a shell command string. Quoting a shell string is not an accepted repair.
+
+Every compiler, linker, archiver, generator, debugger, signer, profiler, package, docs, and deployment invocation uses an argv-capable process API and records:
+
+- admitted executable identity and version;
+- exact argv without secret leakage;
+- controlled environment and working directory;
+- input/output/artifact paths and containment;
+- target/toolchain/profile identity;
+- wall, CPU, output, process-count, and cleanup limits where the tool can be hostile or hang;
+- exit/signal/timeout classification and bounded raw output.
+
+Ambient `PATH`, `cc`, `pkg-config`, shell expansion, command substitution, wildcard expansion, and inherited secret-bearing environment are rejected unless the selected external-tool contract explicitly admits and records the exact dependency.
+
+### 11.6d Recursive Filesystem Traversal
+
+Source discovery, package extraction, vendoring, docs, caches, generated sources, and test fixtures define link and containment policy before recursion.
+
+Rules:
+
+- Prefer no-follow traversal for untrusted package trees.
+- If links are admitted, validate canonical containment for every traversed component and track visited filesystem identities or an equally strong cycle mechanism.
+- Use handle-relative/race-resistant traversal where the target provides it and record weaker-target exposure.
+- Bound depth, entry count, total bytes, path bytes, diagnostics, and work.
+- Reject or explicitly classify special files, mount crossings, hard links, case collisions, Unicode normalization collisions, and link replacement races.
+- Tests include symlink escape, self/mutual cycles, deep trees, replacement races, special files, hard-link aliases, case collisions, and budget exhaustion.
+
 ### 11.7 FFI Bindings
 
 Every FFI binding needs this contract:
@@ -1437,7 +1578,8 @@ Include:
 Rules:
 
 - Do not write vague TODOs.
-- A TODO should name the missing rule, issue, D-point, or condition for removal.
+- A TODO should name the missing rule, issue, proposal, D-point, or condition for removal.
+- A FIXME should name what behavior is wrong.
 - Do not leave TODOs in accepted semantic paths without a tracking note.
 - Remove obsolete TODOs when touching nearby code.
 
@@ -1555,6 +1697,19 @@ Rules:
 - Do not silently require a newer compiler/tool version without updating docs.
 - If a feature needs OCaml 5 behavior, say so.
 
+### 16.6 Warning And Hygiene Policy
+
+Maintained code should introduce no new compiler, linter, formatter, documentation, or generated-code warnings in the lanes that currently cover it.
+
+Rules:
+
+- Fix a warning instead of suppressing it when the code can express the intent directly.
+- A required suppression is as narrow as possible and records the reason, owner, and removal condition.
+- Do not use broad warning disables to make inherited or experimental code appear clean.
+- Remove commented-out implementations, stale feature flags, temporary prints, unused dependencies, placeholder names, and dead compatibility paths before graduation.
+- A TODO in a reachable maintained path links to an authorized issue, phase item, D-point, or XP and states the condition that resolves it.
+- Generated warnings are fixed in the generator or recorded as an admitted external-tool limitation; generated output is not hand-patched to hide them.
+
 ---
 
 ## 17. Performance, Allocation, And Memory Discipline
@@ -1666,6 +1821,11 @@ Rules:
 - Do not mix inherited rename churn with compiler logic changes.
 - Split PRs when they touch unrelated passes.
 - Include migration notes for large refactors.
+- Prefer one independently reviewable concern per change, with focused tests that remain useful after later stages land.
+- Separate mechanical moves and renames from behavior changes when doing so makes the semantic diff auditable.
+- Refactor in safe stages: establish tests, introduce the new boundary, migrate callers, remove the old path, then tighten the invariant.
+- Large changes state the rollback or forward-repair path and identify any artifact, schema, cache, or source compatibility boundary they cross.
+- A small diff that adds hidden coupling is worse than a larger diff that establishes the correct boundary. Line count does not override semantic completeness.
 
 ### 19.3 PR Description Expectations
 
@@ -1697,6 +1857,32 @@ Before code is ready:
 - [ ] Generated output is deterministic.
 - [ ] Public docs/spec/shape are updated when behavior changed.
 - [ ] ProofTrace registry records and required boundary comments are updated when a registered or new spec-relevant boundary changed.
+- [ ] Every touched inherited module/pass has `RETAIN`, `ADAPT`, `REPLACE`, or `DELETE` disposition evidence.
+- [ ] Allocation/reallocation changes include before/after owner states and checked byte arithmetic.
+- [ ] Every span/native-string boundary proves length-bounded versus NUL-terminated behavior.
+- [ ] External tools use argv execution with controlled identity/environment, not a shell command string.
+- [ ] Recursive filesystem work has link, containment, cycle, race, special-file, and resource-budget tests.
+- [ ] Scaffolds remain draft/non-default, use experimental artifact identity, and cannot write partial stable formats.
+- [ ] Touched files, interfaces, functions, and match arms meet the size budgets or carry the required split plan/large-file exception.
+- [ ] The change introduces no unexplained warning or broad suppression.
+- [ ] Public API additions are the smallest surface that encodes the accepted behavior and have an evolution/removal story.
+- [ ] Long-running or operational code defines startup, readiness, shutdown, failure, and resource-exhaustion behavior.
+- [ ] Performance-sensitive claims include a workload, baseline, measurement method, and regression threshold.
+- [ ] Schema, cache, artifact, or state migrations define compatibility, rollback/forward repair, and stale-data behavior.
+
+### 19.5 Operational And Lifecycle Review
+
+Operational review applies proportionally to long-running compiler services, analysis servers, package and documentation services, Poller-based programs, build workers, and release tooling. It does not force service machinery into a short-lived local compiler command.
+
+When applicable, the change defines:
+
+- startup ordering, configuration validation, and version/build identity
+- readiness, liveness, degraded operation, and clean shutdown
+- bounded queues, backpressure, timeouts, cancellation, and resource ceilings
+- structured diagnostics, logs, metrics, traces, and secret-redaction rules
+- persistent-state compatibility, migration, backup, rollback, and corruption handling
+- failure injection or restart tests for the important boundaries
+- the owning person or project role and the incident-learning record used after a failure
 
 ---
 
@@ -1862,6 +2048,10 @@ Do not:
 - leave generated files stale
 - write public examples using syntax that is not accepted or clearly experimental
 - treat tests as optional for type-system, linearity, backend, runtime, or stdlib behavior
+- grow a maintained handwritten source file to 4,000 logical lines
+- split one incoherent file into numbered fragments or forwarding wrappers that preserve the same coupling
+- silence warning families globally because one inherited or experimental site is noisy
+- add long-running code without explicit startup, shutdown, resource-exhaustion, and failure behavior
 
 ---
 
@@ -1875,14 +2065,15 @@ Common commands:
 dune build
 dune runtest
 ./run-tests.sh
-./run-examples.sh
+make check-phase3-identity
+make run-conformance-fixtures
 ```
 
 Useful inspection commands:
 
 ```bash
-rg -n "pattern" lib test test-programs
-find lib -maxdepth 1 -type f | sort
+rg -n "pattern" compiler lib test test-programs
+find compiler lib -maxdepth 2 -type f | sort
 sed -n '1,220p' docs/walkthrough.md
 ```
 

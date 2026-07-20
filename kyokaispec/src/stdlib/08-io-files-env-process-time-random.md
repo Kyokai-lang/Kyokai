@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-08-IO-FILES-ENV-PROCESS-TIME-RANDOM
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-The outside world is not a global variable Kyokai forgot to name. Files, terminals, clocks, entropy, processes, sockets, and the environment are authority. Authority moves through values.
+Files, terminals, clocks, entropy sources, processes, sockets, and the environment are external authority. Their APIs require explicit capability values or narrower handles; no ambient global grants access to them.
 
 > Trace: D48, D67, D171-D173, D211-D212, D255
 > Covers: External-world stdlib APIs are capability-gated and do not use ambient authority.
@@ -132,10 +132,10 @@ TLS is separate from sockets. TLS configuration names certificate store, verific
 > Trace: D91, D93, D100-D101, D117, D211-D212, D236, D260, D411, D473
 > Covers: Networking splits address parsing, DNS, socket authority, blocking mode, readiness, deadline, cancellation, TLS, broker sharing, test injection, and audit facts explicitly.
 
-## Why This Shape
+## OS Authority Stays Visible
 
 [Rikona Kurasaki / Mjoyufull]
-The operating system is too powerful to be treated like background weather. Kyokai makes the handle visible, the capability visible, the path base visible, the block visible, and the failure visible.
+Operating-system APIs combine authority with target-dependent failure and blocking behavior. Kyokai exposes the authorizing capability or handle, path base, blocking contract, partial-progress rules, and mapped host failure at the call boundary.
 
 > Trace: D67, D85, D171, D211-D212
 > Covers: External-world APIs expose authority and failure instead of hiding them in globals.
@@ -163,3 +163,44 @@ Host-observed datasets are reported as target facts and do not silently imperson
 
 > Trace: D404, D421, D549
 > Covers: Time, locale, trust, suffix, and MIME behavior remains versioned, auditable, offline-defined, and explicit about network updates.
+
+## First-Party Command Schema
+
+`Kyokai.CliArgs` parses explicit native-encoding `Args` without capability
+authority. Its schema covers aliases, options, positionals, subcommands,
+cardinality, repetition, defaults, groups, conflicts, requirements,
+help/examples, deprecation, visibility, and secret classification. Schema
+validation, token termination, and value consumption are deterministic.
+
+Parsing returns distinct outcomes for success, help, version, completion, and
+structured error. It never prints, exits, prompts, or reads environment,
+configuration, or files. Applications supply those capability-bearing layers
+separately and retain their provenance. The application owns output and exit.
+
+Help is one document model projected to terminal, man, Markdown, completion,
+documentation, and machine schema forms. Each projection states width, Unicode,
+color, locale, sink-failure, and redaction policy. Static completion is pure;
+dynamic completion requires separately declared authority.
+
+> Trace: D588
+> Covers: Argument parsing is a pure schema operation; authority, output, and process exit remain application decisions.
+
+## Explicit Observability
+
+Logging, tracing, and metrics are distinct APIs over shared stable descriptor,
+field, source, schema, and compatibility identities. Field types and secret
+classes are closed. Span creation, task/channel propagation, and closure are
+explicit; no destructor closes a span. A metric declares kind, unit,
+aggregation, monotonicity, labels and cardinality, temporality, reset, and
+overflow behavior.
+
+Disabled-event efficiency uses an explicit enable check or lazy builder. It
+does not change ordinary expression evaluation. Wall, monotonic, and external
+clocks are named. Every sink states synchronization, allocation, buffering,
+ordering, re-entry, backpressure policy, drop/block/spill behavior, failure,
+flush, and shutdown. Exporters such as OTLP and platform log providers require
+separate package or Bridge admission with explicit authority and provider
+identity. Fatal diagnostics use a separate bounded crash sink.
+
+> Trace: D591
+> Covers: Observability exposes work, time, secrets, backpressure, and shutdown instead of hiding them in a universal logger.

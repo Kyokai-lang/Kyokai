@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-09-EXPRESSIONS-AND-EVALUATION
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-An expression is where a program stops promising and starts producing a value. Kyokai makes that motion strict. The reader can walk the source from left to right and know which call runs, which borrow starts, which bounds check fires, and which value is built before the next one moves.
+Expressions evaluate strictly from left to right. Calls, borrows, checks, construction, and movement occur in source order unless a construct's rule explicitly states another order.
 
 > Trace: D71, D73, D87, D139, D228
 > Covers: Kyokai expression evaluation is strict, source ordered, and specified by the language rather than by backend evaluation folklore.
@@ -178,7 +178,7 @@ Slice syntax is checked half-open span extraction. `a[i..j]` selects the range f
 > Trace: D106, D210
 > Covers: Slicing uses explicit half-open bounds with checked relation semantics, not raw `j - i` folklore.
 
-On an immutable source, slicing produces an immutable span view. On a mutable source, slicing produces a mutable span view when the mutable-borrow rules allow it. `String` does not have direct slicing or indexing syntax. Text-to-bytes access stays named. Adding text indexing requires a separate accepted D-point that states byte, scalar-value, grapheme, allocation, and failure semantics.
+On an immutable source, slicing produces an immutable span view. On a mutable source, slicing produces a mutable span view when the mutable-borrow rules allow it. `String` does not have direct slicing or indexing syntax. Text-to-bytes access stays named. Any later specification revision that adds text indexing must state byte, scalar-value, grapheme, allocation, and failure semantics.
 
 > Trace: D30, D30a, D106, D187
 > Covers: Slice result mutability follows source access, while text indexing/slicing is not implicit.
@@ -190,7 +190,7 @@ Kyokai uses a small precedence table. Postfix field/call/indexing bind tightest;
 > Trace: D10, D41, D56, D57
 > Covers: Operator grouping is limited and explicit, with left-to-right associativity at the same level.
 
-Comparison and equality do not chain. `a < b < c` and `a = b = c` are illegal. Bitwise, shift, and rotate operators do not mix implicitly with arithmetic, comparison, Boolean operators, or different bitwise/shift/rotate operators. Parentheses are required for mixed families.
+Comparison and equality do not chain. `a < b < c` and `a == b == c` are illegal. Value equality is written `==`, value inequality is written `!=`, and assignment remains the statement-only `:=` form. Bitwise, shift, and rotate operators do not mix implicitly with arithmetic, comparison, Boolean operators, or different bitwise/shift/rotate operators. Parentheses are required for mixed families.
 
 > Trace: D41, D56
 > Covers: Risky operator mixes and chained comparisons are rejected unless grouping is explicit.

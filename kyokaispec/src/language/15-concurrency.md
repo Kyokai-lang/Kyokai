@@ -4,9 +4,9 @@
 > ProofTrace: SPEC-LANGUAGE-15-CONCURRENCY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Concurrency is where a program stops being a hallway and becomes a city at night. Doors open in different buildings. Lights change before anyone on the next street sees them. A message leaves one room and arrives in another with work still warm on it. If the language does not say what crossed, what waited, and what became visible, the rest is weather.
+Kyokai concurrency specifies ownership transfer, blocking, synchronization, visibility, cancellation, and cleanup at each task or communication boundary. Tasks, channels, synchronization objects, cancellation tokens, atomics, and pollers are explicit program objects.
 
-Kyokai does not hide a scheduler under the floor. It gives the program tasks, channels, synchronization objects, cancellation tokens, atomics, and pollers, then makes each boundary visible.
+The language has no hidden executor, implicit suspension point, or scheduler-defined ownership transfer.
 
 > Trace: D3, D3a/D3b, D90-D90a, D156, D164, D247, D252
 > Covers: Concurrency is structured, explicit, and governed by a closed memory-order model.
@@ -79,17 +79,21 @@ A capture written as `name` captures by value. If `name` has `Free` type, the ch
 > Trace: D88, D89, D195
 > Covers: By-value capture follows ordinary copy or move semantics.
 
-A capture written as `&name` captures an immutable borrow. It is legal only for types in the closed `SpawnShareable` registry: immutable `Free` values, admitted `Atomic[T]`, `Mutex[T]`, `RwLock[T]`, and explicitly admitted SPSC channel endpoints whose transfer class permits shared observation. User code cannot implement `SpawnShareable`. Adding a registry entry requires an accepted D-point, stdlib admission record, `.koi` transfer fact, and conformance tests. The borrow lives until the child completes at `join;`.
+A capture written as `&read name` captures an immutable borrow. It is legal only for types in the closed `SpawnShareable` registry: immutable `Free` values, `Atomic[T]`, `Mutex[T]`, `RwLock[T]`, and SPSC channel endpoints whose specified transfer class permits shared observation. User code cannot implement `SpawnShareable`. The borrow lives until the child completes at `join;`.
 
 > Trace: D88, D100, D248, D252
 > Covers: Shared task capture is narrow, explicit, and scoped to structured join.
 
-`&!name` capture is illegal in `spawn`. A mutable borrow cannot be shared into a child task.
+`&write name` capture is illegal in `spawn`. A mutable borrow cannot be shared into a child task.
 
 > Trace: D88
 > Covers: Spawn cannot smuggle cross-task mutable borrowing.
 
-Task-boundary transfer is controlled by declaration or standard-library contract metadata: `task_transfer` or `task_local`. `Linear` by itself does not imply task-transfer permission. Generic user-defined types are `task_local` by default. A generic user-defined type opts into field-derived transfer classification by declaring `task_transfer structural`; after generic substitution, the checker classifies that concrete type as task-transferable only when every stored field is task-transferable. Safe Kyokai has no user-implemented `Send` or `Sync` marker typeclasses, no automatic structural transfer classification for types that did not opt in, and no user-written conditional transfer syntax such as `task_transfer when T: task_transfer`. Opaque, unsafe-backed, target-backed, and foreign-backed types require an explicit unsafe transfer contract before safe code can transfer their values across tasks. `.koi` records the task classification and the structural-opt-in or unsafe-contract provenance for public types and internal types whose facts can cross package-checking boundaries.
+Task-boundary transfer is controlled by declaration or standard-library contract metadata: `task_transfer` or `task_local`. `Linear` by itself does not imply task-transfer permission. Generic user-defined types are `task_local` by default.
+
+A generic user-defined type opts into field-derived transfer classification by declaring `task_transfer structural`. After generic substitution, the checker classifies the concrete type as task-transferable only when every stored field is task-transferable. Safe Kyokai has no user-implemented `Send` or `Sync` marker typeclasses, automatic structural classification for types that did not opt in, or user-written conditional transfer syntax such as `task_transfer when T: task_transfer`.
+
+Opaque, unsafe-backed, target-backed, and foreign-backed types require an explicit unsafe transfer contract before safe code can transfer their values across tasks. `.koi` records the task classification and the structural-opt-in or unsafe-contract provenance for public types and internal types whose facts can cross package-checking boundaries.
 
 > Trace: D248
 > Covers: Cross-task ownership is explicit metadata, not Rust-style auto-trait inference.
@@ -150,7 +154,12 @@ Fan-in, fan-out, logging, work queues, and broadcast-like designs use explicit b
 > Trace: D236
 > Covers: Complex topology is visible source structure over SPSC endpoints.
 
-A multi-endpoint broker helper is legal only as a separately admitted standard-library structure over visible SPSC endpoints. Its admission record states ownership, producer and consumer topology, ordering, fairness or non-fairness, shutdown, backpressure, cancellation and deadline behavior, and linear-payload drain rules. The baseline channel contract does not create a hidden broker or cloneable endpoint.
+A multi-endpoint broker helper is an ordinary standard-library structure over
+visible SPSC endpoints. Its public contract states ownership, producer and
+consumer topology, ordering, fairness or non-fairness, shutdown, backpressure,
+cancellation and deadline behavior, and linear-payload drain rules. The
+baseline channel contract does not create a hidden broker or cloneable
+endpoint.
 
 > Trace: D85, D236
 > Covers: Broker helpers do not create hidden shared channel ownership.
@@ -324,7 +333,7 @@ Failed channel operations create no happens-before edge. `Relaxed` atomic operat
 
 ## Data-Race Boundary
 
-Safe Kyokai code cannot create two unsynchronized mutable accesses to the same non-atomic storage. Ordinary shared mutation across tasks must use channels, `Mutex[T]`, `RwLock[T]`, or `Atomic[T]`. Another synchronized primitive is absent from stable Kyokai until an accepted D-point explicitly names its synchronization and happens-before rules.
+Safe Kyokai code cannot create two unsynchronized mutable accesses to the same non-atomic storage. Ordinary shared mutation across tasks must use channels, `Mutex[T]`, `RwLock[T]`, or `Atomic[T]`. Another synchronized primitive is absent from this specification revision unless its contract explicitly states synchronization and happens-before rules.
 
 > Trace: D3, D3b, D90, D100, D247
 > Covers: Safe cross-task mutation is limited to named synchronization primitives.
@@ -380,3 +389,90 @@ Callbacks are classified as `CallableRead`, `CallableMut`, `CallableOnce`, or `C
 
 > Trace: D411, D473, D484
 > Covers: Poller readiness, cancellation, partial progress, stale events, and replay boundaries are explicit.
+
+## Kyokai Atomic Execution Model
+
+Kyokai atomic behavior is defined by events, source `sequenced-before`,
+`reads-from`, per-location modification order, `synchronizes-with`,
+`happens-before`, and the order constraints attached to each operation. The
+model defines data races, invalid executions, CAS success and failure ordering,
+fences, initialization, lifetime, mixed atomic/non-atomic access, and the task,
+channel, and lock edges in this chapter.
+
+The normative litmus corpus includes store buffering, load buffering, message
+passing, IRIW, release sequences, fences, CAS, and initialization. C11 lowering
+is a refinement obligation for each operation, order, target, and admitted C
+toolchain; C11 is not the source memory model. Safe racing source is rejected
+or receives its specified Kyokai failure instead of inheriting C or C++
+undefined behavior. External compiler agreement is evidence, not semantic
+authority.
+
+> Trace: D569
+> Covers: The source memory model is Kyokai-owned and tested by stable litmus IDs across model, IR, generated C, runtime, and conformance lanes.
+
+## Completed-Task Reclamation
+
+The runtime may reclaim completed native thread or task machinery before the
+lexical `join;` point when the child has reached a terminal state and all
+runtime-owned completion facts have been retained. Reclamation changes no
+source ownership: captured values, borrows, channel endpoints, failures, and
+taskgroup obligations remain governed by the taskgroup until `join;` completes.
+
+Reclamation runs no user destructor or deferred action, does not manufacture a
+join handle, and does not make `join;` non-blocking by promise. The runtime
+records bounds for retained terminal state, native handles, unreaped OS
+resources, and failure reporting. Long-lived taskgroups cannot accumulate
+unbounded completed native machinery.
+
+> Trace: D571
+> Covers: Runtime-only child reaping controls native resource growth without changing structured task ownership or the visible join boundary.
+
+## SPSC And Native-Task Evidence Boundary
+
+The semantic model remains Linear SPSC endpoints, explicit brokers,
+one-to-one native tasks, and explicit `Poller`. It adds no async/await, hidden
+executor, general MPMC endpoint, or M:N scheduler. Canonical patterns cover
+fan-in, fan-out, reply endpoints, sharded brokers, work distribution,
+broadcast-by-copy, supervision, bounded backpressure, load shedding,
+cancellation, and graceful shutdown.
+
+Evidence for this topology records thread count, memory, tail latency, broker
+contention, starvation, cancellation latency, and topology source size against
+appropriate direct-channel and lock-based comparisons. A diagnostic may report
+a provable task/channel cycle or broker bottleneck. Measurements do not change
+the primitive model; repeated workload evidence must enter a later D-point.
+
+> Trace: D600
+> Covers: Kyokai keeps its CSP-style ownership topology and requires workload evidence for later ergonomic changes.
+
+## Linux `io_uring` Provider
+
+`IoUringProvider` is a first-party Linux provider, not source syntax or a hidden
+executor. Construction requires bounded Linux-provider authority naming allowed
+operation classes, queue and pinned-memory ceilings, worker policy, and
+restrictions. It negotiates setup flags, features, opcodes, and limits and
+returns structured setup or unsupported failure. File, network, process, and
+time operations still require their domain capabilities.
+
+The ring, registered files and buffers, buffer leases, submission reservations,
+and in-flight operations are linear owners or region-bound borrows. Kernel-held
+memory and handles cannot move, close, unregister, resize, or be surrendered.
+Each submission has a generation-checked operation ID. Exactly one terminal
+completion consumes the in-flight state and returns ownership, partial progress,
+result or error, and every promised lease.
+
+Cancellation can succeed, find no live request, race with completion, or report
+that execution progressed too far. The caller drains completions until terminal
+ownership returns. Cancellation alone never releases kernel ownership.
+Restricted mode validates an opcode/flag allowlist before enabling the ring;
+unrestricted mode is separately capability- and audit-visible. Portable
+fallback is explicit policy, never a silent switch that changes cancellation,
+allocation, ordering, authority, or failure.
+
+The provider contract states kernel ranges, architecture, wrapper identity,
+setup flags, opcode/feature matrix, limits, restrictions, stress/sanitizer
+evidence, and workloads. `io_uring` has its own provider tier; its absence does
+not demote ordinary Linux support.
+
+> Trace: D573a
+> Covers: Native `io_uring` support is explicit, capability-bounded, linear around kernel-held resources, and independently admitted from portable Poller semantics.

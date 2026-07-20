@@ -1,0 +1,3 @@
+module Demo.OctalPrefix is
+constant mode: Nat16 := #o755;
+seal;

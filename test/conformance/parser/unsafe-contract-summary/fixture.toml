@@ -1,0 +1,14 @@
+id = "parser.unsafe-contract-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/16-unsafe-ffi-and-abi.md"
+edition = "2026"
+inputs = ["src/Demo/Foreign.kyo"]
+command = "kyokai internal conformance-fixture parser.unsafe-contract-summary"
+expect = "Parse unsafe audit items, compiler operation keys, and closed-vocabulary string fields into structured facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "unsafe-contract-summary"
+expected_facts = ["contract=RawIo", "module-invariant", "covers=foreign:c_open", "fields=assumes,maps_failure,owns", "additional=foreign:c_close", "field=cleanup"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

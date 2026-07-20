@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-LANGUAGE-04-MODULES-AND-VISIBILITY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai keeps Austral's strongest module idea: the interface is the surface other code can trust before the private work is even visible. Kyokai moves where that surface lives. Austral wrote it twice, once in a handwritten interface file and once again in the body, and treated the second copy as the boundary. The boundary was never the file. It was the contract. So a Kyokai module is one handwritten source file, and the compiler derives the trustable interface from it. The source extension is Kyokai's own, the package boundary is explicit, visibility is marked on each declaration, `internal` has a defined reach, and imports have one mechanical lookup story.
+Kyokai retains Austral's interface-first module contract and removes the handwritten interface/body pair. A module has one handwritten `.kyo` source file. The compiler derives its importable interface from checked declarations in that file. Package boundaries are explicit, every declaration carries its visibility, `internal` has package-defined reach, and imports follow one mechanical lookup rule.
 
 > Trace: D5, D17, D52, D78, D86, D537, D538
 > Covers: Kyokai keeps interface-first modularity but replaces the handwritten interface/body pair with one `.kyo` source file, per-declaration visibility, package-visible `internal`, and deterministic package-rooted module resolution specified in the Kyokai spec itself.
@@ -81,7 +81,9 @@ A program entry function is selected by the manifest target and the runtime star
 
 ## Representation Visibility
 
-Visibility controls who may name a declaration. It does not by itself control whether a type's representation is visible. A `public record` or `public union` exports its fields or variants as public API; changing that representation is a public API change. A type marked `opaque`, for example `public opaque record`, exports only its nominal identity and universe classification. Its representation is sealed against construction, destructuring, pattern matching, and inspection outside the defining module, while inside the defining module the representation is fully visible. The `opaque` modifier, its interaction with universes, and its `.koi` recording are specified in the declarations and type-system chapters; this chapter fixes only that representation visibility is orthogonal to name visibility.
+Visibility controls who may name a declaration; it does not by itself control whether a type's representation is visible. A `public record` or `public union` exports its fields or variants as public API, so changing that representation is a public API change.
+
+A type marked `opaque`, for example `public opaque record`, exports only its nominal identity and universe classification. Outside the defining module, its representation is sealed against construction, destructuring, pattern matching, and inspection. Inside the defining module, the representation is fully visible. The declarations and type-system chapters specify the `opaque` modifier, its universe interaction, and its `.koi` recording; this chapter establishes that representation visibility is orthogonal to name visibility.
 
 > Trace: D17, D466, D539
 > Covers: Name visibility and representation visibility are orthogonal; `opaque` is the representation-hiding mechanism and full rules live in the declarations and type-system chapters.
@@ -111,7 +113,7 @@ The compiler records the imports that feed the public or `internal` interface in
 > Trace: D79, D537
 > Covers: The derived interface records only the imports its public/`internal` surface depends on; private-only imports are not exported.
 
-The official Bridge collection uses ordinary imports under the reserved `Kyokai.Bridge.*` namespace. Bridge modules have no special import syntax, no wildcard privilege, and no ambient authority. Their only special status is that the installed toolchain supplies them as first-party checked interface roots with D529 admission records rather than package dependencies.
+The official Bridge collection uses ordinary imports under the reserved `Kyokai.Bridge.*` namespace. Bridge modules have no special import syntax, no wildcard privilege, and no ambient authority. When installed, the toolchain supplies them as first-party checked interface roots rather than package dependencies; their project admission evidence does not alter import semantics.
 
 > Trace: D1, D17, D78-D79, D211, D529
 > Covers: Bridge modules use ordinary import and visibility rules while resolving from installed first-party bridge interfaces instead of package dependencies.

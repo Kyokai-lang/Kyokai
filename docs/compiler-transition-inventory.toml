@@ -1,0 +1,82 @@
+schema_version = 1
+scope = "Inherited OCaml modules still compiled from lib/"
+
+# A family owns both the semantic decision about inherited behavior and the
+# target implementation-language decision. Paths must match exactly one family.
+
+[[family]]
+name = "legacy-two-file-frontend"
+paths = ["lib/ParserInterface.*", "lib/Lexer.mll", "lib/Parser.mly", "lib/LexEnv.*", "lib/Cst.ml", "lib/CstUtil.*", "lib/CombiningPass.*"]
+semantic = "REPLACE"
+implementation = "REMOVE"
+reason = "The inherited interface/body grammar cannot implement one-file Kyokai modules."
+
+[[family]]
+name = "hidden-builtins"
+paths = ["lib/BuiltIn.*", "lib/BuiltInModules.*"]
+semantic = "REPLACE"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Kyokai built-ins and standard-library admission replace hidden Austral pervasive-module behavior."
+
+[[family]]
+name = "legacy-public-cli"
+paths = ["lib/Cli.*", "lib/CliEngine.*", "lib/CliParser.*", "lib/CliUtil.*", "lib/Version.ml"]
+semantic = "DELETE"
+implementation = "REMOVE"
+reason = "The inherited whole-program compile command is not a Kyokai command contract."
+
+[[family]]
+name = "surface-and-control-lowering"
+paths = ["lib/AbstractionPass.*", "lib/DesugarBorrows.*", "lib/DesugarPaths.*", "lib/DesugaringPass.*", "lib/LiftControlPass.*", "lib/ReturnCheck.*"]
+semantic = "REPLACE"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "D238 requires an ordered, visible elaboration pipeline with Kyokai origin records."
+
+[[family]]
+name = "legacy-whole-program-driver"
+paths = ["lib/Compiler.*"]
+semantic = "REPLACE"
+implementation = "REMOVE"
+reason = "The inherited interface/body whole-program driver is bypassed by the staged Kyokai compiler pipeline."
+
+[[family]]
+name = "names-modules-and-environments"
+paths = ["lib/DeclIdSet.ml", "lib/Entrypoint.*", "lib/Env.ml", "lib/Env.mli", "lib/EnvExtras.*", "lib/EnvTypes.ml", "lib/EnvUtils.*", "lib/ExtractionPass.*", "lib/Id.*", "lib/Identifier.*", "lib/IdentifierMap.ml", "lib/IdentifierSet.ml", "lib/ImportResolution.*", "lib/Imports.*", "lib/ModIdSet.ml", "lib/ModuleNameSet.ml", "lib/Names.*", "lib/Qualifier.*"]
+semantic = "ADAPT"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "The separation remains useful; package identity, visibility, imports, and .koi facts change the semantics."
+
+[[family]]
+name = "types-and-typed-ir"
+paths = ["lib/MonoType.ml", "lib/MonoTypeBindings.*", "lib/Region.*", "lib/RegionMap.*", "lib/Stages.ml", "lib/TastUtil.*", "lib/Type.ml", "lib/Type.mli", "lib/TypeBindings.*", "lib/TypeCheckExpr.*", "lib/TypeClasses.*", "lib/TypeErrors.ml", "lib/TypeMatch.*", "lib/TypeParameter.*", "lib/TypeParameters.*", "lib/TypeParser.*", "lib/TypeReplace.*", "lib/TypeSignature.ml", "lib/TypeStripping.*", "lib/TypeSystem.*", "lib/TypeVarSet.ml", "lib/TypingPass.*"]
+semantic = "ADAPT"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Kyokai retains nominal typing and linear universes but changes inference, generics, typeclasses, and elaboration."
+
+[[family]]
+name = "linearity-checker"
+paths = ["lib/LinearityCheck.*"]
+semantic = "ADAPT"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Austral's checker is prior art; Kyokai adds explicit checker states, cleanup, capabilities, and the reviewed calculus boundary."
+
+[[family]]
+name = "materialization-and-generated-c"
+paths = ["lib/BodyExtractionPass.*", "lib/CRepr.ml", "lib/CRenderer.*", "lib/CodeGen.*", "lib/ExportInstantiation.*", "lib/Monomorphize.*", "lib/MtastUtil.ml"]
+semantic = "ADAPT"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Static materialization and generated C remain, but Kyokai requires deterministic artifacts and the Gate-D no-UB contract."
+
+[[family]]
+name = "diagnostics-source-and-reporting"
+paths = ["lib/Error.*", "lib/ErrorText.*", "lib/Escape.*", "lib/HtmlError.*", "lib/Reporter.*", "lib/SourceContext.*", "lib/Span.*"]
+semantic = "ADAPT"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Source origins and human diagnostics remain; stable Kyokai diagnostic records and machine output replace inherited presentation."
+
+[[family]]
+name = "shared-host-utilities"
+paths = ["lib/Common.ml", "lib/StringSet.ml", "lib/Util.*"]
+semantic = "RETAIN"
+implementation = "REIMPLEMENT_IN_KYOKAI"
+reason = "Only general algorithms and data-structure behavior survive; OCaml ownership does not."

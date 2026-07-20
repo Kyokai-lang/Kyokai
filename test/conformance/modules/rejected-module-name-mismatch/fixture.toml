@@ -1,0 +1,14 @@
+id = "modules.rejected-module-name-mismatch"
+lane = "modules"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/04-modules-and-visibility.md"
+edition = "2026"
+inputs = ["kyokai.toml", "src/App/Main.kyo"]
+command = "kyokai internal conformance-fixture modules.rejected-module-name-mismatch"
+expect = "Reject a source file whose declaration says App.Other when the manifest-rooted path resolves to App.Main."
+expected_outcome = "reject"
+expected_stage = "package-source"
+expected_code = "parsed-module-name-mismatch"
+expected_facts = ["expected=App.Main", "actual=App.Other"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-PACKAGE-SOURCE-DISCOVERY"

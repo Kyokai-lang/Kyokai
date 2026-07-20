@@ -7,6 +7,10 @@
 
 This file records only deliberate proof abstractions. It is not a place to preserve mistakes. When a calculus rule conflicts with the normative spec without a valid abstraction boundary, the calculus must be repaired and the invalid rule must not be retained as a deviation.
 
+Discovered ambiguity, incompleteness, contradiction, unreviewed mismatch, and
+open correspondence work belong in `findings-divergence.md`. Routing a finding
+there does not turn it into an accepted abstraction or a resolved semantic rule.
+
 Each row states the normative Kyokai rule, the calculus treatment, why the treatment is valid for the named theorem boundary, and what remains outside the claim.
 
 ## 2. Active Abstractions

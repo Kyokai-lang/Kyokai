@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-13-APPLICATION-INTEGRATION-AND-DEPLOYMENT
 > Covers: This chapter specifies generated-API projection, edition migration, authority explanations, foreign adapters, packaging, browser tooling, mobile tooling, runtime data updates, and deployment plans. It does not claim implementation or provider admission.
 
-Compilation is not the last door an application walks through. Generated APIs arrive before checking. Foreign build systems sit beside the linker. Signing services and stores wait after it. Browsers, phones, firmware, containers, and cloud control planes each carry their own machinery. Kyokai lets that machinery exist, but it makes the plan inspectable and keeps authority attached to the operation that uses it.
+Application delivery includes operations before and after compilation: generated APIs, foreign build systems, linking, signing, stores, browser packaging, mobile and firmware tooling, containers, and cloud deployment. Kyokai represents those operations through inspectable plans whose authority remains attached to the operation that uses it.
 
 > Trace: D541, D544-D550, D554, D557
 > Covers: Toolchain integration uses versioned plans, explicit authority, provenance, atomic local updates, and separately admitted adapters rather than hidden scripts or language semantics.
@@ -241,7 +241,30 @@ A fixture or plan-schema test is supporting evidence until a real public command
 > Trace: D155, D220, D367, D526, D540-D557
 > Covers: Integration conformance requires executable result checking and does not promote metadata validation into implementation evidence.
 
-## Why This Shape
+## Delivery Effects Enter The Plan
 
 [Rikona Kurasaki / Mjoyufull]
-The dangerous part of a toolchain is rarely the command printed in the tutorial. It is the second process, the generated directory, the credential store, the target SDK, the upload step, and the recovery path after half of it changed. Kyokai writes those pieces into the plan. The work can still be large. It cannot be invisible.
+Application delivery commonly invokes external processes, writes generated directories, reads credentials, selects target SDKs, uploads artifacts, and can fail after partial mutation. Kyokai plan artifacts name those operations, inputs, authority grants, recovery states, and output identities before an apply step performs them.
+
+## Apple Admission Matrix
+
+`aarch64-macos-none` is the first Tier-One Apple host and target identity.
+External Clang triples and deployment targets are recorded separately. Intel
+macOS and every iOS, iPadOS, tvOS, watchOS, visionOS, Catalyst, simulator,
+device, and architecture combination are distinct admission tuples.
+
+Each tuple records Xcode and SDK identity and path, deployment target, Clang,
+linker, archiver, frameworks, external triple, destination, signing class,
+entitlements, and runtime evidence. Generated C, module maps, headers,
+libraries, bundles, symbols, and XCFramework slices are explicit outputs. Swift
+and Objective-C adapters state ARC retention, callbacks, exception boundaries,
+thread affinity, and teardown.
+
+Apple plan, build, test, and package commands are toolchain adapters. Signing,
+notarization, deployment, and store submission are distinct authority-bearing
+steps. Simulator evidence cannot establish physical-device behavior or
+performance. Tier-One status requires hosted CI, simulator lanes, named device
+lanes, debugging, packaging, release provenance, and an admission owner.
+
+> Trace: D619
+> Covers: Apple support is earned per exact platform tuple and delivery boundary rather than inferred from one successful macOS compile.

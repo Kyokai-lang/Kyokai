@@ -1,0 +1,14 @@
+id = "parser.function-signature-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/05-declarations.md"
+edition = "2026"
+inputs = ["src/Demo/Signatures.kyo"]
+command = "kyokai internal conformance-fixture parser.function-signature-summary"
+expect = "Parse a function declaration into structured generic-parameter, value-parameter, borrow-type, and return-type signature facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "function-signature-summary"
+expected_facts = ["function=copyText", "generic=T", "param=text:&[StaticString]", "param=output:&![Buffer[T]]", "return=Result[Unit, IoError]"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

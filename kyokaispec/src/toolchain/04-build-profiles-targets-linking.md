@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-TOOLCHAIN-04-BUILD-PROFILES-TARGETS-LINKING
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A build profile is not a mood. A target is not a wish. A C compiler is not a secret second language. Kyokai writes these choices down because optimization, debug info, link mode, target ABI, and external-tool contracts can change what a programmer receives from the toolchain.
+Build profiles, targets, and admitted C toolchains are explicit configuration. They determine optimization, debug information, link mode, target ABI, external tools, and produced artifacts without changing Kyokai language semantics.
 
 > Trace: D27, D31, D80, D83, D139, D149, D200, D530-D536
 > Covers: Build profiles, targets, admitted C toolchains, and linking are explicit contracts.
@@ -38,7 +38,7 @@ A profile may contain these fields:
 > Trace: D27, D31, D73, D83, D84, D200, D225
 > Covers: Profile fields are typed, bounded, and visible.
 
-`optimization` must never remove runtime checks required by the language spec. Bounds checks, integer traps where checked arithmetic applies, contract checks, borrow/linearity consequences already enforced at compile time, panic paths, TPOE paths, stack probes required by the target contract, and safe concurrency checks remain semantically present in all profiles. Stable Kyokai has no unsafe-only profile or flag that disables these semantics; admitting one requires a separate accepted D-point and source-visible contract.
+`optimization` must never remove runtime checks required by the language spec. Bounds checks, integer traps where checked arithmetic applies, contract checks, borrow/linearity consequences already enforced at compile time, panic paths, TPOE paths, stack probes required by the target contract, and safe concurrency checks remain semantically present in all profiles. Stable Kyokai has no unsafe-only profile or flag that disables these semantics. A later specification revision could add only a source-visible contract; project approval alone could not weaken the conformance rule.
 
 > Trace: D53, D73, D75-D76, D84, D139, D262
 > Covers: Release optimization cannot erase Kyokai safety semantics.
@@ -91,10 +91,22 @@ A target-spec file is part of build identity. Its bytes, normalized path identit
 > Trace: D83, D149
 > Covers: Target-spec files are deterministic build inputs.
 
-The target record names one or more admitted C toolchain contracts. A contract records compiler executable identity, compiler family, version range, dialect mode, required flags, SDK/sysroot, linker, archiver, object/debug format, admitted environment keys, extension families, probe commands, and rejection diagnostics. `[build].backend`, `[backend.c]`, `[backend.llvm]`, and `--backend` are not valid Kyokai configuration.
+The target record names one or more admitted C toolchain contracts through an
+ordered `c_toolchain_contracts = ["<contract-id>", ...]` list. A contract records
+compiler family, its set of individually admitted builds, dialect mode,
+required flags, SDK/sysroot constraints, linker, archiver, object/debug format,
+admitted environment keys, extension families, probe commands, and rejection
+diagnostics. A displayed version range is only a summary over exact admitted
+records. `[build].backend`, `[backend.c]`, `[backend.llvm]`, and `--backend` are
+not valid Kyokai configuration.
 
 > Trace: D31, D80, D139, D149, D530-D532
 > Covers: Target-toolchain availability is explicit without exposing multiple Kyokai backends.
+
+Release and reproducible profiles resolve exactly one contract and one native
+provider into the lockfile and build plan. Development configuration can list
+alternatives, but the selected provider remains part of build identity. A
+dependency cannot select the workspace provider.
 
 ## Generated-C And C-Toolchain Contract
 
@@ -179,10 +191,10 @@ Dynamic linking is allowed only when the selected target and package configurati
 > Trace: D27, D83, D200
 > Covers: Code-size optimization is explicit and constrained by observable semantics.
 
-## Why This Shape
+## Reject Unsupported Targets Early
 
 [Rikona Kurasaki / Mjoyufull]
-C taught systems programmers to ask what the target really is because the machine always answers eventually. Kyokai asks earlier. The profile says what it optimizes. The target says what it supports. The admitted C-toolchain contract says which tools carry it. When the answer is no, the compiler says no before the linker leaves only smoke and an unexplained failure.
+The build profile selects optimization and artifact policy. The target contract selects platform behavior and available facilities. The admitted C-toolchain record identifies the external tools that implement that combination. An unsupported combination is rejected before code generation rather than failing later as an unexplained linker or runtime defect.
 
 > Trace: D31, D80, D83, D139, D149
 > Covers: Explicit target and build policy keeps systems programming practical without returning to external-toolchain folklore.
@@ -203,9 +215,60 @@ Native compiler, linker, archiver, sysroot, SDK, include roots, library roots, a
 > Trace: D405
 > Covers: Native-tool discovery, fallback order, pkg-config use, sysroots, and host-leak rejection are explicit build identity.
 
+## Native Compiler Providers
+
+A native compiler provider is the host-local realization of an admitted target
+contract. Provider classes are `bleedring_managed`, `system`, `explicit_path`,
+`container`, and `self_verified`. Host-local configuration maps
+`[c_toolchain_provider.<name>]` to a contract, class, installation or content
+identity, compiler, linker, archiver, runtime, sysroot or SDK, admitted
+environment, and verification state. A published package or workspace manifest
+must not contain developer-local provider paths.
+
+`--c-toolchain-provider <name>` selects one compatible declared provider for
+one invocation. Resolution order is the command selection, the
+manifest/profile contract requirement, the user provider mapping, then the
+distribution's target default. Each candidate must satisfy the requested
+contract. Kyokai never adds an unrecorded fallback by searching `cc`, `gcc`,
+`clang`, a linker, an SDK, or PATH.
+
+A failed resolution lists the requested contracts, every rejected provider and
+reason, and an exact Bleedring install command when a verified provider bundle
+is available. `doctor`, verbose and machine build reports, cache keys, generated
+artifacts, provenance, crash records, and admission records expose the selected
+contract and provider identity.
+
+Bleedring is the separately released, officially supported bootstrap installer.
+It is implemented in Kyokai and distributed as standalone binaries. It can
+install complete Kyokai distributions and exact native-compiler provider
+bundles. Distribution and compiler-provider roots, manifests, caches, locks,
+provenance, updates, verification, and removal state remain separate.
+
+A managed provider manifest binds the exact compiler, linker, archiver,
+runtime, sysroot or SDK, targets, admission record, upstream provenance,
+licenses, signatures and checksums, archive and unpacked manifests, host
+requirements, and security state. Installation uses bounded safe extraction
+and atomic publication under explicit roots. It neither invokes an external OS
+package manager nor silently elevates privilege. When redistribution is not
+available, Bleedring supplies exact probes and guidance for a declared system
+or path provider rather than claiming to manage it.
+
+Bleedring lists, installs, verifies, updates, and removes providers without
+silently editing project selection. `kyokai install` remains a package and
+dependency command; it does not install compilers, SDKs, or arbitrary system
+software.
+
+> Trace: D405, D569, D615, D631-D632
+> Covers: Native compiler acquisition and selection are reproducible without ambient `cc`, hidden PATH precedence, or system-package-manager behavior in `kyokai install`.
+
 ## C Compiler Admission
 
-Kyokai admits C toolchains by exact compiler family, version range, target triple, dialect mode, SDK/sysroot, linker/archive family, object/debug format, and tested feature contract. An arbitrary ambient `cc` is not conforming merely because it accepts one generated file.
+Kyokai admits C toolchains by exact compiler build and version, provider
+identity, target triple, dialect mode, SDK/sysroot, linker/archive family,
+object/debug format, and tested feature contract. A range displayed to users is
+derived from individually admitted records; it does not admit untested members.
+An arbitrary ambient `cc` is not conforming merely because it accepts one
+generated file.
 
 The initial major hosted lanes are:
 
@@ -282,3 +345,72 @@ Hot reload is an explicit development service. It records loader mechanism, symb
 
 > Trace: D445, D475
 > Covers: Loader behavior and hot reload are explicit target/toolchain services, not hidden source semantics.
+
+## C-Toolchain Semantic Corpus And Admission Lifecycle
+
+Every admission case has a stable Kyokai semantic/conformance ID and expected
+outcome. Frozen evidence binds compiler, IR schemas, generated-C bundle,
+runtime/prelude, target contract, and manifest. Except for declared
+target/profile transforms, the same generated C bytes run across candidate
+compiler lanes. The oracle is the specification, attached expected result, and
+an executable model where available. Candidate agreement cannot legalize a
+different result.
+
+Cases cover execution, defined failure, invalid-subset rejection, structural C,
+sanitizers, source maps/debuggers, atomics/litmus, optimization/LTO, linking,
+and target runtime. Randomized cases retain seeds and are minimized on
+disagreement. `PASS`, `FAIL`, `TIMEOUT`, `UNSUPPORTED`, `UNRESOLVED`, and
+`FLAKY` are distinct. Upstream compiler suites are supporting health evidence,
+not copied Kyokai semantic cases.
+
+An admission tuple binds compiler executable and provenance, justified version
+interval, host, target, sysroot/runtime, linker, archiver, profile,
+optimization, LTO, debug mode, and required flags. Family names are headings,
+not facts. Correctness covers debug, release, size, unoptimized, optimized, and
+each claimed LTO/ICF mode. Cross-target evidence distinguishes compile-only,
+emulated/simulated, and physical execution. Compile-only evidence cannot claim
+runtime conformance. Performance status is separate from correctness, and a
+partial pass narrows the admitted tuple.
+
+Revalidation is triggered by a relevant backend, runtime/prelude, C subset,
+compiler/linker/sysroot, target SDK, profile/flag, corpus, miscompilation,
+security advisory, or review-interval change. A correctness or security defect
+suspends the affected tuple without deleting history. Readmission creates a
+linked record. `doctor`, build JSON, release provenance, and crash reports name
+the admission used; offline reuse requires exact identity.
+
+A developer can run the complete harness for an unlisted tuple and produce
+`SELF_VERIFIED` evidence. It is unofficial and user-owned, creates no support
+claim, and cannot update official admission until project-controlled
+infrastructure reproduces the relevant run. Every major release reruns the full
+official matrix. Patches inherit admission and cannot silently change
+admission-relevant semantics, generated C, runtime ABI, target contract, or
+flags. A minor reruns affected tuples when those facts change. Active defects
+can suspend at any release level.
+
+> Trace: D569a-D569c
+> Covers: C compiler support is tuple-specific, oracle-owned, evidence-retaining, suspendable, and distinct from unofficial self-verification.
+
+## Apple Admission Matrix
+
+`aarch64-macos-none` is the first Tier-One Apple host and target identity.
+Apple/Clang triples and deployment targets are recorded external facts. Intel
+macOS is a separate tuple. iOS, iPadOS, tvOS, watchOS, visionOS, Mac Catalyst,
+and each simulator/device/architecture combination require separate admission.
+
+Each tuple records Xcode and SDK identities and paths, deployment target,
+Clang, linker, archiver, frameworks, external triple, destination, signing
+class, entitlements, and runtime evidence. Generated C, module maps, headers,
+static/dynamic libraries, bundles, symbols, and XCFramework slices are explicit
+outputs. Objective-C and Swift adapters state ARC retention, callback ownership,
+exception boundaries, affinity, and teardown.
+
+Planning, build, test, and packaging are toolchain/adapter operations. Simulator
+execution establishes no physical-device performance or behavior. Tier-One
+status requires hosted CI, simulator lanes, named physical-device lanes,
+debugging, packaging, release provenance, and maintained admission ownership.
+Signing, notarization, deployment, and store submission are separate
+authority-bearing steps.
+
+> Trace: D548, D554, D619
+> Covers: Apple support is claimed per exact target, SDK, toolchain, simulator/device, adapter, packaging, and physical-execution evidence tuple.

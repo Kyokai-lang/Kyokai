@@ -4,12 +4,12 @@
 > ProofTrace: SPEC-LANGUAGE-03-GRAMMAR
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai keeps Austral's central grammatical idea: a module exposes an importable surface, and the boundary between that surface and the private work still matters. Kyokai stops spelling the boundary as a second file. A module is one `.kyo` source file. The public contract, the private helpers, and the platform-specific bodies all live in that one file, each declaration carrying its own visibility marker, and the compiler derives the importable interface from it.
+Kyokai keeps Austral's interface-first module model without retaining its handwritten interface/body file pair. One `.kyo` file contains the module's public declarations, private helpers, and selected platform-specific bodies. Each declaration carries its own visibility marker, and the compiler derives the importable interface from the checked file.
 
 > Trace: D5, D17, D52, D78, D86, D537, D538
 > Covers: Kyokai is a fork that keeps Austral's interface-first modularity while replacing the handwritten interface/body pair with one `.kyo` source file, per-declaration visibility, package-visible `internal`, and deterministic module resolution.
 
-This chapter gives the source grammar shape. Later chapters define name resolution, type checking, ownership, borrowing, evaluation, layout, contracts, FFI, unsafe obligations, concurrency, and runtime failure. If this chapter admits a form, that does not make every use type-correct; it only says the parser can recognize the shape.
+This chapter defines source grammar. Later chapters define name resolution, typing, ownership, borrowing, evaluation, layout, contracts, FFI, unsafe obligations, concurrency, and runtime failure. A form admitted here is syntactically recognizable; it is not necessarily semantically legal.
 
 > Trace: D86, D87, D155
 > Covers: Syntax admission is separate from semantic acceptance, and accepted Kyokai behavior is defined by the normative spec rather than by inherited implementation accidents.
@@ -81,6 +81,7 @@ declaration item = constant definition
                  | typeclass declaration
                  | instance definition
                  | generator definition
+                 | test declaration
                  | foreign block
                  | unsafe contract;
 ```
@@ -122,16 +123,21 @@ Records have three layout classes: ordinary Kyokai records, C-ABI extern records
 record declaration = record header, record body;
 record header = [representation modifier], "record", type name, [generic parameters], [":", universe];
 representation modifier = "opaque" | "extern" | "packed";
-record body = "is", {field declaration}, "build", ";"
+record body = "is", {field declaration}, {projection independence clause}, "build", ";"
             | "(", single field, ")", ":", universe, ";";
 field declaration = declaration docs, identifier, ":", type, ";";
 single field = identifier, ":", type;
+projection independence clause = "projection", "independent", "(", identifier, {",", identifier}, [","], ")", ";";
 ```
 
 The one-line record form is legal only for a single-field ordinary record. `extern record` and `packed record` use the block form so their layout boundary stays visible. The representation modifiers are mutually exclusive: `opaque` seals the representation outside the defining module, while `extern` and `packed` are ABI/layout modes whose representation is the contract, so `opaque extern record` and `opaque packed record` are rejected.
 
-> Trace: D35, D42, D109, D116, D196, D539
-> Covers: Kyokai has `record`, `opaque record`, `extern record`, and `packed record`; the representation modifiers are mutually exclusive; single-field records are the nominal wrapper mechanism; and record declarations close with `build;`.
+`projection independent (fieldA, fieldB);` is legal only in the block form of
+an ordinary record. The type-system chapter defines the field restrictions and
+the pairwise meaning of the relation.
+
+> Trace: D35, D42, D109, D116, D196, D539, D563
+> Covers: Kyokai has `record`, `opaque record`, `extern record`, and `packed record`; the representation modifiers are mutually exclusive; single-field records are the nominal wrapper mechanism; ordinary records can declare independently projectable fields; and record declarations close with `build;`.
 
 `bitrecord` declares nominal fixed-width bit-position views over unsigned integer storage.
 
@@ -246,10 +252,17 @@ unsafe contract field = ("assumes" | "requires" | "preserves" | "forbids" | "map
 unsafe operation key = identifier, {":", identifier};
 ```
 
+The labels after `covers` and `module_invariant` are position-bound grammar
+labels. Outside an already recognized `unsafe contract` item, the same
+spellings are ordinary identifiers unless another production reserves them.
+Parser recovery must choose one interpretation without name lookup or type
+information. A spelling that cannot meet that recovery rule remains globally
+reserved.
+
 `foreign "C" is ... mon;` is the portable baseline form. A non-`"C"` ABI string is type-checked against the selected target contract and is rejected unless that contract admits the exact spelling and lowering contract. Raw foreign declarations are legal only in a module marked with `pragma Unsafe_Module;`, and that module must contain source-level unsafe contracts covering the unsafe operations it uses. Unsafe operation keys use compiler-produced colon-separated identifiers such as `foreign:c_open`; source contracts cannot invent a key that matches no operation.
 
-> Trace: D20, D20a, D20b, D127, D242, D242a, D245
-> Covers: Kyokai raw FFI uses `foreign "C" is ... mon;`, requires `pragma Unsafe_Module;`, forbids implicit linear ownership transfer and implicit sum-type ABI across raw C, and requires audited unsafe contracts.
+> Trace: D20, D20a, D20b, D127, D242, D242a, D245, D606
+> Covers: Kyokai raw FFI uses `foreign "C" is ... mon;`, requires `pragma Unsafe_Module;`, forbids implicit linear ownership transfer and implicit sum-type ABI across raw C, requires audited unsafe contracts, and limits contextual audit labels to one unambiguous grammar position.
 
 ## Types
 
@@ -351,13 +364,17 @@ Borrow scopes make reference lifetime visible in source.
 
 ```ebnf
 borrow statement = "borrow", identifier, ":=", borrow expression, "do", block, "drop", ";";
-borrow expression = "&", place | "&!", place | "&~", place;
+borrow expression = "&read", place | "&write", place | "&reborrow", place;
 ```
 
-`&` creates an immutable borrow, `&!` creates a mutable borrow, and `&~` is the explicit reborrow surface where the borrow chapter admits it. The borrow scope ends at `drop;`.
+`&read` creates an immutable borrow, `&write` creates a mutable borrow, and
+`&reborrow` creates the explicit mutable reborrow admitted by the borrow
+chapter. `drop;` ends the lexical borrow scope; it does not destroy a value.
+The retired `&place`, `&!place`, and `&~place` creation forms are edition
+migration inputs, not alternate current syntax.
 
-> Trace: D7b, D14, D34, D87, D111, D187, D238-D240
-> Covers: Kyokai borrow syntax is explicit, borrow scopes close with `drop;`, and accepted implicit reborrow completions are checked through the elaboration pipeline rather than guessed by syntax.
+> Trace: D7b, D14, D34, D87, D111, D187, D238-D240, D604, D607
+> Covers: Kyokai gives immutable borrow, mutable borrow, and reborrow distinct source words; borrow scopes close with the non-destructive `drop;`; and accepted implicit reborrow completions are checked through the elaboration pipeline rather than guessed by syntax.
 
 `defer` and `errdefer` register visible cleanup work. `debug` observes existing values only. `todo`, `panic`, and `unreachable` are explicit fatal or divergent statement forms, not optimizer folklore.
 
@@ -510,14 +527,14 @@ Operator precedence is deliberately small.
 | Level | Operators |
 | --- | --- |
 | 1 | postfix `.`, call `(...)`, indexing/slicing `[...]` |
-| 2 | prefix `&`, `&!`, `~`, unary `-`, `not`, `bnot` |
+| 2 | prefix `&read`, `&write`, `&reborrow`, `~`, unary `-`, `not`, `bnot` |
 | 3 | `*`, `/`, `%` |
 | 4 | `+`, binary `-`, `++` |
-| 5 | `<`, `<=`, `>`, `>=`, `=`, `!=` |
+| 5 | `<`, `<=`, `>`, `>=`, `==`, `!=` |
 | 6 | `and` |
 | 7 | `or` |
 
-Operators at the same level associate left-to-right unless another rule says otherwise. Comparisons and equality do not chain. Bitwise, shift, and rotate operators do not mix implicitly with arithmetic, comparison, boolean operators, or each other except for same-operator chaining; parentheses are required.
+Operators at the same level associate left-to-right unless another rule says otherwise. Comparisons and equality do not chain. Value equality is written `==`; `=` remains specification notation in EBNF and is not a Kyokai source operator. Bitwise, shift, and rotate operators do not mix implicitly with arithmetic, comparison, boolean operators, or each other except for same-operator chaining; parentheses are required.
 
 > Trace: D10, D41, D56, D57
 > Covers: Kyokai uses `!=`, short-circuiting boolean operators, keyword bitwise operators, and a limited precedence table with explicit grouping for risky mixes.
@@ -561,6 +578,21 @@ yield statement = "yield", expression, ";";
 > Trace: D32, D118, D193, D198, D249
 > Covers: Kyokai has named stackless pull generators with `yield`, nominal linear iterator types, explicit destruction for suspended state, and no general coroutine or async surface.
 
+## Inline Tests
+
+[Rikona Kurasaki / Mjoyufull]
+An inline test is a module-private test-build declaration. Its description is a static string literal. A pure test has no parameters. An authority-bearing test spells its capability parameters after `with`; no parameter is inserted by the compiler.
+
+```ebnf
+test declaration = "test", static string literal, [test capability clause], "is", block, "qed", ";";
+test capability clause = "with", "(", [parameter list], ")";
+```
+
+`public test`, `internal test`, and `opaque test` are compile-time errors. Test declarations do not enter the compiler-derived `.koi` interface. Their bodies use ordinary statement grammar and ordinary control-flow restrictions; in particular, a test body is not a generator body, taskgroup, loop, or `build` expression merely because the test harness owns its execution.
+
+> Trace: D28, D137
+> Covers: Inline tests use `test "description" [with (...)] is ... qed;`, remain module-private and test-only, expose no derived-interface declaration, and receive only source-declared authority.
+
 ## Grammar Forms Not In Kyokai
 
 [Rikona Kurasaki / Mjoyufull]
@@ -575,7 +607,7 @@ The following productions extend the grammar:
 
 ```ebnf
 configuration rejection declaration = "compile_error", "(", expression, ")", ";" ;
-build expression = "build", type, "do", { statement }, produce statement, { statement }, "build", ";" ;
+build expression = "build", type, "do", { statement }, "build", ";" ;
 produce statement = "produce", expression, ";" ;
 ```
 
@@ -584,10 +616,18 @@ produce statement = "produce", expression, ";" ;
 > Trace: D467
 > Covers: Selected configuration rejection has one protected compile-time grammar form.
 
-`build T do ... produce expr; ... build;` is an expression. Every non-diverging path reaches exactly one `produce` targeting the nearest enclosing build expression. `produce` exits only that expression. General uninitialized declarations such as `let x;` are illegal. Partial record values, omitted fields, hidden defaults, and double initialization are illegal.
+`build T do ... build;` is an expression. The outer grammar does not require a
+direct `produce` statement. Typed control-flow analysis proves that every
+reachable normal path executes exactly one compatible `produce expr;`
+targeting the nearest enclosing build expression. Production may occur inside
+branches. A path with zero, duplicate, or incompatible production is rejected.
+Abnormal or diverging exits follow their ordinary cleanup and failure rules and
+do not produce a hidden result. General uninitialized declarations such as
+`let x;` are illegal. Partial record values, omitted fields, hidden defaults,
+and double initialization are illegal.
 
-> Trace: D500
-> Covers: Multi-line construction is explicit grammar with exactly-one-production and definite-initialization rules.
+> Trace: D500, D610
+> Covers: Multi-line construction is explicit grammar; branch-local production is legal, and typed control flow proves exactly one compatible result on every reachable normal path.
 
 ## Cycle Rejection Grammar
 

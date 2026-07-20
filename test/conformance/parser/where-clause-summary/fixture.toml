@@ -1,0 +1,14 @@
+id = "parser.where-clause-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/07-generics-and-typeclasses.md"
+edition = "2026"
+inputs = ["src/Demo/Constraints.kyo"]
+command = "kyokai internal conformance-fixture parser.where-clause-summary"
+expect = "Parse typeclass bounds, associated-type bounds, and associated-type equality into structured function-signature obligations."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "where-clause-summary"
+expected_facts = ["bound=C: Iterable", "bound=C.Item: Displayable", "equality=C.Error == E"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

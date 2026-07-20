@@ -1,0 +1,3 @@
+module Demo.PlatformChar is
+constant letter: CodePoint := L'A';
+seal;

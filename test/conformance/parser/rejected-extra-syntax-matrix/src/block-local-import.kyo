@@ -1,0 +1,5 @@
+module Demo.BlockLocalImport is
+function run(): Unit is
+    import Demo.Other;
+qed;
+seal;

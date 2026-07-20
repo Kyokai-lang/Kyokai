@@ -1,0 +1,36 @@
+name: D-point proposal
+description: Propose a public language, toolchain, stdlib, compatibility, release, or governance decision.
+title: "[proposal] "
+labels: ["proposal"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: The question and use case
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current state and prior art
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options and recommendation
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: Explicit proposed shape
+      description: Write the complete finalizable rule, including failures, interactions, exclusions, and consequences.
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Canonical home and spec target
+    validations:
+      required: true

@@ -1,0 +1,33 @@
+name: Semantic or specification finding
+description: Report a contradiction, missing rule, extraction gap, or observable semantic defect.
+title: "[semantic finding] "
+labels: ["semantic-finding"]
+body:
+  - type: textarea
+    id: observation
+    attributes:
+      label: Observation and witness
+      description: Give the smallest source, trace, clause comparison, or command that demonstrates the finding.
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Accepted and normative sources
+      description: List relevant D-points, specification clauses, and any contradiction between them.
+    validations:
+      required: true
+  - type: dropdown
+    id: proposed_class
+    attributes:
+      label: Proposed D614 class
+      options: [DEFECT, AUTHORIZED_KNOWN_ISSUE, DPOINT_CANDIDATE, XP_CANDIDATE, RESEARCH, DIRECTION, REJECTED]
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Affected behavior and evidence
+      description: State compiler, spec, calculus, tests, targets, compatibility, security, and release impact.
+    validations:
+      required: true

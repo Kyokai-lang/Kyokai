@@ -28,6 +28,6 @@ jobs:
       - name: upload compiler binary
         uses: actions/upload-artifact@v4
         with:
-          name: austral-macos-bin
-          path: austral
+          name: kyokai-macos-bootstrap-bin
+          path: kyokai
           retention-days: 1

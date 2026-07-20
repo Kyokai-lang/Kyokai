@@ -4,7 +4,13 @@
 > ProofTrace: SPEC-TOOLCHAIN-11-BUILD-GENERATION-AND-PLAYGROUND
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Generated code and playgrounds are where hidden power likes to dress up as convenience. Kyokai allows convenience, but it makes the wire visible: what runs, what it reads, what it writes, what authority it holds, and whether the result is ordinary Kyokai.
+> Amendment status (2026-07-16): D618 and D624 add deterministic development
+> supervision and a reviewable foreign-build plan protocol; D624a moves
+> publication identity to the knot. Conflicting generation/build terminology
+> below remains pre-amendment text until the owning clauses, schemas, and
+> hostile-input cases are extracted.
+
+Build generation, evaluation, REPL sessions, and playground execution can run code outside an ordinary package build. Their contracts therefore state what executes, readable inputs, writable outputs, granted authority, resource limits, persistence, and how produced Kyokai source enters checking.
 
 > Trace: D83, D150, D151-D151a, D226
 > Covers: Build generation, exploration, and playground execution are explicit and authority-bounded.
@@ -149,10 +155,57 @@ Scratch, eval, REPL, playground, and hosted development services use explicit sa
 > Trace: D475, D489, D505
 > Covers: Development services improve iteration without changing stable language semantics or smuggling state migration into reload.
 
-## Why This Shape
+## Convenience Tools Still Execute Code
 
 [Rikona Kurasaki / Mjoyufull]
-There is nothing wrong with a generator, a REPL, or a playground. The danger is pretending they are small because they are convenient. A build generator can rewrite the room before the compiler walks in. A REPL can hide a dropped linear value behind a prompt. A playground can become a tiny unguarded server. Kyokai lets these tools exist with the lights on.
+Generators, REPL sessions, and playgrounds execute code outside an ordinary package build's simplest path. A generator can change compiler inputs, a REPL can retain linear state across submissions, and a playground accepts untrusted work. Their contracts therefore expose authority, persistence, cleanup, resource limits, provenance, and sandbox boundaries.
 
 > Trace: D83, D150, D151-D151a, D226, D465, D475, D505, D509
 > Covers: Convenience tools remain explicit about source generation, ownership, authority, sandbox boundaries, and artifact identity.
+
+## Generator Host Admission
+
+Before loading or executing generator code, the toolchain computes the
+generator's required isolation features and verifies host support. A missing
+required feature fails closed. Generator programs and inputs are
+content-identified before execution, and the run records every granted
+filesystem, process, environment, time, randomness, and network authority.
+
+`--allow-unsandboxed-generator` is a development-only override. The diagnostic
+names the exact exposed authority. Outputs and evidence from that run are marked
+untrusted and cannot satisfy reproducible-build, publication, release,
+shared-cache, package-admission, or stable generated-artifact claims. A warning
+emitted after launch is never admission.
+
+> Trace: D465, D597
+> Covers: Generator threats are classified and admitted before execution; an unsandboxed override cannot launder its output into trusted artifacts.
+
+## Foreign Build Plan Protocol
+
+Foreign adapter planning and execution are separate protocol phases. A plan is
+a versioned DAG with stable node IDs, dependency edges, declared inputs and
+outputs, executable identities, argv, allowlisted environment, working
+directory, target/profile, resource class, and cache identity. Link facts record
+ordered objects, libraries, search paths, frameworks, whole-archive groups,
+runtime files, and platform loader facts.
+
+Rerun predicates use a closed grammar over declared files, directories,
+manifests, environment keys, tool identities, target facts, and adapter
+configuration. Planning supports dry-run and offline review; offline planning
+reports absent facts instead of probing the network.
+
+Execution begins only after generator/foreign host admission and plan
+validation. It runs under explicit authority and executor-issued concurrency
+permits, cannot widen planning authority, and cannot infer ambient parallelism.
+Stdout and stderr are logs, never executable directives. Dynamic discovery
+writes a structured result under a declared output root. Kyokai validates that
+result and creates a new plan identity before dependent work can run. Partial
+outputs remain quarantined until the producing node and full plan validate.
+
+A plan cannot mutate source, manifests, lockfiles, the knot index, or installed
+Kyokai distributions unless a separately authorized workflow owns that
+mutation. Plan, result, raw logs, environment facts, and artifacts are
+content-identified inputs to reproducibility, caching, and admission.
+
+> Trace: D547, D597, D624
+> Covers: Foreign builds use reviewable plans, structured replanning, explicit authority, quarantined partial output, and no command-stream protocol hidden in tool output.

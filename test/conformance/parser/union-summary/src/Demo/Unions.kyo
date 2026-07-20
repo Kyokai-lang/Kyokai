@@ -1,0 +1,13 @@
+module Demo.Unions is
+union Optional[T: Type]: Auto is
+    case None;
+    case Some(T);
+build;
+union Color: Free is
+    case RGB is
+        red: Nat8;
+        green: Nat8;
+        blue: Nat8;
+    case Greyscale(Nat8);
+build;
+seal;

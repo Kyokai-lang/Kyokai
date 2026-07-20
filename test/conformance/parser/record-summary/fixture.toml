@@ -1,0 +1,14 @@
+id = "parser.record-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/05-declarations.md"
+edition = "2026"
+inputs = ["src/Demo/Records.kyo"]
+command = "kyokai internal conformance-fixture parser.record-summary"
+expect = "Parse ordinary and packed record declarations into structured layout, universe, generic-parameter, and field facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "record-summary"
+expected_facts = ["record=Point", "layout=ordinary", "generic=T", "universe=Free", "field=x:T", "field=y:Int32", "record=Header", "layout=packed", "field=tag:Nat8", "field=length:Nat16"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-07-MATH-AND-NUMERICS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Numerics are where confidence can become arrogance fast. A wrong byte order, a silent overflow, a host `libm` result changing underneath a program, a signed zero nobody named: all of that becomes program behavior. Kyokai makes the number story testable.
+Byte order, overflow, floating-point environment, signed zero, and mathematical approximation are observable program behavior. Kyokai numeric APIs specify those behaviors and bind approximation claims to tests or oracles.
 
 > Trace: D37, D41, D75-D76, D117, D232, D260
 > Covers: Numeric stdlib APIs specify conversion, bit operations, overflow, endianness, floating behavior, and math accuracy contracts.
@@ -98,10 +98,29 @@ A transitional foreign math wrapper carries the same record plus the reason nati
 > Trace: D400, D412, D501, D517
 > Covers: Target dispatch and transitional foreign math never weaken or hide the numeric contract.
 
-## Why This Shape
+## Numeric Claims Need Evidence
 
 [Rikona Kurasaki / Mjoyufull]
-The point is not to sound brave about writing math in Kyokai. The point is to prove the promise in public. If `sin` says `MaxUlp(1)`, the tests must hunt that number. If a byte helper says big-endian, no boundary may swap the order invisibly.
+Numeric claims need measurements. If `sin` promises `MaxUlp(1)`, the admission tests search for violations against the named oracle and domain. If a byte helper promises big-endian order, its contract and cross-target tests preserve that order at every boundary.
 
 > Trace: D117, D229-D232, D260, D517
 > Covers: Numeric APIs are trusted through contracts and tests, not borrowed confidence.
+
+## Native Numeric Ownership
+
+Every admitted numeric function records its accuracy tier, domain, exceptional
+cases, oracle and oracle revision, vector sources, targets, rounding
+assumptions, implementation owner, reviewer, review cadence, and compatible
+replacement trigger. Tests cover reference results, boundaries, subnormals,
+signed zero, infinities, NaNs, and rounding-sensitive cases. Security-sensitive
+numeric code receives a separate timing and side-channel review.
+
+A new function without an owner remains experimental or provider-backed. When
+a stable native implementation loses its owner, expansion freezes and the
+project must assign a new owner, suspend unsupported claims, or install a
+compatible reviewed provider replacement. It may not keep an unowned accuracy
+claim by inertia. Native replacement requires measured parity or a versioned
+contract change.
+
+> Trace: D598
+> Covers: RIIK math has named human ownership, independent evidence, and a replacement path rather than becoming permanent orphaned code.

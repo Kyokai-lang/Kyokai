@@ -1,0 +1,14 @@
+id = "parser.generator-summary"
+lane = "parser"
+status = "implementation-gated"
+spec = "kyokaispec/src/language/03-grammar.md; kyokaispec/src/language/05-declarations.md; kyokaispec/src/stdlib/06-iterators-and-generators.md"
+edition = "2026"
+inputs = ["src/Demo/Generation.kyo"]
+command = "kyokai internal conformance-fixture parser.generator-summary"
+expect = "Parse a top-level generator definition into structured generic, parameter, yield-type, where-obligation, and declaration-guard facts."
+expected_outcome = "accept"
+expected_stage = "parser"
+expected_code = "generator-summary"
+expected_facts = ["generator=Windows", "generics=T,R", "param=source:&[Buffer[T], R]", "param=width:Index", "yield=Span[T]", "where=T: Displayable", "guard-line=4"]
+targets = "host-independent"
+prooftrace = "FRONTEND-KYOKAI-SURFACE-PARSER"

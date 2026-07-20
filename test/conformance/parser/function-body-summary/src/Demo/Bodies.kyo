@@ -1,0 +1,46 @@
+module Demo.Bodies is
+function classify(value: Int32): Int32 is
+    let { x, y: ignore } := point;
+    let Ok(result): Int32 := operation else Err(error) do
+        return fallback;
+    fi;
+    let Ok(saved) := save() or return;
+    let Ok(mapped) := load() or return error => wrap(error);
+    let Ok(item) := next() or break retry;
+    let Ok(more) := advance() or continue retry;
+    borrow view := &read value do
+        debug view;
+    drop;
+    taskgroup do
+        spawn [value, &counter] do
+            debug value;
+        od else spawn_error do
+            debug spawn_error;
+        fi;
+    join;
+    select
+        when receive(rx) do
+            debug value;
+        timeout(deadline) do
+            debug deadline;
+    pick;
+    wait
+        when ready(token) do
+            debug token;
+        default do
+            debug idle;
+    wake;
+    debug value;
+    defer closeLog();
+    while let Some(next) := queue.next() do
+        debug next;
+    od;
+    if value > 0 then
+        return value;
+    else if value == 0 then
+        todo "zero";
+    else
+        panic("negative");
+    fi;
+qed;
+seal;

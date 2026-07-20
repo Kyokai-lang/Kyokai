@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-00-STDLIB-OVERVIEW
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Kyokai's standard library is not a decorative appendix to the language. It is the place where ownership, allocation, authority, failure, platform behavior, and ordinary systems work meet. A language can be strict in the compiler and still become vague in the library; Kyokai does not get to do that.
+Kyokai's standard library applies the language's ownership, allocation, authority, failure, and platform rules to ordinary systems APIs. Library contracts cannot weaken or leave implicit a boundary that the language makes explicit.
 
 > Trace: D85, D152, D229, D243
 > Covers: The Kyokai standard library is a committed systems-library surface with explicit contracts and compatibility policy.
@@ -94,10 +94,10 @@ The Bridge collection does not weaken RIIK. Pure algorithms remain safe native K
 > Trace: D64, D229-D230, D529
 > Covers: Bridge entries are admitted integration boundaries and do not replace native Kyokai implementations for pure stdlib work.
 
-## Why This Shape
+## Library Behavior Is Language Behavior
 
 [Rikona Kurasaki / Mjoyufull]
-A standard library can become a second language hiding under function names. Kyokai refuses that. The function name states the ownership story. The signature shows the allocator and capability story. The contract states how it fails. The docs state what changes across platforms. No one has to read a source file in the rain to discover whether `push` can allocate, whether an iterator dies after mutation, or whether a file call secretly uses the current directory.
+A standard library can undermine the language by leaving important behavior in naming custom or implementation detail. Kyokai library contracts state whether an operation consumes or borrows, which allocator or capability it uses, how it fails, and which behavior varies by target. Whether `push` can allocate, mutation invalidates an iterator, or a file operation depends on a current directory is part of the public API.
 
 > Trace: D85, D152, D229
 > Covers: Kyokai's stdlib contract exists so library behavior stays as explicit as language behavior.
@@ -129,3 +129,23 @@ Tier-1 usability includes buffers, strings and text views, paths, files, argumen
 
 > Trace: D305, D392, D481, D501
 > Covers: Full implementations claim explicit stdlib tiers, and the batteries-included cold-start ladder has stable admission evidence for each tier.
+
+## Tier-One API Packets
+
+Before implementation, every Tier-One module has a normative API packet and a
+checked machine projection. The packet contains exact declarations, generic and
+universe constraints, access modes, ownership, borrows and regions, callable
+class, allocation, failure variants, complexity, invalidation, determinism,
+target limits, `.koi`/compatibility facts, examples, and positive and negative
+conformance cases.
+
+The first packets cover `Result`, `Optional`, standard/contextual errors,
+display and format sinks, parsing, equality/ordering, and must-use behavior.
+They close Free and Linear payload extraction, replacement, combinators,
+callback consumption, error conversion/recovery, branch state, OOM/context/
+backtrace behavior, display depth/secret/partial writes, full-versus-prefix
+parsing, and applicable algebraic laws. Packet review is separate from code
+review. A packet does not imply an admitted implementation.
+
+> Trace: D584
+> Covers: Tier-One APIs are declaration-complete and machine-projectable before implementation or admission claims.

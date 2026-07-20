@@ -1,0 +1,7 @@
+module Rejected.ReadBorrow is
+function invalid(value: Int32): Unit is
+    borrow view := &value do
+        debug view;
+    drop;
+qed;
+seal;

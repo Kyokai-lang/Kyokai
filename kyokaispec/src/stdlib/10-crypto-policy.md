@@ -4,14 +4,14 @@
 > ProofTrace: SPEC-STDLIB-10-CRYPTO-POLICY
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-Cryptography is not where Kyokai gets to show off. It is where the language has to be humble, strict, and boring in the places boring keeps people alive.
+Kyokai admits cryptographic APIs only from external specifications with published vectors, explicit security properties, review evidence, and stated side-channel and secret-lifetime contracts.
 
 > Trace: D231
 > Covers: `Kyokai.Crypto` admits only externally specified, vector-tested, side-channel-explicit cryptographic APIs.
 
 ## Admission Rule
 
-`Kyokai.Crypto` includes only named modern algorithms, modes, protocols, key derivation functions, hashes, MACs, signatures, password hashing schemes, and random constructions with external specifications, published vectors, and documented security properties. Kyokai does not invent cryptographic primitives for the standard library.
+Kyokai does not implement cryptographic primitives, TLS internals, password algorithms, JWT signature algorithms, certificate validation, or authentication protocols from scratch. First-party APIs expose only named modern constructions supplied by admitted providers, packages, or project-specific Bridges with external specifications, published vectors, owners, update routes, and documented security properties. Native checksums and ordinary hashes are non-cryptographic unless a separate crypto admission says otherwise.
 
 > Trace: D229, D231
 > Covers: Crypto admission requires external specification and rejects invented primitives.
@@ -23,12 +23,12 @@ Deprecated, broken, legacy, or compatibility-only cryptography is permitted only
 
 ## Implementation Policy
 
-FFI-backed crypto is admitted when its admission record identifies a mature reviewed library and shows that wrapping that library provides stronger evidence than a fresh native implementation. Native Kyokai crypto is admitted only with review evidence appropriate to the primitive's risk, official or de facto standard test vectors, documented side-channel claims, and conformance tests for every tooling-observable claim. Neither implementation strategy receives default preference without that evidence record.
+Crypto and TLS implementations are admitted providers, packages, or project-specific Bridges. Their records identify the exact implementation and version, owner, update and advisory route, supported targets, specifications, vectors, side-channel claims, build and provenance facts, and vulnerability response. The standard library may supply safe interfaces and provider selection, but it does not grow a fresh native primitive behind that interface.
 
 > Trace: D230-D231
 > Covers: Crypto can be FFI-backed or native only when the trust evidence fits the risk.
 
-Pure Kyokai memory safety is not a crypto audit. A native implementation must still address timing behavior, cache behavior when the algorithm uses those facts, key erasure, randomness quality, algorithm agility, invalid-input handling, and misuse resistance.
+Kyokai memory safety is not a crypto audit. An admitted provider must still address timing behavior, cache behavior when the algorithm uses those facts, key erasure, randomness quality, algorithm agility, invalid-input handling, and misuse resistance.
 
 > Trace: D85, D231
 > Covers: Crypto contracts include side-channel and misuse concerns beyond ordinary memory safety.
@@ -70,10 +70,10 @@ APIs that generate keys, nonces, IVs, salts, or random protocol values must take
 > Trace: D83, D220, D231
 > Covers: Crypto randomness and deterministic tests are distinct and explicit.
 
-## Why This Shape
+## Evidence Before Provider Admission
 
 [Rikona Kurasaki / Mjoyufull]
-RIIK does not mean pretending a fresh implementation is wise because it is ours. In crypto, pride gets people hurt. Kyokai can wrap mature libraries, and it can write native code when the evidence is real, but the spec never lets confidence stand in for proof.
+A native Kyokai implementation receives no presumption of cryptographic safety. Mature foreign libraries and native implementations face the same algorithm, vector, review, side-channel, randomness, and secret-lifetime admission fields. The evidence decides admission; implementation language does not.
 
 > Trace: D230-D231
 > Covers: Crypto policy keeps native ambition subordinate to external standards, vectors, side-channel contracts, and review.
@@ -95,3 +95,19 @@ An expired, unavailable, malformed, or unverifiable dataset produces the provide
 
 > Trace: D231, D404, D421, D549
 > Covers: Security datasets fail closed and retain explicit provider identity instead of inheriting ambient host trust state without record.
+
+## Provider Boundary And Secret Lifetime
+
+TLS records identify provider, entropy, clock, trust-store, hostname, network,
+certificate, session, and policy boundaries separately. A convenient TLS
+constructor may collect them in an ordinary record; it may not invent or hide
+any authority.
+
+`SecretBuffer` is Linear and noncopying. Its APIs state exposure, redaction,
+allocator/provider identity, and best-effort erasure. Kyokai does not claim that
+erasure removes copies from registers, swap, crash dumps, allocator slack, a
+foreign provider, or a hostile operating system. Constant-time and FIPS claims
+are limited to the exact evidence of the selected provider and target.
+
+> Trace: D593
+> Covers: Crypto stays outside the project's invention boundary, and secret cleanup claims stop where the machine and provider evidence stop.

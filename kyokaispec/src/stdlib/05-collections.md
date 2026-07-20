@@ -4,7 +4,7 @@
 > ProofTrace: SPEC-STDLIB-05-COLLECTIONS
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A collection is not just a clever box. It owns values, borrows values, moves values, can allocate, can reorder, can invalidate, and can make performance promises people build whole systems on. Kyokai writes those promises down.
+A collection contract states ownership, borrowing, movement, allocation, ordering, invalidation, complexity, and determinism. These rules apply to every admitted public collection.
 
 > Trace: D44, D77, D85, D176-D177, D201, D229
 > Covers: Public collection APIs require explicit ownership, allocator, invalidation, equality/hash/order, and testing contracts.
@@ -130,10 +130,32 @@ Slot maps, arenas, sparse sets, ECS stores, UI trees, and observer registries ca
 > Trace: D374, D490, D540
 > Covers: Framework graph collections share one explicit identity, invalidation, borrowing, payload-removal, and generation-exhaustion contract without standardizing one container layout.
 
-## Why This Shape
+## Collections Publish Their Invariants
 
 [Rikona Kurasaki / Mjoyufull]
-Collections are where a language often starts whispering. Kyokai does not whisper. If a map can rehash, the invalidation is written. If a queue can hold a linear handle, the drain story is written. If a hash seed changes iteration, the determinism story is written.
+Collection behavior cannot be recovered from method signatures alone. A map contract must state rehash invalidation, a queue containing linear values must state its drain behavior, and a hash table must state whether seed selection affects iteration order. These facts are stable API behavior, not implementation folklore.
 
 > Trace: D77, D83, D85, D229, D401, D496-D497
 > Covers: Collection behavior remains explicit instead of living as accidental implementation custom.
+
+## Reviewed Collection Family Matrix
+
+The admitted matrix covers dynamic and small sequences, deques, priority
+structures, hash and ordered maps and sets, slot/generational/stable/sparse
+storage, and structure-of-arrays layouts. One checked matrix generates or
+validates universe-conditioned APIs; independently written Free and Linear
+surfaces may not drift.
+
+Insertion failure returns recoverable ownership whenever the operation received
+an owned value. Removal and replacement return owned payloads. Linear drains
+must be finalized, cleanup requires explicit bounds, and entry APIs publish
+each ownership transition. Every family states failure atomicity, invalidation,
+generation exhaustion, complexity, allocation, seed and order behavior,
+determinism, and serialization behavior. Concurrent variants require separate
+admission.
+
+Reference models, property tests, hostile allocator schedules, and Linear
+cleanup cases are required evidence.
+
+> Trace: D587
+> Covers: Collection breadth is admitted through one ownership-aware behavioral matrix, not a list of container names.

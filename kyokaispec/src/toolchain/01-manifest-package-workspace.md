@@ -4,15 +4,15 @@
 > ProofTrace: SPEC-TOOLCHAIN-01-MANIFEST-PACKAGE-WORKSPACE
 > Covers: This chapter is registered in the public ProofTrace evidence graph; registration does not claim implementation, conformance, or theorem completion.
 
-A Kyokai project does not become a package because a tool guessed right while walking through folders. The package boundary is written down. The workspace boundary is written down. The module root is written down. That is the whole point: the build does not become a hallway full of unmarked doors where the compiler is the only one who knows which one opens.
+A Kyokai manifest declares the package or workspace boundary and the module root. The toolchain does not infer those boundaries from an undocumented directory convention.
 
 > Trace: D78, D83, D155
 > Covers: Kyokai packages and workspaces are manifest-declared boundaries, not inferred directory folklore, and tool behavior must be specified rather than discovered by accident.
 
-The normative manifest file is `kyokai.toml`. A directory containing `kyokai.toml` is either a package root or a workspace root, never both. A tool must reject a manifest that contains both `[package]` and `[workspace]` tables.
+The normative manifest file is `kyokai.toml`. A manifest can contain `[package]`, `[workspace]`, or both. When both are present, the directory is the workspace root and a package root; that root package joins the workspace only when canonical member `"."` appears in `[workspace].members`.
 
-> Trace: D78
-> Covers: `kyokai.toml` is the manifest file, and a manifest is exactly one of package manifest or workspace manifest.
+> Trace: D78, D332, D562
+> Covers: `kyokai.toml` can declare a package, a workspace, or an explicitly enrolled root package and workspace in one file.
 
 A package is the unit of dependency, visibility, build artifacts, edition selection, and `.koi` interface production. A workspace is an explicit collection of packages built together under one lockfile. A module is the source-level thing imported by Kyokai code. Kyokai deliberately collapses Rust's crate/package split into one package concept so there is one unit for dependency identity and artifact identity.
 
@@ -68,26 +68,47 @@ The official Bridge collection is not declared in `[dependencies]`. It is instal
 > Trace: D51, D78-D79, D529
 > Covers: Bridge modules are installed first-party modules, not package dependencies or resolver-selected graph nodes.
 
+## Documentation Storage Selection
+
+The workspace-root manifest may select the inherited documentation storage
+mode:
+
+```toml
+[documentation]
+mode = "structured" # "rendered" or "source-only"
+```
+
+`structured` is the default when the table is absent. An explicitly selected
+package may override the workspace value under the ordinary manifest
+inheritance rules. Any other value is a manifest error. The recorded
+command-line override has higher precedence for that invocation, but does not
+rewrite the manifest. Storage, transition, sanitization, and service behavior
+for the three modes are defined by the documentation chapter.
+
+> Trace: D602
+> Covers: Documentation mode is selectable in the root manifest, inherited by member packages, and overrideable only through the ordinary recorded precedence rules.
+
 ## Workspace Manifests
 
-A workspace manifest contains a `[workspace]` table and an explicit `members` array. A workspace manifest does not contain `[package]`, `[layout]`, or package dependencies for itself.
+A workspace manifest contains a `[workspace]` table and an explicit `members` array. It may also contain the root package's `[package]`, `[layout]`, dependencies, targets, and package-owned tables. Those package tables describe the root package only; the workspace table does not acquire package identity.
 
 ```toml
 [workspace]
 members = [
+    ".",
     "packages/core",
     "packages/net",
     "packages/cli",
 ]
 ```
 
-> Trace: D78
-> Covers: Workspaces exist only by explicit manifest declaration and list member packages directly.
+> Trace: D78, D332, D562
+> Covers: Workspaces exist only by explicit manifest declaration, list member packages directly, and enroll a root package only through explicit member `"."`.
 
-Each workspace member path is a non-empty relative path from the workspace root to a package root containing its own `kyokai.toml`. Member paths must not be absolute, must not escape the workspace root through `..` or symlink-equivalent resolution, and must not identify the workspace root itself.
+Each workspace member is either canonical `"."` or a non-empty relative path from the workspace root to a package root containing its own `kyokai.toml`. Other members must not be absolute, must not escape the workspace root through `..` or symlink-equivalent resolution, and must not canonicalize to the root. Canonical member identities are unique; duplicate spellings or paths resolving to the same member are errors.
 
-> Trace: D78
-> Covers: Workspace members are explicit package-root paths contained by the workspace root.
+> Trace: D78, D332, D562
+> Covers: Workspace members are unique canonical package roots contained by the workspace, including the explicitly written root member `"."`.
 
 Package names must be unique within a workspace. If two workspace members declare the same `[package].name`, the workspace is ill-formed. A dependency written with `{ workspace = "name" }` resolves by package name, not by filesystem path.
 
@@ -243,7 +264,9 @@ requirement = "^1.4"
 capabilities = []
 ```
 
-The `[lock]` table records schema version, resolver version, feature-resolution version, owner kind, owner path, index snapshot identities, selected policy identities, and the lockfile mode that produced the graph when that mode writes a graph. Each `[[root]]` record names a selected root package and resolved package instance. Each `[[package]]` record names one package instance with package name, version, edition, source kind, workspace path or exact external source revision, canonical source hash when external, selected features, target contract, semantic profile, `.koi` digest where produced, docs metadata digest where relevant, yanked/advisory observation where policy records it, and source provenance. Each `[[edge]]` record names one dependency edge with depender instance, local dependency name, resolved dependee instance, dependency class, requested features, target condition, capability requirement summary, and the requirement or exact pin that introduced the edge.
+The `[lock]` table records schema version, resolver version, feature-resolution version, owner kind, owner path, index snapshot identities, selected policy identities, and the lockfile mode that produced the graph when that mode writes a graph.
+
+Each `[[root]]` record names a selected root package and resolved package instance. Each `[[package]]` record names one package instance with package name, version, edition, source kind, workspace path or exact external source revision, canonical source hash when external, selected features, target contract, semantic profile, `.koi` digest where produced, docs metadata digest where relevant, yanked/advisory observation where policy records it, and source provenance. Each `[[edge]]` record names one dependency edge with depender instance, local dependency name, resolved dependee instance, dependency class, requested features, target condition, capability requirement summary, and the requirement or exact pin that introduced the edge.
 
 `instance` strings are stable lockfile-local identifiers. They are not source syntax and are not parsed by Kyokai programs. Tools may expose them in machine output and may present friendlier human names.
 
@@ -267,10 +290,10 @@ The formatter, documentation generator, LSP, test runner, package manager, audit
 > Trace: D25, D26, D28, D29, D78, D83, D155
 > Covers: All Kyokai tools share the same package/workspace/module-root contract.
 
-## Why This Shape
+## One Declared Resolution Model
 
 [Rikona Kurasaki / Mjoyufull]
-C lets header paths grow into a private weather system. Python ties module names to filesystem shape but leaves public/private access mostly to naming culture. Rust splits crate and package in a way that works, but it gives Kyokai one more concept than it needs. Kyokai chooses the boring door with the label on it: one package identity, one written module root, one workspace list, one lockfile owner, and one way for `Foo.Bar` to become files.
+C include paths permit ambient search order; Python relies heavily on filesystem and naming conventions; Rust distinguishes package and crate identities. Kyokai instead uses one package identity, one declared module root, one workspace membership list, one lockfile owner, and one mapping from `Foo.Bar` to a source path. The smaller identity model removes search-order and package/crate ambiguity from module resolution.
 
 > Trace: D78
 > Covers: Kyokai chooses explicit package/workspace/module-root declarations to avoid ambient include paths, naming conventions, inferred workspaces, and extra package/crate identity layers.
@@ -329,3 +352,65 @@ For an executable target, `module` is the dotted Kyokai module path containing t
 
 > Trace: D437, D462, D527
 > Covers: Packages expose explicit runnable targets and authority ceilings without granting runtime authority through manifests, and the effective capability deny policy can only make those ceilings stricter.
+
+## Knot Publication Declaration
+
+A workspace can declare at most one knot:
+
+```toml
+[knot]
+name = "kyokai-tools"
+version = "0.4.0"
+exclude_packages = ["internal-fixtures"]
+```
+
+The knot name and version are publication identity. They do not replace member
+package names or versions. The default knot selection is every workspace member
+whose package manifest permits publication. A package can prohibit publication
+with `publish = false` in `[package]`. `exclude_packages` is a list of workspace
+package names removed from this knot selection. The list is canonicalized,
+duplicate-free, and records only packages that are workspace members.
+
+Exclusion is subtractive. It cannot add a private package, change a version,
+rewrite a dependency, or substitute an indexed package for a workspace edge.
+If an included package has a workspace dependency on an excluded package, knot
+publication fails and reports the complete dependency path. The manifest must
+include the dependency, exclude every dependent package, or explicitly change
+the dependent manifest to use an indexed package release.
+
+A package remains an independent dependency, visibility, SemVer, `.koi`, docs,
+advisory, yank, and publication unit. `internal` visibility remains
+package-scoped across both workspace and knot membership.
+
+Lockfiles can record knot selections and package instances. A knot dependency
+records the exact knot version and selected package releases. A direct package
+dependency records its package release and, when applicable, the supplying knot
+as provenance. One immutable package release has one semantic package identity
+even when dependency paths arrive both directly and through a knot.
+
+> Trace: D624a
+> Covers: A knot is one manifest-declared aggregate publication over a dependency-closed selected package graph; member package identity remains intact.
+
+## Stable-Carried Experiment Selection
+
+The root workspace manifest is the only publishable/release-capable authority
+for selecting a stable-carried experiment:
+
+```toml
+[experimental]
+enable = ["XP-NNN"]
+```
+
+The array contains unique accepted XP IDs. User-global configuration and
+dependencies cannot enable an XP for a workspace. A command-line-only opt-in is
+legal only for scratch or evaluation commands, is recorded in their output,
+and cannot produce a publishable package, knot, or release artifact.
+
+An XP used by a public interface propagates its exact XP and distribution
+requirement through `.koi`. A downstream root workspace must enable that exact
+XP. A package or knot using an XP carries an experimental publication marker
+and cannot satisfy a stable dependency requirement without the consuming root's
+matching opt-in.
+
+> Trace: D582, D625
+> Covers: Stable distributions can carry accepted experiments disabled by default, with exact root-manifest opt-in and transitive artifact identity.

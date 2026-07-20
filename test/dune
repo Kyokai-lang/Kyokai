@@ -10,6 +10,8 @@
   KyokaiSourceTextTest
   KyokaiLexicalTokenTest
   KyokaiSurfaceParserTest
+  KyokaiFrontendTest
+  KyokaiControlFlowValidationTest
   KyokaiInterfaceValidationTest
   KyokaiPackageSourceTest
   KyokaiPackageResolutionTest
@@ -25,9 +27,11 @@
   KyokaiSourceTextTest
   KyokaiLexicalTokenTest
   KyokaiSurfaceParserTest
+  KyokaiFrontendTest
+  KyokaiControlFlowValidationTest
   KyokaiInterfaceValidationTest
   KyokaiPackageSourceTest
   KyokaiPackageResolutionTest
   KyokaiPackageLockfileTest
   CRendererTest)
- (libraries austral_core ounit2))
+ (libraries kyokai_bootstrap_core kyokai_frontend ounit2))

@@ -1,0 +1,3 @@
+module Demo.BinaryPrefix is
+constant mask: Nat8 := #b1010_0101;
+seal;

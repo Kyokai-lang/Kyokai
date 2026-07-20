@@ -1,0 +1,10 @@
+module Demo.Tests is
+test "pure arithmetic" is
+    assert(add(2, 2) == 4);
+qed;
+
+test "reads env" with (root: RootCapability) is
+    let env := root.env();
+    assert(env.isReady());
+qed;
+seal;

@@ -1,0 +1,10 @@
+//! span fixture
+pragma Unsafe_Module;
+import Core.Text;
+module Demo.Spans is
+record Item(value: Int64): Free;
+function main(): Unit is
+    if true then
+    fi;
+qed;
+seal;
